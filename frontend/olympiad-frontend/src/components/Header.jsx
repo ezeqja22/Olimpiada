@@ -311,6 +311,7 @@ function Header({ showHomeButton = false }) {
                             borderRadius: "6px",
                             cursor: "pointer",
                             fontWeight: typography.fontWeight.medium,
+                            fontSize: typography.fontSize.base,
                             display: "flex",
                             alignItems: "center",
                             gap: "5px",
