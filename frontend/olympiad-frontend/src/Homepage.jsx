@@ -981,12 +981,13 @@ function Homepage() {
                             // Get icon based on subject
                             const getForumIcon = (subject) => {
                                 const subjectLower = subject?.toLowerCase() || '';
-                                if (subjectLower.includes('biology') || subjectLower.includes('chemistry')) return '🔬';
-                                if (subjectLower.includes('mathematics') || subjectLower.includes('math')) return '📐';
-                                if (subjectLower.includes('physics')) return '⚛️';
-                                if (subjectLower.includes('computer')) return '💻';
-                                if (subjectLower.includes('education') || subjectLower.includes('academic')) return '🏫';
-                                return '📚';
+                                if (subjectLower.includes('biology')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/Biology_subject_pcxmoa.svg';
+                                if (subjectLower.includes('chemistry')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/chemistry_subject_r4n7jq.svg';
+                                if (subjectLower.includes('mathematics') || subjectLower.includes('math')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/math_subject_iqigfx.svg';
+                                if (subjectLower.includes('physics')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/physics_subject_m90gto.svg';
+                                if (subjectLower.includes('computer')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/computer_engineerin_subject_u2m2ze.svg';
+                                if (subjectLower.includes('education') || subjectLower.includes('academic')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
+                                return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
                             };
 
                             return (
@@ -1026,12 +1027,21 @@ function Homepage() {
                                 >
                                     {/* Forum Icon */}
                                     <div style={{
-                                        fontSize: "20px",
                                         marginTop: "2px",
                                         flexShrink: 0,
-                                        pointerEvents: "none"
+                                        pointerEvents: "none",
+                                        display: "flex",
+                                        alignItems: "center"
                                     }}>
-                                        {getForumIcon(forum.subject)}
+                                        <img 
+                                            src={getForumIcon(forum.subject)}
+                                            alt={forum.subject}
+                                            style={{
+                                                width: "20px",
+                                                height: "20px",
+                                                objectFit: "contain"
+                                            }}
+                                        />
                                     </div>
                                     
                                     {/* Forum Content */}
