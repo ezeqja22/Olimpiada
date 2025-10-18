@@ -310,7 +310,7 @@ function Header({ showHomeButton = false }) {
                             padding: `${spacing.sm} ${spacing.md}`,
                             borderRadius: "6px",
                             cursor: "pointer",
-                            fontWeight: typography.fontWeight.semibold,
+                            fontWeight: typography.fontWeight.medium,
                             fontSize: typography.fontSize.base,
                             display: "flex",
                             alignItems: "center",

@@ -283,7 +283,7 @@ function Homepage() {
                                 padding: "8px 16px",
                                 borderRadius: "6px",
                                 cursor: "pointer",
-                                fontWeight: "600",
+                                fontWeight: "500",
                                 fontSize: "16px",
                                 display: "flex",
                                 alignItems: "center",
