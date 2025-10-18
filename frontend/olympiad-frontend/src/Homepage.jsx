@@ -264,7 +264,9 @@ function Homepage() {
                         fontWeight: "500",
                         padding: "8px 16px",
                         borderRadius: "6px",
-                        transition: "background-color 0.2s"
+                        transition: "background-color 0.2s",
+                        display: "flex",
+                        alignItems: "center"
                     }}
                     onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
                     onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
@@ -341,7 +343,9 @@ function Homepage() {
                         fontWeight: "500",
                         padding: "8px 16px",
                         borderRadius: "6px",
-                        transition: "background-color 0.2s"
+                        transition: "background-color 0.2s",
+                        display: "flex",
+                        alignItems: "center"
                     }}
                     onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
                     onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}

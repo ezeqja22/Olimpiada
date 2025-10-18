@@ -265,7 +265,9 @@ function Header({ showHomeButton = false }) {
                         fontWeight: typography.fontWeight.medium,
                         padding: `${spacing.sm} ${spacing.md}`,
                         borderRadius: "6px",
-                        transition: "background-color 0.2s"
+                        transition: "background-color 0.2s",
+                        display: "flex",
+                        alignItems: "center"
                     }}
                     onMouseEnter={(e) => e.target.style.backgroundColor = colors.secondary}
                     onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
@@ -291,7 +293,9 @@ function Header({ showHomeButton = false }) {
                     fontWeight: typography.fontWeight.medium,
                     padding: `${spacing.sm} ${spacing.md}`,
                     borderRadius: "6px",
-                    transition: "background-color 0.2s"
+                    transition: "background-color 0.2s",
+                    display: "flex",
+                    alignItems: "center"
                 }}
                 onMouseEnter={(e) => e.target.style.backgroundColor = colors.secondary}
                 onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
@@ -378,7 +382,9 @@ function Header({ showHomeButton = false }) {
                         padding: `${spacing.sm} ${spacing.md}`,
                         borderRadius: "6px",
                         transition: "background-color 0.2s",
-                        cursor: "pointer"
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center"
                     }}
                     onMouseEnter={(e) => e.target.style.backgroundColor = colors.secondary}
                     onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
