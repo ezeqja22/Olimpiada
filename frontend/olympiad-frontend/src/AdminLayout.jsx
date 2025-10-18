@@ -60,49 +60,49 @@ const AdminLayout = () => {
     {
       path: '/admin',
       label: 'Dashboard',
-      icon: '📊',
+      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811298/Dashboard_admin_panel_omb7cw.svg',
       adminOnly: false
     },
     {
       path: '/admin/users',
       label: 'Users',
-      icon: '👥',
+      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg',
       adminOnly: false
     },
     {
       path: '/admin/forums',
       label: 'Forums',
-      icon: '',
+      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg',
       adminOnly: false
     },
     {
       path: '/admin/reports',
       label: 'Reports',
-      icon: '',
+      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg',
       adminOnly: false
     },
         {
           path: '/admin/user-history',
           label: 'User History',
-          icon: '📋',
+          icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811353/Users_Hirstory_admin_panel_eqvfdf.svg',
           adminOnly: false
         },
         {
           path: '/admin/settings',
           label: 'Settings',
-          icon: '',
+          icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811439/Settings_admin_panel_cpayja.svg',
           adminOnly: true
         },
     {
       path: '/admin/email',
       label: 'Email',
-      icon: '',
+      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811297/Email_admin_panel_zjmkz7.svg',
       adminOnly: true
     },
     {
       path: '/admin/analytics',
       label: 'Analytics',
-      icon: '📈',
+      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/Analytics_admin_panel_en0409.svg',
       adminOnly: false
     }
   ];
@@ -134,7 +134,17 @@ const AdminLayout = () => {
               }`}
               onClick={() => navigate(item.path)}
             >
-              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-icon">
+                <img 
+                  src={item.icon} 
+                  alt={item.label}
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    objectFit: "contain"
+                  }}
+                />
+              </span>
               {sidebarOpen && <span className="nav-label">{item.label}</span>}
             </button>
           ))}
