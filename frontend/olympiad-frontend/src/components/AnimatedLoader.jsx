@@ -19,28 +19,24 @@ const AnimatedLoader = ({
     const getAnimation = () => {
         const logoSize = size === "large" ? "80px" : "40px";
         
-        return (
-            <div style={{ 
-                marginBottom: spacing.lg,
-                display: "flex",
-                alignItems: "center",
+                return (
+                    <div style={{ 
+                        marginBottom: spacing.lg,
+                        display: "flex",
+                        alignItems: "center",
                 justifyContent: "center",
-                minHeight: logoSize,
-                backgroundColor: "lightblue", // Temporary debug background
-                border: "2px solid green" // Temporary debug border
+                minHeight: logoSize
             }}>
                 <img 
-                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png"
+                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809847/Olimpiada_Logo_green_1_n9agy9.png"
                     alt="Loading"
                     style={{
                         height: logoSize,
                         width: logoSize,
                         objectFit: "contain",
-                        display: "inline-block",
+                            display: "inline-block",
                         backgroundColor: "transparent",
-                        border: "2px solid red", // Temporary debug border
-                        visibility: "visible",
-                        opacity: 1
+                        border: "none"
                     }}
                     onError={(e) => {
                         console.error("Logo failed to load:", e);
@@ -65,15 +61,10 @@ const AnimatedLoader = ({
                     }}
                     onLoad={(e) => {
                         console.log("Logo loaded successfully");
-                        console.log("Image dimensions:", e.target.naturalWidth, "x", e.target.naturalHeight);
-                        console.log("Image element:", e.target);
-                        console.log("Image computed style:", window.getComputedStyle(e.target));
-                        console.log("Image offset dimensions:", e.target.offsetWidth, "x", e.target.offsetHeight);
-                        console.log("Image client dimensions:", e.target.clientWidth, "x", e.target.clientHeight);
                     }}
                 />
-            </div>
-        );
+                    </div>
+                );
     };
 
     return (
