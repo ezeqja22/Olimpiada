@@ -95,6 +95,18 @@ function SubjectPage() {
                 return;
             }
             
+            // Get current user info
+            let currentUserId = null;
+            try {
+                const userResponse = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                currentUserId = userResponse.data.id;
+                console.log("👤 Current user ID:", currentUserId);
+            } catch (userError) {
+                console.error("❌ Error fetching current user:", userError);
+            }
+            
             const votePromises = problemsList.map(async (problem) => {
                 const problemId = problem.id;
                 try {
@@ -107,7 +119,36 @@ function SubjectPage() {
                         }
                     );
                     console.log(`📊 Vote data for problem ${problemId}:`, response.data);
-                    return { problemId, voteData: response.data };
+                    
+                    // Process the vote data - backend returns array of votes, we need aggregated data
+                    let likeCount = 0;
+                    let dislikeCount = 0;
+                    let userVote = null;
+                    
+                    if (Array.isArray(response.data)) {
+                        response.data.forEach(vote => {
+                            if (vote.vote_type === 'like') {
+                                likeCount++;
+                                if (vote.user_id === currentUserId) {
+                                    userVote = 'like';
+                                }
+                            } else if (vote.vote_type === 'dislike') {
+                                dislikeCount++;
+                                if (vote.user_id === currentUserId) {
+                                    userVote = 'dislike';
+                                }
+                            }
+                        });
+                    }
+                    
+                    const processedVoteData = {
+                        like_count: likeCount,
+                        dislike_count: dislikeCount,
+                        user_vote: userVote
+                    };
+                    
+                    console.log(`📊 Processed vote data for problem ${problemId}:`, processedVoteData);
+                    return { problemId, voteData: processedVoteData };
                 } catch (error) {
                     console.error(`Error fetching vote data for problem ${problemId}:`, error);
                     return { problemId, voteData: { like_count: 0, dislike_count: 0, user_vote: null } };
@@ -144,16 +185,34 @@ function SubjectPage() {
             
             const problemIds = problemsList.map(problem => problem.id);
             console.log("📤 Sending bookmark request with problem IDs:", problemIds);
-            const response = await axios.post(
-                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
-                { problem_ids: problemIds }, // Back to wrapped format
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+            // Try different request formats
+            let response;
+            try {
+                // First try: wrapped format
+                response = await axios.post(
+                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
+                    { problem_ids: problemIds },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
                     }
-                }
-            );
+                );
+            } catch (firstError) {
+                console.log("🔄 First bookmark request failed, trying direct array format...");
+                // Second try: direct array format
+                response = await axios.post(
+                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
+                    problemIds,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+            }
             // Convert backend format to frontend format
             const convertedData = {};
             Object.keys(response.data).forEach(problemId => {
