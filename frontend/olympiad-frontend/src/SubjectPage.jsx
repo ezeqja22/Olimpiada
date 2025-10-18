@@ -49,11 +49,7 @@ function SubjectPage() {
     ).join(' ');
 
     useEffect(() => {
-        // Only fetch data if user is authenticated
-        const token = localStorage.getItem("token");
-        if (token) {
-            fetchProblems();
-        }
+        fetchProblems();
     }, [subject, currentPage]);
 
     const fetchProblems = async () => {
@@ -81,6 +77,16 @@ function SubjectPage() {
     const fetchVoteData = async (problemsList) => {
         try {
             const token = localStorage.getItem("token");
+            if (!token) {
+                // If no token, initialize with default values
+                const voteDataMap = {};
+                problemsList.forEach(problem => {
+                    voteDataMap[problem.id] = { like_count: 0, dislike_count: 0, user_vote: null };
+                });
+                setVoteData(voteDataMap);
+                return;
+            }
+            
             const votePromises = problemsList.map(async (problem) => {
                 const problemId = problem.id;
                 try {
@@ -113,26 +119,34 @@ function SubjectPage() {
     const fetchBookmarkData = async (problemsList) => {
         try {
             const token = localStorage.getItem("token");
+            if (!token) {
+                // If no token, initialize with all false
+                const bookmarkDataMap = {};
+                problemsList.forEach(problem => {
+                    bookmarkDataMap[problem.id] = false;
+                });
+                setBookmarkData(bookmarkDataMap);
+                return;
+            }
+            
             const problemIds = problemsList.map(problem => problem.id);
             const response = await axios.post(
                 `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
-                problemIds,
+                { problem_ids: problemIds },
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+                        Authorization: `Bearer ${token}`
                     }
                 }
             );
-            setBookmarkData(response.data);
+            // Convert backend format to frontend format
+            const convertedData = {};
+            Object.keys(response.data).forEach(problemId => {
+                convertedData[problemId] = response.data[problemId].isBookmarked;
+            });
+            setBookmarkData(convertedData);
         } catch (error) {
             console.error("Error fetching bookmark data:", error);
-            // Initialize with all false if fetch fails
-            const bookmarkDataMap = {};
-            problemsList.forEach(problem => {
-                bookmarkDataMap[problem.id] = { isBookmarked: false };
-            });
-            setBookmarkData(bookmarkDataMap);
         }
     };
 
@@ -168,7 +182,7 @@ function SubjectPage() {
 
         try {
             const token = localStorage.getItem("token");
-            const isCurrentlyBookmarked = bookmarkData[problemId]?.isBookmarked;
+            const isCurrentlyBookmarked = bookmarkData[problemId];
             
             if (isCurrentlyBookmarked) {
                 // Try to remove bookmark
@@ -182,7 +196,7 @@ function SubjectPage() {
                     // Update state to unbookmarked
                     setBookmarkData(prev => ({
                         ...prev,
-                        [problemId]: { isBookmarked: false }
+                        [problemId]: false
                     }));
                 } catch (deleteError) {
                     // If delete fails (404), it means it wasn't bookmarked, so try to add it
@@ -196,7 +210,7 @@ function SubjectPage() {
                         // Update state to bookmarked
                         setBookmarkData(prev => ({
                             ...prev,
-                            [problemId]: { isBookmarked: true }
+                            [problemId]: true
                         }));
                     } else {
                         throw deleteError;
@@ -214,7 +228,7 @@ function SubjectPage() {
                     // Update state to bookmarked
                     setBookmarkData(prev => ({
                         ...prev,
-                        [problemId]: { isBookmarked: true }
+                        [problemId]: true
                     }));
                 } catch (postError) {
                     // If post fails (400), it means it was already bookmarked, so try to remove it
@@ -228,7 +242,7 @@ function SubjectPage() {
                         // Update state to unbookmarked
                         setBookmarkData(prev => ({
                             ...prev,
-                            [problemId]: { isBookmarked: false }
+                            [problemId]: false
                         }));
                     } else {
                         throw postError;
@@ -718,7 +732,7 @@ function SubjectPage() {
                                                 }}
                                             >
                                                 <img 
-                                                    src={bookmarkData[problem.id]?.isBookmarked 
+                                                    src={bookmarkData[problem.id] 
                                                         ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
                                                         : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
                                                     } 

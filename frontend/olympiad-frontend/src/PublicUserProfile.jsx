@@ -139,6 +139,16 @@ const PublicUserProfile = () => {
     const fetchVoteData = async (problemsList) => {
         try {
             const token = localStorage.getItem("token");
+            if (!token) {
+                // If no token, initialize with default values
+                const voteDataMap = {};
+                problemsList.forEach(problem => {
+                    voteDataMap[problem.id] = { like_count: 0, dislike_count: 0, user_vote: null };
+                });
+                setVoteData(voteDataMap);
+                return;
+            }
+            
             const votePromises = problemsList.map(async (problem) => {
                 const problemId = problem.id;
                 try {
@@ -200,11 +210,19 @@ const PublicUserProfile = () => {
     const fetchBookmarkData = async (problemsList) => {
         try {
             const token = localStorage.getItem("token");
-            if (!token) return;
+            if (!token) {
+                // If no token, initialize with all false
+                const bookmarkDataMap = {};
+                problemsList.forEach(problem => {
+                    bookmarkDataMap[problem.id] = false;
+                });
+                setBookmarkData(bookmarkDataMap);
+                return;
+            }
             
             const problemIds = problemsList.map(problem => problem.id);
             const response = await axios.post(
-                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/problems/bookmark-status`,
+                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
                 { problem_ids: problemIds },
                 {
                     headers: {
@@ -213,7 +231,12 @@ const PublicUserProfile = () => {
                 }
             );
             
-            setBookmarkData(response.data);
+            // Convert backend format to frontend format
+            const convertedData = {};
+            Object.keys(response.data).forEach(problemId => {
+                convertedData[problemId] = response.data[problemId].isBookmarked;
+            });
+            setBookmarkData(convertedData);
         } catch (error) {
             console.error("Error fetching bookmark data:", error);
         }
@@ -232,7 +255,7 @@ const PublicUserProfile = () => {
             if (isCurrentlyBookmarked) {
                 // Remove bookmark
                 await axios.delete(
-                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/problems/${problemId}/bookmark`,
+                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`
@@ -246,7 +269,7 @@ const PublicUserProfile = () => {
             } else {
                 // Add bookmark
                 await axios.post(
-                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/problems/${problemId}/bookmark`,
+                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`,
                     {},
                     {
                         headers: {
