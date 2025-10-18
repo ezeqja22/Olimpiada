@@ -50,6 +50,7 @@ const PublicUserProfile = () => {
     const [following, setFollowing] = useState(false);
     const [followLoading, setFollowLoading] = useState(false);
     const [voteData, setVoteData] = useState({});
+    const [bookmarkData, setBookmarkData] = useState({});
     const [showReportModal, setShowReportModal] = useState(false);
 
     useEffect(() => {
@@ -84,6 +85,7 @@ const PublicUserProfile = () => {
             // Fetch vote data for user's problems
             if (response.data.problems && response.data.problems.length > 0) {
                 await fetchVoteData(response.data.problems);
+                await fetchBookmarkData(response.data.problems);
             }
         } catch (err) {
             setError('User not found');
@@ -167,6 +169,12 @@ const PublicUserProfile = () => {
     };
 
     const handleVote = async (problemId, voteType) => {
+        // Check if voting is enabled
+        if (!checkFeatureEnabled('voting_enabled')) {
+            showFeatureDisabledAlert('Voting');
+            return;
+        }
+
         try {
             const token = localStorage.getItem("token");
             const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/vote`,
@@ -186,6 +194,74 @@ const PublicUserProfile = () => {
         } catch (error) {
             console.error("Error voting:", error);
             alert("Error voting on problem");
+        }
+    };
+
+    const fetchBookmarkData = async (problemsList) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+            
+            const problemIds = problemsList.map(problem => problem.id);
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/problems/bookmark-status`,
+                { problem_ids: problemIds },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            
+            setBookmarkData(response.data);
+        } catch (error) {
+            console.error("Error fetching bookmark data:", error);
+        }
+    };
+
+    const handleBookmark = async (problemId) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Please log in to bookmark problems");
+                return;
+            }
+
+            const isCurrentlyBookmarked = bookmarkData[problemId];
+            
+            if (isCurrentlyBookmarked) {
+                // Remove bookmark
+                await axios.delete(
+                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/problems/${problemId}/bookmark`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+                setBookmarkData(prev => ({
+                    ...prev,
+                    [problemId]: false
+                }));
+            } else {
+                // Add bookmark
+                await axios.post(
+                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/problems/${problemId}/bookmark`,
+                    {},
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+                setBookmarkData(prev => ({
+                    ...prev,
+                    [problemId]: true
+                }));
+            }
+        } catch (error) {
+            console.error("Error updating bookmark:", error);
+            alert("Error updating bookmark");
         }
     };
 
@@ -380,8 +456,10 @@ const PublicUserProfile = () => {
                                 padding: '24px',
                                 backgroundColor: 'white',
                                 boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                                transition: 'all 0.2s ease'
+                                transition: 'all 0.2s ease',
+                                cursor: 'pointer'
                             }}
+                            onClick={() => navigate(`/problem/${problem.id}?from=user&username=${encodeURIComponent(username)}`)}
                             onMouseEnter={(e) => {
                                 e.target.style.transform = 'translateY(-2px)';
                                 e.target.style.boxShadow = '0 8px 20px rgba(0,0,0,0.12)';
@@ -424,20 +502,20 @@ const PublicUserProfile = () => {
                                     ))}
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ display: 'flex', gap: '15px', color: '#666', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', gap: '10px', color: '#666', alignItems: 'center' }}>
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleVote(problem.id, "like");
                                             }}
                                             style={{
-                                                backgroundColor: voteData[problem.id]?.user_vote === "like" ? "#e8f5e8" : "#f8f9fa",
-                                                border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "#4CAF50" : "#dee2e6"}`,
+                                                backgroundColor: voteData[problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
+                                                border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
                                                 cursor: "pointer",
                                                 fontSize: "14px",
-                                                color: voteData[problem.id]?.user_vote === "like" ? "#4CAF50" : "#666",
+                                                color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
                                                 fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
-                                                padding: "8px 14px",
+                                                padding: "6px 12px",
                                                 borderRadius: "6px",
                                                 transition: "all 0.2s ease",
                                                 display: "flex",
@@ -457,7 +535,16 @@ const PublicUserProfile = () => {
                                                 }
                                             }}
                                         >
-                                             {voteData[problem.id]?.like_count || 0}
+                                            <img 
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg" 
+                                                alt="Like"
+                                                style={{
+                                                    height: "14px",
+                                                    width: "14px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            {voteData[problem.id]?.like_count || 0}
                                         </button>
                                         <button
                                             onClick={(e) => {
@@ -465,13 +552,13 @@ const PublicUserProfile = () => {
                                                 handleVote(problem.id, "dislike");
                                             }}
                                             style={{
-                                                backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "#ffebee" : "#f8f9fa",
-                                                border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "#f44336" : "#dee2e6"}`,
+                                                backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
+                                                border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
                                                 cursor: "pointer",
                                                 fontSize: "14px",
-                                                color: voteData[problem.id]?.user_vote === "dislike" ? "#f44336" : "#666",
+                                                color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
                                                 fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
-                                                padding: "8px 14px",
+                                                padding: "6px 12px",
                                                 borderRadius: "6px",
                                                 transition: "all 0.2s ease",
                                                 display: "flex",
@@ -491,23 +578,50 @@ const PublicUserProfile = () => {
                                                 }
                                             }}
                                         >
-                                             {voteData[problem.id]?.dislike_count || 0}
+                                            <img 
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg" 
+                                                alt="Dislike"
+                                                style={{
+                                                    height: "14px",
+                                                    width: "14px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            {voteData[problem.id]?.dislike_count || 0}
                                         </button>
-                                        <span> {problem.comment_count}</span>
+                                        <span style={{ fontSize: "12px", color: "#666", pointerEvents: "none" }}>
+                                             {problem.comment_count || 0}
+                                        </span>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                e.preventDefault();
+                                                handleBookmark(problem.id);
+                                            }}
+                                            style={{
+                                                padding: "4px 8px",
+                                                backgroundColor: "transparent",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center"
+                                            }}
+                                        >
+                                            <img 
+                                                src={bookmarkData[problem.id] 
+                                                    ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
+                                                    : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
+                                                }
+                                                alt={bookmarkData[problem.id] ? "Remove bookmark" : "Bookmark"}
+                                                style={{
+                                                    height: "20px",
+                                                    width: "20px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                        </button>
                                     </div>
-                                    <button 
-                                        onClick={() => navigate(`/problem/${problem.id}?from=user&username=${encodeURIComponent(username)}`)}
-                                        style={{
-                                            padding: '8px 16px',
-                                            backgroundColor: '#007bff',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        View Problem
-                                    </button>
                                 </div>
                             </div>
                         ))}
