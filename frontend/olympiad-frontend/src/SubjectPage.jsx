@@ -53,19 +53,24 @@ function SubjectPage() {
     }, [subject, currentPage]);
 
     const fetchProblems = async () => {
+        console.log("🚀 fetchProblems called for subject:", subjectName);
         setLoading(true);
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${subjectName}`);
+            console.log("📋 Problems fetched:", response.data.length);
             setAllProblems(response.data); // Store all problems
             setProblems(response.data); // Initially show all problems
             // For now, we'll implement simple pagination on frontend
             setTotalPages(Math.ceil(response.data.length / 20));
             
             // Fetch vote data for all problems
+            console.log("🔄 Starting to fetch vote data...");
             await fetchVoteData(response.data);
+            console.log("🔄 Starting to fetch bookmark data...");
             await fetchBookmarkData(response.data);
+            console.log("✅ All data fetching completed");
         } catch (error) {
-            console.error("Error fetching problems:", error);
+            console.error("❌ Error fetching problems:", error);
             console.error("Subject name being used:", subjectName);
             setProblems([]);
         } finally {
@@ -75,8 +80,10 @@ function SubjectPage() {
 
 
     const fetchVoteData = async (problemsList) => {
+        console.log("🔍 fetchVoteData called with problems:", problemsList.length);
         try {
             const token = localStorage.getItem("token");
+            console.log("🔑 Token exists:", !!token);
             if (!token) {
                 // If no token, initialize with default values
                 const voteDataMap = {};
@@ -84,6 +91,7 @@ function SubjectPage() {
                     voteDataMap[problem.id] = { like_count: 0, dislike_count: 0, user_vote: null };
                 });
                 setVoteData(voteDataMap);
+                console.log("📊 Set default vote data:", voteDataMap);
                 return;
             }
             
@@ -111,14 +119,17 @@ function SubjectPage() {
                 voteDataMap[problemId] = voteData;
             });
             setVoteData(voteDataMap);
+            console.log("✅ Vote data fetched successfully:", voteDataMap);
         } catch (error) {
-            console.error("Error fetching vote data:", error);
+            console.error("❌ Error fetching vote data:", error);
         }
     };
 
     const fetchBookmarkData = async (problemsList) => {
+        console.log("🔍 fetchBookmarkData called with problems:", problemsList.length);
         try {
             const token = localStorage.getItem("token");
+            console.log("🔑 Token exists for bookmarks:", !!token);
             if (!token) {
                 // If no token, initialize with all false
                 const bookmarkDataMap = {};
@@ -126,6 +137,7 @@ function SubjectPage() {
                     bookmarkDataMap[problem.id] = false;
                 });
                 setBookmarkData(bookmarkDataMap);
+                console.log("📊 Set default bookmark data:", bookmarkDataMap);
                 return;
             }
             
@@ -145,8 +157,9 @@ function SubjectPage() {
                 convertedData[problemId] = response.data[problemId].isBookmarked;
             });
             setBookmarkData(convertedData);
+            console.log("✅ Bookmark data fetched successfully:", convertedData);
         } catch (error) {
-            console.error("Error fetching bookmark data:", error);
+            console.error("❌ Error fetching bookmark data:", error);
         }
     };
 
