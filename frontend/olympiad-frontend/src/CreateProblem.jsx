@@ -535,7 +535,6 @@ function CreateProblem() {
             <option value="Chemistry">Chemistry</option>
             <option value="Biology">Biology</option>
             <option value="Computer Science">Computer Science</option>
-            <option value="Engineering">Engineering</option>
             <option value="Other">Other</option>
           </select>
         </div>

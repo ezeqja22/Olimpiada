@@ -538,7 +538,6 @@ const Forums = () => {
                                     <option value="Chemistry">Chemistry</option>
                                     <option value="Biology">Biology</option>
                                     <option value="Computer Science">Computer Science</option>
-                                    <option value="Engineering">Engineering</option>
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
@@ -971,7 +970,7 @@ const Forums = () => {
                                     borderRadius: borderRadius.md,
                                     backgroundColor: colors.gray[50]
                                 }}>
-                                    {['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Engineering', 'Other'].map(subject => (
+                                    {['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Other'].map(subject => (
                                         <label key={subject} style={{ 
                                             display: "flex", 
                                             alignItems: "center", 

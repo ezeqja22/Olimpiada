@@ -52,7 +52,6 @@ const ForumProblemCard = ({ problem, author, forumId }) => {
             'chemistry': colors.success,
             'biology': colors.warning,
             'computer science': colors.error,
-            'engineering': colors.gray[600],
             'other': colors.gray[500]
         };
         return colors_map[subject?.toLowerCase()] || colors.gray[500];

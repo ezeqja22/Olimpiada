@@ -49,11 +49,10 @@ function Header({ showHomeButton = false }) {
     // Subjects list
     const subjects = [
         "Mathematics",
-        "Physics", 
+        "Physics",
         "Chemistry",
         "Biology",
         "Computer Science",
-        "Engineering",
         "Other"
     ];
 
@@ -781,7 +780,7 @@ function Header({ showHomeButton = false }) {
                                 if (subjectLower.includes('biology') || subjectLower.includes('chemistry')) return '🔬';
                                 if (subjectLower.includes('mathematics') || subjectLower.includes('math')) return '📐';
                                 if (subjectLower.includes('physics')) return '⚛️';
-                                if (subjectLower.includes('computer') || subjectLower.includes('engineering')) return '💻';
+                                if (subjectLower.includes('computer')) return '💻';
                                 if (subjectLower.includes('education') || subjectLower.includes('academic')) return '🏫';
                                 return '📚';
                             };

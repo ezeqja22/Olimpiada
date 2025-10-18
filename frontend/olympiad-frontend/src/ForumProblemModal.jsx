@@ -24,7 +24,7 @@ const ForumProblemModal = ({ isOpen, onClose, forumId, onProblemCreated }) => {
 
     const subjects = [
         'Mathematics', 'Physics', 'Chemistry', 'Biology', 
-        'Computer Science', 'Engineering', 'Other'
+        'Computer Science', 'Other'
     ];
 
     const openMathEditor = (target) => {
