@@ -25,7 +25,9 @@ const AnimatedLoader = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                minHeight: logoSize
+                minHeight: logoSize,
+                backgroundColor: "lightblue", // Temporary debug background
+                border: "2px solid green" // Temporary debug border
             }}>
                 <img 
                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png"
@@ -64,6 +66,10 @@ const AnimatedLoader = ({
                     onLoad={(e) => {
                         console.log("Logo loaded successfully");
                         console.log("Image dimensions:", e.target.naturalWidth, "x", e.target.naturalHeight);
+                        console.log("Image element:", e.target);
+                        console.log("Image computed style:", window.getComputedStyle(e.target));
+                        console.log("Image offset dimensions:", e.target.offsetWidth, "x", e.target.offsetHeight);
+                        console.log("Image client dimensions:", e.target.clientWidth, "x", e.target.clientHeight);
                     }}
                 />
             </div>
