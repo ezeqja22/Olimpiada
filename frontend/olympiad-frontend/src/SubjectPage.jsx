@@ -106,6 +106,7 @@ function SubjectPage() {
                             }
                         }
                     );
+                    console.log(`📊 Vote data for problem ${problemId}:`, response.data);
                     return { problemId, voteData: response.data };
                 } catch (error) {
                     console.error(`Error fetching vote data for problem ${problemId}:`, error);
@@ -142,12 +143,14 @@ function SubjectPage() {
             }
             
             const problemIds = problemsList.map(problem => problem.id);
+            console.log("📤 Sending bookmark request with problem IDs:", problemIds);
             const response = await axios.post(
                 `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
-                { problem_ids: problemIds },
+                { problem_ids: problemIds }, // Back to wrapped format
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     }
                 }
             );
@@ -160,6 +163,8 @@ function SubjectPage() {
             console.log("✅ Bookmark data fetched successfully:", convertedData);
         } catch (error) {
             console.error("❌ Error fetching bookmark data:", error);
+            console.error("❌ Error response:", error.response?.data);
+            console.error("❌ Error status:", error.response?.status);
         }
     };
 
