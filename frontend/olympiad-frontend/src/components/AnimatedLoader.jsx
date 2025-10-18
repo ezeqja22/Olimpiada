@@ -36,7 +36,9 @@ const AnimatedLoader = ({
                         objectFit: "contain",
                         display: "inline-block",
                         backgroundColor: "transparent",
-                        border: "none"
+                        border: "2px solid red", // Temporary debug border
+                        visibility: "visible",
+                        opacity: 1
                     }}
                     onError={(e) => {
                         console.error("Logo failed to load:", e);
