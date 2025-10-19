@@ -292,12 +292,13 @@ function Header({ showHomeButton = false }) {
                     fontWeight: typography.fontWeight.medium,
                     padding: `${spacing.sm} ${spacing.md}`,
                     borderRadius: "6px",
+                    backgroundColor: colors.secondary,
                     transition: "background-color 0.2s",
                     display: "flex",
                     alignItems: "center"
                 }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = colors.secondary}
-                onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[600]}
+                onMouseLeave={(e) => e.target.style.backgroundColor = colors.secondary}
                 >
                     Feed
                 </Link>
@@ -307,21 +308,20 @@ function Header({ showHomeButton = false }) {
                     <button
                         onClick={() => setShowSubjectDropdown(!showSubjectDropdown)}
                         style={{
-                            backgroundColor: "transparent",
+                            backgroundColor: colors.secondary,
                             color: colors.white,
                             border: "none",
                             padding: `${spacing.sm} ${spacing.md}`,
                             borderRadius: "6px",
                             cursor: "pointer",
                             fontWeight: typography.fontWeight.medium,
-                            fontSize: typography.fontSize.base,
                             display: "flex",
                             alignItems: "center",
                             gap: "5px",
                             transition: "background-color 0.2s"
                         }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = colors.secondary}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[600]}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = colors.secondary}
                     >
                         Subject
                         <span style={{ fontSize: typography.fontSize.xs }}>▼</span>

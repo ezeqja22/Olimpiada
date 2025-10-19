@@ -278,21 +278,20 @@ function Homepage() {
                         <button
                             onClick={() => setShowSubjectDropdown(!showSubjectDropdown)}
                             style={{
-                                backgroundColor: "transparent",
+                                backgroundColor: "#2d7a5f",
                                 color: "white",
                                 border: "none",
                                 padding: "8px 16px",
                                 borderRadius: "6px",
                                 cursor: "pointer",
                                 fontWeight: "500",
-                                fontSize: "16px",
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "5px",
                                 transition: "background-color 0.2s"
                             }}
-                            onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = "#6c757d"}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = "#2d7a5f"}
                         >
                             Subject
                             <span style={{ fontSize: "12px" }}>▼</span>
