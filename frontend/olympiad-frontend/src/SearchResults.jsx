@@ -129,35 +129,24 @@ const SearchResults = () => {
 
 
             if (hasAdvancedParams) {
-                // Advanced search results - always show problems
-                // Filter out forum problems from search results
-                const filteredData = {
-                    ...response.data,
-                    problems: response.data.problems ? response.data.problems.filter(problem => problem.forum_id === null || problem.forum_id === undefined) : []
-                };
-                
-                setSearchResults(filteredData);
+                // Advanced search results - always show problems (backend already filters out forum problems)
+                setSearchResults(response.data);
                 setTotalPages(response.data.total_pages || 1);
-                setTotalResults(filteredData.problems.length);
-                // Fetch vote data and bookmark data for standalone problems only
-                if (filteredData.problems && filteredData.problems.length > 0) {
-                    await fetchVoteData(filteredData.problems);
-                    await fetchBookmarkData(filteredData.problems);
+                setTotalResults(response.data.total_problems || 0);
+                // Fetch vote data and bookmark data for problems
+                if (response.data.problems && response.data.problems.length > 0) {
+                    await fetchVoteData(response.data.problems);
+                    await fetchBookmarkData(response.data.problems);
                 }
             } else if (activeTab === 'all' || (activeTab === 'users' && currentPage === 1) || (activeTab === 'problems' && currentPage === 1)) {
-                // Use combined search results - filter out forum problems
-                const filteredData = {
-                    ...response.data,
-                    problems: response.data.problems ? response.data.problems.filter(problem => problem.forum_id === null || problem.forum_id === undefined) : []
-                };
-                
-                setSearchResults(filteredData);
+                // Use combined search results (backend already filters out forum problems)
+                setSearchResults(response.data);
                 setTotalPages(1); // Combined search doesn't use pagination
-                setTotalResults((filteredData.users ? filteredData.users.length : 0) + (filteredData.problems ? filteredData.problems.length : 0));
-                // Fetch vote data and bookmark data for standalone problems only
-                if (filteredData.problems && filteredData.problems.length > 0) {
-                    await fetchVoteData(filteredData.problems);
-                    await fetchBookmarkData(filteredData.problems);
+                setTotalResults((response.data.users ? response.data.users.length : 0) + (response.data.problems ? response.data.problems.length : 0));
+                // Fetch vote data and bookmark data for problems
+                if (response.data.problems && response.data.problems.length > 0) {
+                    await fetchVoteData(response.data.problems);
+                    await fetchBookmarkData(response.data.problems);
                 }
             } else {
                 // Use individual endpoint results for pagination
@@ -166,16 +155,14 @@ const SearchResults = () => {
                     setTotalPages(response.data.total_pages);
                     setTotalResults(response.data.total);
                 } else {
-                    // Filter out forum problems from individual endpoint results
-                    const standaloneProblems = response.data.problems ? response.data.problems.filter(problem => problem.forum_id === null || problem.forum_id === undefined) : [];
-                    
-                    setSearchResults({ users: [], problems: standaloneProblems });
+                    // Individual endpoint results (backend already filters out forum problems)
+                    setSearchResults({ users: [], problems: response.data.problems });
                     setTotalPages(response.data.total_pages);
-                    setTotalResults(standaloneProblems.length);
-                    // Fetch vote data and bookmark data for standalone problems only
-                    if (standaloneProblems && standaloneProblems.length > 0) {
-                        await fetchVoteData(standaloneProblems);
-                        await fetchBookmarkData(standaloneProblems);
+                    setTotalResults(response.data.total);
+                    // Fetch vote data and bookmark data for problems
+                    if (response.data.problems && response.data.problems.length > 0) {
+                        await fetchVoteData(response.data.problems);
+                        await fetchBookmarkData(response.data.problems);
                     }
                 }
             }

@@ -493,8 +493,11 @@ async def get_problem_images(
 
 @router.get("/problems/{subject}", response_model=List[ProblemResponse])
 def get_problems_by_subject(subject: str, db: Session = Depends(get_db)):
-    # First get problems with comment counts (case-insensitive search)
-    problems_with_counts = db.query(Problem, func.count(Comment.id).label('comment_count')).outerjoin(Comment).filter(func.lower(Problem.subject) == func.lower(subject)).group_by(Problem.id).order_by(Problem.created_at.desc()).all()
+    # First get problems with comment counts (case-insensitive search) - EXCLUDE forum problems
+    problems_with_counts = db.query(Problem, func.count(Comment.id).label('comment_count')).outerjoin(Comment).filter(
+        func.lower(Problem.subject) == func.lower(subject),
+        Problem.forum_id.is_(None)
+    ).group_by(Problem.id).order_by(Problem.created_at.desc()).all()
     
     # Then fetch authors for all problems
     authors = db.query(User).filter(User.id.in_([p.author_id for p, _ in problems_with_counts])).all()
@@ -1704,13 +1707,14 @@ def search_problems(
     
     offset = (page - 1) * limit
     
-    # Get total count for pagination
+    # Get total count for pagination - EXCLUDE forum problems
     total_problems = db.query(Problem).filter(
         or_(
             Problem.title.ilike(f"%{q}%"),
             Problem.description.ilike(f"%{q}%"),
             Problem.tags.ilike(f"%{q}%")
-        )
+        ),
+        Problem.forum_id.is_(None)
     ).count()
     
     problems = db.query(Problem).filter(
@@ -1718,7 +1722,8 @@ def search_problems(
             Problem.title.ilike(f"%{q}%"),
             Problem.description.ilike(f"%{q}%"),
             Problem.tags.ilike(f"%{q}%")
-        )
+        ),
+        Problem.forum_id.is_(None)
     ).offset(offset).limit(limit).all()
     
     results = []
@@ -1795,13 +1800,14 @@ def combined_search(
             "is_following": is_following
         })
     
-    # Search problems (limit to 5 per page)
+    # Search problems (limit to 5 per page) - EXCLUDE forum problems
     problems = db.query(Problem).filter(
         or_(
             Problem.title.ilike(f"%{q}%"),
             Problem.description.ilike(f"%{q}%"),
             Problem.tags.ilike(f"%{q}%")
-        )
+        ),
+        Problem.forum_id.is_(None)
     ).limit(5).all()
     
     problem_results = []
@@ -1874,6 +1880,9 @@ async def advanced_search(
         tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
         for tag in tag_list:
             problems_query = problems_query.filter(Problem.tags.ilike(f"%{tag}%"))
+    
+    # EXCLUDE forum problems from search results
+    problems_query = problems_query.filter(Problem.forum_id.is_(None))
     
     # Execute problems query
     problems = problems_query.offset(offset).limit(limit).all()
