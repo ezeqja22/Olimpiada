@@ -57,18 +57,23 @@ function SubjectPage() {
         console.log("🚀 fetchProblems called for subject:", subjectName);
         setLoading(true);
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${subjectName}`);
-            console.log("📋 Problems fetched:", response.data.length);
-            setAllProblems(response.data); // Store all problems
-            setProblems(response.data); // Initially show all problems
+        const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${subjectName}`);
+        console.log("📋 Problems fetched:", response.data.length);
+        
+        // Filter out forum problems - only show standalone problems
+        const standaloneProblems = response.data.filter(problem => !problem.forum_id);
+        console.log("📋 Standalone problems (excluding forum problems):", standaloneProblems.length);
+        
+        setAllProblems(standaloneProblems); // Store all standalone problems
+        setProblems(standaloneProblems); // Initially show all standalone problems
             // For now, we'll implement simple pagination on frontend
-            setTotalPages(Math.ceil(response.data.length / 20));
+            setTotalPages(Math.ceil(standaloneProblems.length / 20));
             
-            // Fetch vote data for all problems
+            // Fetch vote data for all standalone problems
             console.log("🔄 Starting to fetch vote data...");
-            await fetchVoteData(response.data);
+            await fetchVoteData(standaloneProblems);
             console.log("🔄 Starting to fetch bookmark data...");
-            await fetchBookmarkData(response.data);
+            await fetchBookmarkData(standaloneProblems);
             console.log("✅ All data fetching completed");
         } catch (error) {
             console.error("❌ Error fetching problems:", error);

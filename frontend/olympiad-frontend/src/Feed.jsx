@@ -130,18 +130,23 @@ function Feed() {
       }
       
       const response = await axios.get(endpoint);
-      setProblems(response.data.problems || response.data);
+      const allProblems = response.data.problems || response.data;
+      
+      // Filter out forum problems - only show standalone problems
+      const standaloneProblems = allProblems.filter(problem => !problem.forum_id);
+      
+      setProblems(standaloneProblems);
       setCurrentPage(page);
       setTotalPages(response.data.total_pages || 1);
       setTotalProblems(response.data.total_problems || response.data.total || response.data.length);
       
-      // Fetch vote data for all problems
-      const problemIds = (response.data.problems || response.data).map(problem => problem.id);
+      // Fetch vote data for all standalone problems
+      const problemIds = standaloneProblems.map(problem => problem.id);
       await fetchVoteData(problemIds);
       await fetchBookmarkData(problemIds);
       
       // Fetch follow status for all authors
-      await fetchFollowStatus(response.data.problems || response.data);
+      await fetchFollowStatus(standaloneProblems);
     } catch (error) {
       console.error("Error fetching problems:", error);
     } finally {
@@ -160,15 +165,18 @@ function Feed() {
       });
       
       // The backend returns an object with 'problems' array
-      const problemsData = Array.isArray(response.data.problems) ? response.data.problems : [];
-      setProblems(problemsData);
+      const allProblems = Array.isArray(response.data.problems) ? response.data.problems : [];
       
-      // Only fetch vote data and follow status if we have problems
-      if (problemsData.length > 0) {
-        const problemIds = problemsData.map(problem => problem.id);
+      // Filter out forum problems - only show standalone problems
+      const standaloneProblems = allProblems.filter(problem => !problem.forum_id);
+      setProblems(standaloneProblems);
+      
+      // Only fetch vote data and follow status if we have standalone problems
+      if (standaloneProblems.length > 0) {
+        const problemIds = standaloneProblems.map(problem => problem.id);
         await fetchVoteData(problemIds);
         await fetchBookmarkData(problemIds);
-        await fetchFollowStatus(problemsData);
+        await fetchFollowStatus(standaloneProblems);
       }
     } catch (error) {
       console.error("Error fetching following problems:", error);
@@ -188,17 +196,21 @@ function Feed() {
           Authorization: `Bearer ${token}`
         }
       });
-      setProblems(response.data.problems || []);
+      const allProblems = response.data.problems || [];
+      
+      // Filter out forum problems - only show standalone problems
+      const standaloneProblems = allProblems.filter(problem => !problem.forum_id);
+      setProblems(standaloneProblems);
       setCurrentPage(page);
       setTotalPages(response.data.total_pages || 1);
-      setTotalProblems(response.data.total_problems || 0);
+      setTotalProblems(standaloneProblems.length);
       
-      // Only fetch vote data and follow status if we have problems
-      if (response.data.problems && response.data.problems.length > 0) {
-        const problemIds = response.data.problems.map(problem => problem.id);
+      // Only fetch vote data and follow status if we have standalone problems
+      if (standaloneProblems && standaloneProblems.length > 0) {
+        const problemIds = standaloneProblems.map(problem => problem.id);
         await fetchVoteData(problemIds);
         await fetchBookmarkData(problemIds);
-        await fetchFollowStatus(response.data.problems);
+        await fetchFollowStatus(standaloneProblems);
       }
     } catch (error) {
       console.error("Error fetching trending problems:", error);
