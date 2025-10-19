@@ -40,6 +40,7 @@ function UserProfile() {
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [voteData, setVoteData] = useState({});
+    const [bookmarkData, setBookmarkData] = useState({});
     const [showImageModal, setShowImageModal] = useState(false);
     const [drafts, setDrafts] = useState([]);
     const fileInputRef = useRef(null);
@@ -75,6 +76,13 @@ function UserProfile() {
             // Fetch vote data for user's problems
             if (response.data.problems && response.data.problems.length > 0) {
                 await fetchVoteData(response.data.problems);
+            }
+            
+            // Fetch vote data and bookmark data for bookmarked problems
+            if (response.data.bookmarks && response.data.bookmarks.length > 0) {
+                const bookmarkedProblems = response.data.bookmarks.map(bookmark => bookmark.problem);
+                await fetchVoteData(bookmarkedProblems);
+                await fetchBookmarkData(bookmarkedProblems);
             }
         } catch (error) {
             console.error("Error fetching user profile:", error);
@@ -114,6 +122,32 @@ function UserProfile() {
             setVoteData(voteDataMap);
         } catch (error) {
             console.error("Error fetching vote data:", error);
+        }
+    };
+
+    const fetchBookmarkData = async (problemsList) => {
+        try {
+            const token = localStorage.getItem("token");
+            const problemIds = problemsList.map(problem => problem.id);
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
+                problemIds,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            setBookmarkData(response.data);
+        } catch (error) {
+            console.error("Error fetching bookmark data:", error);
+            // Initialize with all false if fetch fails
+            const bookmarkDataMap = {};
+            problemsList.forEach(problem => {
+                bookmarkDataMap[problem.id] = false;
+            });
+            setBookmarkData(bookmarkDataMap);
         }
     };
 
@@ -195,24 +229,49 @@ function UserProfile() {
         });
     };
 
-    const handleBookmark = async (problemId, isBookmarked) => {
+    const handleBookmark = async (problemId) => {
         try {
             const token = localStorage.getItem("token");
-            if (isBookmarked) {
-                await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
+            const isCurrentlyBookmarked = bookmarkData[problemId];
+            
+            if (isCurrentlyBookmarked) {
+                // Try to remove bookmark
+                try {
+                    await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    
+                    // Update state to unbookmarked
+                    setBookmarkData(prev => ({
+                        ...prev,
+                        [problemId]: false
+                    }));
+                    
+                    // Refresh profile data to remove from bookmarks list
+                    fetchUserProfile();
+                } catch (deleteError) {
+                    console.error("Error removing bookmark:", deleteError);
+                }
             } else {
-                await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {}, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
+                // Try to add bookmark
+                try {
+                    await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {}, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    
+                    // Update state to bookmarked
+                    setBookmarkData(prev => ({
+                        ...prev,
+                        [problemId]: true
+                    }));
+                } catch (postError) {
+                    console.error("Error adding bookmark:", postError);
+                }
             }
-            // Refresh profile data
-            fetchUserProfile();
         } catch (error) {
             console.error("Error toggling bookmark:", error);
         }
@@ -1219,23 +1278,9 @@ function UserProfile() {
                                             <Link to={`/problem/${bookmark.problem.id}?from=/profile`} style={{ textDecoration: "none" }}>
                                                 <h4 style={{ margin: "0", color: "#333" }}>{renderMathContent(bookmark.problem.title)}</h4>
                                             </Link>
-                                            <button
-                                                onClick={() => handleBookmark(bookmark.problem.id, true)}
-                                                style={{
-                                                    padding: "5px 10px",
-                                                    backgroundColor: "#dc3545",
-                                                    color: "white",
-                                                    border: "none",
-                                                    borderRadius: "4px",
-                                                    cursor: "pointer",
-                                                    fontSize: "12px"
-                                                }}
-                                            >
-                                                Remove Bookmark
-                                            </button>
                                         </div>
                                         <p style={{ color: "#666", margin: "0 0 15px 0", whiteSpace: "pre-wrap" }}>{renderMathContent(bookmark.problem.description.substring(0, 150))}...</p>
-                                        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                                        <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
                                             <span style={{
                                                 backgroundColor: "#e0e7ff",
                                                 color: "#3730a3",
@@ -1286,77 +1331,138 @@ function UserProfile() {
                                                     </span>
                                                 ))
                                             )}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleVote(bookmark.problem.id, "like");
-                                                }}
-                                                style={{
-                                                    backgroundColor: voteData[bookmark.problem.id]?.user_vote === "like" ? "#e8f5e8" : "#f8f9fa",
-                                                    border: `1px solid ${voteData[bookmark.problem.id]?.user_vote === "like" ? "#4CAF50" : "#dee2e6"}`,
-                                                    cursor: "pointer",
-                                                    fontSize: "14px",
-                                                    color: voteData[bookmark.problem.id]?.user_vote === "like" ? "#4CAF50" : "#666",
-                                                    fontWeight: voteData[bookmark.problem.id]?.user_vote === "like" ? "bold" : "500",
-                                                    padding: "6px 12px",
-                                                    borderRadius: "6px",
-                                                    transition: "all 0.2s ease",
+                                            <div style={{ marginLeft: "auto", display: "flex", gap: "10px", alignItems: "center" }}>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleVote(bookmark.problem.id, "like");
+                                                    }}
+                                                    style={{
+                                                        backgroundColor: voteData[bookmark.problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
+                                                        border: `1px solid ${voteData[bookmark.problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
+                                                        cursor: "pointer",
+                                                        fontSize: "14px",
+                                                        color: voteData[bookmark.problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
+                                                        fontWeight: voteData[bookmark.problem.id]?.user_vote === "like" ? "bold" : "500",
+                                                        padding: "6px 12px",
+                                                        borderRadius: "6px",
+                                                        transition: "all 0.2s ease",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: "4px"
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        if (voteData[bookmark.problem.id]?.user_vote !== "like") {
+                                                            e.target.style.backgroundColor = "#e9ecef";
+                                                            e.target.style.borderColor = "#adb5bd";
+                                                        }
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        if (voteData[bookmark.problem.id]?.user_vote !== "like") {
+                                                            e.target.style.backgroundColor = "#f8f9fa";
+                                                            e.target.style.borderColor = "#dee2e6";
+                                                        }
+                                                    }}
+                                                >
+                                                    <img 
+                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg" 
+                                                        alt="Like"
+                                                        style={{
+                                                            height: "14px",
+                                                            width: "14px",
+                                                            objectFit: "contain"
+                                                        }}
+                                                    />
+                                                    {voteData[bookmark.problem.id]?.like_count || 0}
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleVote(bookmark.problem.id, "dislike");
+                                                    }}
+                                                    style={{
+                                                        backgroundColor: voteData[bookmark.problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
+                                                        border: `1px solid ${voteData[bookmark.problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
+                                                        cursor: "pointer",
+                                                        fontSize: "14px",
+                                                        color: voteData[bookmark.problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
+                                                        fontWeight: voteData[bookmark.problem.id]?.user_vote === "dislike" ? "bold" : "500",
+                                                        padding: "6px 12px",
+                                                        borderRadius: "6px",
+                                                        transition: "all 0.2s ease",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: "4px"
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        if (voteData[bookmark.problem.id]?.user_vote !== "dislike") {
+                                                            e.target.style.backgroundColor = "#e9ecef";
+                                                            e.target.style.borderColor = "#adb5bd";
+                                                        }
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        if (voteData[bookmark.problem.id]?.user_vote !== "dislike") {
+                                                            e.target.style.backgroundColor = "#f8f9fa";
+                                                            e.target.style.borderColor = "#dee2e6";
+                                                        }
+                                                    }}
+                                                >
+                                                    <img 
+                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg" 
+                                                        alt="Dislike"
+                                                        style={{
+                                                            height: "14px",
+                                                            width: "14px",
+                                                            objectFit: "contain"
+                                                        }}
+                                                    />
+                                                    {voteData[bookmark.problem.id]?.dislike_count || 0}
+                                                </button>
+                                                <span style={{ 
+                                                    fontSize: "12px", 
+                                                    color: "#666", 
+                                                    pointerEvents: "none",
                                                     display: "flex",
                                                     alignItems: "center",
                                                     gap: "4px"
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    if (voteData[bookmark.problem.id]?.user_vote !== "like") {
-                                                        e.target.style.backgroundColor = "#e9ecef";
-                                                        e.target.style.borderColor = "#adb5bd";
-                                                    }
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    if (voteData[bookmark.problem.id]?.user_vote !== "like") {
-                                                        e.target.style.backgroundColor = "#f8f9fa";
-                                                        e.target.style.borderColor = "#dee2e6";
-                                                    }
-                                                }}
-                                            >
-                                                 {voteData[bookmark.problem.id]?.like_count || 0}
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleVote(bookmark.problem.id, "dislike");
-                                                }}
-                                                style={{
-                                                    backgroundColor: voteData[bookmark.problem.id]?.user_vote === "dislike" ? "#ffebee" : "#f8f9fa",
-                                                    border: `1px solid ${voteData[bookmark.problem.id]?.user_vote === "dislike" ? "#f44336" : "#dee2e6"}`,
-                                                    cursor: "pointer",
-                                                    fontSize: "14px",
-                                                    color: voteData[bookmark.problem.id]?.user_vote === "dislike" ? "#f44336" : "#666",
-                                                    fontWeight: voteData[bookmark.problem.id]?.user_vote === "dislike" ? "bold" : "500",
-                                                    padding: "6px 12px",
-                                                    borderRadius: "6px",
-                                                    transition: "all 0.2s ease",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    gap: "4px"
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    if (voteData[bookmark.problem.id]?.user_vote !== "dislike") {
-                                                        e.target.style.backgroundColor = "#e9ecef";
-                                                        e.target.style.borderColor = "#adb5bd";
-                                                    }
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    if (voteData[bookmark.problem.id]?.user_vote !== "dislike") {
-                                                        e.target.style.backgroundColor = "#f8f9fa";
-                                                        e.target.style.borderColor = "#dee2e6";
-                                                    }
-                                                }}
-                                            >
-                                                 {voteData[bookmark.problem.id]?.dislike_count || 0}
-                                            </button>
-                                            <span style={{ fontSize: "12px", color: "#666" }}>
-                                                Bookmarked {new Date(bookmark.created_at).toLocaleDateString()}
-                                            </span>
+                                                }}>
+                                                    <img 
+                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
+                                                        alt="Comments"
+                                                        style={{
+                                                            height: "14px",
+                                                            width: "14px",
+                                                            objectFit: "contain"
+                                                        }}
+                                                    />
+                                                    {bookmark.problem.comment_count || 0}
+                                                </span>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleBookmark(bookmark.problem.id);
+                                                    }}
+                                                    style={{
+                                                        padding: "4px 8px",
+                                                        backgroundColor: "transparent",
+                                                        border: "none",
+                                                        cursor: "pointer",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: "4px"
+                                                    }}
+                                                >
+                                                    <img 
+                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
+                                                        alt="Bookmark"
+                                                        style={{
+                                                            height: "16px",
+                                                            width: "16px",
+                                                            objectFit: "contain"
+                                                        }}
+                                                    />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
