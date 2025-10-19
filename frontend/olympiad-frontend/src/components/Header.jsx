@@ -222,7 +222,7 @@ function Header({ showHomeButton = false }) {
                 )}
                 
                 <Link to="/homepage" style={{ textDecoration: "none", color: "inherit" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: spacing.sm, marginLeft: spacing.lg }}>
                         {/* Site Logo */}
                         {siteSettings.site_logo && (
                             <img 

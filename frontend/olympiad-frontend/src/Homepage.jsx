@@ -229,7 +229,7 @@ function Homepage() {
                             }} />
                         </button>
                     )}
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "24px" }}>
                         {/* Site Logo */}
                         {siteSettings.site_logo && (
                             <img 
