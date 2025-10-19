@@ -81,28 +81,40 @@ const ReportModal = ({ isOpen, onClose, reportType, targetId, targetUser }) => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 1000
+            zIndex: 1000,
+            backdropFilter: 'blur(4px)',
+            animation: 'fadeIn 0.3s ease-out'
         }}>
             <div style={{
                 backgroundColor: 'white',
-                borderRadius: '12px',
-                padding: '24px',
-                width: '90%',
-                maxWidth: '500px',
-                maxHeight: '80vh',
-                overflow: 'auto'
+                borderRadius: '16px',
+                padding: '32px',
+                width: '520px',
+                maxWidth: '90vw',
+                maxHeight: '90vh',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+                animation: 'slideUp 0.3s ease-out',
+                overflow: 'hidden'
             }}>
+                {/* Header */}
                 <div style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '20px'
+                    justifyContent: 'space-between',
+                    marginBottom: '24px',
+                    paddingBottom: '16px',
+                    borderBottom: '1px solid #e5e7eb'
                 }}>
-                    <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
+                    <h2 style={{
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        color: '#111827',
+                        margin: 0
+                    }}>
                         Report {reportType === 'user' ? 'User' : reportType === 'comment' ? 'Comment' : 'Message'}
                     </h2>
                     <button
@@ -110,123 +122,259 @@ const ReportModal = ({ isOpen, onClose, reportType, targetId, targetUser }) => {
                         style={{
                             background: 'none',
                             border: 'none',
-                            fontSize: '1.5rem',
+                            fontSize: '24px',
+                            color: '#9ca3af',
                             cursor: 'pointer',
-                            color: '#666'
+                            padding: '4px',
+                            borderRadius: '6px',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#f3f4f6';
+                            e.target.style.color = '#6b7280';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'transparent';
+                            e.target.style.color = '#9ca3af';
                         }}
                     >
                         ×
                     </button>
                 </div>
 
-                {targetUser && (
-                    <div style={{
-                        backgroundColor: '#f8f9fa',
-                        padding: '12px',
-                        borderRadius: '8px',
-                        marginBottom: '20px'
-                    }}>
-                        <strong>Reporting:</strong> {targetUser.username}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: '20px' }}>
-                        <label style={{
-                            display: 'block',
-                            marginBottom: '8px',
-                            fontWeight: '500',
-                            fontSize: '0.9rem'
+                {/* Content */}
+                <div style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: '8px' }}>
+                    {targetUser && (
+                        <div style={{
+                            backgroundColor: '#f8fafc',
+                            padding: '16px',
+                            borderRadius: '12px',
+                            marginBottom: '24px',
+                            border: '1px solid #e2e8f0'
                         }}>
-                            Category *
-                        </label>
-                        <select
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                border: '2px solid #e9ecef',
-                                borderRadius: '8px',
-                                fontSize: '0.9rem',
-                                backgroundColor: 'white'
-                            }}
-                            required
-                        >
-                            <option value="">Select a category</option>
-                            {reportCategories.map(cat => (
-                                <option key={cat.value} value={cat.value}>
-                                    {cat.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px'
+                            }}>
+                                <div style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#3b82f6',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontWeight: '600',
+                                    fontSize: '16px'
+                                }}>
+                                    {targetUser.username.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div style={{
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        color: '#374151',
+                                        marginBottom: '2px'
+                                    }}>
+                                        Reporting
+                                    </div>
+                                    <div style={{
+                                        fontSize: '16px',
+                                        color: '#6b7280'
+                                    }}>
+                                        {targetUser.username}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-                    <div style={{ marginBottom: '24px' }}>
-                        <label style={{
-                            display: 'block',
-                            marginBottom: '8px',
-                            fontWeight: '500',
-                            fontSize: '0.9rem'
-                        }}>
-                            Description *
-                        </label>
-                        <textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Please provide details about why you're reporting this content..."
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                border: '2px solid #e9ecef',
-                                borderRadius: '8px',
-                                fontSize: '0.9rem',
-                                minHeight: '120px',
-                                resize: 'vertical',
-                                fontFamily: 'inherit'
-                            }}
-                            required
-                        />
-                    </div>
+                    <form onSubmit={handleSubmit}>
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{
+                                display: 'block',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                marginBottom: '8px',
+                                color: '#374151'
+                            }}>
+                                Category *
+                            </label>
+                            <select
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    border: '2px solid #e5e7eb',
+                                    borderRadius: '10px',
+                                    fontSize: '16px',
+                                    outline: 'none',
+                                    transition: 'all 0.2s ease',
+                                    backgroundColor: '#f9fafb',
+                                    cursor: 'pointer'
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = '#dc2626';
+                                    e.target.style.backgroundColor = 'white';
+                                    e.target.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = '#e5e7eb';
+                                    e.target.style.backgroundColor = '#f9fafb';
+                                    e.target.style.boxShadow = 'none';
+                                }}
+                                required
+                            >
+                                <option value="">Select a category</option>
+                                {reportCategories.map(cat => (
+                                    <option key={cat.value} value={cat.value}>
+                                        {cat.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                    <div style={{
-                        display: 'flex',
-                        gap: '12px',
-                        justifyContent: 'flex-end'
-                    }}>
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            style={{
-                                padding: '12px 24px',
-                                border: '2px solid #e9ecef',
-                                borderRadius: '8px',
-                                backgroundColor: 'white',
-                                color: '#666',
-                                cursor: 'pointer',
-                                fontSize: '0.9rem'
-                            }}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            style={{
-                                padding: '12px 24px',
-                                border: 'none',
-                                borderRadius: '8px',
-                                backgroundColor: isSubmitting ? '#ccc' : '#dc3545',
-                                color: 'white',
-                                cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                                fontSize: '0.9rem'
-                            }}
-                        >
-                            {isSubmitting ? 'Submitting...' : 'Submit Report'}
-                        </button>
-                    </div>
-                </form>
+                        <div style={{ marginBottom: '24px' }}>
+                            <label style={{
+                                display: 'block',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                marginBottom: '8px',
+                                color: '#374151'
+                            }}>
+                                Description *
+                            </label>
+                            <textarea
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Please provide details about why you're reporting this content..."
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    border: '2px solid #e5e7eb',
+                                    borderRadius: '10px',
+                                    fontSize: '16px',
+                                    outline: 'none',
+                                    minHeight: '120px',
+                                    resize: 'vertical',
+                                    fontFamily: 'inherit',
+                                    transition: 'all 0.2s ease',
+                                    backgroundColor: '#f9fafb'
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = '#dc2626';
+                                    e.target.style.backgroundColor = 'white';
+                                    e.target.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = '#e5e7eb';
+                                    e.target.style.backgroundColor = '#f9fafb';
+                                    e.target.style.boxShadow = 'none';
+                                }}
+                                required
+                            />
+                        </div>
+                    </form>
+                </div>
+
+                {/* Footer */}
+                <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    justifyContent: 'flex-end',
+                    paddingTop: '20px',
+                    borderTop: '1px solid #e5e7eb'
+                }}>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        style={{
+                            backgroundColor: 'transparent',
+                            color: '#6b7280',
+                            border: '2px solid #d1d5db',
+                            padding: '12px 24px',
+                            borderRadius: '10px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#f9fafb';
+                            e.target.style.borderColor = '#9ca3af';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'transparent';
+                            e.target.style.borderColor = '#d1d5db';
+                        }}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                        style={{
+                            backgroundColor: isSubmitting ? '#9ca3af' : '#dc2626',
+                            color: 'white',
+                            border: 'none',
+                            padding: '12px 24px',
+                            borderRadius: '10px',
+                            cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            transition: 'all 0.2s ease',
+                            boxShadow: isSubmitting ? 'none' : '0 4px 12px rgba(220, 38, 38, 0.3)'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (!isSubmitting) {
+                                e.target.style.backgroundColor = '#b91c1c';
+                                e.target.style.transform = 'translateY(-1px)';
+                                e.target.style.boxShadow = '0 6px 16px rgba(220, 38, 38, 0.4)';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (!isSubmitting) {
+                                e.target.style.backgroundColor = '#dc2626';
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                            }
+                        }}
+                    >
+                        {isSubmitting ? 'Submitting...' : 'Submit Report'}
+                    </button>
+                </div>
             </div>
+
+            <style jsx>{`
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                    }
+                    to {
+                        opacity: 1;
+                    }
+                }
+                
+                @keyframes slideUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px) scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+            `}</style>
         </div>
     );
 };
