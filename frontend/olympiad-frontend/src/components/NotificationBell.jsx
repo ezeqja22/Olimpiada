@@ -179,10 +179,8 @@ function NotificationBell({ onNotificationClick }) {
             
             alert("Join request accepted!");
             
-            // Refresh the page to update forum membership status
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+            // Fetch updated notifications from server
+            await fetchNotifications();
         } catch (error) {
             console.error("Error accepting join request:", error);
             alert("Failed to accept join request");
@@ -213,6 +211,9 @@ function NotificationBell({ onNotificationClick }) {
             );
             
             alert("Join request declined");
+            
+            // Fetch updated notifications from server
+            await fetchNotifications();
         } catch (error) {
             console.error("Error declining join request:", error);
             alert("Failed to decline join request");
@@ -249,10 +250,8 @@ function NotificationBell({ onNotificationClick }) {
             
             alert("Forum invitation accepted!");
             
-            // Refresh the page to update forum membership status
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+            // Fetch updated notifications from server
+            await fetchNotifications();
         } catch (error) {
             console.error("Error accepting invitation:", error);
             alert("Failed to accept invitation");
@@ -288,6 +287,9 @@ function NotificationBell({ onNotificationClick }) {
             );
             
             alert("Forum invitation declined");
+            
+            // Fetch updated notifications from server
+            await fetchNotifications();
         } catch (error) {
             console.error("Error declining invitation:", error);
             alert("Failed to decline invitation");
@@ -302,7 +304,7 @@ function NotificationBell({ onNotificationClick }) {
             case 'comment': 
                 return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg';
             case 'follow': 
-                return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg';
+                return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795125/Profile_Icon_Green_rupznp.svg';
             case 'forum_join_request': 
                 return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg';
             case 'forum_request_accepted': 
