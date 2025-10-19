@@ -213,19 +213,19 @@ function Homepage() {
                                 width: "20px",
                                 height: "2px",
                                 backgroundColor: "white",
-                                transition: "none"
+                                display: "block"
                             }} />
                             <div style={{
                                 width: "20px",
                                 height: "2px",
                                 backgroundColor: "white",
-                                transition: "none"
+                                display: "block"
                             }} />
                             <div style={{
                                 width: "20px",
                                 height: "2px",
                                 backgroundColor: "white",
-                                transition: "none"
+                                display: "block"
                             }} />
                         </button>
                     )}
