@@ -155,7 +155,17 @@ const AdminLayout = () => {
             className="back-to-site"
             onClick={() => navigate('/')}
           >
-            <span className="nav-icon"></span>
+            <span className="nav-icon">
+              <img 
+                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795078/Home_icon_gezrca.svg" 
+                alt="Home"
+                style={{
+                  width: "20px",
+                  height: "20px",
+                  objectFit: "contain"
+                }}
+              />
+            </span>
             {sidebarOpen && <span className="nav-label">Back to Site</span>}
           </button>
         </div>
