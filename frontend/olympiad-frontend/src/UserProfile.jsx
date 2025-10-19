@@ -96,17 +96,25 @@ function UserProfile() {
     const fetchVoteData = async (problemsList) => {
         try {
             const token = localStorage.getItem("token");
+            if (!token) {
+                console.log("No token found, skipping vote data fetch");
+                return;
+            }
+            
+            console.log("Fetching vote data for problems:", problemsList.map(p => p.id));
+            
             const votePromises = problemsList.map(async (problem) => {
                 const problemId = problem.id;
                 try {
                     const response = await axios.get(
-                        `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/votes`,
+                        `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/vote-status`,
                         {
                             headers: {
                                 Authorization: `Bearer ${token}`
                             }
                         }
                     );
+                    console.log(`Vote data for problem ${problemId}:`, response.data);
                     return { problemId, voteData: response.data };
                 } catch (error) {
                     console.error(`Error fetching vote data for problem ${problemId}:`, error);
@@ -119,6 +127,7 @@ function UserProfile() {
             voteResults.forEach(({ problemId, voteData }) => {
                 voteDataMap[problemId] = voteData;
             });
+            console.log("Final vote data map:", voteDataMap);
             setVoteData(voteDataMap);
         } catch (error) {
             console.error("Error fetching vote data:", error);

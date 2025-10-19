@@ -345,10 +345,36 @@ function NotificationBell({ onNotificationClick }) {
         const now = new Date();
         const diffInSeconds = Math.floor((now - date) / 1000);
         
+        // Just now (under 1 minute)
         if (diffInSeconds < 60) return 'Just now';
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-        return `${Math.floor(diffInSeconds / 86400)}d ago`;
+        
+        // Minutes (1-59 minutes)
+        if (diffInSeconds < 3600) {
+            const minutes = Math.floor(diffInSeconds / 60);
+            return `${minutes}m ago`;
+        }
+        
+        // Hours (1-23 hours)
+        if (diffInSeconds < 86400) {
+            const hours = Math.floor(diffInSeconds / 3600);
+            return `${hours}h ago`;
+        }
+        
+        // Days (1-29 days)
+        if (diffInSeconds < 2592000) { // 30 days
+            const days = Math.floor(diffInSeconds / 86400);
+            return `${days}d ago`;
+        }
+        
+        // Months (1-11 months)
+        if (diffInSeconds < 31536000) { // 1 year
+            const months = Math.floor(diffInSeconds / 2592000); // 30 days per month
+            return `${months}mo ago`;
+        }
+        
+        // Years (1+ years)
+        const years = Math.floor(diffInSeconds / 31536000); // 365 days per year
+        return `${years}y ago`;
     };
 
     return (

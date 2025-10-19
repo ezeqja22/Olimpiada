@@ -75,7 +75,7 @@ const EmailVerification = () => {
         
         // Check if email sending failed and code is provided
         if (response.data.verification_code) {
-          alert(`Email sending failed, but here's your verification code: ${response.data.verification_code}`);
+          setError('Error sending verification code, please try again later');
         } else {
           alert('Verification code sent! Please check your email.');
         }
