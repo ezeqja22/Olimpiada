@@ -137,8 +137,10 @@ const PublicUserProfile = () => {
     };
 
     const fetchVoteData = async (problemsList) => {
+        console.log("🔍 fetchVoteData called with problems:", problemsList.length);
         try {
             const token = localStorage.getItem("token");
+            console.log("🔑 Token exists:", !!token);
             if (!token) {
                 // If no token, initialize with default values
                 const voteDataMap = {};
@@ -146,7 +148,20 @@ const PublicUserProfile = () => {
                     voteDataMap[problem.id] = { like_count: 0, dislike_count: 0, user_vote: null };
                 });
                 setVoteData(voteDataMap);
+                console.log("📊 Set default vote data:", voteDataMap);
                 return;
+            }
+            
+            // Get current user info
+            let currentUserId = null;
+            try {
+                const userResponse = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                currentUserId = userResponse.data.id;
+                console.log("👤 Current user ID:", currentUserId);
+            } catch (userError) {
+                console.error("❌ Error fetching current user:", userError);
             }
             
             const votePromises = problemsList.map(async (problem) => {
@@ -160,7 +175,37 @@ const PublicUserProfile = () => {
                             }
                         }
                     );
-                    return { problemId, voteData: response.data };
+                    console.log(`📊 Vote data for problem ${problemId}:`, response.data);
+                    
+                    // Process the vote data - backend returns array of votes, we need aggregated data
+                    let likeCount = 0;
+                    let dislikeCount = 0;
+                    let userVote = null;
+                    
+                    if (Array.isArray(response.data)) {
+                        response.data.forEach(vote => {
+                            if (vote.vote_type === 'like') {
+                                likeCount++;
+                                if (vote.user_id === currentUserId) {
+                                    userVote = 'like';
+                                }
+                            } else if (vote.vote_type === 'dislike') {
+                                dislikeCount++;
+                                if (vote.user_id === currentUserId) {
+                                    userVote = 'dislike';
+                                }
+                            }
+                        });
+                    }
+                    
+                    const processedVoteData = {
+                        like_count: likeCount,
+                        dislike_count: dislikeCount,
+                        user_vote: userVote
+                    };
+                    
+                    console.log(`📊 Processed vote data for problem ${problemId}:`, processedVoteData);
+                    return { problemId, voteData: processedVoteData };
                 } catch (error) {
                     console.error(`Error fetching vote data for problem ${problemId}:`, error);
                     return { problemId, voteData: { like_count: 0, dislike_count: 0, user_vote: null } };
@@ -173,8 +218,9 @@ const PublicUserProfile = () => {
                 voteDataMap[problemId] = voteData;
             });
             setVoteData(voteDataMap);
+            console.log("✅ Vote data fetched successfully:", voteDataMap);
         } catch (error) {
-            console.error("Error fetching vote data:", error);
+            console.error("❌ Error fetching vote data:", error);
         }
     };
 
@@ -208,8 +254,10 @@ const PublicUserProfile = () => {
     };
 
     const fetchBookmarkData = async (problemsList) => {
+        console.log("🔍 fetchBookmarkData called with problems:", problemsList.length);
         try {
             const token = localStorage.getItem("token");
+            console.log("🔑 Token exists for bookmarks:", !!token);
             if (!token) {
                 // If no token, initialize with all false
                 const bookmarkDataMap = {};
@@ -217,19 +265,40 @@ const PublicUserProfile = () => {
                     bookmarkDataMap[problem.id] = false;
                 });
                 setBookmarkData(bookmarkDataMap);
+                console.log("📊 Set default bookmark data:", bookmarkDataMap);
                 return;
             }
             
             const problemIds = problemsList.map(problem => problem.id);
-            const response = await axios.post(
-                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
-                { problem_ids: problemIds },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
+            console.log("📤 Sending bookmark request with problem IDs:", problemIds);
+            // Try different request formats
+            let response;
+            try {
+                // First try: wrapped format
+                response = await axios.post(
+                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
+                    { problem_ids: problemIds },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
                     }
-                }
-            );
+                );
+            } catch (firstError) {
+                console.log("🔄 First bookmark request failed, trying direct array format...");
+                // Second try: direct array format
+                response = await axios.post(
+                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
+                    problemIds,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+            }
             
             // Convert backend format to frontend format
             const convertedData = {};
@@ -237,8 +306,11 @@ const PublicUserProfile = () => {
                 convertedData[problemId] = response.data[problemId].isBookmarked;
             });
             setBookmarkData(convertedData);
+            console.log("✅ Bookmark data fetched successfully:", convertedData);
         } catch (error) {
-            console.error("Error fetching bookmark data:", error);
+            console.error("❌ Error fetching bookmark data:", error);
+            console.error("❌ Error response:", error.response?.data);
+            console.error("❌ Error status:", error.response?.status);
         }
     };
 
