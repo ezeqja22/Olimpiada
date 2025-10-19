@@ -80,6 +80,7 @@ function NotificationBell({ onNotificationClick }) {
             const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/notifications`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            console.log('Fetched notifications from server:', response.data);
             const filteredNotifications = filterNotificationsByPreferences(response.data);
             setNotifications(filteredNotifications);
         } catch (error) {
@@ -296,8 +297,22 @@ function NotificationBell({ onNotificationClick }) {
         }
     };
 
-    const getNotificationIcon = (type) => {
-        console.log('Getting icon for notification type:', type);
+    const getNotificationIcon = (notification) => {
+        const type = notification.type;
+        const title = notification.title || '';
+        const message = notification.message || '';
+        
+        console.log('Getting icon for notification:', { type, title, message });
+        
+        // Check for accepted/declined states based on title or message content
+        if (title.includes('Accepted') || message.includes('accepted')) {
+            return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811399/Tick_Icon_Green_a28qin.svg';
+        }
+        if (title.includes('Declined') || message.includes('declined')) {
+            return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811317/X_Icon_Green_kynqkv.svg';
+        }
+        
+        // Original type-based logic
         switch (type) {
             case 'like': 
                 return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg';
@@ -482,7 +497,7 @@ function NotificationBell({ onNotificationClick }) {
                                     <div style={{ display: "flex", alignItems: "flex-start", gap: spacing.sm }}>
                                         <div style={{ marginTop: "2px" }}>
                                             <img 
-                                                src={getNotificationIcon(notification.type)}
+                                                src={getNotificationIcon(notification)}
                                                 alt={notification.type}
                                                 style={{
                                                     width: "20px",
