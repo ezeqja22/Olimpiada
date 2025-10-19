@@ -61,7 +61,7 @@ function SubjectPage() {
         console.log("📋 Problems fetched:", response.data.length);
         
         // Filter out forum problems - only show standalone problems
-        const standaloneProblems = response.data.filter(problem => !problem.forum_id);
+        const standaloneProblems = response.data.filter(problem => problem.forum_id === null || problem.forum_id === undefined);
         console.log("📋 Standalone problems (excluding forum problems):", standaloneProblems.length);
         
         setAllProblems(standaloneProblems); // Store all standalone problems

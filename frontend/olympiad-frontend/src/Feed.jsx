@@ -133,7 +133,7 @@ function Feed() {
       const allProblems = response.data.problems || response.data;
       
       // Filter out forum problems - only show standalone problems
-      const standaloneProblems = allProblems.filter(problem => !problem.forum_id);
+      const standaloneProblems = allProblems.filter(problem => problem.forum_id === null || problem.forum_id === undefined);
       
       setProblems(standaloneProblems);
       setCurrentPage(page);
@@ -168,7 +168,7 @@ function Feed() {
       const allProblems = Array.isArray(response.data.problems) ? response.data.problems : [];
       
       // Filter out forum problems - only show standalone problems
-      const standaloneProblems = allProblems.filter(problem => !problem.forum_id);
+      const standaloneProblems = allProblems.filter(problem => problem.forum_id === null || problem.forum_id === undefined);
       setProblems(standaloneProblems);
       
       // Only fetch vote data and follow status if we have standalone problems
@@ -199,7 +199,7 @@ function Feed() {
       const allProblems = response.data.problems || [];
       
       // Filter out forum problems - only show standalone problems
-      const standaloneProblems = allProblems.filter(problem => !problem.forum_id);
+      const standaloneProblems = allProblems.filter(problem => problem.forum_id === null || problem.forum_id === undefined);
       setProblems(standaloneProblems);
       setCurrentPage(page);
       setTotalPages(response.data.total_pages || 1);

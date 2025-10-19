@@ -133,7 +133,7 @@ const SearchResults = () => {
                 // Filter out forum problems from search results
                 const filteredData = {
                     ...response.data,
-                    problems: response.data.problems ? response.data.problems.filter(problem => !problem.forum_id) : []
+                    problems: response.data.problems ? response.data.problems.filter(problem => problem.forum_id === null || problem.forum_id === undefined) : []
                 };
                 
                 setSearchResults(filteredData);
@@ -148,7 +148,7 @@ const SearchResults = () => {
                 // Use combined search results - filter out forum problems
                 const filteredData = {
                     ...response.data,
-                    problems: response.data.problems ? response.data.problems.filter(problem => !problem.forum_id) : []
+                    problems: response.data.problems ? response.data.problems.filter(problem => problem.forum_id === null || problem.forum_id === undefined) : []
                 };
                 
                 setSearchResults(filteredData);
@@ -167,7 +167,7 @@ const SearchResults = () => {
                     setTotalResults(response.data.total);
                 } else {
                     // Filter out forum problems from individual endpoint results
-                    const standaloneProblems = response.data.problems ? response.data.problems.filter(problem => !problem.forum_id) : [];
+                    const standaloneProblems = response.data.problems ? response.data.problems.filter(problem => problem.forum_id === null || problem.forum_id === undefined) : [];
                     
                     setSearchResults({ users: [], problems: standaloneProblems });
                     setTotalPages(response.data.total_pages);

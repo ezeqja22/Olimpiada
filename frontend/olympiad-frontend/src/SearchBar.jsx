@@ -139,7 +139,7 @@ function SearchBar({
             onClick={openAdvancedSearch}
             style={{
               padding: '12px 24px',
-              backgroundColor: '#17a2b8',
+              backgroundColor: 'rgba(118, 75, 162)',
               color: 'white',
               border: 'none',
               borderRadius: '25px',
@@ -150,10 +150,10 @@ function SearchBar({
               transition: 'background-color 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#138496';
+              e.target.style.backgroundColor = 'rgba(98, 62, 135)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#17a2b8';
+              e.target.style.backgroundColor = 'rgba(118, 75, 162)';
             }}
           >
             Advanced
