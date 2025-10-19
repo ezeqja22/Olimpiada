@@ -292,25 +292,24 @@ function Header({ showHomeButton = false }) {
                     fontWeight: typography.fontWeight.medium,
                     padding: `${spacing.sm} ${spacing.md}`,
                     borderRadius: "6px",
-                    backgroundColor: colors.secondary,
                     transition: "background-color 0.2s",
                     display: "flex",
                     alignItems: "center"
                 }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[600]}
-                onMouseLeave={(e) => e.target.style.backgroundColor = colors.secondary}
+                onMouseEnter={(e) => e.target.style.backgroundColor = colors.secondary}
+                onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                 >
                     Feed
                 </Link>
 
                 {/* Subject Dropdown */}
                 <div style={{ position: "relative" }}>
-                    <button
+                    <span
                         onClick={() => setShowSubjectDropdown(!showSubjectDropdown)}
                         style={{
-                            backgroundColor: colors.secondary,
+                            backgroundColor: "transparent",
                             color: colors.white,
-                            border: "none",
+                            textDecoration: "none",
                             padding: `${spacing.sm} ${spacing.md}`,
                             borderRadius: "6px",
                             cursor: "pointer",
@@ -320,12 +319,12 @@ function Header({ showHomeButton = false }) {
                             gap: "5px",
                             transition: "background-color 0.2s"
                         }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[600]}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = colors.secondary}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = colors.secondary}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                     >
                         Subject
                         <span style={{ fontSize: typography.fontSize.xs }}>▼</span>
-                    </button>
+                    </span>
                     
                     {showSubjectDropdown && (
                         <div style={{
