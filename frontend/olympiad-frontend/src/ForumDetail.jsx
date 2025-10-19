@@ -3620,158 +3620,285 @@ const ForumDetail = () => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    zIndex: 1000
+                    zIndex: 1000,
+                    backdropFilter: 'blur(4px)',
+                    animation: 'fadeIn 0.3s ease-out'
                 }}>
                     <div style={{
                         backgroundColor: colors.white,
-                        borderRadius: borderRadius.lg,
-                        padding: spacing.xl,
-                        width: '500px',
+                        borderRadius: '16px',
+                        padding: '32px',
+                        width: '520px',
                         maxWidth: '90vw',
-                        boxShadow: shadows.xl
+                        maxHeight: '90vh',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+                        animation: 'slideUp 0.3s ease-out',
+                        overflow: 'hidden'
                     }}>
-                        <h2 style={{
-                            fontSize: '24px',
-                            fontWeight: '600',
-                            marginBottom: spacing.lg,
-                            color: colors.gray[800]
-                        }}>
-                            Edit Forum
-                        </h2>
-                        
-                        <div style={{ marginBottom: spacing.md }}>
-                            <label style={{
-                                display: 'block',
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                marginBottom: spacing.sm,
-                                color: colors.gray[700]
-                            }}>
-                                Forum Name
-                            </label>
-                            <input
-                                type="text"
-                                value={editForumData.name}
-                                onChange={(e) => setEditForumData({...editForumData, name: e.target.value})}
-                                style={{
-                                    width: '100%',
-                                    padding: spacing.md,
-                                    border: `1px solid ${colors.gray[300]}`,
-                                    borderRadius: borderRadius.md,
-                                    fontSize: '16px',
-                                    outline: 'none'
-                                }}
-                                placeholder="Enter forum name"
-                            />
-                        </div>
-                        
-                        <div style={{ marginBottom: spacing.md }}>
-                            <label style={{
-                                display: 'block',
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                marginBottom: spacing.sm,
-                                color: colors.gray[700]
-                            }}>
-                                Description
-                            </label>
-                            <textarea
-                                value={editForumData.description}
-                                onChange={(e) => setEditForumData({...editForumData, description: e.target.value})}
-                                style={{
-                                    width: '100%',
-                                    padding: spacing.md,
-                                    border: `1px solid ${colors.gray[300]}`,
-                                    borderRadius: borderRadius.md,
-                                    fontSize: '16px',
-                                    outline: 'none',
-                                    minHeight: '100px',
-                                    resize: 'vertical'
-                                }}
-                                placeholder="Enter forum description"
-                            />
-                        </div>
-                        
-                        <div style={{ marginBottom: spacing.lg }}>
-                            <label style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: spacing.sm,
-                                cursor: 'pointer'
-                            }}>
-                                <input
-                                    type="checkbox"
-                                    checked={editForumData.is_private}
-                                    onChange={(e) => setEditForumData({...editForumData, is_private: e.target.checked})}
-                                    style={{
-                                        width: '18px',
-                                        height: '18px',
-                                        cursor: 'pointer'
-                                    }}
-                                />
-                                <span style={{
-                                    fontSize: '14px',
-                                    fontWeight: '500',
-                                    color: colors.gray[700]
-                                }}>
-                                    Private Forum (requires approval to join)
-                                </span>
-                            </label>
-                        </div>
-                        
+                        {/* Header */}
                         <div style={{
                             display: 'flex',
-                            gap: spacing.md,
-                            justifyContent: 'flex-end'
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: '24px',
+                            paddingBottom: '16px',
+                            borderBottom: `1px solid ${colors.gray[200]}`
                         }}>
-                            <Button
+                            <h2 style={{
+                                fontSize: '24px',
+                                fontWeight: '700',
+                                color: colors.gray[900],
+                                margin: 0
+                            }}>
+                                Edit Forum
+                            </h2>
+                            <button
                                 onClick={() => setShowEditForumModal(false)}
                                 style={{
-                                    backgroundColor: colors.gray[400],
-                                    color: colors.white,
+                                    background: 'none',
                                     border: 'none',
-                                    padding: '12px 24px',
-                                    borderRadius: borderRadius.md,
+                                    fontSize: '24px',
+                                    color: colors.gray[400],
                                     cursor: 'pointer',
-                                    fontSize: '16px',
-                                    fontWeight: '500'
+                                    padding: '4px',
+                                    borderRadius: '6px',
+                                    transition: 'all 0.2s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '32px',
+                                    height: '32px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = colors.gray[100];
+                                    e.target.style.color = colors.gray[600];
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = 'transparent';
+                                    e.target.style.color = colors.gray[400];
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        {/* Form Content */}
+                        <div style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: '8px' }}>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{
+                                    display: 'block',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    marginBottom: '8px',
+                                    color: colors.gray[700]
+                                }}>
+                                    Forum Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editForumData.name}
+                                    onChange={(e) => setEditForumData({...editForumData, name: e.target.value})}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px 16px',
+                                        border: `2px solid ${colors.gray[200]}`,
+                                        borderRadius: '10px',
+                                        fontSize: '16px',
+                                        outline: 'none',
+                                        transition: 'all 0.2s ease',
+                                        backgroundColor: colors.gray[50]
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = colors.primary;
+                                        e.target.style.backgroundColor = colors.white;
+                                        e.target.style.boxShadow = `0 0 0 3px ${colors.primary}20`;
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = colors.gray[200];
+                                        e.target.style.backgroundColor = colors.gray[50];
+                                        e.target.style.boxShadow = 'none';
+                                    }}
+                                    placeholder="Enter forum name"
+                                />
+                            </div>
+                            
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{
+                                    display: 'block',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    marginBottom: '8px',
+                                    color: colors.gray[700]
+                                }}>
+                                    Description
+                                </label>
+                                <textarea
+                                    value={editForumData.description}
+                                    onChange={(e) => setEditForumData({...editForumData, description: e.target.value})}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px 16px',
+                                        border: `2px solid ${colors.gray[200]}`,
+                                        borderRadius: '10px',
+                                        fontSize: '16px',
+                                        outline: 'none',
+                                        minHeight: '120px',
+                                        resize: 'vertical',
+                                        transition: 'all 0.2s ease',
+                                        backgroundColor: colors.gray[50],
+                                        fontFamily: 'inherit'
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = colors.primary;
+                                        e.target.style.backgroundColor = colors.white;
+                                        e.target.style.boxShadow = `0 0 0 3px ${colors.primary}20`;
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = colors.gray[200];
+                                        e.target.style.backgroundColor = colors.gray[50];
+                                        e.target.style.boxShadow = 'none';
+                                    }}
+                                    placeholder="Enter forum description"
+                                />
+                            </div>
+                            
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    cursor: 'pointer',
+                                    padding: '12px',
+                                    borderRadius: '10px',
+                                    transition: 'background-color 0.2s ease',
+                                    backgroundColor: colors.gray[50]
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = colors.gray[100];
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = colors.gray[50];
+                                }}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={editForumData.is_private}
+                                        onChange={(e) => setEditForumData({...editForumData, is_private: e.target.checked})}
+                                        style={{
+                                            width: '20px',
+                                            height: '20px',
+                                            cursor: 'pointer',
+                                            accentColor: colors.primary
+                                        }}
+                                    />
+                                    <div>
+                                        <span style={{
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            color: colors.gray[700],
+                                            display: 'block'
+                                        }}>
+                                            Private Forum
+                                        </span>
+                                        <span style={{
+                                            fontSize: '12px',
+                                            color: colors.gray[500],
+                                            display: 'block',
+                                            marginTop: '2px'
+                                        }}>
+                                            Requires approval to join
+                                        </span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        {/* Footer */}
+                        <div style={{
+                            display: 'flex',
+                            gap: '12px',
+                            justifyContent: 'flex-end',
+                            paddingTop: '20px',
+                            borderTop: `1px solid ${colors.gray[200]}`
+                        }}>
+                            <button
+                                onClick={() => setShowEditForumModal(false)}
+                                style={{
+                                    backgroundColor: 'transparent',
+                                    color: colors.gray[600],
+                                    border: `2px solid ${colors.gray[300]}`,
+                                    padding: '12px 24px',
+                                    borderRadius: '10px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = colors.gray[100];
+                                    e.target.style.borderColor = colors.gray[400];
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = 'transparent';
+                                    e.target.style.borderColor = colors.gray[300];
                                 }}
                             >
                                 Cancel
-                            </Button>
-                            <Button
+                            </button>
+                            <button
                                 onClick={updateForum}
                                 style={{
                                     backgroundColor: colors.primary,
                                     color: colors.white,
                                     border: 'none',
                                     padding: '12px 24px',
-                                    borderRadius: borderRadius.md,
+                                    borderRadius: '10px',
                                     cursor: 'pointer',
-                                    fontSize: '16px',
-                                    fontWeight: '500'
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    transition: 'all 0.2s ease',
+                                    boxShadow: `0 4px 12px ${colors.primary}30`
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = '#1a4d3a';
+                                    e.target.style.transform = 'translateY(-1px)';
+                                    e.target.style.boxShadow = `0 6px 16px ${colors.primary}40`;
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = colors.primary;
+                                    e.target.style.transform = 'translateY(0)';
+                                    e.target.style.boxShadow = `0 4px 12px ${colors.primary}30`;
                                 }}
                             >
                                 Save Changes
-                            </Button>
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
             <style jsx>{`
-                @keyframes slideUp {
+                @keyframes fadeIn {
                     from {
-                        transform: translateX(-50%) translateY(100%);
                         opacity: 0;
                     }
                     to {
-                        transform: translateX(-50%) translateY(0);
                         opacity: 1;
+                    }
+                }
+                
+                @keyframes slideUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px) scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
                     }
                 }
             `}</style>
