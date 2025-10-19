@@ -1411,6 +1411,16 @@ function UserProfile() {
                                                         fontSize: "12px"
                                                     }}
                                                 >
+                                                    <img
+                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
+                                                        alt="Delete"
+                                                        style={{
+                                                            width: "12px",
+                                                            height: "12px",
+                                                            objectFit: "contain",
+                                                            marginRight: "6px"
+                                                        }}
+                                                    />
                                                     Delete
                                                 </button>
                                             </div>

@@ -833,6 +833,16 @@ function Settings() {
                                 transition: "all 0.2s ease"
                             }}
                         >
+                            <img
+                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
+                                alt="Delete"
+                                style={{
+                                    width: "16px",
+                                    height: "16px",
+                                    objectFit: "contain",
+                                    marginRight: "8px"
+                                }}
+                            />
                              Delete Account
                         </Button>
                     </div>
@@ -904,7 +914,21 @@ function Settings() {
                                             cursor: loading ? "not-allowed" : "pointer"
                                         }}
                                     >
-                                        {loading ? "Sending..." : "Yes, Delete Account"}
+                                        {loading ? "Sending..." : (
+                                            <>
+                                                <img
+                                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
+                                                    alt="Delete"
+                                                    style={{
+                                                        width: "16px",
+                                                        height: "16px",
+                                                        objectFit: "contain",
+                                                        marginRight: "8px"
+                                                    }}
+                                                />
+                                                Yes, Delete Account
+                                            </>
+                                        )}
                                     </Button>
                                 </div>
                             </div>
@@ -1012,7 +1036,21 @@ function Settings() {
                                                 cursor: (loading || !verificationCode.trim()) ? "not-allowed" : "pointer"
                                             }}
                                         >
-                                            {loading ? "Deleting..." : "Delete Account"}
+                                            {loading ? "Deleting..." : (
+                                                <>
+                                                    <img
+                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
+                                                        alt="Delete"
+                                                        style={{
+                                                            width: "16px",
+                                                            height: "16px",
+                                                            objectFit: "contain",
+                                                            marginRight: "8px"
+                                                        }}
+                                                    />
+                                                    Delete Account
+                                                </>
+                                            )}
                                         </Button>
                                     </div>
                                 </form>

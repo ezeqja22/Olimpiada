@@ -1397,6 +1397,16 @@ const ForumDetail = () => {
                                                         onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[50]}
                                                         onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                                                     >
+                                                        <img
+                                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/kosh_icon_red_yr4dpb.svg"
+                                                            alt="Delete"
+                                                            style={{
+                                                                width: "16px",
+                                                                height: "16px",
+                                                                objectFit: "contain",
+                                                                marginRight: "8px"
+                                                            }}
+                                                        />
                                                          Delete Forum
                                                     </button>
                                                 </>
@@ -2654,7 +2664,17 @@ const ForumDetail = () => {
                                                                                 e.target.style.backgroundColor = 'transparent';
                                                                             }}
                                                                         >
-                                                                            🗑️ Delete
+                                                                            <img
+                                                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/kosh_icon_red_yr4dpb.svg"
+                                                                                alt="Delete"
+                                                                                style={{
+                                                                                    width: "14px",
+                                                                                    height: "14px",
+                                                                                    objectFit: "contain",
+                                                                                    marginRight: "6px"
+                                                                                }}
+                                                                            />
+                                                                            Delete
                                                                         </button>
                                                                     )}
                                                                     
@@ -3574,6 +3594,16 @@ const ForumDetail = () => {
                                     fontWeight: '600'
                                 }}
                             >
+                                <img
+                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/kosh_icon_red_yr4dpb.svg"
+                                    alt="Delete"
+                                    style={{
+                                        width: "16px",
+                                        height: "16px",
+                                        objectFit: "contain",
+                                        marginRight: "8px"
+                                    }}
+                                />
                                 Yes, I'm Sure
                             </Button>
                         </div>

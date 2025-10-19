@@ -371,6 +371,16 @@ const AdminEmail = () => {
                             fontSize: '0.8rem'
                           }}
                         >
+                          <img
+                              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
+                              alt="Delete"
+                              style={{
+                                  width: "14px",
+                                  height: "14px",
+                                  objectFit: "contain",
+                                  marginRight: "6px"
+                              }}
+                          />
                           Delete
                         </button>
                       )}

@@ -228,6 +228,16 @@ const CommentThread = ({
                                             e.target.style.color = "#656d76";
                                         }}
                                     >
+                                        <img
+                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
+                                            alt="Delete"
+                                            style={{
+                                                width: "14px",
+                                                height: "14px",
+                                                objectFit: "contain",
+                                                marginRight: "6px"
+                                            }}
+                                        />
                                         Delete
                                     </button>
                                 </>
@@ -1602,6 +1612,16 @@ function ProblemDetail() {
                                         e.target.style.boxShadow = "0 2px 8px rgba(220, 38, 38, 0.3)";
                                     }}
                                 >
+                                    <img
+                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
+                                        alt="Delete"
+                                        style={{
+                                            width: "16px",
+                                            height: "16px",
+                                            objectFit: "contain",
+                                            marginRight: "8px"
+                                        }}
+                                    />
                                     Delete Problem
                                 </button>
                             </div>

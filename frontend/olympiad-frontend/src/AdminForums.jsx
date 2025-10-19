@@ -205,6 +205,16 @@ const AdminForums = () => {
                         className="admin-btn danger"
                         onClick={() => handleDeleteForum(forum.id, forum.title)}
                       >
+                        <img
+                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
+                            alt="Delete"
+                            style={{
+                                width: "16px",
+                                height: "16px",
+                                objectFit: "contain",
+                                marginRight: "8px"
+                            }}
+                        />
                         Delete
                       </button>
                     </div>
