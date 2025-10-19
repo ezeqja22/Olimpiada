@@ -100,32 +100,82 @@ const AdminDashboard = () => {
           <button 
             className="admin-btn"
             onClick={() => navigate('/admin/users')}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           >
-            👥 Manage Users
+            <img 
+              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg" 
+              alt="Users"
+              style={{
+                width: "20px",
+                height: "20px",
+                objectFit: "contain"
+              }}
+            />
+            Manage Users
           </button>
           <button 
             className="admin-btn"
             onClick={() => navigate('/admin/forums')}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           >
-             Moderate Forums
+            <img 
+              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg" 
+              alt="Forums"
+              style={{
+                width: "20px",
+                height: "20px",
+                objectFit: "contain"
+              }}
+            />
+            Moderate Forums
           </button>
           <button 
             className="admin-btn"
             onClick={() => navigate('/admin/reports')}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           >
-             Review Reports
+            <img 
+              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg" 
+              alt="Reports"
+              style={{
+                width: "20px",
+                height: "20px",
+                objectFit: "contain"
+              }}
+            />
+            Review Reports
           </button>
           <button 
             className="admin-btn secondary"
             onClick={() => navigate('/admin/email')}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           >
-             Send Email
+            <img 
+              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811297/Email_admin_panel_zjmkz7.svg" 
+              alt="Email"
+              style={{
+                width: "20px",
+                height: "20px",
+                objectFit: "contain"
+              }}
+            />
+            Send Email
           </button>
           <button 
             className="admin-btn secondary"
             onClick={() => navigate('/admin/analytics')}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           >
-            📈 View Analytics
+            <img 
+              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/Analytics_admin_panel_en0409.svg" 
+              alt="Analytics"
+              style={{
+                width: "20px",
+                height: "20px",
+                objectFit: "contain"
+              }}
+            />
+            View Analytics
           </button>
         </div>
       </div>
