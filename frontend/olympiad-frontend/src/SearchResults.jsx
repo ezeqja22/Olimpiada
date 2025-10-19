@@ -39,6 +39,7 @@ const SearchResults = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const [followStatus, setFollowStatus] = useState({});
     const [voteData, setVoteData] = useState({});
+    const [bookmarkData, setBookmarkData] = useState({});
     const [activeTab, setActiveTab] = useState('all'); // 'all', 'users', 'problems'
     
     // Get category from URL parameters
@@ -132,18 +133,20 @@ const SearchResults = () => {
                 setSearchResults(response.data);
                 setTotalPages(response.data.total_pages || 1);
                 setTotalResults(response.data.total_problems || 0);
-                // Fetch vote data for problems
+                // Fetch vote data and bookmark data for problems
                 if (response.data.problems && response.data.problems.length > 0) {
                     await fetchVoteData(response.data.problems);
+                    await fetchBookmarkData(response.data.problems);
                 }
             } else if (activeTab === 'all' || (activeTab === 'users' && currentPage === 1) || (activeTab === 'problems' && currentPage === 1)) {
                 // Use combined search results
                 setSearchResults(response.data);
                 setTotalPages(1); // Combined search doesn't use pagination
                 setTotalResults((response.data.users ? response.data.users.length : 0) + (response.data.problems ? response.data.problems.length : 0));
-                // Fetch vote data for problems
+                // Fetch vote data and bookmark data for problems
                 if (response.data.problems && response.data.problems.length > 0) {
                     await fetchVoteData(response.data.problems);
+                    await fetchBookmarkData(response.data.problems);
                 }
             } else {
                 // Use individual endpoint results for pagination
@@ -238,8 +241,32 @@ const SearchResults = () => {
     };
 
     const fetchVoteData = async (problemsList) => {
+        console.log("🔍 fetchVoteData called with problems:", problemsList.length);
         try {
             const token = localStorage.getItem("token");
+            console.log("🔑 Token exists:", !!token);
+            if (!token) {
+                const voteDataMap = {};
+                problemsList.forEach(problem => {
+                    voteDataMap[problem.id] = { like_count: 0, dislike_count: 0, user_vote: null };
+                });
+                setVoteData(voteDataMap);
+                console.log("📊 Set default vote data:", voteDataMap);
+                return;
+            }
+
+            // Get current user info
+            let currentUserId = null;
+            try {
+                const userResponse = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                currentUserId = userResponse.data.id;
+                console.log("👤 Current user ID:", currentUserId);
+            } catch (userError) {
+                console.error("❌ Error fetching current user:", userError);
+            }
+
             const votePromises = problemsList.map(async (problem) => {
                 const problemId = problem.id;
                 try {
@@ -251,7 +278,36 @@ const SearchResults = () => {
                             }
                         }
                     );
-                    return { problemId, voteData: response.data };
+                    console.log(`📊 Vote data for problem ${problemId}:`, response.data);
+
+                    let likeCount = 0;
+                    let dislikeCount = 0;
+                    let userVote = null;
+
+                    if (Array.isArray(response.data)) {
+                        response.data.forEach(vote => {
+                            if (vote.vote_type === 'like') {
+                                likeCount++;
+                                if (vote.user_id === currentUserId) {
+                                    userVote = 'like';
+                                }
+                            } else if (vote.vote_type === 'dislike') {
+                                dislikeCount++;
+                                if (vote.user_id === currentUserId) {
+                                    userVote = 'dislike';
+                                }
+                            }
+                        });
+                    }
+
+                    const processedVoteData = {
+                        like_count: likeCount,
+                        dislike_count: dislikeCount,
+                        user_vote: userVote
+                    };
+
+                    console.log(`📊 Processed vote data for problem ${problemId}:`, processedVoteData);
+                    return { problemId, voteData: processedVoteData };
                 } catch (error) {
                     console.error(`Error fetching vote data for problem ${problemId}:`, error);
                     return { problemId, voteData: { like_count: 0, dislike_count: 0, user_vote: null } };
@@ -264,8 +320,103 @@ const SearchResults = () => {
                 voteDataMap[problemId] = voteData;
             });
             setVoteData(voteDataMap);
+            console.log("✅ Vote data fetched successfully:", voteDataMap);
         } catch (error) {
-            console.error("Error fetching vote data:", error);
+            console.error("❌ Error fetching vote data:", error);
+        }
+    };
+
+    const fetchBookmarkData = async (problemsList) => {
+        console.log("🔍 fetchBookmarkData called with problems:", problemsList.length);
+        try {
+            const token = localStorage.getItem("token");
+            console.log("🔑 Token exists for bookmarks:", !!token);
+            if (!token) {
+                const bookmarkDataMap = {};
+                problemsList.forEach(problem => {
+                    bookmarkDataMap[problem.id] = false;
+                });
+                setBookmarkData(bookmarkDataMap);
+                console.log("📊 Set default bookmark data:", bookmarkDataMap);
+                return;
+            }
+            
+            const problemIds = problemsList.map(problem => problem.id);
+            console.log("📤 Sending bookmark request with problem IDs:", problemIds);
+            let response;
+            try {
+                response = await axios.post(
+                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
+                    { problem_ids: problemIds },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+            } catch (firstError) {
+                console.log("🔄 First bookmark request failed, trying direct array format...");
+                response = await axios.post(
+                    `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
+                    problemIds,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+            }
+            const convertedData = {};
+            Object.keys(response.data).forEach(problemId => {
+                convertedData[problemId] = response.data[problemId].isBookmarked;
+            });
+            setBookmarkData(convertedData);
+            console.log("✅ Bookmark data fetched successfully:", convertedData);
+        } catch (error) {
+            console.error("❌ Error fetching bookmark data:", error);
+            console.error("❌ Error response:", error.response?.data);
+            console.error("❌ Error status:", error.response?.status);
+        }
+    };
+
+    const handleBookmark = async (problemId) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Please log in to bookmark problems");
+                return;
+            }
+
+            const isCurrentlyBookmarked = bookmarkData[problemId];
+            
+            if (isCurrentlyBookmarked) {
+                // Remove bookmark
+                await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setBookmarkData(prev => ({
+                    ...prev,
+                    [problemId]: false
+                }));
+            } else {
+                // Add bookmark
+                await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setBookmarkData(prev => ({
+                    ...prev,
+                    [problemId]: true
+                }));
+            }
+        } catch (error) {
+            console.error("Error toggling bookmark:", error);
+            alert(`Error updating bookmark: ${error.response?.data?.detail || error.message}`);
         }
     };
 
@@ -794,6 +945,34 @@ const SearchResults = () => {
                                             />
                                             {problem.comment_count} comments
                                         </span>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleBookmark(problem.id);
+                                            }}
+                                            style={{
+                                                padding: "4px 8px",
+                                                backgroundColor: "transparent",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "4px"
+                                            }}
+                                        >
+                                            <img 
+                                                src={bookmarkData[problem.id] 
+                                                    ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
+                                                    : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
+                                                } 
+                                                alt="Bookmark"
+                                                style={{
+                                                    height: "16px",
+                                                    width: "16px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                        </button>
                                     </div>
                                 </div>
                             </div>
