@@ -687,24 +687,15 @@ function Header({ showHomeButton = false }) {
                             onMouseEnter={(e) => e.target.style.backgroundColor = "rgba(255, 255, 255, 0.1)"}
                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                         >
-                            <div style={{
-                                width: "16px",
-                                height: "2px",
-                                backgroundColor: colors.white,
-                                transition: "all 0.3s ease"
-                            }} />
-                            <div style={{
-                                width: "16px",
-                                height: "2px",
-                                backgroundColor: colors.white,
-                                transition: "all 0.3s ease"
-                            }} />
-                            <div style={{
-                                width: "16px",
-                                height: "2px",
-                                backgroundColor: colors.white,
-                                transition: "all 0.3s ease"
-                            }} />
+                            <img
+                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/Sandwich_icon_efioyq.svg"
+                                alt="Close Menu"
+                                style={{
+                                    width: "16px",
+                                    height: "16px",
+                                    objectFit: "contain"
+                                }}
+                            />
                         </button>
                         <h3 style={{
                             margin: 0,
@@ -748,24 +739,15 @@ function Header({ showHomeButton = false }) {
                             onMouseEnter={(e) => e.target.style.backgroundColor = "rgba(255, 255, 255, 0.1)"}
                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                         >
-                            <div style={{
-                                width: "16px",
-                                height: "2px",
-                                backgroundColor: colors.white,
-                                transition: "all 0.3s ease"
-                            }} />
-                            <div style={{
-                                width: "16px",
-                                height: "2px",
-                                backgroundColor: colors.white,
-                                transition: "all 0.3s ease"
-                            }} />
-                            <div style={{
-                                width: "16px",
-                                height: "2px",
-                                backgroundColor: colors.white,
-                                transition: "all 0.3s ease"
-                            }} />
+                            <img
+                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/Sandwich_icon_efioyq.svg"
+                                alt="Close Menu"
+                                style={{
+                                    width: "16px",
+                                    height: "16px",
+                                    objectFit: "contain"
+                                }}
+                            />
                         </button>
                         <h3 style={{
                             margin: 0,
