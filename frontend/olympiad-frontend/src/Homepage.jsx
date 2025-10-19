@@ -310,27 +310,53 @@ function Homepage() {
                                 minWidth: "200px",
                                 marginTop: "5px"
                             }}>
-                                {subjects.map((subject) => (
-                                    <button
-                                        key={subject}
-                                        onClick={() => handleSubjectClick(subject)}
-                                        style={{
-                                            width: "100%",
-                                            padding: "12px 16px",
-                                            border: "none",
-                                            backgroundColor: "transparent",
-                                            color: "#333",
-                                            textAlign: "left",
-                                            cursor: "pointer",
-                                            fontSize: "14px",
-                                            transition: "background-color 0.2s"
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
-                                    >
-                                        {subject}
-                                    </button>
-                                ))}
+                                {subjects.map((subject) => {
+                                    // Get icon based on subject
+                                    const getSubjectIcon = (subject) => {
+                                        const subjectLower = subject?.toLowerCase() || '';
+                                        if (subjectLower.includes('biology')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/Biology_subject_pcxmoa.svg';
+                                        if (subjectLower.includes('chemistry')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/chemistry_subject_r4n7jq.svg';
+                                        if (subjectLower.includes('mathematics') || subjectLower.includes('math')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/math_subject_iqigfx.svg';
+                                        if (subjectLower.includes('physics')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/physics_subject_m90gto.svg';
+                                        if (subjectLower.includes('computer')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/computer_engineerin_subject_u2m2ze.svg';
+                                        if (subjectLower.includes('other')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
+                                        return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
+                                    };
+
+                                    return (
+                                        <button
+                                            key={subject}
+                                            onClick={() => handleSubjectClick(subject)}
+                                            style={{
+                                                width: "100%",
+                                                padding: "12px 16px",
+                                                border: "none",
+                                                backgroundColor: "transparent",
+                                                color: "#333",
+                                                textAlign: "left",
+                                                cursor: "pointer",
+                                                fontSize: "14px",
+                                                transition: "background-color 0.2s",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "8px"
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                        >
+                                            <img
+                                                src={getSubjectIcon(subject)}
+                                                alt={subject}
+                                                style={{
+                                                    width: "20px",
+                                                    height: "20px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            {subject}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
