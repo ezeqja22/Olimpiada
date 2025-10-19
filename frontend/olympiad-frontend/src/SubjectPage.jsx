@@ -38,6 +38,7 @@ function SubjectPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [voteData, setVoteData] = useState({});
     const [bookmarkData, setBookmarkData] = useState({});
+    const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
     
     // Feature settings
@@ -339,6 +340,93 @@ function SubjectPage() {
         navigate("/homepage", { replace: true });
     };
 
+    // Local search filtering
+    const handleLocalSearch = (query) => {
+        setSearchQuery(query);
+        filterProblems(query);
+    };
+
+    // Local advanced search filtering
+    const handleLocalAdvancedSearch = (advancedData) => {
+        setSearchQuery(advancedData.query || "");
+        filterProblemsAdvanced(advancedData);
+    };
+
+    // Filter problems based on search query
+    const filterProblems = (query) => {
+        if (!query.trim()) {
+            setProblems(allProblems);
+            setTotalPages(Math.ceil(allProblems.length / 20));
+            setCurrentPage(1);
+            return;
+        }
+
+        const filtered = allProblems.filter(problem => {
+            const searchTerm = query.toLowerCase();
+            return (
+                problem.title.toLowerCase().includes(searchTerm) ||
+                problem.description.toLowerCase().includes(searchTerm) ||
+                (problem.tags && problem.tags.toLowerCase().includes(searchTerm)) ||
+                (problem.level && problem.level.toLowerCase().includes(searchTerm)) ||
+                (problem.year && problem.year.toString().includes(searchTerm))
+            );
+        });
+
+        setProblems(filtered);
+        setTotalPages(Math.ceil(filtered.length / 20));
+        setCurrentPage(1);
+    };
+
+    // Advanced filtering
+    const filterProblemsAdvanced = (filters) => {
+        let filtered = [...allProblems];
+
+        // Text search
+        if (filters.query && filters.query.trim()) {
+            const searchTerm = filters.query.toLowerCase();
+            filtered = filtered.filter(problem => 
+                problem.title.toLowerCase().includes(searchTerm) ||
+                problem.description.toLowerCase().includes(searchTerm) ||
+                (problem.tags && problem.tags.toLowerCase().includes(searchTerm))
+            );
+        }
+
+        // Subject filter (should already be locked to current subject)
+        if (filters.subjects && filters.subjects.length > 0) {
+            filtered = filtered.filter(problem => 
+                filters.subjects.includes(problem.subject)
+            );
+        }
+
+        // Level filter
+        if (filters.level && filters.level.trim()) {
+            filtered = filtered.filter(problem => 
+                problem.level && problem.level.toLowerCase().includes(filters.level.toLowerCase())
+            );
+        }
+
+        // Year filter
+        if (filters.year && filters.year.trim()) {
+            filtered = filtered.filter(problem => 
+                problem.year && problem.year.toString().includes(filters.year)
+            );
+        }
+
+        // Tags filter
+        if (filters.tags && filters.tags.trim()) {
+            const tagTerms = filters.tags.toLowerCase().split(',').map(tag => tag.trim());
+            filtered = filtered.filter(problem => 
+                problem.tags && tagTerms.some(term => 
+                    problem.tags.toLowerCase().includes(term)
+                )
+            );
+        }
+
+        setProblems(filtered);
+        setTotalPages(Math.ceil(filtered.length / 20));
+        setCurrentPage(1);
+    };
+
 
     // Paginate problems (20 per page)
     const startIndex = (currentPage - 1) * 20;
@@ -392,6 +480,7 @@ function SubjectPage() {
                         marginBottom: "1rem"
                     }}>
                         {problems.length} problems found in {subjectName}
+                        {searchQuery && ` (filtered by "${searchQuery}")`}
                     </p>
 
                     {/* Search Bar */}
@@ -408,6 +497,8 @@ function SubjectPage() {
                                 placeholder={`Search within ${subjectName} problems...`}
                                 searchMode="subject"
                                 lockedSubject={subjectName}
+                                onLocalSearch={handleLocalSearch}
+                                onAdvancedSearch={handleLocalAdvancedSearch}
                             />
                         </div>
                     </div>

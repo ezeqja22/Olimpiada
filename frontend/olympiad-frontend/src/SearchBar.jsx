@@ -6,7 +6,9 @@ function SearchBar({
   showAdvanced = true, 
   initialQuery = "",
   searchMode = "all", // "all", "forums", "subject"
-  lockedSubject = null // For subject-locked searches
+  lockedSubject = null, // For subject-locked searches
+  onLocalSearch = null, // Callback for local filtering
+  onAdvancedSearch = null // Callback for advanced local filtering
 }) {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [showAdvancedModal, setShowAdvancedModal] = useState(false);
@@ -15,6 +17,12 @@ function SearchBar({
   const handleSearch = (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
+    
+    // If local search callback is provided, use it instead of navigation
+    if (onLocalSearch) {
+      onLocalSearch(searchQuery.trim());
+      return;
+    }
     
     const query = encodeURIComponent(searchQuery.trim());
     
@@ -35,6 +43,13 @@ function SearchBar({
 
   const closeAdvancedSearch = () => {
     setShowAdvancedModal(false);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    if (onLocalSearch) {
+      onLocalSearch("");
+    }
   };
 
   const handleAdvancedSearch = (advancedData) => {
@@ -58,29 +73,66 @@ function SearchBar({
       <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
 
         {/* Search Input */}
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={placeholder}
-          style={{
-            flex: 1,
-            padding: '12px 20px',
-            border: '2px solid #e9ecef',
-            borderRadius: '25px',
-            fontSize: '16px',
-            outline: 'none',
-            transition: 'border-color 0.2s ease',
-            backgroundColor: 'white',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = '#1a4d3a';
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = '#e9ecef';
-          }}
-        />
+        <div style={{ position: 'relative', flex: 1 }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={placeholder}
+            style={{
+              width: '100%',
+              padding: '12px 20px',
+              paddingRight: searchQuery ? '50px' : '20px',
+              border: '2px solid #e9ecef',
+              borderRadius: '25px',
+              fontSize: '16px',
+              outline: 'none',
+              transition: 'border-color 0.2s ease',
+              backgroundColor: 'white',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = '#1a4d3a';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = '#e9ecef';
+            }}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              style={{
+                position: 'absolute',
+                right: '15px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                fontSize: '18px',
+                cursor: 'pointer',
+                color: '#666',
+                padding: '2px',
+                borderRadius: '50%',
+                width: '24px',
+                height: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#f8f9fa';
+                e.target.style.color = '#333';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = '#666';
+              }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
 
         {/* Search Button */}
         <button
@@ -150,7 +202,7 @@ function SearchBar({
       {showAdvancedModal && (
         <AdvancedSearchModal
           onClose={closeAdvancedSearch}
-          onSearch={handleAdvancedSearch}
+          onSearch={onAdvancedSearch || handleAdvancedSearch}
           initialData={{
             query: searchQuery,
             category: searchMode === "forums" ? "forums" : "problems"
