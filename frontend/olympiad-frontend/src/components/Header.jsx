@@ -204,19 +204,19 @@ function Header({ showHomeButton = false }) {
                             width: "20px",
                             height: "2px",
                             backgroundColor: colors.white,
-                            transition: "all 0.3s ease"
+                            transition: "none"
                         }} />
                         <div style={{
                             width: "20px",
                             height: "2px",
                             backgroundColor: colors.white,
-                            transition: "all 0.3s ease"
+                            transition: "none"
                         }} />
                         <div style={{
                             width: "20px",
                             height: "2px",
                             backgroundColor: colors.white,
-                            transition: "all 0.3s ease"
+                            transition: "none"
                         }} />
                     </button>
                 )}
