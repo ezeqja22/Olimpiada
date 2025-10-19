@@ -31,6 +31,8 @@ const Forums = () => {
     const [activeTab, setActiveTab] = useState('all');
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [selectedForumId, setSelectedForumId] = useState(null);
+    const [allForums, setAllForums] = useState([]); // Store all forums for filtering
+    const [searchQuery, setSearchQuery] = useState("");
     const [forumOnlineCounts, setForumOnlineCounts] = useState({});
 
     const navigate = useNavigate();
@@ -99,6 +101,7 @@ const Forums = () => {
             });
             
             setForums(response.data);
+            setAllForums(response.data); // Store all forums for filtering
             
             // Fetch online counts for all forums
             fetchAllOnlineCounts(response.data);
@@ -253,6 +256,80 @@ const Forums = () => {
         fetchForums(); // Refresh forums to update member counts
     };
 
+    // Local search filtering
+    const handleLocalSearch = (query) => {
+        setSearchQuery(query);
+        filterForums(query);
+    };
+
+    // Local advanced search filtering
+    const handleLocalAdvancedSearch = (advancedData) => {
+        setSearchQuery(advancedData.query || "");
+        filterForumsAdvanced(advancedData);
+    };
+
+    // Filter forums based on search query
+    const filterForums = (query) => {
+        if (!query.trim()) {
+            setForums(allForums);
+            return;
+        }
+
+        const filtered = allForums.filter(forum => {
+            const searchTerm = query.toLowerCase();
+            return (
+                forum.title.toLowerCase().includes(searchTerm) ||
+                forum.description.toLowerCase().includes(searchTerm) ||
+                (forum.subject && forum.subject.toLowerCase().includes(searchTerm)) ||
+                (forum.level && forum.level.toLowerCase().includes(searchTerm)) ||
+                (forum.tags && forum.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
+            );
+        });
+
+        setForums(filtered);
+    };
+
+    // Advanced filtering for forums
+    const filterForumsAdvanced = (filters) => {
+        let filtered = [...allForums];
+
+        // Text search
+        if (filters.query && filters.query.trim()) {
+            const searchTerm = filters.query.toLowerCase();
+            filtered = filtered.filter(forum => 
+                forum.title.toLowerCase().includes(searchTerm) ||
+                forum.description.toLowerCase().includes(searchTerm) ||
+                (forum.tags && forum.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
+            );
+        }
+
+        // Subject filter
+        if (filters.subjects && filters.subjects.length > 0) {
+            filtered = filtered.filter(forum => 
+                filters.subjects.includes(forum.subject)
+            );
+        }
+
+        // Level filter
+        if (filters.level && filters.level.trim()) {
+            filtered = filtered.filter(forum => 
+                forum.level && forum.level.toLowerCase().includes(filters.level.toLowerCase())
+            );
+        }
+
+        // Tags filter
+        if (filters.tags && filters.tags.trim()) {
+            const tagTerms = filters.tags.toLowerCase().split(',').map(tag => tag.trim());
+            filtered = filtered.filter(forum => 
+                forum.tags && tagTerms.some(term => 
+                    forum.tags.some(forumTag => forumTag.toLowerCase().includes(term))
+                )
+            );
+        }
+
+        setForums(filtered);
+    };
+
     // Filter forums based on active tab, search query, and advanced filters
     const filteredForums = forums.filter(forum => {
         // Tab filtering
@@ -359,10 +436,12 @@ const Forums = () => {
 
                 {/* Search Bar */}
                 <div style={{ marginBottom: spacing.lg }}>
-                    <SearchBar 
-                        placeholder="Search forums, users, tags..." 
-                        searchMode="forums"
-                    />
+                            <SearchBar 
+                                placeholder="Search forums, users, tags..." 
+                                searchMode="forums"
+                                onLocalSearch={handleLocalSearch}
+                                onAdvancedSearch={handleLocalAdvancedSearch}
+                            />
                 </div>
 
                 {/* Tabs */}
@@ -613,6 +692,23 @@ const Forums = () => {
                     </Card>
                 )}
 
+                {/* Forum Count */}
+                {filteredForums.length > 0 && (
+                    <div style={{ 
+                        marginBottom: spacing.md,
+                        textAlign: "center"
+                    }}>
+                        <p style={{ 
+                            fontSize: "1.1rem", 
+                            color: colors.gray[600],
+                            margin: 0
+                        }}>
+                            {filteredForums.length} forum{filteredForums.length !== 1 ? 's' : ''} found
+                            {searchQuery && ` matching "${searchQuery}"`}
+                        </p>
+                    </div>
+                )}
+
                 {/* Forums Grid */}
                 <div style={{ 
                     display: "grid", 
@@ -814,7 +910,8 @@ const Forums = () => {
                     }}>
                         <h3>No forums found</h3>
                         <p>
-                            {activeTab === 'public' ? 'No public forums available' :
+                            {searchQuery ? `No forums found matching "${searchQuery}"` :
+                             activeTab === 'public' ? 'No public forums available' :
                              activeTab === 'private' ? 'No private forums available' :
                              'Be the first to create a forum!'}
                         </p>
