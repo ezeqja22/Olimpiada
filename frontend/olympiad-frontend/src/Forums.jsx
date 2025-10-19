@@ -814,8 +814,7 @@ const Forums = () => {
                     }}>
                         <h3>No forums found</h3>
                         <p>
-                            {searchQuery ? 'Try adjusting your search terms' : 
-                             activeTab === 'public' ? 'No public forums available' :
+                            {activeTab === 'public' ? 'No public forums available' :
                              activeTab === 'private' ? 'No private forums available' :
                              'Be the first to create a forum!'}
                         </p>
