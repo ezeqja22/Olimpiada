@@ -612,8 +612,24 @@ const PublicUserProfile = () => {
                                             />
                                             {voteData[problem.id]?.dislike_count || 0}
                                         </button>
-                                        <span style={{ fontSize: "12px", color: "#666", pointerEvents: "none" }}>
-                                             {problem.comment_count || 0}
+                                        <span style={{ 
+                                            fontSize: "12px", 
+                                            color: "#666", 
+                                            pointerEvents: "none",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "4px"
+                                        }}>
+                                            <img 
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
+                                                alt="Comments"
+                                                style={{
+                                                    height: "14px",
+                                                    width: "14px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            {problem.comment_count || 0}
                                         </span>
                                         <button
                                             onClick={(e) => {

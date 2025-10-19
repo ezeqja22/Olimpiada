@@ -776,8 +776,23 @@ const SearchResults = () => {
                                             />
                                             {voteData[problem.id]?.dislike_count || 0}
                                         </button>
-                                        <span style={{ color: "#666", fontSize: "12px" }}>
-                                             {problem.comment_count} comments
+                                        <span style={{ 
+                                            color: "#666", 
+                                            fontSize: "12px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "4px"
+                                        }}>
+                                            <img 
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
+                                                alt="Comments"
+                                                style={{
+                                                    height: "14px",
+                                                    width: "14px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            {problem.comment_count} comments
                                         </span>
                                     </div>
                                 </div>
