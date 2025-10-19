@@ -200,24 +200,15 @@ function Header({ showHomeButton = false }) {
                         onMouseEnter={(e) => e.target.style.backgroundColor = colors.secondary}
                         onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                     >
-                        <div style={{
-                            width: "20px",
-                            height: "2px",
-                            backgroundColor: colors.white,
-                            display: "block"
-                        }} />
-                        <div style={{
-                            width: "20px",
-                            height: "2px",
-                            backgroundColor: colors.white,
-                            display: "block"
-                        }} />
-                        <div style={{
-                            width: "20px",
-                            height: "2px",
-                            backgroundColor: colors.white,
-                            display: "block"
-                        }} />
+                        <img
+                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/Sandwich_icon_efioyq.svg"
+                            alt="Menu"
+                            style={{
+                                width: "20px",
+                                height: "20px",
+                                objectFit: "contain"
+                            }}
+                        />
                     </button>
                 )}
                 

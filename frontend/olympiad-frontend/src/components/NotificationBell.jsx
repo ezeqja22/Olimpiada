@@ -309,7 +309,7 @@ function NotificationBell({ onNotificationClick }) {
             return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811399/Tick_Icon_Green_a28qin.svg';
         }
         if (title.includes('Declined') || message.includes('declined')) {
-            return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811317/X_Icon_Green_kynqkv.svg';
+            return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/kryq_icon_red_kl8yvv.svg';
         }
         
         // Original type-based logic
@@ -325,13 +325,13 @@ function NotificationBell({ onNotificationClick }) {
             case 'forum_request_accepted': 
                 return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811399/Tick_Icon_Green_a28qin.svg';
             case 'forum_request_declined': 
-                return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811317/X_Icon_Green_kynqkv.svg';
+                return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/kryq_icon_red_kl8yvv.svg';
             case 'forum_invitation': 
                 return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811297/Email_admin_panel_zjmkz7.svg';
             case 'forum_invitation_accepted': 
                 return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811399/Tick_Icon_Green_a28qin.svg';
             case 'forum_invitation_declined': 
-                return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811317/X_Icon_Green_kynqkv.svg';
+                return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/kryq_icon_red_kl8yvv.svg';
             case 'forum_deleted': 
                 return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_Green_padbr7.svg';
             default: 

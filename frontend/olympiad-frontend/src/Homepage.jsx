@@ -209,24 +209,15 @@ function Homepage() {
                             onMouseEnter={(e) => e.target.style.backgroundColor = "rgba(255, 255, 255, 0.1)"}
                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                         >
-                            <div style={{
-                                width: "20px",
-                                height: "2px",
-                                backgroundColor: "white",
-                                display: "block"
-                            }} />
-                            <div style={{
-                                width: "20px",
-                                height: "2px",
-                                backgroundColor: "white",
-                                display: "block"
-                            }} />
-                            <div style={{
-                                width: "20px",
-                                height: "2px",
-                                backgroundColor: "white",
-                                display: "block"
-                            }} />
+                            <img
+                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/Sandwich_icon_efioyq.svg"
+                                alt="Menu"
+                                style={{
+                                    width: "20px",
+                                    height: "20px",
+                                    objectFit: "contain"
+                                }}
+                            />
                         </button>
                     )}
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "24px" }}>
