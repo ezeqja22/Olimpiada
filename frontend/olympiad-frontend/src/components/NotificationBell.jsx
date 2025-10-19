@@ -295,6 +295,7 @@ function NotificationBell({ onNotificationClick }) {
     };
 
     const getNotificationIcon = (type) => {
+        console.log('Getting icon for notification type:', type);
         switch (type) {
             case 'like': 
                 return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg';
@@ -317,6 +318,7 @@ function NotificationBell({ onNotificationClick }) {
             case 'forum_deleted': 
                 return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_Green_padbr7.svg';
             default: 
+                console.log('Using default icon for type:', type);
                 return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760789591/Notification_Icon_fm5zqx.svg';
         }
     };
@@ -483,7 +485,15 @@ function NotificationBell({ onNotificationClick }) {
                                                 style={{
                                                     width: "20px",
                                                     height: "20px",
-                                                    objectFit: "contain"
+                                                    objectFit: "contain",
+                                                    display: "block"
+                                                }}
+                                                onError={(e) => {
+                                                    console.error('Notification icon failed to load:', notification.type, getNotificationIcon(notification.type));
+                                                    e.target.style.display = 'none';
+                                                }}
+                                                onLoad={() => {
+                                                    console.log('Notification icon loaded successfully:', notification.type, getNotificationIcon(notification.type));
                                                 }}
                                             />
                                         </div>
