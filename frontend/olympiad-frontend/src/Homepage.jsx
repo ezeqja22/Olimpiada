@@ -489,11 +489,23 @@ function Homepage() {
                                             textAlign: "left",
                                             cursor: "pointer",
                                             fontSize: "14px",
-                                            transition: "background-color 0.2s"
+                                            transition: "background-color 0.2s",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "8px"
                                         }}
                                         onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
                                         onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                         >
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Profile_Icon_Green_t3zoz5.svg"
+                                                alt="Profile"
+                                                style={{
+                                                    width: "16px",
+                                                    height: "16px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
                                             My Profile
                                         </button>
                                     </Link>
@@ -507,11 +519,23 @@ function Homepage() {
                                             textAlign: "left",
                                             cursor: "pointer",
                                             fontSize: "14px",
-                                            transition: "background-color 0.2s"
+                                            transition: "background-color 0.2s",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "8px"
                                         }}
                                         onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
                                         onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                         >
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
+                                                alt="Settings"
+                                                style={{
+                                                    width: "16px",
+                                                    height: "16px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
                                              Settings
                                         </button>
                                     </Link>

@@ -534,12 +534,24 @@ function Header({ showHomeButton = false }) {
                                         color: colors.dark,
                                         cursor: "pointer",
                                         transition: "background-color 0.2s",
-                                        borderBottom: `1px solid ${colors.gray[200]}`
+                                        borderBottom: `1px solid ${colors.gray[200]}`,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px"
                                     }}
                                     onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[100]}
                                     onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                     >
-                                    My Profile
+                                        <img
+                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Profile_Icon_Green_t3zoz5.svg"
+                                            alt="Profile"
+                                            style={{
+                                                width: "16px",
+                                                height: "16px",
+                                                objectFit: "contain"
+                                            }}
+                                        />
+                                        My Profile
                                     </div>
                                 </Link>
                                 <Link to="/settings" style={{ textDecoration: "none" }}>
@@ -548,12 +560,24 @@ function Header({ showHomeButton = false }) {
                                         color: colors.dark,
                                         cursor: "pointer",
                                         transition: "background-color 0.2s",
-                                        borderBottom: `1px solid ${colors.gray[200]}`
+                                        borderBottom: `1px solid ${colors.gray[200]}`,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px"
                                     }}
                                     onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[100]}
                                     onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                     >
-                                    Settings
+                                        <img
+                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
+                                            alt="Settings"
+                                            style={{
+                                                width: "16px",
+                                                height: "16px",
+                                                objectFit: "contain"
+                                            }}
+                                        />
+                                        Settings
                                     </div>
                                 </Link>
                                 {(currentUser.role === 'admin' || currentUser.role === 'moderator') && (
