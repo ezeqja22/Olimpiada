@@ -7,6 +7,7 @@ import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import BackButton from "./components/BackButton";
 import AnimatedLoader from "./components/AnimatedLoader";
 import Layout from "./components/Layout";
+import SearchBar from "./SearchBar";
 import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 
@@ -37,7 +38,6 @@ function SubjectPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [voteData, setVoteData] = useState({});
     const [bookmarkData, setBookmarkData] = useState({});
-    const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
     
     // Feature settings
@@ -339,37 +339,6 @@ function SubjectPage() {
         navigate("/homepage", { replace: true });
     };
 
-    // Filter problems based on search query
-    const filterProblems = (query) => {
-        if (!query.trim()) {
-            setProblems(allProblems);
-            setTotalPages(Math.ceil(allProblems.length / 20));
-            setCurrentPage(1);
-            return;
-        }
-
-        const filtered = allProblems.filter(problem => {
-            const searchTerm = query.toLowerCase();
-            return (
-                problem.title.toLowerCase().includes(searchTerm) ||
-                problem.description.toLowerCase().includes(searchTerm) ||
-                (problem.tags && problem.tags.toLowerCase().includes(searchTerm)) ||
-                (problem.level && problem.level.toLowerCase().includes(searchTerm)) ||
-                (problem.year && problem.year.toString().includes(searchTerm))
-            );
-        });
-
-        setProblems(filtered);
-        setTotalPages(Math.ceil(filtered.length / 20));
-        setCurrentPage(1);
-    };
-
-    // Handle search input changes
-    const handleSearch = (e) => {
-        const query = e.target.value;
-        setSearchQuery(query);
-        filterProblems(query);
-    };
 
     // Paginate problems (20 per page)
     const startIndex = (currentPage - 1) * 20;
@@ -423,7 +392,6 @@ function SubjectPage() {
                         marginBottom: "1rem"
                     }}>
                         {problems.length} problems found in {subjectName}
-                        {searchQuery && ` (filtered by ${searchQuery})`}
                     </p>
 
                     {/* Search Bar */}
@@ -433,55 +401,14 @@ function SubjectPage() {
                         justifyContent: "center"
                     }}>
                         <div style={{ 
-                            position: "relative",
                             width: "100%",
                             maxWidth: "600px"
                         }}>
-                            <input
-                                type="text"
+                            <SearchBar 
                                 placeholder={`Search within ${subjectName} problems...`}
-                                value={searchQuery}
-                                onChange={handleSearch}
-                                style={{
-                                    width: "100%",
-                                    padding: "12px 20px",
-                                    fontSize: "16px",
-                                    border: "2px solid #e9ecef",
-                                    borderRadius: "25px",
-                                    outline: "none",
-                                    transition: "border-color 0.2s ease",
-                                    backgroundColor: "white",
-                                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-                                }}
-                                onFocus={(e) => {
-                                    e.target.style.borderColor = "#1a4d3a";
-                                }}
-                                onBlur={(e) => {
-                                    e.target.style.borderColor = "#e9ecef";
-                                }}
+                                searchMode="subject"
+                                lockedSubject={subjectName}
                             />
-                            {searchQuery && (
-                                <button
-                                    onClick={() => {
-                                        setSearchQuery("");
-                                        filterProblems("");
-                                    }}
-                                    style={{
-                                        position: "absolute",
-                                        right: "15px",
-                                        top: "50%",
-                                        transform: "translateY(-50%)",
-                                        background: "none",
-                                        border: "none",
-                                        fontSize: "18px",
-                                        cursor: "pointer",
-                                        color: "#666",
-                                        padding: "2px"
-                                    }}
-                                >
-                                    ✕
-                                </button>
-                            )}
                         </div>
                     </div>
                 </div>

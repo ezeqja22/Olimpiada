@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function SearchBar({ placeholder = "Search...", showAdvanced = true, initialQuery = "" }) {
+function SearchBar({ 
+  placeholder = "Search...", 
+  showAdvanced = true, 
+  initialQuery = "",
+  searchMode = "all", // "all", "forums", "subject"
+  lockedSubject = null // For subject-locked searches
+}) {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [showAdvancedModal, setShowAdvancedModal] = useState(false);
   const navigate = useNavigate();
@@ -11,7 +17,15 @@ function SearchBar({ placeholder = "Search...", showAdvanced = true, initialQuer
     if (!searchQuery.trim()) return;
     
     const query = encodeURIComponent(searchQuery.trim());
-    navigate(`/search?q=${query}&category=all`);
+    
+    // Navigate based on search mode
+    if (searchMode === "forums") {
+      navigate(`/search?q=${query}&category=forums`);
+    } else if (searchMode === "subject") {
+      navigate(`/search?q=${query}&category=problems&subjects=${encodeURIComponent(lockedSubject)}`);
+    } else {
+      navigate(`/search?q=${query}&category=all`);
+    }
   };
 
 
@@ -139,8 +153,10 @@ function SearchBar({ placeholder = "Search...", showAdvanced = true, initialQuer
           onSearch={handleAdvancedSearch}
           initialData={{
             query: searchQuery,
-            category: 'all'
+            category: searchMode === "forums" ? "forums" : "problems"
           }}
+          searchMode={searchMode}
+          lockedSubject={lockedSubject}
         />
       )}
     </div>
@@ -148,11 +164,11 @@ function SearchBar({ placeholder = "Search...", showAdvanced = true, initialQuer
 }
 
 // Advanced Search Modal Component
-function AdvancedSearchModal({ onClose, onSearch, initialData = {} }) {
+function AdvancedSearchModal({ onClose, onSearch, initialData = {}, searchMode = "all", lockedSubject = null }) {
   const [formData, setFormData] = useState({
     query: initialData.query || '',
-    category: 'problems', // Advanced search always focuses on problems
-    subjects: [],
+    category: searchMode === "forums" ? "forums" : "problems",
+    subjects: lockedSubject ? [lockedSubject] : [],
     level: '',
     year: '',
     tags: ''
@@ -227,7 +243,7 @@ function AdvancedSearchModal({ onClose, onSearch, initialData = {} }) {
             />
           </div>
 
-          {/* Advanced search focuses on problems only */}
+          {/* Advanced search info */}
           <div style={{ 
             padding: '10px', 
             backgroundColor: '#f8f9fa', 
@@ -235,14 +251,19 @@ function AdvancedSearchModal({ onClose, onSearch, initialData = {} }) {
             marginBottom: '10px'
           }}>
             <p style={{ margin: '0', fontSize: '14px', color: '#666' }}>
-              <strong>Advanced Search</strong> - Filter problems by specific criteria
+              <strong>Advanced Search</strong> - Filter {searchMode === "forums" ? "forums" : "problems"} by specific criteria
+              {lockedSubject && (
+                <span style={{ display: 'block', marginTop: '4px', color: '#1a4d3a', fontWeight: 'bold' }}>
+                  🔒 Subject locked to: {lockedSubject}
+                </span>
+              )}
             </p>
           </div>
 
           {/* Subjects */}
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Subjects (Optional)
+              Subjects {lockedSubject ? '(Locked)' : '(Optional)'}
             </label>
             <div style={{ 
               display: 'grid', 
@@ -253,28 +274,42 @@ function AdvancedSearchModal({ onClose, onSearch, initialData = {} }) {
               padding: '10px',
               border: '1px solid #ddd',
               borderRadius: '4px',
-              backgroundColor: '#f8f9fa'
+              backgroundColor: lockedSubject ? '#e9ecef' : '#f8f9fa',
+              opacity: lockedSubject ? 0.7 : 1
             }}>
               {subjects.map(subject => (
                 <label key={subject} style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: '8px',
-                  cursor: 'pointer',
+                  cursor: lockedSubject ? 'not-allowed' : 'pointer',
                   padding: '8px',
                   borderRadius: '4px',
-                  transition: 'background-color 0.2s ease'
+                  transition: 'background-color 0.2s ease',
+                  backgroundColor: lockedSubject && subject === lockedSubject ? '#d4edda' : 'transparent'
                 }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#e9ecef'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                onMouseEnter={(e) => {
+                  if (!lockedSubject) e.target.style.backgroundColor = '#e9ecef';
+                }}
+                onMouseLeave={(e) => {
+                  if (!lockedSubject) e.target.style.backgroundColor = 'transparent';
+                }}
                 >
                   <input
                     type="checkbox"
                     checked={formData.subjects.includes(subject)}
-                    onChange={() => handleSubjectChange(subject)}
+                    onChange={() => !lockedSubject && handleSubjectChange(subject)}
+                    disabled={lockedSubject}
                     style={{ margin: 0 }}
                   />
-                  <span style={{ fontSize: '14px', fontWeight: '500' }}>{subject}</span>
+                  <span style={{ 
+                    fontSize: '14px', 
+                    fontWeight: '500',
+                    color: lockedSubject && subject === lockedSubject ? '#1a4d3a' : 'inherit'
+                  }}>
+                    {subject}
+                    {lockedSubject && subject === lockedSubject && ' 🔒'}
+                  </span>
                 </label>
               ))}
             </div>
@@ -301,28 +336,30 @@ function AdvancedSearchModal({ onClose, onSearch, initialData = {} }) {
             />
           </div>
 
-          {/* Year */}
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Year (Optional)
-            </label>
-            <input
-              type="number"
-              name="year"
-              value={formData.year}
-              onChange={handleChange}
-              placeholder="e.g., 2024"
-              min="1900"
-              max="2030"
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
-            />
-          </div>
+          {/* Year - Only show for problems, not forums */}
+          {searchMode !== "forums" && (
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                Year (Optional)
+              </label>
+              <input
+                type="number"
+                name="year"
+                value={formData.year}
+                onChange={handleChange}
+                placeholder="e.g., 2024"
+                min="1900"
+                max="2030"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '16px'
+                }}
+              />
+            </div>
+          )}
 
           {/* Tags */}
           <div>

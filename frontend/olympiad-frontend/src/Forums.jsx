@@ -6,6 +6,7 @@ import Card from './components/Card';
 import Button from './components/Button';
 import AnimatedLoader from './components/AnimatedLoader';
 import ForumInviteModal from './ForumInviteModal';
+import SearchBar from './SearchBar';
 import { colors, spacing, typography, borderRadius, shadows } from './designSystem';
 import { useFeatureSettings } from './hooks/useFeatureSettings';
 
@@ -28,16 +29,8 @@ const Forums = () => {
         tags: ['']
     });
     const [activeTab, setActiveTab] = useState('all');
-    const [searchQuery, setSearchQuery] = useState('');
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [selectedForumId, setSelectedForumId] = useState(null);
-    const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-    const [filters, setFilters] = useState({
-        subjects: [],
-        level: '',
-        tags: [],
-        isPrivate: null
-    });
     const [forumOnlineCounts, setForumOnlineCounts] = useState({});
 
     const navigate = useNavigate();
@@ -266,26 +259,7 @@ const Forums = () => {
         if (activeTab === 'public' && forum.is_private) return false;
         if (activeTab === 'private' && !forum.is_private) return false;
         
-        // Search filtering
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            const matchesSearch = forum.title.toLowerCase().includes(query) || 
-                   forum.description.toLowerCase().includes(query);
-            if (!matchesSearch) return false;
-        }
-        
-        // Advanced filters
-        if (filters.subjects.length > 0 && !filters.subjects.includes(forum.subject)) {
-            return false;
-        }
-        
-        if (filters.level && forum.level !== filters.level) {
-            return false;
-        }
-        
-        if (filters.isPrivate !== null && forum.is_private !== filters.isPrivate) {
-            return false;
-        }
+        // No local filtering needed - search is now handled by SearchBar component
         
         return true;
     });
@@ -384,61 +358,11 @@ const Forums = () => {
                 </div>
 
                 {/* Search Bar */}
-                <div style={{ marginBottom: spacing.lg, display: "flex", gap: spacing.sm }}>
-                    <input
-                        type="text"
-                        placeholder="Search forums..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{
-                            flex: 1,
-                            padding: spacing.md,
-                            border: `1px solid ${colors.gray[300]}`,
-                            borderRadius: borderRadius.lg,
-                            fontSize: typography.body,
-                            outline: 'none',
-                            transition: 'border-color 0.2s ease',
-                        }}
-                        onFocus={(e) => e.target.style.borderColor = colors.primary}
-                        onBlur={(e) => e.target.style.borderColor = colors.gray[300]}
+                <div style={{ marginBottom: spacing.lg }}>
+                    <SearchBar 
+                        placeholder="Search forums, users, tags..." 
+                        searchMode="forums"
                     />
-                    <button
-                        onClick={() => setShowAdvancedSearch(true)}
-                        style={{
-                            padding: spacing.md,
-                            backgroundColor: colors.secondary,
-                            color: colors.white,
-                            border: "none",
-                            borderRadius: borderRadius.lg,
-                            cursor: "pointer",
-                            fontSize: typography.body,
-                            fontWeight: "600",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: spacing.xs,
-                            transition: "all 0.2s ease"
-                        }}
-                        onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = colors.gray[600];
-                            e.target.style.transform = "translateY(-1px)";
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = colors.secondary;
-                            e.target.style.transform = "translateY(0)";
-                        }}
-                    >
-                        <img 
-                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795126/Search_Icon_White_wj1ka1.svg" 
-                            alt="Advanced Search"
-                            style={{
-                                height: "16px",
-                                width: "16px",
-                                objectFit: "contain",
-                                marginRight: "4px"
-                            }}
-                        />
-                        Advanced
-                    </button>
                 </div>
 
                 {/* Tabs */}
@@ -908,192 +832,6 @@ const Forums = () => {
                     />
                 )}
 
-                {/* Advanced Search Modal */}
-                {showAdvancedSearch && (
-                    <div style={{
-                        position: "fixed",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        zIndex: 1000,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: spacing.lg
-                    }}>
-                        <div style={{
-                            backgroundColor: colors.white,
-                            borderRadius: borderRadius.lg,
-                            padding: spacing.xl,
-                            width: "100%",
-                            maxWidth: "500px",
-                            maxHeight: "80vh",
-                            overflow: "auto",
-                            boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
-                        }}>
-                            <div style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                marginBottom: spacing.lg
-                            }}>
-                                <h3 style={{ margin: 0, color: colors.primary }}>Advanced Search</h3>
-                                <button
-                                    onClick={() => setShowAdvancedSearch(false)}
-                                    style={{
-                                        background: "none",
-                                        border: "none",
-                                        fontSize: "24px",
-                                        cursor: "pointer",
-                                        color: colors.gray[500]
-                                    }}
-                                >
-                                    ×
-                                </button>
-                            </div>
-
-                            {/* Subject Filter */}
-                            <div style={{ marginBottom: spacing.md }}>
-                                <label style={{ display: "block", marginBottom: spacing.xs, fontWeight: "600" }}>
-                                    Subjects
-                                </label>
-                                <div style={{ 
-                                    display: "grid", 
-                                    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", 
-                                    gap: spacing.sm,
-                                    maxHeight: "200px",
-                                    overflowY: "auto",
-                                    padding: spacing.sm,
-                                    border: `1px solid ${colors.gray[300]}`,
-                                    borderRadius: borderRadius.md,
-                                    backgroundColor: colors.gray[50]
-                                }}>
-                                    {['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Other'].map(subject => (
-                                        <label key={subject} style={{ 
-                                            display: "flex", 
-                                            alignItems: "center", 
-                                            gap: spacing.xs,
-                                            cursor: "pointer",
-                                            padding: spacing.xs,
-                                            borderRadius: borderRadius.sm,
-                                            transition: "background-color 0.2s ease"
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[100]}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={filters.subjects.includes(subject)}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                        setFilters({...filters, subjects: [...filters.subjects, subject]});
-                                                    } else {
-                                                        setFilters({...filters, subjects: filters.subjects.filter(s => s !== subject)});
-                                                    }
-                                                }}
-                                                style={{ margin: 0 }}
-                                            />
-                                            <span style={{ fontSize: typography.body, fontWeight: "500" }}>{subject}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Level Filter */}
-                            <div style={{ marginBottom: spacing.md }}>
-                                <label style={{ display: "block", marginBottom: spacing.xs, fontWeight: "600" }}>
-                                    Level
-                                </label>
-                                <input
-                                    type="text"
-                                    value={filters.level}
-                                    onChange={(e) => setFilters({...filters, level: e.target.value})}
-                                    placeholder="e.g., Beginner, Intermediate, Advanced"
-                                    style={{
-                                        width: "100%",
-                                        padding: spacing.sm,
-                                        border: `1px solid ${colors.gray[300]}`,
-                                        borderRadius: borderRadius.md,
-                                        fontSize: typography.body
-                                    }}
-                                />
-                            </div>
-
-                            {/* Privacy Filter */}
-                            <div style={{ marginBottom: spacing.lg }}>
-                                <label style={{ display: "block", marginBottom: spacing.xs, fontWeight: "600" }}>
-                                    Privacy
-                                </label>
-                                <div style={{ display: "flex", gap: spacing.md }}>
-                                    <label style={{ display: "flex", alignItems: "center", gap: spacing.xs }}>
-                                        <input
-                                            type="radio"
-                                            name="privacy"
-                                            checked={filters.isPrivate === null}
-                                            onChange={() => setFilters({...filters, isPrivate: null})}
-                                        />
-                                        <span>All</span>
-                                    </label>
-                                    <label style={{ display: "flex", alignItems: "center", gap: spacing.xs }}>
-                                        <input
-                                            type="radio"
-                                            name="privacy"
-                                            checked={filters.isPrivate === false}
-                                            onChange={() => setFilters({...filters, isPrivate: false})}
-                                        />
-                                        <span>Public Only</span>
-                                    </label>
-                                    <label style={{ display: "flex", alignItems: "center", gap: spacing.xs }}>
-                                        <input
-                                            type="radio"
-                                            name="privacy"
-                                            checked={filters.isPrivate === true}
-                                            onChange={() => setFilters({...filters, isPrivate: true})}
-                                        />
-                                        <span>Private Only</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div style={{ display: "flex", gap: spacing.sm, justifyContent: "flex-end" }}>
-                                <button
-                                    onClick={() => {
-                                        setFilters({ subjects: [], level: '', tags: [], isPrivate: null });
-                                        setSearchQuery('');
-                                    }}
-                                    style={{
-                                        padding: spacing.sm,
-                                        backgroundColor: colors.gray[500],
-                                        color: colors.white,
-                                        border: "none",
-                                        borderRadius: borderRadius.md,
-                                        cursor: "pointer",
-                                        fontSize: typography.body
-                                    }}
-                                >
-                                    Clear All
-                                </button>
-                                <button
-                                    onClick={() => setShowAdvancedSearch(false)}
-                                    style={{
-                                        padding: spacing.sm,
-                                        backgroundColor: colors.primary,
-                                        color: colors.white,
-                                        border: "none",
-                                        borderRadius: borderRadius.md,
-                                        cursor: "pointer",
-                                        fontSize: typography.body
-                                    }}
-                                >
-                                    Apply Filters
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
         </Layout>
     );
