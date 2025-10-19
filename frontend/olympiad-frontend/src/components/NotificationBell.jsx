@@ -180,8 +180,8 @@ function NotificationBell({ onNotificationClick }) {
             
             alert("Join request accepted!");
             
-            // Fetch updated notifications from server
-            await fetchNotifications();
+            // Don't fetch from server immediately to preserve local updates
+            // The notification will show the updated state with correct icon
         } catch (error) {
             console.error("Error accepting join request:", error);
             alert("Failed to accept join request");
@@ -213,8 +213,8 @@ function NotificationBell({ onNotificationClick }) {
             
             alert("Join request declined");
             
-            // Fetch updated notifications from server
-            await fetchNotifications();
+            // Don't fetch from server immediately to preserve local updates
+            // The notification will show the updated state with correct icon
         } catch (error) {
             console.error("Error declining join request:", error);
             alert("Failed to decline join request");
@@ -251,8 +251,8 @@ function NotificationBell({ onNotificationClick }) {
             
             alert("Forum invitation accepted!");
             
-            // Fetch updated notifications from server
-            await fetchNotifications();
+            // Don't fetch from server immediately to preserve local updates
+            // The notification will show the updated state with correct icon
         } catch (error) {
             console.error("Error accepting invitation:", error);
             alert("Failed to accept invitation");
@@ -289,8 +289,8 @@ function NotificationBell({ onNotificationClick }) {
             
             alert("Forum invitation declined");
             
-            // Fetch updated notifications from server
-            await fetchNotifications();
+            // Don't fetch from server immediately to preserve local updates
+            // The notification will show the updated state with correct icon
         } catch (error) {
             console.error("Error declining invitation:", error);
             alert("Failed to decline invitation");
@@ -432,7 +432,10 @@ function NotificationBell({ onNotificationClick }) {
                             margin: 0,
                             fontSize: typography.fontSize.lg,
                             fontWeight: typography.fontWeight.semibold,
-                            color: colors.dark
+                            color: "rgb(26, 77, 58)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px"
                         }}>
                             <img 
                                 src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760789591/Notification_Icon_fm5zqx.svg" 
@@ -443,6 +446,7 @@ function NotificationBell({ onNotificationClick }) {
                                     objectFit: "contain"
                                 }}
                             />
+                            Notification Center
                         </h3>
                         {unreadCount > 0 && (
                             <button
