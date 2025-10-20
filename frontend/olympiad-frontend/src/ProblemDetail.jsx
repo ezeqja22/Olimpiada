@@ -2003,99 +2003,133 @@ function ProblemDetail() {
                             backgroundColor: "white",
                             minHeight: "100px"
                         }}>
-                            {/* Left Section - Profile Picture and Buttons (11/12 width) */}
-                            <div style={{ 
-                                width: "91.67%", 
-                                padding: "15px", 
-                                display: "flex", 
-                                flexDirection: "column", 
-                                alignItems: "flex-start",
-                                gap: "20px",
-                                borderRight: "1px solid #ddd"
-                            }}>
-                                {/* User Profile Picture */}
-                                <div style={{
-                                    width: "40px",
-                                    height: "40px",
-                                    borderRadius: "50%",
-                                    backgroundColor: "#f3f4f6",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    color: "#6b7280",
-                                    fontWeight: "bold",
-                                    fontSize: "16px",
-                                    backgroundImage: currentUser?.profile_picture ? 
-                                        `url(${currentUser.profile_picture})` : 
-                                        'none',
-                                    backgroundSize: "cover",
-                                    backgroundPosition: "center",
-                                    border: "2px solid #e5e7eb"
-                                }}>
-                                    {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
-                                </div>
-                                
-                                {/* Buttons Row - Aligned and Lower */}
-                                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                    {/* Math Button - Text Style */}
-                                    <span
-                                        onClick={openCommentMathEditor}
-                                        style={{
-                                            color: "#6b7280",
-                                            cursor: "pointer",
-                                            fontSize: "14px",
-                                            fontWeight: "500",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px",
-                                            transition: "all 0.2s ease",
-                                            padding: "4px 0"
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.target.style.color = "#4caf50";
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.target.style.color = "#6b7280";
-                                        }}
-                                        title="Add Math"
-                                    >
-                                        Math
-                                    </span>
-                                    
-                                    {/* Add Image Button */}
-                                    <ImageUpload
-                                        onImagesChange={setCommentImages}
-                                        maxImages={5}
-                                        resetTrigger={imageResetKey}
-                                        variant="compact"
-                                        showHelper={false}
-                                    />
-                                </div>
-                            </div>
-                            
-                            {/* Right Section - Clickable Textarea Area (1/12 width) */}
-                        <textarea
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Write your comment here..."
-                            style={{
-                                    width: "8.33%", 
+                            {/* Left Section - Textarea where users type (11/12 width) */}
+                            <textarea
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                placeholder="Write your comment here..."
+                                style={{ 
+                                    width: "91.67%", 
                                     border: "none",
                                     outline: "none",
                                     resize: "none",
-                                fontFamily: "inherit",
+                                    fontFamily: "inherit",
                                     fontSize: "14px",
                                     padding: "15px",
-                                    backgroundColor: "#f9fafb",
+                                    backgroundColor: "white",
                                     transition: "all 0.2s ease",
                                     cursor: "text"
                                 }}
-                                onFocus={(e) => {
-                                    e.target.style.backgroundColor = "white";
+                            />
+                            
+                            {/* Right Section - Clickable submit area (1/12 width) */}
+                            <div 
+                                style={{ 
+                                    width: "8.33%", 
+                                    display: "flex", 
+                                    alignItems: "center", 
+                                    justifyContent: "center",
+                                    cursor: "pointer",
+                                    backgroundColor: "#f9fafb",
+                                    transition: "all 0.2s ease",
+                                    borderLeft: "1px solid #ddd"
                                 }}
-                                onBlur={(e) => {
+                                onClick={handleSubmitComment}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = "#f3f4f6";
+                                }}
+                                onMouseLeave={(e) => {
                                     e.target.style.backgroundColor = "#f9fafb";
                                 }}
+                            >
+                                <div style={{ 
+                                    display: "flex", 
+                                    alignItems: "center", 
+                                    gap: "4px",
+                                    color: "#6b7280",
+                                    fontSize: "10px",
+                                    fontWeight: "500"
+                                }}>
+                                    <span>Send</span>
+                                    <div style={{
+                                        width: "12px",
+                                        height: "12px",
+                                        backgroundColor: "#d1d5db",
+                                        borderRadius: "2px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "white",
+                                        fontSize: "8px"
+                                    }}>
+                                        →
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Profile Picture and Buttons - Below the main input */}
+                        <div style={{ 
+                            display: "flex", 
+                            alignItems: "center", 
+                            gap: "12px", 
+                            marginTop: "10px",
+                            paddingLeft: "15px"
+                        }}>
+                            {/* User Profile Picture */}
+                            <div style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "50%",
+                                backgroundColor: "#f3f4f6",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "#6b7280",
+                                fontWeight: "bold",
+                                fontSize: "16px",
+                                backgroundImage: currentUser?.profile_picture ? 
+                                    `url(${currentUser.profile_picture})` : 
+                                    'none',
+                                backgroundSize: "cover",
+                                backgroundPosition: "center",
+                                border: "2px solid #e5e7eb"
+                            }}>
+                                {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
+                            </div>
+                            
+                            {/* Math Button - Text Style */}
+                            <span
+                                onClick={openCommentMathEditor}
+                                style={{
+                                    color: "#6b7280",
+                                    cursor: "pointer",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    transition: "all 0.2s ease",
+                                    padding: "4px 0"
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.color = "#4caf50";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.color = "#6b7280";
+                                }}
+                                title="Add Math"
+                            >
+                                Math
+                            </span>
+                            
+                            {/* Add Image Button */}
+                            <ImageUpload
+                                onImagesChange={setCommentImages}
+                                maxImages={5}
+                                resetTrigger={imageResetKey}
+                                variant="compact"
+                                showHelper={false}
                             />
                         </div>
                         
