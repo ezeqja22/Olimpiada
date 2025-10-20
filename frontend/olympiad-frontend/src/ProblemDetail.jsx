@@ -49,8 +49,12 @@ const CommentThread = ({
     setReplyingTo,
     replyText,
     setReplyText,
+    replyImages,
+    setReplyImages,
     onSubmitReply,
     onReportComment,
+    setCurrentImageIndex,
+    setShowImageModal,
     depth = 0 
 }) => {
     const maxDepth = 3; // Limit nesting depth
@@ -446,8 +450,12 @@ const CommentThread = ({
                                 setReplyingTo={setReplyingTo}
                                 replyText={replyText}
                                 setReplyText={setReplyText}
+                                replyImages={replyImages}
+                                setReplyImages={setReplyImages}
                                 onSubmitReply={onSubmitReply}
                                 onReportComment={onReportComment}
+                                setCurrentImageIndex={setCurrentImageIndex}
+                                setShowImageModal={setShowImageModal}
                                 depth={depth + 1}
                             />
                         </div>
@@ -2055,10 +2063,14 @@ function ProblemDetail() {
                         setReplyingTo={setReplyingTo}
                         replyText={replyText}
                         setReplyText={setReplyText}
+                        replyImages={replyImages}
+                        setReplyImages={setReplyImages}
                         onSubmitReply={handleSubmitReply}
                         onReportComment={handleReportComment}
+                        setCurrentImageIndex={setCurrentImageIndex}
+                        setShowImageModal={setShowImageModal}
                     />
-    ))}
+                ))}
             </div>
             
             {/* Math Editor Modal */}
