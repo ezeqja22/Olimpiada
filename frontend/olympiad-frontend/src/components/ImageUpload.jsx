@@ -167,18 +167,15 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                     }}>
                         +
                     </div>
-                    <span style={{
-                        fontSize: variant === 'compact' ? '13px' : '14px',
-                        color: 'rgba(118, 75, 162)',
-                        fontWeight: '600',
-                        transition: 'width 0.18s ease, opacity 0.18s ease',
-                        whiteSpace: 'nowrap',
-                        width: variant === 'compact' ? (isHovered ? 'auto' : '0') : 'auto',
-                        opacity: variant === 'compact' ? (isHovered ? 1 : 0) : 1,
-                        marginLeft: variant === 'compact' ? (isHovered ? '6px' : '0') : '8px'
-                    }}>
-                        {variant === 'compact' ? 'Add Images' : (isHovered ? 'Add Images' : `Add Image (${images.length}/${maxImages})`)}
-                    </span>
+                <span style={{
+                    fontSize: variant === 'compact' ? '13px' : '14px',
+                    color: 'rgba(118, 75, 162)',
+                    fontWeight: '600',
+                    whiteSpace: 'nowrap',
+                    marginLeft: variant === 'compact' ? '6px' : '8px'
+                }}>
+                    {variant === 'compact' ? 'Add Images' : `Add Image (${images.length}/${maxImages})`}
+                </span>
                 </div>
             )}
 

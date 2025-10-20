@@ -99,19 +99,34 @@ const CommentThread = ({
                 
                 
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                    <div style={{
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "50%",
-                        backgroundColor: "#007bff",
-                        color: "white",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "14px",
-                        fontWeight: "bold",
-                        flexShrink: 0
-                    }}>
+                    <div 
+                        style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            backgroundColor: "#007bff",
+                            color: "white",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "14px",
+                            fontWeight: "bold",
+                            flexShrink: 0,
+                            cursor: "pointer",
+                            transition: "all 0.2s ease"
+                        }}
+                        onClick={() => {
+                            window.location.href = `/profile/${comment.author.username}`;
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.transform = "scale(1.1)";
+                            e.target.style.boxShadow = "0 2px 8px rgba(0, 123, 255, 0.3)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.transform = "scale(1)";
+                            e.target.style.boxShadow = "none";
+                        }}
+                    >
                         {getUserInitial(comment.author.username)}
                     </div>
                     
@@ -2048,7 +2063,9 @@ function ProblemDetail() {
                                     }}
                                     onClick={() => {
                                         // Navigate to user profile
-                                        window.location.href = `/profile/${currentUser?.username}`;
+                                        if (currentUser?.username) {
+                                            window.location.href = `/profile/${currentUser.username}`;
+                                        }
                                     }}
                                     onMouseEnter={(e) => {
                                         e.target.style.borderColor = "rgb(26, 77, 58)";
@@ -2150,8 +2167,7 @@ function ProblemDetail() {
                             <div style={{ 
                                 width: "73.67%", 
                                 position: "relative",
-                                backgroundColor: "white",
-                                transition: "all 0.3s ease"
+                                backgroundColor: "white"
                             }}>
                                 <textarea
                                     value={newComment}
