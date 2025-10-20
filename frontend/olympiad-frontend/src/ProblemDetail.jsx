@@ -2013,7 +2013,7 @@ function ProblemDetail() {
                                 }}
                             />
                             {/* Inline controls */}
-                            <div style={{ position: "absolute", right: "10px", bottom: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
+                            <div style={{ position: "absolute", right: "10px", bottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
                                 <ImageUpload
                                     onImagesChange={setCommentImages}
                                     maxImages={5}
@@ -2024,13 +2024,13 @@ function ProblemDetail() {
                                     type="button"
                                     onClick={openCommentMathEditor}
                                     style={{
-                                        padding: "8px 10px",
+                                        padding: "6px 8px",
                                         backgroundColor: "#1e293b",
                                         color: "white",
                                         border: "none",
                                         borderRadius: "9999px",
                                         cursor: "pointer",
-                                        fontSize: "13px"
+                                        fontSize: "12px"
                                     }}
                                     title="Add Math"
                                 >
@@ -2041,13 +2041,13 @@ function ProblemDetail() {
                                     type="submit"
                                     disabled={!newComment.trim() && commentImages.length === 0}
                                     style={{
-                                        padding: "8px 12px",
+                                        padding: "6px 10px",
                                         backgroundColor: (newComment.trim() || commentImages.length > 0) ? "rgb(26, 77, 58)" : "#ccc",
                                         color: "white",
                                         border: "none",
                                         borderRadius: "9999px",
                                         cursor: (newComment.trim() || commentImages.length > 0) ? "pointer" : "not-allowed",
-                                        fontSize: "13px"
+                                        fontSize: "12px"
                                     }}
                                 >
                                     Add Comment

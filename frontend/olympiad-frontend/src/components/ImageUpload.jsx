@@ -133,8 +133,8 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                     style={{
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: variant === 'compact' ? '8px' : '10px',
-                        padding: variant === 'compact' ? '8px 10px' : '10px 14px',
+                        gap: variant === 'compact' ? '6px' : '10px',
+                        padding: variant === 'compact' ? '6px 8px' : '10px 14px',
                         backgroundColor: variant === 'compact' ? (isHovered ? 'rgba(118, 75, 162, 0.12)' : 'rgba(118, 75, 162, 0.08)') : (isHovered ? '#eff6ff' : '#f8fafc'),
                         border: variant === 'compact' ? '1px solid rgba(118, 75, 162, 0.35)' : '1.5px dashed #cbd5e1',
                         borderRadius: variant === 'compact' ? '9999px' : '10px',
@@ -146,29 +146,29 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                     }}
                 >
                     <div style={{
-                        width: variant === 'compact' ? '26px' : '26px',
-                        height: variant === 'compact' ? '26px' : '26px',
+                        width: variant === 'compact' ? '22px' : '26px',
+                        height: variant === 'compact' ? '22px' : '26px',
                         borderRadius: '50%',
                         backgroundColor: 'rgba(118, 75, 162)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: 'white',
-                        fontSize: '16px',
+                        fontSize: variant === 'compact' ? '14px' : '16px',
                         fontWeight: 'bold',
                         transition: 'all 0.18s ease'
                     }}>
                         +
                     </div>
                     <span style={{
-                        fontSize: '14px',
+                        fontSize: variant === 'compact' ? '13px' : '14px',
                         color: 'rgba(118, 75, 162)',
                         fontWeight: '600',
                         transition: 'width 0.18s ease, opacity 0.18s ease',
                         whiteSpace: 'nowrap',
                         width: variant === 'compact' ? (isHovered ? 'auto' : '0') : 'auto',
                         opacity: variant === 'compact' ? (isHovered ? 1 : 0) : 1,
-                        marginLeft: variant === 'compact' ? (isHovered ? '8px' : '0') : '8px'
+                        marginLeft: variant === 'compact' ? (isHovered ? '6px' : '0') : '8px'
                     }}>
                         {variant === 'compact' ? 'Add Images' : (isHovered ? 'Add Images' : `Add Image (${images.length}/${maxImages})`)}
                     </span>
