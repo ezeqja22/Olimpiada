@@ -134,7 +134,7 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: variant === 'compact' ? '6px' : '10px',
-                        padding: variant === 'compact' ? '6px 8px' : '10px 14px',
+                        padding: variant === 'compact' ? '4px 6px' : '10px 14px',
                         backgroundColor: variant === 'compact' ? (isHovered ? 'rgba(118, 75, 162, 0.12)' : 'rgba(118, 75, 162, 0.08)') : (isHovered ? '#eff6ff' : '#f8fafc'),
                         border: variant === 'compact' ? '1px solid rgba(118, 75, 162, 0.35)' : '1.5px dashed #cbd5e1',
                         borderRadius: variant === 'compact' ? '9999px' : '10px',
@@ -142,19 +142,21 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                         transition: 'all 0.18s ease',
                         opacity: disabled ? 0.5 : 1,
                         boxShadow: isHovered ? '0 6px 20px rgba(0,0,0,0.08)' : '0 2px 10px rgba(0,0,0,0.04)',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        height: variant === 'compact' ? '20px' : 'auto',
+                        transform: variant === 'compact' ? 'translateY(0px)' : 'none'
                     }}
                 >
                     <div style={{
-                        width: variant === 'compact' ? '22px' : '26px',
-                        height: variant === 'compact' ? '22px' : '26px',
+                        width: variant === 'compact' ? '16px' : '26px',
+                        height: variant === 'compact' ? '16px' : '26px',
                         borderRadius: '50%',
                         backgroundColor: 'rgba(118, 75, 162)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: 'white',
-                        fontSize: variant === 'compact' ? '14px' : '16px',
+                        fontSize: variant === 'compact' ? '12px' : '16px',
                         fontWeight: 'bold',
                         transition: 'all 0.18s ease'
                     }}>
