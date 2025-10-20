@@ -88,6 +88,34 @@ def get_cloudinary_signature(folder: str = "comments", upload_preset: str = None
         "upload_preset": upload_preset,
     }
 
+# Backend upload for comment images (signed via server)
+@router.post("/problems/{problem_id}/comment-images")
+async def upload_comment_image(
+    problem_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_verified_user)
+):
+    """Upload a comment image to Cloudinary via backend and return its URL."""
+    from cloudinary_service import cloudinary_service
+
+    if not cloudinary_service.is_configured():
+        raise HTTPException(status_code=500, detail="Image service not configured")
+
+    # Ensure problem exists
+    problem = db.query(Problem).filter(Problem.id == problem_id).first()
+    if not problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File must be an image")
+
+    url = cloudinary_service.upload_image(file, folder=f"comment_images/problem_{problem_id}")
+    if not url:
+        raise HTTPException(status_code=500, detail="Failed to upload image")
+
+    return {"url": url}
+
 
 @router.get("/problems/trending")
 async def get_trending_problems(

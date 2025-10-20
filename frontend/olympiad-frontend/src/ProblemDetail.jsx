@@ -776,8 +776,9 @@ function ProblemDetail() {
                 const uploadPromises = commentImages.map(async (imageData) => {
                     try {
                         // Get signed params from backend
+                        const uploadPreset = 'comments_signed';
                         const signRes = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/cloudinary/signature`, {
-                            params: { folder: 'comments' }
+                            params: { folder: 'comments', upload_preset: uploadPreset }
                         });
 
                         const { api_key, timestamp, signature } = signRes.data;
@@ -788,12 +789,17 @@ function ProblemDetail() {
                         formData.append('timestamp', timestamp);
                         formData.append('folder', 'comments');
                         formData.append('signature', signature);
+                        formData.append('upload_preset', uploadPreset);
 
+                        // Upload via backend so credentials stay server-side
+                        const backendForm = new FormData();
+                        backendForm.append('file', imageData.file);
                         const uploadResponse = await axios.post(
-                            'https://api.cloudinary.com/v1_1/dqmmgk88b/image/upload',
-                            formData
+                            `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${id}/comment-images`,
+                            backendForm,
+                            { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
                         );
-                        return uploadResponse.data.secure_url;
+                        return uploadResponse.data.url;
                     } catch (error) {
                         console.error('Cloudinary upload error:', error.response?.data || error.message);
                         throw new Error(`Failed to upload image: ${error.response?.data?.error?.message || error.message}`);
@@ -841,8 +847,9 @@ function ProblemDetail() {
             if (replyImages.length > 0) {
                 const uploadPromises = replyImages.map(async (imageData) => {
                     // Get signed params from backend
+                    const uploadPreset = 'comments_signed';
                     const signRes = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/cloudinary/signature`, {
-                        params: { folder: 'comments' }
+                        params: { folder: 'comments', upload_preset: uploadPreset }
                     });
                     const { api_key, timestamp, signature } = signRes.data;
 
@@ -852,12 +859,16 @@ function ProblemDetail() {
                     formData.append('timestamp', timestamp);
                     formData.append('folder', 'comments');
                     formData.append('signature', signature);
+                    formData.append('upload_preset', uploadPreset);
 
+                    const backendForm = new FormData();
+                    backendForm.append('file', imageData.file);
                     const uploadResponse = await axios.post(
-                        'https://api.cloudinary.com/v1_1/dqmmgk88b/image/upload',
-                        formData
+                        `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${id}/comment-images`,
+                        backendForm,
+                        { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
                     );
-                    return uploadResponse.data.secure_url;
+                    return uploadResponse.data.url;
                 });
                 
                 imageUrls = await Promise.all(uploadPromises);
