@@ -2070,7 +2070,9 @@ function ProblemDetail() {
                                             borderRadius: "4px",
                                             backgroundColor: "transparent",
                                             border: "none",
-                                            height: "20px"
+                                            height: "20px",
+                                            minHeight: "20px",
+                                            lineHeight: "1"
                                         }}
                                         onMouseEnter={(e) => {
                                             e.target.style.color = "rgb(26, 77, 58)";
