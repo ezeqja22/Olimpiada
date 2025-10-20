@@ -775,10 +775,20 @@ function ProblemDetail() {
             if (commentImages.length > 0) {
                 const uploadPromises = commentImages.map(async (imageData) => {
                     try {
+                        // Get signed params from backend
+                        const signRes = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/cloudinary/signature`, {
+                            params: { folder: 'comments' }
+                        });
+
+                        const { api_key, timestamp, signature } = signRes.data;
+
                         const formData = new FormData();
                         formData.append('file', imageData.file);
-                        formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || 'unsigned_upload');
-                        
+                        formData.append('api_key', api_key);
+                        formData.append('timestamp', timestamp);
+                        formData.append('folder', 'comments');
+                        formData.append('signature', signature);
+
                         const uploadResponse = await axios.post(
                             'https://api.cloudinary.com/v1_1/dqmmgk88b/image/upload',
                             formData
@@ -830,10 +840,19 @@ function ProblemDetail() {
             let imageUrls = [];
             if (replyImages.length > 0) {
                 const uploadPromises = replyImages.map(async (imageData) => {
+                    // Get signed params from backend
+                    const signRes = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/cloudinary/signature`, {
+                        params: { folder: 'comments' }
+                    });
+                    const { api_key, timestamp, signature } = signRes.data;
+
                     const formData = new FormData();
                     formData.append('file', imageData.file);
-                    formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || 'unsigned_upload');
-                    
+                    formData.append('api_key', api_key);
+                    formData.append('timestamp', timestamp);
+                    formData.append('folder', 'comments');
+                    formData.append('signature', signature);
+
                     const uploadResponse = await axios.post(
                         'https://api.cloudinary.com/v1_1/dqmmgk88b/image/upload',
                         formData

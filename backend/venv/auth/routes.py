@@ -1,4 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+import os
+import hashlib
+import time
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import func, or_
@@ -50,6 +53,40 @@ import uuid
 from PIL import Image
 
 router = APIRouter()
+
+# Signed upload signature generator for Cloudinary
+@router.get("/cloudinary/signature")
+def get_cloudinary_signature(folder: str = "comments", upload_preset: str = None):
+    """Return timestamp and signature for signed uploads.
+    If upload_preset is provided, include it in the signature string.
+    """
+    cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
+    api_key = os.getenv("CLOUDINARY_API_KEY")
+    api_secret = os.getenv("CLOUDINARY_API_SECRET")
+    if not (cloud_name and api_key and api_secret):
+        raise HTTPException(status_code=500, detail="Cloudinary credentials not configured")
+
+    timestamp = int(time.time())
+
+    # Build the string to sign (alphabetically by parameter name)
+    params = []
+    if folder:
+        params.append(f"folder={folder}")
+    if upload_preset:
+        params.append(f"upload_preset={upload_preset}")
+    params.append(f"timestamp={timestamp}")
+    to_sign = "&".join(sorted(params)) + api_secret
+
+    signature = hashlib.sha1(to_sign.encode("utf-8")).hexdigest()
+
+    return {
+        "cloud_name": cloud_name,
+        "api_key": api_key,
+        "timestamp": timestamp,
+        "signature": signature,
+        "folder": folder,
+        "upload_preset": upload_preset,
+    }
 
 
 @router.get("/problems/trending")
