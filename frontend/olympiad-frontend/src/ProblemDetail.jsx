@@ -2003,9 +2003,9 @@ function ProblemDetail() {
                             backgroundColor: "white",
                             minHeight: "100px"
                         }}>
-                            {/* Left Section - Profile Picture and Buttons (2/3 width) */}
+                            {/* Left Section - Profile Picture and Buttons (11/12 width) */}
                             <div style={{ 
-                                width: "66.67%", 
+                                width: "91.67%", 
                                 padding: "15px", 
                                 display: "flex", 
                                 flexDirection: "column", 
@@ -2035,36 +2035,32 @@ function ProblemDetail() {
                                     {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
                                 </div>
                                 
-                                {/* Buttons Row */}
-                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                    {/* Math Button */}
-                                    <button
-                                        type="button"
+                                {/* Buttons Row - Aligned */}
+                                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                                    {/* Math Button - Text Style */}
+                                    <span
                                         onClick={openCommentMathEditor}
                                         style={{
-                                            padding: "8px 12px",
-                                            backgroundColor: "#4caf50",
-                                            color: "white",
-                                            border: "none",
-                                            borderRadius: "6px",
+                                            color: "#6b7280",
                                             cursor: "pointer",
                                             fontSize: "14px",
                                             fontWeight: "500",
                                             display: "flex",
                                             alignItems: "center",
                                             gap: "4px",
-                                            transition: "all 0.2s ease"
+                                            transition: "all 0.2s ease",
+                                            padding: "4px 0"
                                         }}
                                         onMouseEnter={(e) => {
-                                            e.target.style.backgroundColor = "#45a049";
+                                            e.target.style.color = "#4caf50";
                                         }}
                                         onMouseLeave={(e) => {
-                                            e.target.style.backgroundColor = "#4caf50";
+                                            e.target.style.color = "#6b7280";
                                         }}
                                         title="Add Math"
                                     >
-                                        📐 Math
-                                    </button>
+                                        Math
+                                    </span>
                                     
                                     {/* Add Image Button */}
                                     <ImageUpload
@@ -2077,10 +2073,10 @@ function ProblemDetail() {
                                 </div>
                             </div>
                             
-                            {/* Right Section - Clickable Textarea Area (1/3 width) */}
+                            {/* Right Section - Clickable Textarea Area (1/12 width) */}
                             <div 
                                 style={{ 
-                                    width: "33.33%", 
+                                    width: "8.33%", 
                                     display: "flex", 
                                     alignItems: "center", 
                                     justifyContent: "center",
@@ -2105,22 +2101,22 @@ function ProblemDetail() {
                                 <div style={{ 
                                     display: "flex", 
                                     alignItems: "center", 
-                                    gap: "8px",
+                                    gap: "4px",
                                     color: "#6b7280",
-                                    fontSize: "14px",
+                                    fontSize: "10px",
                                     fontWeight: "500"
                                 }}>
-                                    <span>Click to add comment</span>
+                                    <span>Click</span>
                                     <div style={{
-                                        width: "20px",
-                                        height: "20px",
+                                        width: "12px",
+                                        height: "12px",
                                         backgroundColor: "#d1d5db",
-                                        borderRadius: "4px",
+                                        borderRadius: "2px",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
                                         color: "white",
-                                        fontSize: "12px"
+                                        fontSize: "8px"
                                     }}>
                                         →
                                     </div>
@@ -2128,7 +2124,7 @@ function ProblemDetail() {
                             </div>
                         </div>
                         
-                        {/* Hidden Textarea for actual input */}
+                        {/* Textarea for actual input - Always visible */}
                         <textarea
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
@@ -2142,8 +2138,7 @@ function ProblemDetail() {
                                 resize: "vertical",
                                 fontFamily: "inherit",
                                 whiteSpace: "pre-wrap",
-                                marginTop: "10px",
-                                display: newComment.trim() || commentImages.length > 0 ? "block" : "none"
+                                marginTop: "10px"
                             }}
                         />
                         
