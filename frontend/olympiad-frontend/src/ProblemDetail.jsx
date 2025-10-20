@@ -2003,20 +2003,21 @@ function ProblemDetail() {
                             backgroundColor: "white",
                             minHeight: "100px"
                         }}>
-                            {/* Section 1 - Profile Picture and Buttons */}
+                            {/* Section 1 - Profile Picture and Buttons (smaller) */}
                             <div style={{ 
-                                width: "25%", 
+                                width: "18%", 
                                 padding: "15px", 
                                 display: "flex", 
                                 flexDirection: "column", 
                                 alignItems: "flex-start",
-                                gap: "15px",
-                                backgroundColor: "white"
+                                gap: "12px",
+                                backgroundColor: "white",
+                                minWidth: "140px"
                             }}>
                                 {/* User Profile Picture */}
                                 <div style={{
-                                    width: "40px",
-                                    height: "40px",
+                                    width: "35px",
+                                    height: "35px",
                                     borderRadius: "50%",
                                     backgroundColor: "#f3f4f6",
                                     display: "flex",
@@ -2024,7 +2025,7 @@ function ProblemDetail() {
                                     justifyContent: "center",
                                     color: "#6b7280",
                                     fontWeight: "bold",
-                                    fontSize: "16px",
+                                    fontSize: "14px",
                                     backgroundImage: currentUser?.profile_picture ? 
                                         `url(${currentUser.profile_picture})` : 
                                         'none',
@@ -2035,21 +2036,22 @@ function ProblemDetail() {
                                     {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
                                 </div>
                                 
-                                {/* Buttons Row */}
-                                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                                {/* Buttons Row - Aligned */}
+                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                     {/* Math Button - Text Style */}
                                     <span
                                         onClick={openCommentMathEditor}
                                         style={{
                                             color: "#6b7280",
                                             cursor: "pointer",
-                                            fontSize: "14px",
+                                            fontSize: "12px",
                                             fontWeight: "500",
                                             display: "flex",
                                             alignItems: "center",
-                                            gap: "4px",
+                                            gap: "2px",
                                             transition: "all 0.2s ease",
-                                            padding: "4px 0"
+                                            padding: "2px 0",
+                                            whiteSpace: "nowrap"
                                         }}
                                         onMouseEnter={(e) => {
                                             e.target.style.color = "#4caf50";
@@ -2062,7 +2064,7 @@ function ProblemDetail() {
                                         Math
                                     </span>
                                     
-                                    {/* Add Image Button */}
+                                    {/* Add Image Button - Smaller */}
                                     <ImageUpload
                                         onImagesChange={setCommentImages}
                                         maxImages={5}
@@ -2079,7 +2081,7 @@ function ProblemDetail() {
                                 onChange={(e) => setNewComment(e.target.value)}
                                 placeholder="Write your comment here..."
                                 style={{ 
-                                    width: "66.67%", 
+                                    width: "73.67%", 
                                     border: "none",
                                     outline: "none",
                                     resize: "none",
