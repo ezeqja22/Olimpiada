@@ -2072,7 +2072,8 @@ function ProblemDetail() {
                                             border: "none",
                                             height: "20px",
                                             minHeight: "20px",
-                                            lineHeight: "1"
+                                            lineHeight: "1",
+                                            transform: "translateY(-1px)"
                                         }}
                                         onMouseEnter={(e) => {
                                             e.target.style.color = "rgb(26, 77, 58)";
