@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTrigger }) => {
+const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTrigger, variant = 'default' }) => {
     const [images, setImages] = useState([]);
     const [isHovered, setIsHovered] = useState(false);
     const fileInputRef = useRef(null);
@@ -133,22 +133,23 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                     style={{
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '10px',
-                        padding: '10px 14px',
-                        backgroundColor: isHovered ? '#eff6ff' : '#f8fafc',
-                        border: '1.5px dashed #cbd5e1',
-                        borderRadius: '10px',
+                        gap: variant === 'compact' ? '8px' : '10px',
+                        padding: variant === 'compact' ? '8px 10px' : '10px 14px',
+                        backgroundColor: variant === 'compact' ? (isHovered ? 'rgba(118, 75, 162, 0.12)' : 'rgba(118, 75, 162, 0.08)') : (isHovered ? '#eff6ff' : '#f8fafc'),
+                        border: variant === 'compact' ? '1px solid rgba(118, 75, 162, 0.35)' : '1.5px dashed #cbd5e1',
+                        borderRadius: variant === 'compact' ? '9999px' : '10px',
                         cursor: disabled ? 'not-allowed' : 'pointer',
                         transition: 'all 0.18s ease',
                         opacity: disabled ? 0.5 : 1,
-                        boxShadow: isHovered ? '0 6px 20px rgba(59,130,246,0.12)' : '0 2px 10px rgba(0,0,0,0.05)'
+                        boxShadow: isHovered ? '0 6px 20px rgba(0,0,0,0.08)' : '0 2px 10px rgba(0,0,0,0.04)',
+                        overflow: 'hidden'
                     }}
                 >
                     <div style={{
-                        width: '26px',
-                        height: '26px',
+                        width: variant === 'compact' ? '26px' : '26px',
+                        height: variant === 'compact' ? '26px' : '26px',
                         borderRadius: '50%',
-                        backgroundColor: isHovered ? '#2563eb' : '#64748b',
+                        backgroundColor: 'rgba(118, 75, 162)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -161,12 +162,15 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                     </div>
                     <span style={{
                         fontSize: '14px',
-                        color: isHovered ? '#2563eb' : '#475569',
+                        color: 'rgba(118, 75, 162)',
                         fontWeight: '600',
-                        transition: 'all 0.18s ease',
-                        whiteSpace: 'nowrap'
+                        transition: 'width 0.18s ease, opacity 0.18s ease',
+                        whiteSpace: 'nowrap',
+                        width: variant === 'compact' ? (isHovered ? 'auto' : '0') : 'auto',
+                        opacity: variant === 'compact' ? (isHovered ? 1 : 0) : 1,
+                        marginLeft: variant === 'compact' ? (isHovered ? '8px' : '0') : '8px'
                     }}>
-                        {isHovered ? 'Add Images' : `Add Image (${images.length}/${maxImages})`}
+                        {variant === 'compact' ? 'Add Images' : (isHovered ? 'Add Images' : `Add Image (${images.length}/${maxImages})`)}
                     </span>
                 </div>
             )}

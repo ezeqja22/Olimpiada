@@ -1995,7 +1995,7 @@ function ProblemDetail() {
                 {/* Add Comment Form */}
                 <div style={{ marginBottom: "20px" }}>
                     <form onSubmit={handleSubmitComment}>
-                        <div style={{ marginBottom: "10px" }}>
+                        <div style={{ marginBottom: "10px", position: "relative" }}>
                             <textarea
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
@@ -2008,50 +2008,51 @@ function ProblemDetail() {
                                     borderRadius: "5px",
                                     resize: "vertical",
                                     fontFamily: "inherit",
-                                    whiteSpace: "pre-wrap"
+                                    whiteSpace: "pre-wrap",
+                                    paddingRight: "140px"
                                 }}
                             />
-                        </div>
-                        
-                        {/* Image Upload */}
-                        <ImageUpload
-                            onImagesChange={setCommentImages}
-                            maxImages={5}
-                            resetTrigger={imageResetKey}
-                        />
-                        
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px" }}>
-                            <button
-                                type="button"
-                                onClick={openCommentMathEditor}
-                                style={{
-                                    padding: "8px 12px",
-                                    backgroundColor: "#4caf50",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "5px",
-                                    cursor: "pointer",
-                                    fontSize: "14px"
-                                }}
-                                title="Add Math"
-                            >
-                                📐 Math
-                            </button>
-                            
-                            <button
-                                type="submit"
-                                disabled={!newComment.trim() && commentImages.length === 0}
-                                style={{
-                                    padding: "8px 16px",
-                                    backgroundColor: (newComment.trim() || commentImages.length > 0) ? "#1976d2" : "#ccc",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "5px",
-                                    cursor: (newComment.trim() || commentImages.length > 0) ? "pointer" : "not-allowed"
-                                }}
-                            >
-                                Add Comment
-                            </button>
+                            {/* Inline controls */}
+                            <div style={{ position: "absolute", right: "10px", bottom: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
+                                <ImageUpload
+                                    onImagesChange={setCommentImages}
+                                    maxImages={5}
+                                    resetTrigger={imageResetKey}
+                                    variant="compact"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={openCommentMathEditor}
+                                    style={{
+                                        padding: "8px 10px",
+                                        backgroundColor: "#1e293b",
+                                        color: "white",
+                                        border: "none",
+                                        borderRadius: "9999px",
+                                        cursor: "pointer",
+                                        fontSize: "13px"
+                                    }}
+                                    title="Add Math"
+                                >
+                                    📐 Math
+                                </button>
+                                
+                                <button
+                                    type="submit"
+                                    disabled={!newComment.trim() && commentImages.length === 0}
+                                    style={{
+                                        padding: "8px 12px",
+                                        backgroundColor: (newComment.trim() || commentImages.length > 0) ? "rgb(26, 77, 58)" : "#ccc",
+                                        color: "white",
+                                        border: "none",
+                                        borderRadius: "9999px",
+                                        cursor: (newComment.trim() || commentImages.length > 0) ? "pointer" : "not-allowed",
+                                        fontSize: "13px"
+                                    }}
+                                >
+                                    Add Comment
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
