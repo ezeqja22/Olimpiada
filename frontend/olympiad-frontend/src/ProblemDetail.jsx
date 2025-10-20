@@ -2013,12 +2013,13 @@ function ProblemDetail() {
                                 }}
                             />
                             {/* Inline controls */}
-                            <div style={{ position: "absolute", right: "10px", bottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <div style={{ position: "absolute", right: "10px", bottom: "10px", display: "flex", alignItems: "center", gap: "8px", background: 'linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.6))', padding: '6px 8px', borderRadius: '9999px', backdropFilter: 'blur(2px)' }}>
                                 <ImageUpload
                                     onImagesChange={setCommentImages}
                                     maxImages={5}
                                     resetTrigger={imageResetKey}
                                     variant="compact"
+                                    showHelper={false}
                                 />
                                 <button
                                     type="button"

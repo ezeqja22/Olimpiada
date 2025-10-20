@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTrigger, variant = 'default' }) => {
+const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTrigger, variant = 'default', showHelper = true }) => {
     const [images, setImages] = useState([]);
     const [isHovered, setIsHovered] = useState(false);
     const fileInputRef = useRef(null);
@@ -186,15 +186,17 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                 disabled={disabled}
             />
 
-            {/* Helper Text */}
-            <div style={{
-                fontSize: '12px',
-                color: '#6b7280',
-                marginTop: '6px'
-            }}>
-                {images.length > 0 && `${images.length}/${maxImages} images selected`}
-                {images.length === 0 && `Upload up to ${maxImages} images (max 5MB each)`}
-            </div>
+            {/* Helper Text (optional) */}
+            {showHelper && (
+                <div style={{
+                    fontSize: '12px',
+                    color: '#6b7280',
+                    marginTop: '6px'
+                }}>
+                    {images.length > 0 && `${images.length}/${maxImages} images selected`}
+                    {images.length === 0 && `Upload up to ${maxImages} images (max 5MB each)`}
+                </div>
+            )}
         </div>
     );
 };
