@@ -2050,6 +2050,16 @@ function ProblemDetail() {
                                     {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
                                 </div>
                                 
+                                {/* Username */}
+                                <div style={{
+                                    fontSize: "12px",
+                                    fontWeight: "600",
+                                    color: "#374151",
+                                    marginTop: "2px"
+                                }}>
+                                    {currentUser?.username || "User"}
+                                </div>
+                                
                                 {/* Buttons Row - Small and Left-aligned */}
                                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "-8px" }}>
                                     {/* Math Button - Small */}
@@ -2145,17 +2155,34 @@ function ProblemDetail() {
                                         gap: "4px",
                                         flexWrap: "wrap"
                                     }}>
-                                        {commentImages.map((image) => (
-                                            <div key={image.id} style={{
-                                                position: "relative",
-                                                width: "48px",
-                                                height: "24px",
-                                                borderRadius: "4px",
-                                                overflow: "hidden",
-                                                border: "1px solid #d1d5db",
-                                                backgroundColor: "#fff",
-                                                boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
-                                            }}>
+                                        {commentImages.map((image, index) => (
+                                            <div 
+                                                key={image.id} 
+                                                style={{
+                                                    position: "relative",
+                                                    width: "56px",
+                                                    height: "28px",
+                                                    borderRadius: "4px",
+                                                    overflow: "hidden",
+                                                    border: "1px solid #d1d5db",
+                                                    backgroundColor: "#fff",
+                                                    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                                                    cursor: "pointer",
+                                                    transition: "all 0.2s ease"
+                                                }}
+                                                onClick={() => {
+                                                    setCurrentImageIndex(index);
+                                                    setShowImageModal(true);
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.target.style.transform = "scale(1.05)";
+                                                    e.target.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.target.style.transform = "scale(1)";
+                                                    e.target.style.boxShadow = "0 1px 2px rgba(0,0,0,0.05)";
+                                                }}
+                                            >
                                                 <img
                                                     src={image.preview}
                                                     alt={image.name}
@@ -2166,7 +2193,8 @@ function ProblemDetail() {
                                                     }}
                                                 />
                                                 <button
-                                                    onClick={() => {
+                                                    onClick={(e) => {
+                                                        e.stopPropagation(); // Prevent triggering the image modal
                                                         const newImages = commentImages.filter(img => img.id !== image.id);
                                                         setCommentImages(newImages);
                                                     }}
