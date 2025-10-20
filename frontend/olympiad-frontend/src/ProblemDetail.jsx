@@ -2050,48 +2050,43 @@ function ProblemDetail() {
                                     {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
                                 </div>
                                 
-                                {/* Buttons Row - Styled and Aligned */}
-                                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                    {/* Math Button - Styled */}
+                                {/* Buttons Row - Small and Left-aligned */}
+                                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "-8px" }}>
+                                    {/* Math Button - Small */}
                                     <span
                                         onClick={openCommentMathEditor}
                                         style={{
                                             color: "#6b7280",
                                             cursor: "pointer",
-                                            fontSize: "13px",
-                                            fontWeight: "600",
+                                            fontSize: "11px",
+                                            fontWeight: "500",
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
-                                            gap: "4px",
-                                            transition: "all 0.3s ease",
-                                            padding: "8px 12px",
+                                            gap: "2px",
+                                            transition: "all 0.2s ease",
+                                            padding: "4px 6px",
                                             whiteSpace: "nowrap",
-                                            borderRadius: "6px",
+                                            borderRadius: "4px",
                                             backgroundColor: "transparent",
-                                            border: "1px solid transparent",
-                                            height: "32px",
-                                            minWidth: "60px"
+                                            border: "none",
+                                            height: "20px"
                                         }}
                                         onMouseEnter={(e) => {
-                                            e.target.style.color = "white";
-                                            e.target.style.backgroundColor = "rgb(26, 77, 58)";
-                                            e.target.style.borderColor = "rgb(26, 77, 58)";
-                                            e.target.style.transform = "translateY(-1px)";
+                                            e.target.style.color = "rgb(26, 77, 58)";
+                                            e.target.style.backgroundColor = "rgba(26, 77, 58, 0.1)";
                                         }}
                                         onMouseLeave={(e) => {
                                             e.target.style.color = "#6b7280";
                                             e.target.style.backgroundColor = "transparent";
-                                            e.target.style.borderColor = "transparent";
-                                            e.target.style.transform = "translateY(0)";
                                         }}
                                         title="Add Math"
                                     >
-                                        📐 Math
+                                        Math
                                     </span>
                                     
-                                    {/* Add Image Button - Styled and Aligned */}
-                                    <div style={{ height: "32px", display: "flex", alignItems: "center" }}>
+                                    {/* Add Image Button - Small */}
+                                    <div style={{ height: "20px", display: "flex", alignItems: "center" }}>
                                         <ImageUpload
                                             onImagesChange={setCommentImages}
                                             maxImages={5}
