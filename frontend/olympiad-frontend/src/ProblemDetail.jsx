@@ -774,15 +774,20 @@ function ProblemDetail() {
             let imageUrls = [];
             if (commentImages.length > 0) {
                 const uploadPromises = commentImages.map(async (imageData) => {
-                    const formData = new FormData();
-                    formData.append('file', imageData.file);
-                    formData.append('upload_preset', 'ml_default'); // Replace with your Cloudinary preset
-                    
-                    const uploadResponse = await axios.post(
-                        'https://api.cloudinary.com/v1_1/dqmmgk88b/image/upload',
-                        formData
-                    );
-                    return uploadResponse.data.secure_url;
+                    try {
+                        const formData = new FormData();
+                        formData.append('file', imageData.file);
+                        formData.append('upload_preset', 'ml_default'); // Replace with your Cloudinary preset
+                        
+                        const uploadResponse = await axios.post(
+                            'https://api.cloudinary.com/v1_1/dqmmgk88b/image/upload',
+                            formData
+                        );
+                        return uploadResponse.data.secure_url;
+                    } catch (error) {
+                        console.error('Cloudinary upload error:', error.response?.data || error.message);
+                        throw new Error(`Failed to upload image: ${error.response?.data?.error?.message || error.message}`);
+                    }
                 });
                 
                 imageUrls = await Promise.all(uploadPromises);
@@ -805,6 +810,7 @@ function ProblemDetail() {
             setCommentImages([]);
         } catch (error) {
             console.error("Error adding comment:", error);
+            alert(`Error adding comment: ${error.message}`);
         }
     }
 
