@@ -777,7 +777,7 @@ function ProblemDetail() {
                     try {
                         const formData = new FormData();
                         formData.append('file', imageData.file);
-                        formData.append('upload_preset', 'ml_default'); // Replace with your Cloudinary preset
+                        formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || 'unsigned_upload');
                         
                         const uploadResponse = await axios.post(
                             'https://api.cloudinary.com/v1_1/dqmmgk88b/image/upload',
@@ -832,7 +832,7 @@ function ProblemDetail() {
                 const uploadPromises = replyImages.map(async (imageData) => {
                     const formData = new FormData();
                     formData.append('file', imageData.file);
-                    formData.append('upload_preset', 'ml_default'); // Replace with your Cloudinary preset
+                    formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || 'unsigned_upload');
                     
                     const uploadResponse = await axios.post(
                         'https://api.cloudinary.com/v1_1/dqmmgk88b/image/upload',
