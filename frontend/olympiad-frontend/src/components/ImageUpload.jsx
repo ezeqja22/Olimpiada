@@ -145,7 +145,7 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                         overflow: 'hidden',
                         height: variant === 'compact' ? '20px' : 'auto',
                         minHeight: variant === 'compact' ? '20px' : 'auto',
-                        transform: variant === 'compact' ? 'translateY(2px)' : 'none',
+                        transform: variant === 'compact' ? 'translateY(5px)' : 'none',
                         alignItems: 'center',
                         justifyContent: 'center'
                     }}
