@@ -1955,7 +1955,7 @@ function ProblemDetail() {
                                     objectFit: "contain"
                                 }}
                             />
-                            {voteStatus.like_count}
+                             {voteStatus.like_count}
                         </button>
                         <button
                             onClick={() => handleVote("dislike")}
@@ -1983,7 +1983,7 @@ function ProblemDetail() {
                                     objectFit: "contain"
                                 }}
                             />
-                            {voteStatus.dislike_count}
+                             {voteStatus.dislike_count}
                         </button>
                     </div>
                 </div>
@@ -2010,7 +2010,7 @@ function ProblemDetail() {
                                 display: "flex", 
                                 flexDirection: "column", 
                                 alignItems: "flex-start",
-                                gap: "10px",
+                                gap: "20px",
                                 borderRight: "1px solid #ddd"
                             }}>
                                 {/* User Profile Picture */}
@@ -2035,7 +2035,7 @@ function ProblemDetail() {
                                     {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
                                 </div>
                                 
-                                {/* Buttons Row - Aligned */}
+                                {/* Buttons Row - Aligned and Lower */}
                                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                                     {/* Math Button - Text Style */}
                                     <span
@@ -2074,73 +2074,30 @@ function ProblemDetail() {
                             </div>
                             
                             {/* Right Section - Clickable Textarea Area (1/12 width) */}
-                            <div 
-                                style={{ 
-                                    width: "8.33%", 
-                                    display: "flex", 
-                                    alignItems: "center", 
-                                    justifyContent: "center",
-                                    cursor: "pointer",
-                                    backgroundColor: "#f9fafb",
-                                    transition: "all 0.2s ease"
-                                }}
-                                onClick={() => {
-                                    // Focus the textarea when clicked
-                                    const textarea = document.querySelector('textarea[placeholder="Write your comment here..."]');
-                                    if (textarea) {
-                                        textarea.focus();
-                                    }
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.backgroundColor = "#f3f4f6";
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.backgroundColor = "#f9fafb";
-                                }}
-                            >
-                                <div style={{ 
-                                    display: "flex", 
-                                    alignItems: "center", 
-                                    gap: "4px",
-                                    color: "#6b7280",
-                                    fontSize: "10px",
-                                    fontWeight: "500"
-                                }}>
-                                    <span>Click</span>
-                                    <div style={{
-                                        width: "12px",
-                                        height: "12px",
-                                        backgroundColor: "#d1d5db",
-                                        borderRadius: "2px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        color: "white",
-                                        fontSize: "8px"
-                                    }}>
-                                        →
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {/* Textarea for actual input - Always visible */}
                         <textarea
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
                             placeholder="Write your comment here..."
                             style={{
-                                width: "100%",
-                                minHeight: "80px",
-                                padding: "15px",
-                                border: "1px solid #ddd",
-                                borderRadius: "8px",
-                                resize: "vertical",
+                                    width: "8.33%", 
+                                    border: "none",
+                                    outline: "none",
+                                    resize: "none",
                                 fontFamily: "inherit",
-                                whiteSpace: "pre-wrap",
-                                marginTop: "10px"
-                            }}
-                        />
+                                    fontSize: "14px",
+                                    padding: "15px",
+                                    backgroundColor: "#f9fafb",
+                                    transition: "all 0.2s ease",
+                                    cursor: "text"
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.backgroundColor = "white";
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.backgroundColor = "#f9fafb";
+                                }}
+                            />
+                        </div>
                         
                         {/* Send Button - Only show when there's content */}
                         {(newComment.trim() || commentImages.length > 0) && (
@@ -2149,13 +2106,13 @@ function ProblemDetail() {
                                 justifyContent: "flex-end", 
                                 marginTop: "10px" 
                             }}>
-                                <button
-                                    type="submit"
-                                    style={{
+                        <button
+                            type="submit"
+                            style={{
                                         padding: "12px 24px",
                                         backgroundColor: "#1976d2",
-                                        color: "white",
-                                        border: "none",
+                                color: "white",
+                                border: "none",
                                         borderRadius: "8px",
                                         cursor: "pointer",
                                         fontSize: "16px",
@@ -2179,7 +2136,7 @@ function ProblemDetail() {
                                 >
                                     Send
                                     <span style={{ fontSize: "18px" }}>→</span>
-                                </button>
+                        </button>
                             </div>
                         )}
                     </form>
@@ -2206,7 +2163,7 @@ function ProblemDetail() {
                         setCurrentImageIndex={setCurrentImageIndex}
                         setShowImageModal={setShowImageModal}
                     />
-                ))}
+    ))}
             </div>
             
             {/* Math Editor Modal */}
