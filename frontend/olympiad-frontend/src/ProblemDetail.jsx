@@ -66,17 +66,19 @@ const CommentThread = ({
             position: "relative"
         }}>
             <div style={{
-                backgroundColor: comment.is_solution ? "#f0f9ff" : isNested ? "#f1f5f9" : "#ffffff",
-                border: comment.is_solution ? "2px solid #0ea5e9" : isNested ? "1px solid #94a3b8" : "1px solid #e2e8f0",
+                backgroundColor: comment.is_solution ? "#f0fdf4" : isNested ? "#f1f5f9" : "#ffffff",
+                border: comment.is_solution ? "3px solid rgb(26, 77, 58)" : isNested ? "1px solid #94a3b8" : "1px solid #e2e8f0",
                 borderRadius: isNested ? "8px" : "16px",
                 padding: isNested ? "12px" : "18px",
-                boxShadow: isNested ? "0 1px 4px rgba(0,0,0,0.05)" : "0 4px 12px rgba(0,0,0,0.1)",
+                boxShadow: comment.is_solution ? "0 4px 20px rgba(26, 77, 58, 0.2)" : isNested ? "0 1px 4px rgba(0,0,0,0.05)" : "0 4px 12px rgba(0,0,0,0.1)",
                 position: "relative",
                 transition: "all 0.3s ease",
                 marginLeft: isNested ? "60px" : "0",
                 borderLeft: isNested ? "4px solid #6366f1" : "none",
                 transform: isNested ? "translateX(6px)" : "translateX(0)",
-                opacity: isNested ? "0.95" : "1"
+                opacity: isNested ? "0.95" : "1",
+                outline: comment.is_solution ? "1px solid rgb(26, 77, 58)" : "none",
+                outlineOffset: comment.is_solution ? "2px" : "0"
             }}>
                 {comment.is_solution && (
                     <div style={{
@@ -2048,7 +2050,7 @@ function ProblemDetail() {
                                     {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
                                 </div>
                                 
-                                {/* Buttons Row - Styled */}
+                                {/* Buttons Row - Styled and Aligned */}
                                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                                     {/* Math Button - Styled */}
                                     <span
@@ -2060,13 +2062,16 @@ function ProblemDetail() {
                                             fontWeight: "600",
                                             display: "flex",
                                             alignItems: "center",
+                                            justifyContent: "center",
                                             gap: "4px",
                                             transition: "all 0.3s ease",
-                                            padding: "6px 10px",
+                                            padding: "8px 12px",
                                             whiteSpace: "nowrap",
                                             borderRadius: "6px",
                                             backgroundColor: "transparent",
-                                            border: "1px solid transparent"
+                                            border: "1px solid transparent",
+                                            height: "32px",
+                                            minWidth: "60px"
                                         }}
                                         onMouseEnter={(e) => {
                                             e.target.style.color = "white";
@@ -2085,14 +2090,16 @@ function ProblemDetail() {
                                         📐 Math
                                     </span>
                                     
-                                    {/* Add Image Button - Styled */}
-                                    <ImageUpload
-                                        onImagesChange={setCommentImages}
-                                        maxImages={5}
-                                        resetTrigger={imageResetKey}
-                                        variant="compact"
-                                        showHelper={false}
-                                    />
+                                    {/* Add Image Button - Styled and Aligned */}
+                                    <div style={{ height: "32px", display: "flex", alignItems: "center" }}>
+                                        <ImageUpload
+                                            onImagesChange={setCommentImages}
+                                            maxImages={5}
+                                            resetTrigger={imageResetKey}
+                                            variant="compact"
+                                            showHelper={false}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             
