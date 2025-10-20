@@ -2101,31 +2101,109 @@ function ProblemDetail() {
                                 </div>
                             </div>
                             
-                            {/* Section 2 - Main Textarea (styled) */}
-                            <textarea
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                placeholder="Write your comment here..."
-                                style={{ 
-                                    width: "73.67%", 
-                                    border: "none",
-                                    outline: "none",
-                                    resize: "none",
-                                    fontFamily: "inherit",
-                                    fontSize: "15px",
-                                    padding: "20px",
-                                    backgroundColor: "white",
-                                    transition: "all 0.3s ease",
-                                    cursor: "text",
-                                    lineHeight: "1.5"
-                                }}
-                                onFocus={(e) => {
-                                    e.target.style.backgroundColor = "#fafbfc";
-                                }}
-                                onBlur={(e) => {
-                                    e.target.style.backgroundColor = "white";
-                                }}
-                            />
+                            {/* Section 2 - Main Textarea with inline images */}
+                            <div style={{ 
+                                width: "73.67%", 
+                                position: "relative",
+                                backgroundColor: "white",
+                                transition: "all 0.3s ease"
+                            }}>
+                                <textarea
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                    placeholder="Write your comment here..."
+                                    style={{ 
+                                        width: "100%", 
+                                        border: "none",
+                                        outline: "none",
+                                        resize: "none",
+                                        fontFamily: "inherit",
+                                        fontSize: "15px",
+                                        padding: "20px",
+                                        paddingBottom: commentImages.length > 0 ? "50px" : "20px",
+                                        backgroundColor: "transparent",
+                                        transition: "all 0.3s ease",
+                                        cursor: "text",
+                                        lineHeight: "1.5"
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.backgroundColor = "#fafbfc";
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.backgroundColor = "transparent";
+                                    }}
+                                />
+                                
+                                {/* Inline Image Thumbnails */}
+                                {commentImages.length > 0 && (
+                                    <div style={{
+                                        position: "absolute",
+                                        bottom: "8px",
+                                        left: "20px",
+                                        right: "20px",
+                                        display: "flex",
+                                        gap: "4px",
+                                        flexWrap: "wrap"
+                                    }}>
+                                        {commentImages.map((image) => (
+                                            <div key={image.id} style={{
+                                                position: "relative",
+                                                width: "32px",
+                                                height: "16px",
+                                                borderRadius: "3px",
+                                                overflow: "hidden",
+                                                border: "1px solid #d1d5db",
+                                                backgroundColor: "#fff",
+                                                boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
+                                            }}>
+                                                <img
+                                                    src={image.preview}
+                                                    alt={image.name}
+                                                    style={{
+                                                        width: "100%",
+                                                        height: "100%",
+                                                        objectFit: "cover"
+                                                    }}
+                                                />
+                                                <button
+                                                    onClick={() => {
+                                                        const newImages = commentImages.filter(img => img.id !== image.id);
+                                                        setCommentImages(newImages);
+                                                    }}
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: "-3px",
+                                                        right: "-3px",
+                                                        width: "12px",
+                                                        height: "12px",
+                                                        borderRadius: "50%",
+                                                        backgroundColor: "rgba(220, 38, 38, 0.9)",
+                                                        color: "white",
+                                                        border: "1px solid white",
+                                                        cursor: "pointer",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        fontSize: "7px",
+                                                        fontWeight: "bold",
+                                                        transition: "all 0.2s ease"
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.target.style.backgroundColor = "rgba(185, 28, 28, 1)";
+                                                        e.target.style.transform = "scale(1.1)";
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.target.style.backgroundColor = "rgba(220, 38, 38, 0.9)";
+                                                        e.target.style.transform = "scale(1)";
+                                                    }}
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                             
                             {/* Section 3 - Send Button (styled) */}
                             <div 
