@@ -2178,46 +2178,6 @@ function ProblemDetail() {
                             </div>
                         </div>
                         
-                        {/* Send Button - Only show when there's content */}
-                        {(newComment.trim() || commentImages.length > 0) && (
-                            <div style={{ 
-                                display: "flex", 
-                                justifyContent: "flex-end", 
-                                marginTop: "10px" 
-                            }}>
-                        <button
-                            type="submit"
-                            style={{
-                                        padding: "12px 24px",
-                                        backgroundColor: "#1976d2",
-                                color: "white",
-                                border: "none",
-                                        borderRadius: "8px",
-                                        cursor: "pointer",
-                                        fontSize: "16px",
-                                        fontWeight: "600",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "8px",
-                                        transition: "all 0.2s ease",
-                                        boxShadow: "0 2px 4px rgba(25, 118, 210, 0.2)"
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.backgroundColor = "#1565c0";
-                                        e.target.style.transform = "translateY(-1px)";
-                                        e.target.style.boxShadow = "0 4px 8px rgba(25, 118, 210, 0.3)";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.backgroundColor = "#1976d2";
-                                        e.target.style.transform = "translateY(0)";
-                                        e.target.style.boxShadow = "0 2px 4px rgba(25, 118, 210, 0.2)";
-                                    }}
-                                >
-                                    Send
-                                    <span style={{ fontSize: "18px" }}>→</span>
-                        </button>
-                            </div>
-                        )}
                     </form>
                 </div>
 

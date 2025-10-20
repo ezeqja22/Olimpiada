@@ -63,8 +63,72 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
 
     return (
         <div style={{ marginBottom: '12px' }}>
-            {/* Image Preview Grid */}
-            {images.length > 0 && (
+            {/* Small Inline Thumbnails - Only show for compact variant */}
+            {images.length > 0 && variant === 'compact' && (
+                <div style={{
+                    display: 'flex',
+                    gap: '6px',
+                    marginTop: '8px',
+                    flexWrap: 'wrap'
+                }}>
+                    {images.map((image) => (
+                        <div key={image.id} style={{
+                            position: 'relative',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '6px',
+                            overflow: 'hidden',
+                            border: '1px solid #e5e7eb',
+                            backgroundColor: '#fff',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                        }}>
+                            <img
+                                src={image.preview}
+                                alt={image.name}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover'
+                                }}
+                            />
+                            <button
+                                onClick={() => removeImage(image.id)}
+                                style={{
+                                    position: 'absolute',
+                                    top: '-2px',
+                                    right: '-2px',
+                                    width: '14px',
+                                    height: '14px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'rgba(220, 38, 38, 0.9)',
+                                    color: 'white',
+                                    border: '1px solid white',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '8px',
+                                    fontWeight: 'bold',
+                                    transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = 'rgba(185, 28, 28, 1)';
+                                    e.target.style.transform = 'scale(1.1)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = 'rgba(220, 38, 38, 0.9)';
+                                    e.target.style.transform = 'scale(1)';
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Large Preview Grid - Only show for default variant */}
+            {images.length > 0 && variant === 'default' && (
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
