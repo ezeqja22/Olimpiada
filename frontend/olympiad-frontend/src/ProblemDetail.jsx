@@ -548,6 +548,8 @@ function ProblemDetail() {
     const [showImageModal, setShowImageModal] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [hoveredImageIndex, setHoveredImageIndex] = useState(null);
+    const [modalImages, setModalImages] = useState([]);
+    const [modalImageType, setModalImageType] = useState('problem'); // 'problem' or 'comment'
     const [editProblemData, setEditProblemData] = useState({
         title: "",
         description: "",
@@ -597,8 +599,10 @@ function ProblemDetail() {
     };
 
     // Image modal functions
-    const openImageModal = (index) => {
+    const openImageModal = (index, images, type = 'problem') => {
         setCurrentImageIndex(index);
+        setModalImages(images);
+        setModalImageType(type);
         setShowImageModal(true);
     };
 
@@ -607,11 +611,11 @@ function ProblemDetail() {
     };
 
     const nextImage = () => {
-        setCurrentImageIndex((prev) => (prev + 1) % problemImages.length);
+        setCurrentImageIndex((prev) => (prev + 1) % modalImages.length);
     };
 
     const prevImage = () => {
-        setCurrentImageIndex((prev) => (prev - 1 + problemImages.length) % problemImages.length);
+        setCurrentImageIndex((prev) => (prev - 1 + modalImages.length) % modalImages.length);
     };
 
     // Keyboard navigation for image modal
@@ -624,10 +628,10 @@ function ProblemDetail() {
                     closeImageModal();
                     break;
                 case 'ArrowLeft':
-                    if (problemImages.length > 1) prevImage();
+                    if (modalImages.length > 1) prevImage();
                     break;
                 case 'ArrowRight':
-                    if (problemImages.length > 1) nextImage();
+                    if (modalImages.length > 1) nextImage();
                     break;
                 default:
                     break;
@@ -1865,7 +1869,7 @@ function ProblemDetail() {
                                 }}
                                 onMouseEnter={() => setHoveredImageIndex(index)}
                                 onMouseLeave={() => setHoveredImageIndex(null)}
-                                onClick={() => openImageModal(index)}
+                                onClick={() => openImageModal(index, problemImages, 'problem')}
                                 >
                                     <img 
                                         src={image}
@@ -2027,37 +2031,54 @@ function ProblemDetail() {
                                 minWidth: "140px",
                                 borderRight: "1px solid #e9ecef"
                             }}>
-                                {/* User Profile Picture */}
+                                {/* User Profile Picture and Username Row */}
                                 <div style={{
-                                    width: "40px",
-                                    height: "40px",
-                                    borderRadius: "50%",
-                                    backgroundColor: "rgb(26, 77, 58)",
                                     display: "flex",
                                     alignItems: "center",
-                                    justifyContent: "center",
-                                    color: "white",
-                                    fontWeight: "bold",
-                                    fontSize: "16px",
-                                    backgroundImage: currentUser?.profile_picture ? 
-                                        `url(${currentUser.profile_picture})` : 
-                                        'none',
-                                    backgroundSize: "cover",
-                                    backgroundPosition: "center",
-                                    border: "3px solid white",
-                                    boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)"
+                                    gap: "8px"
                                 }}>
-                                    {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
-                                </div>
-                                
-                                {/* Username */}
-                                <div style={{
-                                    fontSize: "12px",
-                                    fontWeight: "600",
-                                    color: "#374151",
-                                    marginTop: "2px"
-                                }}>
-                                    {currentUser?.username || "User"}
+                                    {/* User Profile Picture */}
+                                    <div style={{
+                                        width: "40px",
+                                        height: "40px",
+                                        borderRadius: "50%",
+                                        backgroundColor: "rgb(26, 77, 58)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        fontSize: "16px",
+                                        backgroundImage: currentUser?.profile_picture ? 
+                                            `url(${currentUser.profile_picture})` : 
+                                            'none',
+                                        backgroundSize: "cover",
+                                        backgroundPosition: "center",
+                                        border: "3px solid white",
+                                        boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)"
+                                    }}>
+                                        {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
+                                    </div>
+                                    
+                                    {/* Username with green connection */}
+                                    <div style={{
+                                        fontSize: "13px",
+                                        fontWeight: "600",
+                                        color: "rgb(26, 77, 58)",
+                                        position: "relative"
+                                    }}>
+                                        {currentUser?.username || "User"}
+                                        {/* Green underline connection */}
+                                        <div style={{
+                                            position: "absolute",
+                                            bottom: "-2px",
+                                            left: "0",
+                                            right: "0",
+                                            height: "2px",
+                                            backgroundColor: "rgb(26, 77, 58)",
+                                            borderRadius: "1px"
+                                        }}></div>
+                                    </div>
                                 </div>
                                 
                                 {/* Buttons Row - Small and Left-aligned */}
@@ -2171,8 +2192,9 @@ function ProblemDetail() {
                                                     transition: "all 0.2s ease"
                                                 }}
                                                 onClick={() => {
-                                                    setCurrentImageIndex(index);
-                                                    setShowImageModal(true);
+                                                    // Convert comment images to URLs for modal display
+                                                    const imageUrls = commentImages.map(img => img.cloudinaryUrl || img.preview);
+                                                    openImageModal(index, imageUrls, 'comment');
                                                 }}
                                                 onMouseEnter={(e) => {
                                                     e.target.style.transform = "scale(1.05)";
@@ -2328,7 +2350,7 @@ function ProblemDetail() {
             />
 
             {/* Fullscreen Image Modal */}
-            {showImageModal && (
+            {showImageModal && modalImages.length > 0 && (
                 <div style={{
                     position: "fixed",
                     top: 0,
@@ -2369,7 +2391,7 @@ function ProblemDetail() {
                     </button>
 
                     {/* Navigation arrows */}
-                    {problemImages.length > 1 && (
+                    {modalImages.length > 1 && (
                         <>
                             <button
                                 onClick={(e) => {
@@ -2427,7 +2449,7 @@ function ProblemDetail() {
                     )}
 
                     {/* Image counter */}
-                    {problemImages.length > 1 && (
+                    {modalImages.length > 1 && (
                         <div style={{
                             position: "absolute",
                             bottom: "20px",
@@ -2440,13 +2462,13 @@ function ProblemDetail() {
                             fontSize: "14px",
                             zIndex: 10000
                         }}>
-                            {currentImageIndex + 1} / {problemImages.length}
+                            {currentImageIndex + 1} / {modalImages.length}
         </div>
                     )}
 
                     {/* Fullscreen image */}
                     <img
-                        src={problemImages[currentImageIndex]}
+                        src={modalImages[currentImageIndex]}
                         alt={`Problem image ${currentImageIndex + 1}`}
                         style={{
                             maxWidth: "90vw",
