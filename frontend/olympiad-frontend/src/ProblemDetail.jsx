@@ -550,6 +550,7 @@ function ProblemDetail() {
     const [hoveredImageIndex, setHoveredImageIndex] = useState(null);
     const [modalImages, setModalImages] = useState([]);
     const [modalImageType, setModalImageType] = useState('problem'); // 'problem' or 'comment'
+    const [isTextareaFocused, setIsTextareaFocused] = useState(false);
     const [editProblemData, setEditProblemData] = useState({
         title: "",
         description: "",
@@ -2031,16 +2032,39 @@ function ProblemDetail() {
                                 minWidth: "140px",
                                 borderRight: "1px solid #e9ecef"
                             }}>
-                                {/* User Profile Picture and Username Row */}
-                                <div style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px"
-                                }}>
+                                {/* Clickable User Card */}
+                                <div 
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+                                        padding: "8px 12px",
+                                        borderRadius: "12px",
+                                        backgroundColor: "white",
+                                        border: "2px solid transparent",
+                                        cursor: "pointer",
+                                        transition: "all 0.2s ease",
+                                        boxShadow: "0 2px 4px rgba(26, 77, 58, 0.1)"
+                                    }}
+                                    onClick={() => {
+                                        // Navigate to user profile
+                                        window.location.href = `/profile/${currentUser?.username}`;
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.borderColor = "rgb(26, 77, 58)";
+                                        e.target.style.boxShadow = "0 4px 12px rgba(26, 77, 58, 0.2)";
+                                        e.target.style.transform = "translateY(-1px)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.borderColor = "transparent";
+                                        e.target.style.boxShadow = "0 2px 4px rgba(26, 77, 58, 0.1)";
+                                        e.target.style.transform = "translateY(0)";
+                                    }}
+                                >
                                     {/* User Profile Picture */}
                                     <div style={{
-                                        width: "40px",
-                                        height: "40px",
+                                        width: "36px",
+                                        height: "36px",
                                         borderRadius: "50%",
                                         backgroundColor: "rgb(26, 77, 58)",
                                         display: "flex",
@@ -2048,36 +2072,26 @@ function ProblemDetail() {
                                         justifyContent: "center",
                                         color: "white",
                                         fontWeight: "bold",
-                                        fontSize: "16px",
+                                        fontSize: "14px",
                                         backgroundImage: currentUser?.profile_picture ? 
                                             `url(${currentUser.profile_picture})` : 
                                             'none',
                                         backgroundSize: "cover",
                                         backgroundPosition: "center",
-                                        border: "3px solid white",
-                                        boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)"
+                                        border: "2px solid white",
+                                        boxShadow: "0 2px 6px rgba(26, 77, 58, 0.3)"
                                     }}>
                                         {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
                                     </div>
                                     
-                                    {/* Username with green connection */}
+                                    {/* Username */}
                                     <div style={{
-                                        fontSize: "13px",
+                                        fontSize: "14px",
                                         fontWeight: "600",
                                         color: "rgb(26, 77, 58)",
-                                        position: "relative"
+                                        whiteSpace: "nowrap"
                                     }}>
                                         {currentUser?.username || "User"}
-                                        {/* Green underline connection */}
-                                        <div style={{
-                                            position: "absolute",
-                                            bottom: "-2px",
-                                            left: "0",
-                                            right: "0",
-                                            height: "2px",
-                                            backgroundColor: "rgb(26, 77, 58)",
-                                            borderRadius: "1px"
-                                        }}></div>
                                     </div>
                                 </div>
                                 
@@ -2152,16 +2166,16 @@ function ProblemDetail() {
                                         fontSize: "15px",
                                         padding: "20px",
                                         paddingBottom: commentImages.length > 0 ? "50px" : "20px",
-                                        backgroundColor: "transparent",
+                                        backgroundColor: isTextareaFocused ? "#fafbfc" : "transparent",
                                         transition: "all 0.3s ease",
                                         cursor: "text",
                                         lineHeight: "1.5"
                                     }}
-                                    onFocus={(e) => {
-                                        e.target.style.backgroundColor = "#fafbfc";
+                                    onFocus={() => {
+                                        setIsTextareaFocused(true);
                                     }}
-                                    onBlur={(e) => {
-                                        e.target.style.backgroundColor = "transparent";
+                                    onBlur={() => {
+                                        setIsTextareaFocused(false);
                                     }}
                                 />
                                 
