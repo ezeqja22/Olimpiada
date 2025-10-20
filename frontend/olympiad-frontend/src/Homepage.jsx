@@ -28,6 +28,18 @@ function Homepage() {
     const { checkFeatureEnabled, showFeatureDisabledAlert } = useFeatureSettings();
     
     
+    // Mobile detection
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     // Update document title, favicon, and theme when site settings change
     useEffect(() => {
         if (siteSettings.site_name) {
@@ -182,11 +194,12 @@ function Homepage() {
             <header style={{
                 backgroundColor: "#1a4d3a", // Dark green
                 color: "white",
-                padding: "1rem 2rem",
+                padding: isMobile ? "0.75rem 1rem" : "1rem 2rem",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
+                boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                minHeight: isMobile ? "60px" : "auto"
             }}>
                 {/* Logo and Hamburger Menu */}
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -220,16 +233,21 @@ function Homepage() {
                             />
                         </button>
                     )}
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "24px" }}>
+                    <div style={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: isMobile ? "6px" : "8px", 
+                        marginLeft: isMobile ? "12px" : "24px" 
+                    }}>
                         {/* Site Logo */}
                         {siteSettings.site_logo && (
                             <img 
                                 src={siteSettings.site_logo} 
                                 alt={siteSettings.site_name}
                                 style={{
-                                    height: "28px",
+                                    height: isMobile ? "22px" : "28px",
                                     width: "auto",
-                                    maxWidth: "150px",
+                                    maxWidth: isMobile ? "100px" : "150px",
                                     objectFit: "contain"
                                 }}
                                 onError={(e) => {
@@ -240,14 +258,23 @@ function Homepage() {
                         )}
                         
                         {/* Site Name */}
-                        <h1 style={{ margin: 0, fontSize: "24px", fontWeight: "600" }}>
+                        <h1 style={{ 
+                            margin: 0, 
+                            fontSize: isMobile ? "18px" : "24px", 
+                            fontWeight: "600",
+                            display: isMobile ? (siteSettings.site_logo ? "none" : "block") : "block"
+                        }}>
                             {siteSettings.site_name || 'Olimpiada'}
                         </h1>
                     </div>
                 </div>
 
                 {/* Navigation */}
-                <nav style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
+                <nav style={{ 
+                    display: isMobile ? "none" : "flex", 
+                    alignItems: "center", 
+                    gap: "2rem" 
+                }}>
                     <Link to="/feed" style={{ 
                         color: "white", 
                         textDecoration: "none", 
@@ -588,6 +615,39 @@ function Homepage() {
                         </div>
                     )}
                 </nav>
+
+                {/* Mobile Menu Button */}
+                {isMobile && currentUser && (
+                    <button
+                        onClick={() => setShowUserDropdown(!showUserDropdown)}
+                        style={{
+                            backgroundColor: "transparent",
+                            border: "none",
+                            color: "white",
+                            cursor: "pointer",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px"
+                        }}
+                    >
+                        <div style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            backgroundColor: "rgba(255, 255, 255, 0.2)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "white",
+                            fontWeight: "bold",
+                            fontSize: "14px"
+                        }}>
+                            {getUserInitial(currentUser.username)}
+                        </div>
+                    </button>
+                )}
             </header>
 
             {/* Main Content */}
@@ -596,41 +656,48 @@ function Homepage() {
                 <section style={{
                     backgroundColor: "#1a4d3a",
                     color: "white",
-                    padding: "4rem 2rem",
+                    padding: isMobile ? "2rem 1rem" : "4rem 2rem",
                     textAlign: "center",
                     background: "linear-gradient(135deg, #1a4d3a 0%, #2d7a5f 100%)"
                 }}>
                     <div style={{ maxWidth: "800px", margin: "0 auto" }}>
                         <h1 style={{ 
-                            fontSize: "3rem", 
+                            fontSize: isMobile ? "2rem" : "3rem", 
                             fontWeight: "700", 
-                            marginBottom: "1.5rem",
+                            marginBottom: isMobile ? "1rem" : "1.5rem",
                             lineHeight: "1.2"
                         }}>
                             Welcome to {siteSettings.site_name || 'Olimpiada'}
                         </h1>
                         <p style={{ 
-                            fontSize: "1.25rem", 
-                            marginBottom: "2rem", 
+                            fontSize: isMobile ? "1rem" : "1.25rem", 
+                            marginBottom: isMobile ? "1.5rem" : "2rem", 
                             opacity: "0.9",
                             lineHeight: "1.6"
                         }}>
                             {siteSettings.site_description || "Master the art of problem-solving through challenging olympiad problems. Join a community of passionate learners and sharpen your analytical skills."}
                         </p>
-                        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+                        <div style={{ 
+                            display: "flex", 
+                            gap: isMobile ? "0.75rem" : "1rem", 
+                            justifyContent: "center", 
+                            flexWrap: "wrap",
+                            flexDirection: isMobile ? "column" : "row"
+                        }}>
                             <Link to="/feed">
                                 <button style={{
                                     backgroundColor: "rgba(118, 75, 162)",
                                     color: "white",
                                     border: "2px solid white",
-                                    padding: "12px 24px",
+                                    padding: isMobile ? "14px 20px" : "12px 24px",
                                     borderRadius: "8px",
-                                    fontSize: "16px",
+                                    fontSize: isMobile ? "14px" : "16px",
                                     fontWeight: "600",
                                     cursor: "pointer",
                                     transition: "all 0.2s",
-                                    minWidth: "140px",
-                                    height: "48px"
+                                    minWidth: isMobile ? "100%" : "140px",
+                                    height: isMobile ? "44px" : "48px",
+                                    width: isMobile ? "100%" : "auto"
                                 }}
                                 onMouseEnter={(e) => {
                                     e.target.style.backgroundColor = "rgba(118, 75, 162)";
@@ -649,14 +716,15 @@ function Homepage() {
                                     backgroundColor: "transparent",
                                     color: "white",
                                     border: "2px solid white",
-                                    padding: "12px 24px",
+                                    padding: isMobile ? "14px 20px" : "12px 24px",
                                     borderRadius: "8px",
-                                    fontSize: "16px",
+                                    fontSize: isMobile ? "14px" : "16px",
                                     fontWeight: "600",
                                     cursor: "pointer",
                                     transition: "all 0.2s",
-                                    minWidth: "140px",
-                                    height: "48px"
+                                    minWidth: isMobile ? "100%" : "140px",
+                                    height: isMobile ? "44px" : "48px",
+                                    width: isMobile ? "100%" : "auto"
                                 }}
                                 onMouseEnter={(e) => {
                                     e.target.style.transform = "translateY(-2px)";

@@ -566,6 +566,7 @@ function ProblemDetail() {
     const [modalImages, setModalImages] = useState([]);
     const [modalImageType, setModalImageType] = useState('problem'); // 'problem' or 'comment'
     const [isTextareaFocused, setIsTextareaFocused] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const [editProblemData, setEditProblemData] = useState({
         title: "",
         description: "",
@@ -613,6 +614,18 @@ function ProblemDetail() {
     const closeCommentMathEditor = () => {
         setShowCommentMathEditor(false);
     };
+
+    // Mobile detection
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Image modal functions
     const openImageModal = (index, images, type = 'problem') => {
@@ -2017,13 +2030,14 @@ function ProblemDetail() {
                 {/* Add Comment Form */}
                 <div style={{ marginBottom: "20px" }}>
                     <form onSubmit={handleSubmitComment}>
-                        <div style={{ 
-                            display: "flex", 
-                            border: "2px solid #e9ecef", 
-                            borderRadius: "12px", 
+                        <div style={{
+                            display: "flex",
+                            flexDirection: isMobile ? "column" : "row",
+                            border: "2px solid #e9ecef",
+                            borderRadius: "12px",
                             overflow: "hidden",
                             backgroundColor: "white",
-                            minHeight: "100px",
+                            minHeight: isMobile ? "120px" : "100px",
                             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
                             transition: "all 0.3s ease"
                         }}
@@ -2036,30 +2050,32 @@ function ProblemDetail() {
                             e.target.style.borderColor = "#e9ecef";
                         }}>
                             {/* Section 1 - Profile Picture and Buttons (styled) */}
-                            <div style={{ 
-                                width: "18%", 
-                                padding: "20px", 
-                                display: "flex", 
-                                flexDirection: "column", 
-                                alignItems: "flex-start",
-                                gap: "15px",
+                            <div style={{
+                                width: isMobile ? "100%" : "18%",
+                                padding: isMobile ? "15px" : "20px",
+                                display: "flex",
+                                flexDirection: isMobile ? "row" : "column",
+                                alignItems: isMobile ? "center" : "flex-start",
+                                gap: isMobile ? "12px" : "15px",
                                 backgroundColor: "#f8f9fa",
-                                minWidth: "140px",
-                                borderRight: "1px solid #e9ecef"
+                                minWidth: isMobile ? "auto" : "140px",
+                                borderRight: isMobile ? "none" : "1px solid #e9ecef",
+                                borderBottom: isMobile ? "1px solid #e9ecef" : "none"
                             }}>
                                 {/* Clickable User Card */}
                                 <div 
                                     style={{
                                         display: "flex",
                                         alignItems: "center",
-                                        gap: "10px",
-                                        padding: "8px 12px",
+                                        gap: isMobile ? "8px" : "10px",
+                                        padding: isMobile ? "6px 10px" : "8px 12px",
                                         borderRadius: "12px",
                                         backgroundColor: "white",
                                         border: "2px solid transparent",
                                         cursor: "pointer",
                                         transition: "all 0.2s ease",
-                                        boxShadow: "0 2px 4px rgba(26, 77, 58, 0.1)"
+                                        boxShadow: "0 2px 4px rgba(26, 77, 58, 0.1)",
+                                        flex: isMobile ? "1" : "none"
                                     }}
                                     onClick={() => {
                                         // Navigate to user profile
@@ -2080,8 +2096,8 @@ function ProblemDetail() {
                                 >
                                     {/* User Profile Picture */}
                                     <div style={{
-                                        width: "36px",
-                                        height: "36px",
+                                        width: isMobile ? "32px" : "36px",
+                                        height: isMobile ? "32px" : "36px",
                                         borderRadius: "50%",
                                         backgroundColor: "rgb(26, 77, 58)",
                                         display: "flex",
@@ -2089,7 +2105,7 @@ function ProblemDetail() {
                                         justifyContent: "center",
                                         color: "white",
                                         fontWeight: "bold",
-                                        fontSize: "14px",
+                                        fontSize: isMobile ? "12px" : "14px",
                                         backgroundImage: currentUser?.profile_picture ? 
                                             `url(${currentUser.profile_picture})` : 
                                             'none',
@@ -2103,39 +2119,46 @@ function ProblemDetail() {
                                     
                                     {/* Username */}
                                     <div style={{
-                                        fontSize: "14px",
+                                        fontSize: isMobile ? "13px" : "14px",
                                         fontWeight: "600",
                                         color: "rgb(26, 77, 58)",
-                                        whiteSpace: "nowrap"
+                                        whiteSpace: "nowrap",
+                                        display: isMobile ? "none" : "block"
                                     }}>
                                         {currentUser?.username || "User"}
                                     </div>
                                 </div>
                                 
                                 {/* Buttons Row - Small and Left-aligned */}
-                                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "-8px" }}>
+                                <div style={{ 
+                                    display: "flex", 
+                                    alignItems: "center", 
+                                    gap: isMobile ? "8px" : "6px", 
+                                    marginLeft: isMobile ? "0" : "-8px",
+                                    flex: isMobile ? "none" : "none"
+                                }}>
                                     {/* Math Button - Small */}
                                     <span
                                         onClick={openCommentMathEditor}
                                         style={{
                                             color: "#6b7280",
                                             cursor: "pointer",
-                                            fontSize: "11px",
+                                            fontSize: isMobile ? "12px" : "11px",
                                             fontWeight: "500",
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
                                             gap: "2px",
                                             transition: "all 0.2s ease",
-                                            padding: "4px 6px",
+                                            padding: isMobile ? "8px 12px" : "4px 6px",
                                             whiteSpace: "nowrap",
                                             borderRadius: "4px",
                                             backgroundColor: "transparent",
                                             border: "none",
-                                            height: "20px",
-                                            minHeight: "20px",
+                                            height: isMobile ? "36px" : "20px",
+                                            minHeight: isMobile ? "36px" : "20px",
                                             lineHeight: "1",
-                                            transform: "translateY(-1px)"
+                                            transform: isMobile ? "none" : "translateY(-1px)"
                                         }}
                                         onMouseEnter={(e) => {
                                             e.target.style.color = "rgb(26, 77, 58)";
@@ -2165,7 +2188,7 @@ function ProblemDetail() {
                             
                             {/* Section 2 - Main Textarea with inline images */}
                             <div style={{ 
-                                width: "73.67%", 
+                                width: isMobile ? "100%" : "73.67%", 
                                 position: "relative",
                                 backgroundColor: "white"
                             }}>
@@ -2179,13 +2202,14 @@ function ProblemDetail() {
                                         outline: "none",
                                         resize: "none",
                                         fontFamily: "inherit",
-                                        fontSize: "15px",
-                                        padding: "20px",
-                                        paddingBottom: commentImages.length > 0 ? "50px" : "20px",
+                                        fontSize: isMobile ? "16px" : "15px",
+                                        padding: isMobile ? "15px" : "20px",
+                                        paddingBottom: commentImages.length > 0 ? (isMobile ? "60px" : "50px") : (isMobile ? "15px" : "20px"),
                                         backgroundColor: isTextareaFocused ? "#fafbfc" : "transparent",
                                         transition: "all 0.3s ease",
                                         cursor: "text",
-                                        lineHeight: "1.5"
+                                        lineHeight: "1.5",
+                                        minHeight: isMobile ? "80px" : "auto"
                                     }}
                                     onFocus={() => {
                                         setIsTextareaFocused(true);
@@ -2288,14 +2312,16 @@ function ProblemDetail() {
                             {/* Section 3 - Send Button (styled) */}
                             <div 
                                 style={{ 
-                                    width: "8.33%", 
-                                    display: "flex", 
-                                    alignItems: "center", 
+                                    width: isMobile ? "100%" : "8.33%", 
+                                    display: "flex",
+                                    alignItems: "center",
                                     justifyContent: "center",
                                     cursor: "pointer",
                                     background: "linear-gradient(135deg, rgb(118, 75, 162) 0%, rgb(98, 62, 135) 100%)",
                                     transition: "all 0.3s ease",
-                                    borderLeft: "2px solid rgb(118, 75, 162)"
+                                    borderLeft: isMobile ? "none" : "2px solid rgb(118, 75, 162)",
+                                    borderTop: isMobile ? "2px solid rgb(118, 75, 162)" : "none",
+                                    height: isMobile ? "50px" : "auto"
                                 }}
                                 onClick={handleSubmitComment}
                                 onMouseEnter={(e) => {
@@ -2309,12 +2335,12 @@ function ProblemDetail() {
                                     e.target.style.boxShadow = "none";
                                 }}
                             >
-                                <div style={{ 
-                                    display: "flex", 
-                                    alignItems: "center", 
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
                                     gap: "6px",
                                     color: "white",
-                                    fontSize: "12px",
+                                    fontSize: isMobile ? "14px" : "12px",
                                     fontWeight: "600"
                                 }}>
                                     <span>Send</span>

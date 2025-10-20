@@ -24,6 +24,18 @@ function Header({ showHomeButton = false }) {
     // Feature settings
     const { checkFeatureEnabled, showFeatureDisabledAlert } = useFeatureSettings();
     
+    // Mobile detection
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     // Update document title, favicon, and theme when site settings change
     useEffect(() => {
         if (siteSettings.site_name) {
@@ -170,14 +182,15 @@ function Header({ showHomeButton = false }) {
         <header style={{
             backgroundColor: colors.primary,
             color: colors.white,
-            padding: `${spacing.md} ${spacing.xl}`,
+            padding: isMobile ? `${spacing.sm} ${spacing.md}` : `${spacing.md} ${spacing.xl}`,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             boxShadow: shadows.md,
             position: "sticky",
             top: 0,
-            zIndex: 1000
+            zIndex: 1000,
+            minHeight: isMobile ? "60px" : "auto"
         }}>
             {/* Logo and Hamburger Menu */}
             <div style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
@@ -213,16 +226,21 @@ function Header({ showHomeButton = false }) {
                 )}
                 
                 <Link to="/homepage" style={{ textDecoration: "none", color: "inherit" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: spacing.sm, marginLeft: spacing.lg }}>
+                    <div style={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: isMobile ? spacing.xs : spacing.sm, 
+                        marginLeft: isMobile ? spacing.sm : spacing.lg 
+                    }}>
                         {/* Site Logo */}
                         {siteSettings.site_logo && (
                             <img 
                                 src={siteSettings.site_logo} 
                                 alt={siteSettings.site_name}
                                 style={{
-                                    height: "32px",
+                                    height: isMobile ? "24px" : "32px",
                                     width: "auto",
-                                    maxWidth: "200px",
+                                    maxWidth: isMobile ? "120px" : "200px",
                                     objectFit: "contain"
                                 }}
                                 onError={(e) => {
@@ -235,9 +253,10 @@ function Header({ showHomeButton = false }) {
                         {/* Site Name */}
                         <h1 style={{
                             margin: 0,
-                            fontSize: typography.fontSize["2xl"],
+                            fontSize: isMobile ? "18px" : typography.fontSize["2xl"],
                             fontWeight: typography.fontWeight.bold,
-                            cursor: "pointer"
+                            cursor: "pointer",
+                            display: isMobile ? (siteSettings.site_logo ? "none" : "block") : "block"
                         }}>
                             {siteSettings.site_name || 'Olimpiada'}
                         </h1>
@@ -246,7 +265,11 @@ function Header({ showHomeButton = false }) {
             </div>
 
             {/* Navigation */}
-            <nav style={{ display: "flex", alignItems: "center", gap: spacing.md }}>
+            <nav style={{ 
+                display: isMobile ? "none" : "flex", 
+                alignItems: "center", 
+                gap: spacing.md 
+            }}>
                 {/* Home Button (if requested) */}
                 {showHomeButton && (
                     <Link to="/homepage" style={{ 
@@ -623,6 +646,40 @@ function Header({ showHomeButton = false }) {
                     </div>
                 )}
             </nav>
+
+            {/* Mobile Menu Button */}
+            {isMobile && currentUser && (
+                <button
+                    onClick={() => setShowUserDropdown(!showUserDropdown)}
+                    style={{
+                        backgroundColor: "transparent",
+                        border: "none",
+                        color: colors.white,
+                        cursor: "pointer",
+                        padding: spacing.sm,
+                        borderRadius: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: spacing.xs
+                    }}
+                >
+                    <NotificationBell />
+                    <div style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "50%",
+                        backgroundColor: colors.secondary,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: colors.white,
+                        fontWeight: "bold",
+                        fontSize: "14px"
+                    }}>
+                        {getUserInitial(currentUser.username)}
+                    </div>
+                </button>
+            )}
             
             {/* Hamburger Menu Overlay */}
             {showHamburgerMenu && (
@@ -644,7 +701,7 @@ function Header({ showHomeButton = false }) {
             <div style={{
                 position: "fixed",
                 top: 0,
-                left: showHamburgerMenu ? "0" : (isMobile ? "-100%" : "-100%"),
+                left: showHamburgerMenu ? "0" : "-100%",
                 width: isMobile ? "100%" : "25%",
                 height: "100vh",
                 backgroundColor: colors.white,
