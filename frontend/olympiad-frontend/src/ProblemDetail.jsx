@@ -2148,9 +2148,9 @@ function ProblemDetail() {
                                         {commentImages.map((image) => (
                                             <div key={image.id} style={{
                                                 position: "relative",
-                                                width: "32px",
-                                                height: "16px",
-                                                borderRadius: "3px",
+                                                width: "48px",
+                                                height: "24px",
+                                                borderRadius: "4px",
                                                 overflow: "hidden",
                                                 border: "1px solid #d1d5db",
                                                 backgroundColor: "#fff",

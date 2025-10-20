@@ -63,69 +63,7 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
 
     return (
         <div style={{ marginBottom: '12px' }}>
-            {/* Flat Inline Thumbnails - Only show for compact variant */}
-            {images.length > 0 && variant === 'compact' && (
-                <div style={{
-                    display: 'flex',
-                    gap: '4px',
-                    marginTop: '6px',
-                    flexWrap: 'wrap'
-                }}>
-                    {images.map((image) => (
-                        <div key={image.id} style={{
-                            position: 'relative',
-                            width: '32px',
-                            height: '16px',
-                            borderRadius: '3px',
-                            overflow: 'hidden',
-                            border: '1px solid #d1d5db',
-                            backgroundColor: '#fff',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                        }}>
-                            <img
-                                src={image.preview}
-                                alt={image.name}
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'cover'
-                                }}
-                            />
-                            <button
-                                onClick={() => removeImage(image.id)}
-                                style={{
-                                    position: 'absolute',
-                                    top: '-3px',
-                                    right: '-3px',
-                                    width: '12px',
-                                    height: '12px',
-                                    borderRadius: '50%',
-                                    backgroundColor: 'rgba(220, 38, 38, 0.9)',
-                                    color: 'white',
-                                    border: '1px solid white',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '7px',
-                                    fontWeight: 'bold',
-                                    transition: 'all 0.2s ease'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.backgroundColor = 'rgba(185, 28, 28, 1)';
-                                    e.target.style.transform = 'scale(1.1)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.backgroundColor = 'rgba(220, 38, 38, 0.9)';
-                                    e.target.style.transform = 'scale(1)';
-                                }}
-                            >
-                                ×
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
+            {/* No thumbnails for compact variant - they're displayed inline in the textarea */}
 
             {/* Large Preview Grid - Only show for default variant */}
             {images.length > 0 && variant === 'default' && (
