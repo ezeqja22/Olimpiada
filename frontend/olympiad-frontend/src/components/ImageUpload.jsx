@@ -143,7 +143,7 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                         opacity: disabled ? 0.5 : 1,
                         boxShadow: isHovered ? '0 6px 20px rgba(0,0,0,0.08)' : '0 2px 10px rgba(0,0,0,0.04)',
                         overflow: 'hidden',
-                        height: variant === 'compact' ? '16px' : 'auto',
+                        height: variant === 'compact' ? '26px' : 'auto',
                         transform: variant === 'compact' ? 'translateY(0px)' : 'none'
                     }}
                 >
