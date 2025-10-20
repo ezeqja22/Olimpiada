@@ -75,6 +75,7 @@ class ProblemResponse(BaseModel):
 class CommentCreate(BaseModel):
     text: str
     parent_comment_id: Optional[int] = None
+    images: Optional[List[str]] = None
 
 class CommentResponse(BaseModel):
     id: int
@@ -83,6 +84,7 @@ class CommentResponse(BaseModel):
     problem_id: int
     parent_comment_id: Optional[int] = None
     is_solution: bool = False
+    images: Optional[List[str]] = None
     created_at: datetime
     author: UserOut
     updated_at: Optional[datetime] = None

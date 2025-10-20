@@ -728,7 +728,8 @@ async def create_comment(
         text=comment.text,
         author_id=current_user.id,
         problem_id=problem_id,
-        parent_comment_id=comment.parent_comment_id
+        parent_comment_id=comment.parent_comment_id,
+        images=comment.images
     )
     db.add(db_comment)
     db.commit()
@@ -859,6 +860,7 @@ def update_comment(
     
     # Update comment
     db_comment.text = comment.text
+    db_comment.images = comment.images
     db_comment.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(db_comment)

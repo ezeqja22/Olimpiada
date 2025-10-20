@@ -11,6 +11,7 @@ import Card from "./components/Card";
 import Button from "./components/Button";
 import BackButton from "./components/BackButton";
 import AnimatedLoader from "./components/AnimatedLoader";
+import ImageUpload from "./components/ImageUpload";
 import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { getUserInitial, getDisplayName } from "./utils";
 import ReportModal from "./ReportModal";
@@ -129,6 +130,53 @@ const CommentThread = ({
                         }}>
                             {renderMathContent(comment.text)}
                         </div>
+                        
+                        {/* Comment Images */}
+                        {comment.images && comment.images.length > 0 && (
+                            <div style={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                                gap: "8px",
+                                marginBottom: "12px"
+                            }}>
+                                {comment.images.map((imageUrl, index) => (
+                                    <div key={index} style={{
+                                        position: "relative",
+                                        width: "120px",
+                                        height: "120px",
+                                        borderRadius: "8px",
+                                        overflow: "hidden",
+                                        border: "2px solid #e5e7eb",
+                                        backgroundColor: "#f9fafb",
+                                        cursor: "pointer",
+                                        transition: "all 0.2s ease"
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.borderColor = "#3b82f6";
+                                        e.target.style.transform = "scale(1.02)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.borderColor = "#e5e7eb";
+                                        e.target.style.transform = "scale(1)";
+                                    }}
+                                    onClick={() => {
+                                        setCurrentImageIndex(index);
+                                        setShowImageModal(true);
+                                    }}
+                                    >
+                                        <img
+                                            src={imageUrl}
+                                            alt={`Comment image ${index + 1}`}
+                                            style={{
+                                                width: "100%",
+                                                height: "100%",
+                                                objectFit: "cover"
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                         
                         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "16px" }}>
                             <button
@@ -289,17 +337,24 @@ const CommentThread = ({
                                         fontSize: "14px"
                                     }}
                                 />
+                                
+                                {/* Reply Image Upload */}
+                                <ImageUpload
+                                    onImagesChange={setReplyImages}
+                                    maxImages={5}
+                                />
+                                
                                 <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
                                     <button
                                         onClick={() => onSubmitReply(comment.id)}
-                                        disabled={!replyText.trim()}
+                                        disabled={!replyText.trim() && replyImages.length === 0}
                                         style={{
                                             padding: "6px 12px",
-                                            backgroundColor: replyText.trim() ? "#007bff" : "#6c757d",
+                                            backgroundColor: (replyText.trim() || replyImages.length > 0) ? "#007bff" : "#6c757d",
                                             color: "white",
                                             border: "none",
                                             borderRadius: "6px",
-                                            cursor: replyText.trim() ? "pointer" : "not-allowed",
+                                            cursor: (replyText.trim() || replyImages.length > 0) ? "pointer" : "not-allowed",
                                             fontSize: "13px",
                                             fontWeight: "500"
                                         }}
@@ -310,6 +365,7 @@ const CommentThread = ({
                                         onClick={() => {
                                             setReplyingTo(null);
                                             setReplyText("");
+                                            setReplyImages([]);
                                         }}
                                         style={{
                                             padding: "6px 12px",
@@ -460,6 +516,7 @@ function ProblemDetail() {
     };
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
+    const [commentImages, setCommentImages] = useState([]);
     const [voteStatus, setVoteStatus] = useState({
         user_vote: null,
         like_count: 0,
@@ -469,8 +526,10 @@ function ProblemDetail() {
     const [currentUser, setCurrentUser] = useState(null);
     const [editingComment, setEditingComment] = useState(null);
     const [editText, setEditText] = useState("");
+    const [editImages, setEditImages] = useState([]);
     const [replyingTo, setReplyingTo] = useState(null);
     const [replyText, setReplyText] = useState("");
+    const [replyImages, setReplyImages] = useState([]);
     const [editingProblem, setEditingProblem] = useState(false);
     const [showMathEditor, setShowMathEditor] = useState(false);
     const [mathEditorTarget, setMathEditorTarget] = useState(null);
@@ -692,7 +751,7 @@ function ProblemDetail() {
 
     const handleSubmitComment = async (e) => {
         e.preventDefault();
-        if (!newComment.trim()) return;
+        if (!newComment.trim() && commentImages.length === 0) return;
 
         // Check if comments are enabled
         if (!checkFeatureEnabled('comments_enabled')) {
@@ -702,8 +761,30 @@ function ProblemDetail() {
 
         try {
             const token = localStorage.getItem("token");
+            
+            // Upload images to Cloudinary first
+            let imageUrls = [];
+            if (commentImages.length > 0) {
+                const uploadPromises = commentImages.map(async (imageData) => {
+                    const formData = new FormData();
+                    formData.append('file', imageData.file);
+                    formData.append('upload_preset', 'ml_default'); // Replace with your Cloudinary preset
+                    
+                    const uploadResponse = await axios.post(
+                        'https://api.cloudinary.com/v1_1/dqmmgk88b/image/upload',
+                        formData
+                    );
+                    return uploadResponse.data.secure_url;
+                });
+                
+                imageUrls = await Promise.all(uploadPromises);
+            }
+            
             const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${id}/comments`,
-                { text: newComment },
+                { 
+                    text: newComment,
+                    images: imageUrls
+                },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -713,13 +794,14 @@ function ProblemDetail() {
             // Refresh comments to get the updated threaded structure
             fetchComments();
             setNewComment("");
+            setCommentImages([]);
         } catch (error) {
             console.error("Error adding comment:", error);
         }
     }
 
     const handleSubmitReply = async (parentCommentId) => {
-        if (!replyText.trim()) return;
+        if (!replyText.trim() && replyImages.length === 0) return;
 
         // Check if comments are enabled
         if (!checkFeatureEnabled('comments_enabled')) {
@@ -729,10 +811,30 @@ function ProblemDetail() {
 
         try {
             const token = localStorage.getItem("token");
+            
+            // Upload images to Cloudinary first
+            let imageUrls = [];
+            if (replyImages.length > 0) {
+                const uploadPromises = replyImages.map(async (imageData) => {
+                    const formData = new FormData();
+                    formData.append('file', imageData.file);
+                    formData.append('upload_preset', 'ml_default'); // Replace with your Cloudinary preset
+                    
+                    const uploadResponse = await axios.post(
+                        'https://api.cloudinary.com/v1_1/dqmmgk88b/image/upload',
+                        formData
+                    );
+                    return uploadResponse.data.secure_url;
+                });
+                
+                imageUrls = await Promise.all(uploadPromises);
+            }
+            
             const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${id}/comments`,
                 { 
                     text: replyText,
-                    parent_comment_id: parentCommentId
+                    parent_comment_id: parentCommentId,
+                    images: imageUrls
                 },
                 {
                     headers: {
@@ -743,6 +845,7 @@ function ProblemDetail() {
             // Refresh comments to get the updated threaded structure
             fetchComments();
             setReplyText("");
+            setReplyImages([]);
             setReplyingTo(null);
         } catch (error) {
             console.error("Error adding reply:", error);
@@ -1878,27 +1981,35 @@ function ProblemDetail() {
                 {/* Add Comment Form */}
                 <div style={{ marginBottom: "20px" }}>
                     <form onSubmit={handleSubmitComment}>
-                        <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-                        <textarea
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Write your comment here..."
-                            style={{
-                                width: "100%",
-                                minHeight: "80px",
-                                padding: "10px",
-                                border: "1px solid #ddd",
-                                borderRadius: "5px",
-                                resize: "vertical",
-                                fontFamily: "inherit",
-                                whiteSpace: "pre-wrap"
-                            }}
+                        <div style={{ marginBottom: "10px" }}>
+                            <textarea
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                placeholder="Write your comment here..."
+                                style={{
+                                    width: "100%",
+                                    minHeight: "80px",
+                                    padding: "10px",
+                                    border: "1px solid #ddd",
+                                    borderRadius: "5px",
+                                    resize: "vertical",
+                                    fontFamily: "inherit",
+                                    whiteSpace: "pre-wrap"
+                                }}
+                            />
+                        </div>
+                        
+                        {/* Image Upload */}
+                        <ImageUpload
+                            onImagesChange={setCommentImages}
+                            maxImages={5}
                         />
+                        
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px" }}>
                             <button
                                 type="button"
                                 onClick={openCommentMathEditor}
                                 style={{
-                                    marginLeft: "10px",
                                     padding: "8px 12px",
                                     backgroundColor: "#4caf50",
                                     color: "white",
@@ -1911,22 +2022,22 @@ function ProblemDetail() {
                             >
                                 📐 Math
                             </button>
+                            
+                            <button
+                                type="submit"
+                                disabled={!newComment.trim() && commentImages.length === 0}
+                                style={{
+                                    padding: "8px 16px",
+                                    backgroundColor: (newComment.trim() || commentImages.length > 0) ? "#1976d2" : "#ccc",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "5px",
+                                    cursor: (newComment.trim() || commentImages.length > 0) ? "pointer" : "not-allowed"
+                                }}
+                            >
+                                Add Comment
+                            </button>
                         </div>
-                        <button
-                            type="submit"
-                            disabled={!newComment.trim()}
-                            style={{
-                                marginTop: "10px",
-                                padding: "8px 16px",
-                                backgroundColor: newComment.trim() ? "#1976d2" : "#ccc",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "5px",
-                                cursor: newComment.trim() ? "pointer" : "not-allowed"
-                            }}
-                        >
-                            Add Comment
-                        </button>
                     </form>
                 </div>
 

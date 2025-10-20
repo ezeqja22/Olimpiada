@@ -70,6 +70,7 @@ class Comment(Base):
     problem_id = Column(Integer, ForeignKey("problems.id"))
     parent_comment_id = Column(Integer, ForeignKey("comments.id"), nullable=True)
     is_solution = Column(Boolean, default=False)
+    images = Column(JSON, nullable=True)  # Store array of image URLs
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
     author = relationship("User", back_populates="comments")
