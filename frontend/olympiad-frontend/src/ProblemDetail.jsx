@@ -1995,67 +1995,198 @@ function ProblemDetail() {
                 {/* Add Comment Form */}
                 <div style={{ marginBottom: "20px" }}>
                     <form onSubmit={handleSubmitComment}>
-                        <div style={{ marginBottom: "10px", position: "relative" }}>
-                            <textarea
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                placeholder="Write your comment here..."
-                                style={{
-                                    width: "100%",
-                                    minHeight: "80px",
-                                    padding: "10px",
-                                    border: "1px solid #ddd",
-                                    borderRadius: "5px",
-                                    resize: "vertical",
-                                    fontFamily: "inherit",
-                                    whiteSpace: "pre-wrap",
-                                    paddingLeft: "160px",
-                                    paddingRight: "10px"
-                                }}
-                            />
-                            {/* Inline controls */}
-                            <div style={{ position: "absolute", left: "10px", bottom: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
-                                <ImageUpload
-                                    onImagesChange={setCommentImages}
-                                    maxImages={5}
-                                    resetTrigger={imageResetKey}
-                                    variant="compact"
-                                    showHelper={false}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={openCommentMathEditor}
-                                    style={{
-                                        padding: "6px 8px",
-                                        backgroundColor: "#111827",
-                                        color: "white",
-                                        border: "none",
-                                        borderRadius: "9999px",
-                                        cursor: "pointer",
-                                        fontSize: "12px"
-                                    }}
-                                    title="Add Math"
-                                >
-                                    📐 Math
-                                </button>
+                        <div style={{ 
+                            display: "flex", 
+                            border: "1px solid #ddd", 
+                            borderRadius: "8px", 
+                            overflow: "hidden",
+                            backgroundColor: "white",
+                            minHeight: "100px"
+                        }}>
+                            {/* Left Section - Profile Picture and Buttons (2/3 width) */}
+                            <div style={{ 
+                                width: "66.67%", 
+                                padding: "15px", 
+                                display: "flex", 
+                                flexDirection: "column", 
+                                alignItems: "flex-start",
+                                gap: "10px",
+                                borderRight: "1px solid #ddd"
+                            }}>
+                                {/* User Profile Picture */}
+                                <div style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    borderRadius: "50%",
+                                    backgroundColor: "#f3f4f6",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    color: "#6b7280",
+                                    fontWeight: "bold",
+                                    fontSize: "16px",
+                                    backgroundImage: currentUser?.profile_picture ? 
+                                        `url(${currentUser.profile_picture})` : 
+                                        'none',
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center",
+                                    border: "2px solid #e5e7eb"
+                                }}>
+                                    {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
+                                </div>
                                 
-                                <button
-                                    type="submit"
-                                    disabled={!newComment.trim() && commentImages.length === 0}
-                                    style={{
-                                        padding: "6px 10px",
-                                        backgroundColor: (newComment.trim() || commentImages.length > 0) ? "rgb(26, 77, 58)" : "#ccc",
+                                {/* Buttons Row */}
+                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                    {/* Math Button */}
+                                    <button
+                                        type="button"
+                                        onClick={openCommentMathEditor}
+                                        style={{
+                                            padding: "8px 12px",
+                                            backgroundColor: "#4caf50",
+                                            color: "white",
+                                            border: "none",
+                                            borderRadius: "6px",
+                                            cursor: "pointer",
+                                            fontSize: "14px",
+                                            fontWeight: "500",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "4px",
+                                            transition: "all 0.2s ease"
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.backgroundColor = "#45a049";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.backgroundColor = "#4caf50";
+                                        }}
+                                        title="Add Math"
+                                    >
+                                        📐 Math
+                                    </button>
+                                    
+                                    {/* Add Image Button */}
+                                    <ImageUpload
+                                        onImagesChange={setCommentImages}
+                                        maxImages={5}
+                                        resetTrigger={imageResetKey}
+                                        variant="compact"
+                                        showHelper={false}
+                                    />
+                                </div>
+                            </div>
+                            
+                            {/* Right Section - Clickable Textarea Area (1/3 width) */}
+                            <div 
+                                style={{ 
+                                    width: "33.33%", 
+                                    display: "flex", 
+                                    alignItems: "center", 
+                                    justifyContent: "center",
+                                    cursor: "pointer",
+                                    backgroundColor: "#f9fafb",
+                                    transition: "all 0.2s ease"
+                                }}
+                                onClick={() => {
+                                    // Focus the textarea when clicked
+                                    const textarea = document.querySelector('textarea[placeholder="Write your comment here..."]');
+                                    if (textarea) {
+                                        textarea.focus();
+                                    }
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = "#f3f4f6";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = "#f9fafb";
+                                }}
+                            >
+                                <div style={{ 
+                                    display: "flex", 
+                                    alignItems: "center", 
+                                    gap: "8px",
+                                    color: "#6b7280",
+                                    fontSize: "14px",
+                                    fontWeight: "500"
+                                }}>
+                                    <span>Click to add comment</span>
+                                    <div style={{
+                                        width: "20px",
+                                        height: "20px",
+                                        backgroundColor: "#d1d5db",
+                                        borderRadius: "4px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
                                         color: "white",
-                                        border: "none",
-                                        borderRadius: "9999px",
-                                        cursor: (newComment.trim() || commentImages.length > 0) ? "pointer" : "not-allowed",
                                         fontSize: "12px"
-                                    }}
-                                >
-                                    Add Comment
-                                </button>
+                                    }}>
+                                        →
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        
+                        {/* Hidden Textarea for actual input */}
+                        <textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Write your comment here..."
+                            style={{
+                                width: "100%",
+                                minHeight: "80px",
+                                padding: "15px",
+                                border: "1px solid #ddd",
+                                borderRadius: "8px",
+                                resize: "vertical",
+                                fontFamily: "inherit",
+                                whiteSpace: "pre-wrap",
+                                marginTop: "10px",
+                                display: newComment.trim() || commentImages.length > 0 ? "block" : "none"
+                            }}
+                        />
+                        
+                        {/* Send Button - Only show when there's content */}
+                        {(newComment.trim() || commentImages.length > 0) && (
+                            <div style={{ 
+                                display: "flex", 
+                                justifyContent: "flex-end", 
+                                marginTop: "10px" 
+                            }}>
+                                <button
+                                    type="submit"
+                                    style={{
+                                        padding: "12px 24px",
+                                        backgroundColor: "#1976d2",
+                                        color: "white",
+                                        border: "none",
+                                        borderRadius: "8px",
+                                        cursor: "pointer",
+                                        fontSize: "16px",
+                                        fontWeight: "600",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        transition: "all 0.2s ease",
+                                        boxShadow: "0 2px 4px rgba(25, 118, 210, 0.2)"
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.backgroundColor = "#1565c0";
+                                        e.target.style.transform = "translateY(-1px)";
+                                        e.target.style.boxShadow = "0 4px 8px rgba(25, 118, 210, 0.3)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.backgroundColor = "#1976d2";
+                                        e.target.style.transform = "translateY(0)";
+                                        e.target.style.boxShadow = "0 2px 4px rgba(25, 118, 210, 0.2)";
+                                    }}
+                                >
+                                    Send
+                                    <span style={{ fontSize: "18px" }}>→</span>
+                                </button>
+                            </div>
+                        )}
                     </form>
                 </div>
 
