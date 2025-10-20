@@ -1,9 +1,18 @@
 import React, { useState, useRef } from 'react';
 
-const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false }) => {
+const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTrigger }) => {
     const [images, setImages] = useState([]);
     const [isHovered, setIsHovered] = useState(false);
     const fileInputRef = useRef(null);
+
+    // Allow parent to reset the internal state (after successful submit)
+    React.useEffect(() => {
+        setImages([]);
+        onImagesChange([]);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    }, [resetTrigger]);
 
     const handleFileSelect = (event) => {
         const files = Array.from(event.target.files);
@@ -58,19 +67,20 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false }) => {
             {images.length > 0 && (
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
-                    gap: '8px',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+                    gap: '10px',
                     marginBottom: '12px'
                 }}>
                     {images.map((image) => (
                         <div key={image.id} style={{
                             position: 'relative',
-                            width: '80px',
-                            height: '80px',
-                            borderRadius: '8px',
+                            width: '90px',
+                            height: '90px',
+                            borderRadius: '10px',
                             overflow: 'hidden',
-                            border: '2px solid #e5e7eb',
-                            backgroundColor: '#f9fafb'
+                            border: '1px solid #e5e7eb',
+                            backgroundColor: '#fff',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
                         }}>
                             <img
                                 src={image.preview}
@@ -87,10 +97,10 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false }) => {
                                     position: 'absolute',
                                     top: '4px',
                                     right: '4px',
-                                    width: '20px',
-                                    height: '20px',
+                                    width: '22px',
+                                    height: '22px',
                                     borderRadius: '50%',
-                                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.65)',
                                     color: 'white',
                                     border: 'none',
                                     cursor: 'pointer',
@@ -121,39 +131,39 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false }) => {
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                     style={{
-                        display: 'flex',
+                        display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '8px',
-                        padding: '8px 12px',
-                        backgroundColor: isHovered ? '#f3f4f6' : '#f9fafb',
-                        border: '2px dashed #d1d5db',
-                        borderRadius: '8px',
+                        gap: '10px',
+                        padding: '10px 14px',
+                        backgroundColor: isHovered ? '#eff6ff' : '#f8fafc',
+                        border: '1.5px dashed #cbd5e1',
+                        borderRadius: '10px',
                         cursor: disabled ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.2s ease',
+                        transition: 'all 0.18s ease',
                         opacity: disabled ? 0.5 : 1,
-                        width: 'fit-content'
+                        boxShadow: isHovered ? '0 6px 20px rgba(59,130,246,0.12)' : '0 2px 10px rgba(0,0,0,0.05)'
                     }}
                 >
                     <div style={{
-                        width: '20px',
-                        height: '20px',
+                        width: '26px',
+                        height: '26px',
                         borderRadius: '50%',
-                        backgroundColor: isHovered ? '#3b82f6' : '#6b7280',
+                        backgroundColor: isHovered ? '#2563eb' : '#64748b',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: 'white',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: 'bold',
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.18s ease'
                     }}>
                         +
                     </div>
                     <span style={{
                         fontSize: '14px',
-                        color: isHovered ? '#3b82f6' : '#6b7280',
-                        fontWeight: '500',
-                        transition: 'all 0.2s ease',
+                        color: isHovered ? '#2563eb' : '#475569',
+                        fontWeight: '600',
+                        transition: 'all 0.18s ease',
                         whiteSpace: 'nowrap'
                     }}>
                         {isHovered ? 'Add Images' : `Add Image (${images.length}/${maxImages})`}
@@ -176,7 +186,7 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false }) => {
             <div style={{
                 fontSize: '12px',
                 color: '#6b7280',
-                marginTop: '4px'
+                marginTop: '6px'
             }}>
                 {images.length > 0 && `${images.length}/${maxImages} images selected`}
                 {images.length === 0 && `Upload up to ${maxImages} images (max 5MB each)`}

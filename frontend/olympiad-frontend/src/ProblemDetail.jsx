@@ -525,6 +525,7 @@ function ProblemDetail() {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
     const [commentImages, setCommentImages] = useState([]);
+    const [imageResetKey, setImageResetKey] = useState(0);
     const [voteStatus, setVoteStatus] = useState({
         user_vote: null,
         like_count: 0,
@@ -807,6 +808,7 @@ function ProblemDetail() {
             fetchComments();
             setNewComment("");
             setCommentImages([]);
+            setImageResetKey(prev => prev + 1); // reset ImageUpload
         } catch (error) {
             console.error("Error adding comment:", error);
             alert(`Error adding comment: ${error.message}`);
@@ -2015,6 +2017,7 @@ function ProblemDetail() {
                         <ImageUpload
                             onImagesChange={setCommentImages}
                             maxImages={5}
+                            resetTrigger={imageResetKey}
                         />
                         
                         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px" }}>
