@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import models
 from database import engine, get_db
+from sqlalchemy import text
 # Import routers with error handling for production
 try:
     from auth.routes import router as auth_router
@@ -42,6 +43,7 @@ app = FastAPI()
 # Removed static files mount - will use Cloudinary in production
 
 # Create database tables with error handling
+
 try:
     models.Base.metadata.create_all(bind=engine)
     print("Database tables created successfully")
@@ -407,6 +409,42 @@ async def save_settings_simple(settings_data: dict):
     except Exception as e:
         return {
             "message": f"Failed to save settings: {str(e)}",
+            "error": str(e)
+        }
+
+# Migration endpoint for manual migration
+@app.post("/admin/migrate")
+async def run_manual_migration():
+    """Manual migration endpoint to add images column to comments table"""
+    try:
+        with engine.connect() as conn:
+            # Check if column already exists
+            result = conn.execute(text("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name='comments' AND column_name='images'
+            """))
+            
+            if result.fetchone():
+                return {
+                    "message": "Column 'images' already exists in comments table",
+                    "status": "already_exists"
+                }
+            else:
+                # Add the column
+                conn.execute(text("""
+                    ALTER TABLE comments 
+                    ADD COLUMN images JSON
+                """))
+                conn.commit()
+                return {
+                    "message": "Successfully added 'images' column to comments table",
+                    "status": "success"
+                }
+    except Exception as e:
+        return {
+            "message": f"Failed to run migration: {str(e)}",
+            "status": "error",
             "error": str(e)
         }
 
