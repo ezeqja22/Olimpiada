@@ -2009,11 +2009,12 @@ function ProblemDetail() {
                                     resize: "vertical",
                                     fontFamily: "inherit",
                                     whiteSpace: "pre-wrap",
-                                    paddingRight: "140px"
+                                    paddingLeft: "160px",
+                                    paddingRight: "10px"
                                 }}
                             />
                             {/* Inline controls */}
-                            <div style={{ position: "absolute", right: "10px", bottom: "10px", display: "flex", alignItems: "center", gap: "8px", background: 'linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.6))', padding: '6px 8px', borderRadius: '9999px', backdropFilter: 'blur(2px)' }}>
+                            <div style={{ position: "absolute", left: "10px", bottom: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
                                 <ImageUpload
                                     onImagesChange={setCommentImages}
                                     maxImages={5}
@@ -2026,7 +2027,7 @@ function ProblemDetail() {
                                     onClick={openCommentMathEditor}
                                     style={{
                                         padding: "6px 8px",
-                                        backgroundColor: "#1e293b",
+                                        backgroundColor: "#111827",
                                         color: "white",
                                         border: "none",
                                         borderRadius: "9999px",
