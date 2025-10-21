@@ -715,7 +715,7 @@ function Homepage() {
                             )}
                         </div>
                         {currentUser ? (
-                            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "4px", position: "relative" }}>
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -758,7 +758,7 @@ function Homepage() {
                                         border: "1px solid #e5e7eb",
                                         borderRadius: "6px",
                                         boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
-                                        zIndex: 1000,
+                                        zIndex: 1001,
                                         minWidth: "150px",
                                         marginTop: "4px"
                                     }}>
@@ -1104,7 +1104,7 @@ function Homepage() {
                         right: 0,
                         bottom: 0,
                         backgroundColor: "rgba(0, 0, 0, 0.5)",
-                        zIndex: 999
+                        zIndex: 998
                     }}
                 />
             )}
