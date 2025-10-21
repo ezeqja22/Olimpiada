@@ -48,12 +48,25 @@ function Feed() {
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProblems, setTotalProblems] = useState(0);
   
   // Feature settings
   const { checkFeatureEnabled, showFeatureDisabledAlert } = useFeatureSettings();
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -560,11 +573,12 @@ function Feed() {
     <Layout showHomeButton={true}>
       <div style={{ marginBottom: spacing.xl }}>
         <h1 style={{
-          fontSize: typography.fontSize["3xl"],
+          fontSize: isMobile ? typography.fontSize["2xl"] : typography.fontSize["3xl"],
           fontWeight: typography.fontWeight.bold,
           color: colors.primary,
           marginBottom: spacing.lg,
-          textAlign: "center"
+          textAlign: "center",
+          padding: isMobile ? "0 1rem" : "0"
         }}>
           Science Problems Feed
         </h1>
@@ -572,7 +586,10 @@ function Feed() {
       </div>
 
       {/* Enhanced Search Bar */}
-      <div style={{ marginBottom: "20px" }}>
+      <div style={{ 
+        marginBottom: "20px",
+        padding: isMobile ? "0 1rem" : "0"
+      }}>
         <SearchBar placeholder="Search problems, users, tags, levels..." />
       </div>
         {/* Removed old search results - now handled by SearchBar component */}
@@ -584,6 +601,7 @@ function Feed() {
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         overflow: "hidden",
+        margin: isMobile ? "0 1rem 1.5rem 1rem" : "0 0 1.5rem 0",
         boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
         border: `1px solid ${colors.gray[200]}`
       }}>
@@ -591,14 +609,14 @@ function Feed() {
           onClick={() => setActiveTab("all")}
           style={{
             flex: 1,
-            padding: `${spacing.sm} ${spacing.md}`,
+            padding: isMobile ? `${spacing.xs} ${spacing.sm}` : `${spacing.sm} ${spacing.md}`,
             border: "none",
             backgroundColor: activeTab === "all" ? colors.primary : "transparent",
             color: activeTab === "all" ? colors.white : colors.gray[600],
             cursor: "pointer",
             fontWeight: activeTab === "all" ? typography.fontWeight.bold : typography.fontWeight.medium,
             transition: "all 0.2s ease",
-            fontSize: typography.fontSize.base
+            fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base
           }}
         >
           All Problems
@@ -607,14 +625,14 @@ function Feed() {
           onClick={() => setActiveTab("following")}
           style={{
             flex: 1,
-            padding: `${spacing.sm} ${spacing.md}`,
+            padding: isMobile ? `${spacing.xs} ${spacing.sm}` : `${spacing.sm} ${spacing.md}`,
             border: "none",
             backgroundColor: activeTab === "following" ? colors.primary : "transparent",
             color: activeTab === "following" ? colors.white : colors.gray[600],
             cursor: "pointer",
             fontWeight: activeTab === "following" ? typography.fontWeight.bold : typography.fontWeight.medium,
             transition: "all 0.2s ease",
-            fontSize: typography.fontSize.base
+            fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base
           }}
         >
           Following
@@ -623,14 +641,14 @@ function Feed() {
           onClick={() => setActiveTab("trending")}
           style={{
             flex: 1,
-            padding: `${spacing.sm} ${spacing.md}`,
+            padding: isMobile ? `${spacing.xs} ${spacing.sm}` : `${spacing.sm} ${spacing.md}`,
             border: "none", 
             backgroundColor: activeTab === "trending" ? colors.primary : "transparent",
             color: activeTab === "trending" ? colors.white : colors.gray[600],
             cursor: "pointer",
             fontWeight: activeTab === "trending" ? typography.fontWeight.bold : typography.fontWeight.medium,
             transition: "all 0.2s ease",
-            fontSize: typography.fontSize.base
+            fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base
           }}
         >
           Trending
@@ -1030,7 +1048,7 @@ function Feed() {
           
           <span style={{ 
             padding: `0 ${spacing.lg}`,
-            fontSize: typography.fontSize.base,
+            fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
             color: colors.gray[600],
             fontWeight: typography.fontWeight.medium
           }}>

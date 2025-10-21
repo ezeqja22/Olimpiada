@@ -2188,7 +2188,7 @@ function ProblemDetail() {
                             
                             {/* Section 2 - Main Textarea with inline images */}
                             <div style={{ 
-                                width: isMobile ? "100%" : "73.67%", 
+                                width: isMobile ? "100%" : "70%", 
                                 position: "relative",
                                 backgroundColor: "white"
                             }}>
@@ -2313,7 +2313,7 @@ function ProblemDetail() {
                             {/* Section 3 - Send Button (styled) */}
                             <div 
                                 style={{ 
-                                    width: isMobile ? "100%" : "8.33%", 
+                                    width: isMobile ? "100%" : "15%", 
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",

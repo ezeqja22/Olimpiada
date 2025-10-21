@@ -208,13 +208,15 @@ function Header({ showHomeButton = false }) {
                             display: "flex",
                             flexDirection: "column",
                             gap: "3px",
-                            transition: "background-color 0.2s"
+                            transition: "background-color 0.2s",
+                            zIndex: 1001,
+                            position: "relative"
                         }}
                         onMouseEnter={(e) => e.target.style.backgroundColor = colors.secondary}
                         onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                     >
                         <img
-                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/Sandwich_icon_efioyq.svg"
+                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
                             alt="Menu"
                             style={{
                                 width: "20px",
@@ -701,7 +703,7 @@ function Header({ showHomeButton = false }) {
             <div style={{
                 position: "fixed",
                 top: 0,
-                left: showHamburgerMenu ? "0" : "-100%",
+                left: showHamburgerMenu ? "0" : (isMobile ? "-100%" : "-100%"),
                 width: isMobile ? "100%" : "25%",
                 height: "100vh",
                 backgroundColor: colors.white,
@@ -745,7 +747,7 @@ function Header({ showHomeButton = false }) {
                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                         >
                             <img
-                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/Sandwich_icon_efioyq.svg"
+                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
                                 alt="Close Menu"
                                 style={{
                                     width: "16px",
@@ -797,7 +799,7 @@ function Header({ showHomeButton = false }) {
                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                         >
                             <img
-                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/Sandwich_icon_efioyq.svg"
+                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
                                 alt="Close Menu"
                                 style={{
                                     width: "16px",

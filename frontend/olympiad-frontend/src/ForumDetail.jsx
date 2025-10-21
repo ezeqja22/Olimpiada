@@ -96,6 +96,7 @@ const ForumDetail = () => {
         const saved = localStorage.getItem(`forum-${forumId}-chat-open`);
         return saved === 'true';
     });
+    const [showSidebar, setShowSidebar] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
@@ -1261,11 +1262,12 @@ const ForumDetail = () => {
             }}>
                 {/* Forum Info Panel */}
                 <div style={{
-                    width: showChat ? (isMobile ? '0%' : '30%') : '100%',
-                    minWidth: showChat ? (isMobile ? '0px' : '300px') : 'auto',
+                    width: showChat ? (isMobile ? (showSidebar ? '100%' : '0%') : '30%') : '100%',
+                    minWidth: showChat ? (isMobile ? (showSidebar ? 'auto' : '0px') : '300px') : 'auto',
                     transition: 'all 0.3s ease-in-out',
                     overflow: 'hidden',
-                    borderRight: showChat ? `1px solid ${colors.gray[200]}` : 'none'
+                    borderRight: showChat ? `1px solid ${colors.gray[200]}` : 'none',
+                    display: isMobile && !showSidebar ? 'none' : 'block'
                 }}>
                     <div style={{ padding: spacing.lg, height: '100%', overflowY: 'auto' }}>
                         <BackButton fallbackPath="/forums" />
@@ -2304,7 +2306,7 @@ const ForumDetail = () => {
                             </div>
                             {isMobile && (
                                 <button
-                                    onClick={toggleChat}
+                                    onClick={() => setShowSidebar(!showSidebar)}
                                     style={{
                                         backgroundColor: 'transparent',
                                         border: 'none',
@@ -2314,7 +2316,15 @@ const ForumDetail = () => {
                                         padding: '8px'
                                     }}
                                 >
-                                    ↓
+                                    <img
+                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
+                                        alt="Menu"
+                                        style={{
+                                            width: "20px",
+                                            height: "20px",
+                                            objectFit: "contain"
+                                        }}
+                                    />
                                 </button>
                             )}
                         </div>
