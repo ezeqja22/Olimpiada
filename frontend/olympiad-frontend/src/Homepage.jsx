@@ -617,36 +617,75 @@ function Homepage() {
                 </nav>
 
                 {/* Mobile Menu Button */}
-                {isMobile && currentUser && (
-                    <button
-                        onClick={() => setShowUserDropdown(!showUserDropdown)}
-                        style={{
-                            backgroundColor: "transparent",
-                            border: "none",
-                            color: "white",
-                            cursor: "pointer",
-                            padding: "8px",
+                {isMobile && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        {/* Mobile Navigation Links */}
+                        <Link to="/feed" style={{ 
+                            color: "white", 
+                            textDecoration: "none", 
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            padding: "8px 12px",
                             borderRadius: "4px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px"
-                        }}
-                    >
-                        <div style={{
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "50%",
-                            backgroundColor: "rgba(255, 255, 255, 0.2)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "white",
-                            fontWeight: "bold",
-                            fontSize: "14px"
+                            backgroundColor: "rgba(255, 255, 255, 0.1)"
                         }}>
-                            {getUserInitial(currentUser.username)}
-                        </div>
-                    </button>
+                            Feed
+                        </Link>
+                        <Link to="/forums" style={{ 
+                            color: "white", 
+                            textDecoration: "none", 
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            padding: "8px 12px",
+                            borderRadius: "4px",
+                            backgroundColor: "rgba(255, 255, 255, 0.1)"
+                        }}>
+                            Forums
+                        </Link>
+                        {currentUser ? (
+                            <button
+                                onClick={() => setShowUserDropdown(!showUserDropdown)}
+                                style={{
+                                    backgroundColor: "transparent",
+                                    border: "none",
+                                    color: "white",
+                                    cursor: "pointer",
+                                    padding: "8px",
+                                    borderRadius: "4px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px"
+                                }}
+                            >
+                                <div style={{
+                                    width: "32px",
+                                    height: "32px",
+                                    borderRadius: "50%",
+                                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    color: "white",
+                                    fontWeight: "bold",
+                                    fontSize: "14px"
+                                }}>
+                                    {getUserInitial(currentUser.username)}
+                                </div>
+                            </button>
+                        ) : (
+                            <Link to="/login" style={{ 
+                                color: "white", 
+                                textDecoration: "none", 
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                padding: "8px 12px",
+                                borderRadius: "4px",
+                                backgroundColor: "rgba(255, 255, 255, 0.1)"
+                            }}>
+                                Login
+                            </Link>
+                        )}
+                    </div>
                 )}
             </header>
 
