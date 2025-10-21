@@ -182,7 +182,7 @@ function Header({ showHomeButton = false }) {
         <header style={{
             backgroundColor: colors.primary,
             color: colors.white,
-            padding: isMobile ? `${spacing.sm} ${spacing.md}` : `${spacing.md} ${spacing.xl}`,
+            padding: isMobile ? `${spacing.xs} ${spacing.sm}` : `${spacing.md} ${spacing.xl}`,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -190,7 +190,7 @@ function Header({ showHomeButton = false }) {
             position: "sticky",
             top: 0,
             zIndex: 1000,
-            minHeight: isMobile ? "60px" : "auto"
+            minHeight: isMobile ? "50px" : "auto"
         }}>
             {/* Logo and Hamburger Menu */}
             <div style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
@@ -231,8 +231,8 @@ function Header({ showHomeButton = false }) {
                     <div style={{ 
                         display: "flex", 
                         alignItems: "center", 
-                        gap: isMobile ? spacing.xs : spacing.sm, 
-                        marginLeft: isMobile ? spacing.sm : spacing.lg 
+                        gap: isMobile ? "4px" : spacing.sm, 
+                        marginLeft: isMobile ? "4px" : spacing.lg 
                     }}>
                         {/* Site Logo */}
                         {siteSettings.site_logo && (
@@ -240,9 +240,9 @@ function Header({ showHomeButton = false }) {
                                 src={siteSettings.site_logo} 
                                 alt={siteSettings.site_name}
                                 style={{
-                                    height: isMobile ? "24px" : "32px",
+                                    height: isMobile ? "20px" : "32px",
                                     width: "auto",
-                                    maxWidth: isMobile ? "120px" : "200px",
+                                    maxWidth: isMobile ? "80px" : "200px",
                                     objectFit: "contain"
                                 }}
                                 onError={(e) => {
@@ -255,10 +255,10 @@ function Header({ showHomeButton = false }) {
                         {/* Site Name */}
                         <h1 style={{
                             margin: 0,
-                            fontSize: isMobile ? "18px" : typography.fontSize["2xl"],
+                            fontSize: isMobile ? "16px" : typography.fontSize["2xl"],
                             fontWeight: typography.fontWeight.bold,
                             cursor: "pointer",
-                            display: isMobile ? (siteSettings.site_logo ? "none" : "block") : "block"
+                            display: "block"
                         }}>
                             {siteSettings.site_name || 'Olimpiada'}
                         </h1>
@@ -649,38 +649,77 @@ function Header({ showHomeButton = false }) {
                 )}
             </nav>
 
-            {/* Mobile Menu Button */}
-            {isMobile && currentUser && (
-                <button
-                    onClick={() => setShowUserDropdown(!showUserDropdown)}
-                    style={{
-                        backgroundColor: "transparent",
-                        border: "none",
-                        color: colors.white,
-                        cursor: "pointer",
-                        padding: spacing.sm,
+            {/* Mobile Navigation */}
+            {isMobile && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    {/* Mobile Navigation Links */}
+                    <Link to="/feed" style={{ 
+                        color: "white", 
+                        textDecoration: "none", 
+                        fontSize: "11px",
+                        fontWeight: "500",
+                        padding: "4px 6px",
                         borderRadius: "4px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: spacing.xs
-                    }}
-                >
-                    <NotificationBell />
-                    <div style={{
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "50%",
-                        backgroundColor: colors.secondary,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: colors.white,
-                        fontWeight: "bold",
-                        fontSize: "14px"
+                        backgroundColor: "rgba(255, 255, 255, 0.1)"
                     }}>
-                        {getUserInitial(currentUser.username)}
-                    </div>
-                </button>
+                        Feed
+                    </Link>
+                    <Link to="/forums" style={{ 
+                        color: "white", 
+                        textDecoration: "none", 
+                        fontSize: "11px",
+                        fontWeight: "500",
+                        padding: "4px 6px",
+                        borderRadius: "4px",
+                        backgroundColor: "rgba(255, 255, 255, 0.1)"
+                    }}>
+                        Forums
+                    </Link>
+                    {currentUser ? (
+                        <button
+                            onClick={() => setShowUserDropdown(!showUserDropdown)}
+                            style={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                color: "white",
+                                cursor: "pointer",
+                                padding: "4px",
+                                borderRadius: "4px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px"
+                            }}
+                        >
+                            <NotificationBell />
+                            <div style={{
+                                width: "24px",
+                                height: "24px",
+                                borderRadius: "50%",
+                                backgroundColor: colors.secondary,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: colors.white,
+                                fontWeight: "bold",
+                                fontSize: "10px"
+                            }}>
+                                {getUserInitial(currentUser.username)}
+                            </div>
+                        </button>
+                    ) : (
+                        <Link to="/login" style={{ 
+                            color: "white", 
+                            textDecoration: "none", 
+                            fontSize: "11px",
+                            fontWeight: "500",
+                            padding: "4px 6px",
+                            borderRadius: "4px",
+                            backgroundColor: "rgba(255, 255, 255, 0.1)"
+                        }}>
+                            Login
+                        </Link>
+                    )}
+                </div>
             )}
             
             {/* Hamburger Menu Overlay */}
