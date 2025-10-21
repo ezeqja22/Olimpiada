@@ -157,6 +157,10 @@ function Header({ showHomeButton = false }) {
         setShowHamburgerMenu(false);
     };
 
+    const handleUserDropdownClose = () => {
+        setShowUserDropdown(false);
+    };
+
     const handlePinToggle = (forumId, e) => {
         e.stopPropagation(); // Prevent forum click
         
@@ -676,36 +680,37 @@ function Header({ showHomeButton = false }) {
                         Forums
                     </Link>
                     {currentUser ? (
-                        <button
-                            onClick={() => setShowUserDropdown(!showUserDropdown)}
-                            style={{
-                                backgroundColor: "transparent",
-                                border: "none",
-                                color: "white",
-                                cursor: "pointer",
-                                padding: "4px",
-                                borderRadius: "4px",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px"
-                            }}
-                        >
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                             <NotificationBell />
-                            <div style={{
-                                width: "24px",
-                                height: "24px",
-                                borderRadius: "50%",
-                                backgroundColor: colors.secondary,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: colors.white,
-                                fontWeight: "bold",
-                                fontSize: "10px"
-                            }}>
-                                {getUserInitial(currentUser.username)}
-                            </div>
-                        </button>
+                            <button
+                                onClick={() => setShowUserDropdown(!showUserDropdown)}
+                                style={{
+                                    backgroundColor: "transparent",
+                                    border: "none",
+                                    color: "white",
+                                    cursor: "pointer",
+                                    padding: "4px",
+                                    borderRadius: "4px",
+                                    display: "flex",
+                                    alignItems: "center"
+                                }}
+                            >
+                                <div style={{
+                                    width: "24px",
+                                    height: "24px",
+                                    borderRadius: "50%",
+                                    backgroundColor: colors.secondary,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    color: colors.white,
+                                    fontWeight: "bold",
+                                    fontSize: "10px"
+                                }}>
+                                    {getUserInitial(currentUser.username)}
+                                </div>
+                            </button>
+                        </div>
                     ) : (
                         <Link to="/login" style={{ 
                             color: "white", 
@@ -720,6 +725,21 @@ function Header({ showHomeButton = false }) {
                         </Link>
                     )}
                 </div>
+            )}
+
+            {/* Click outside to close user dropdown */}
+            {showUserDropdown && (
+                <div 
+                    onClick={handleUserDropdownClose}
+                    style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        zIndex: 999
+                    }}
+                />
             )}
             
             {/* Hamburger Menu Overlay */}

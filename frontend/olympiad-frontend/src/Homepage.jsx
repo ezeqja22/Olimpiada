@@ -184,6 +184,10 @@ function Homepage() {
         setShowHamburgerMenu(false);
     };
 
+    const handleUserDropdownClose = () => {
+        setShowUserDropdown(false);
+    };
+
     return (
         <div style={{ 
             minHeight: "100vh", 
@@ -194,15 +198,15 @@ function Homepage() {
             <header style={{
                 backgroundColor: "#1a4d3a", // Dark green
                 color: "white",
-                padding: isMobile ? "0.75rem 1rem" : "1rem 2rem",
+                padding: isMobile ? "0.5rem 0.75rem" : "1rem 2rem",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
                 boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                minHeight: isMobile ? "60px" : "auto"
+                minHeight: isMobile ? "50px" : "auto"
             }}>
                 {/* Logo and Hamburger Menu */}
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "4px" : "10px" }}>
                     {/* Hamburger Menu Button */}
                     {currentUser && (
                         <button
@@ -245,9 +249,9 @@ function Homepage() {
                                 src={siteSettings.site_logo} 
                                 alt={siteSettings.site_name}
                                 style={{
-                                    height: isMobile ? "22px" : "28px",
+                                    height: isMobile ? "20px" : "28px",
                                     width: "auto",
-                                    maxWidth: isMobile ? "100px" : "150px",
+                                    maxWidth: isMobile ? "80px" : "150px",
                                     objectFit: "contain"
                                 }}
                                 onError={(e) => {
@@ -618,14 +622,14 @@ function Homepage() {
 
                 {/* Mobile Menu Button */}
                 {isMobile && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         {/* Mobile Navigation Links */}
                         <Link to="/feed" style={{ 
                             color: "white", 
                             textDecoration: "none", 
-                            fontSize: "14px",
+                            fontSize: "11px",
                             fontWeight: "500",
-                            padding: "8px 12px",
+                            padding: "4px 6px",
                             borderRadius: "4px",
                             backgroundColor: "rgba(255, 255, 255, 0.1)"
                         }}>
@@ -634,9 +638,9 @@ function Homepage() {
                         <Link to="/forums" style={{ 
                             color: "white", 
                             textDecoration: "none", 
-                            fontSize: "14px",
+                            fontSize: "11px",
                             fontWeight: "500",
-                            padding: "8px 12px",
+                            padding: "4px 6px",
                             borderRadius: "4px",
                             backgroundColor: "rgba(255, 255, 255, 0.1)"
                         }}>
@@ -648,9 +652,9 @@ function Homepage() {
                                 style={{ 
                                     color: "white", 
                                     textDecoration: "none", 
-                                    fontSize: "14px",
+                                    fontSize: "11px",
                                     fontWeight: "500",
-                                    padding: "8px 12px",
+                                    padding: "4px 6px",
                                     borderRadius: "4px",
                                     backgroundColor: "rgba(255, 255, 255, 0.1)",
                                     border: "none",
@@ -707,7 +711,7 @@ function Homepage() {
                             )}
                         </div>
                         {currentUser ? (
-                            <div style={{ position: "relative" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                                 <button
                                     onClick={() => setShowUserDropdown(!showUserDropdown)}
                                     style={{
@@ -715,24 +719,23 @@ function Homepage() {
                                         border: "none",
                                         color: "white",
                                         cursor: "pointer",
-                                        padding: "8px",
+                                        padding: "4px",
                                         borderRadius: "4px",
                                         display: "flex",
-                                        alignItems: "center",
-                                        gap: "8px"
+                                        alignItems: "center"
                                     }}
                                 >
                                     <div style={{
-                                        width: "32px",
-                                        height: "32px",
+                                        width: "24px",
+                                        height: "24px",
                                         borderRadius: "50%",
-                                        backgroundColor: "rgba(255, 255, 255, 0.2)",
+                                        backgroundColor: "rgba(118, 75, 162, 0.8)",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
                                         color: "white",
                                         fontWeight: "bold",
-                                        fontSize: "14px"
+                                        fontSize: "10px"
                                     }}>
                                         {getUserInitial(currentUser.username)}
                                     </div>
@@ -799,9 +802,9 @@ function Homepage() {
                             <Link to="/login" style={{ 
                                 color: "white", 
                                 textDecoration: "none", 
-                                fontSize: "14px",
+                                fontSize: "11px",
                                 fontWeight: "500",
-                                padding: "8px 12px",
+                                padding: "4px 6px",
                                 borderRadius: "4px",
                                 backgroundColor: "rgba(255, 255, 255, 0.1)"
                             }}>
@@ -1063,6 +1066,21 @@ function Homepage() {
                     onClick={() => {
                         setShowSubjectDropdown(false);
                         setShowUserDropdown(false);
+                    }}
+                />
+            )}
+
+            {/* Click outside to close user dropdown */}
+            {showUserDropdown && (
+                <div 
+                    onClick={handleUserDropdownClose}
+                    style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        zIndex: 999
                     }}
                 />
             )}
