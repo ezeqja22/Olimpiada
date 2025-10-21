@@ -1262,7 +1262,7 @@ const ForumDetail = () => {
             }}>
                 {/* Forum Info Panel */}
                 <div style={{
-                    width: showChat ? (isMobile ? (showSidebar ? '80%' : '0%') : '30%') : '100%',
+                    width: showChat ? (isMobile ? (showSidebar ? '60%' : '0%') : '30%') : '100%',
                     minWidth: showChat ? (isMobile ? (showSidebar ? 'auto' : '0px') : '300px') : 'auto',
                     transition: 'all 0.3s ease-in-out',
                     overflow: 'hidden',

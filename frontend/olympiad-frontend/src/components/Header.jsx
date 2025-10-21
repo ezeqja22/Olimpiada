@@ -487,7 +487,11 @@ function Header({ showHomeButton = false }) {
                         {/* User Dropdown */}
                         <div style={{ position: "relative" }}>
                         <button
-                            onClick={() => setShowUserDropdown(!showUserDropdown)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                console.log('User dropdown clicked');
+                                setShowUserDropdown(!showUserDropdown);
+                            }}
                             style={{
                                 display: "flex",
                                 alignItems: "center",
@@ -544,7 +548,7 @@ function Header({ showHomeButton = false }) {
                                 border: `1px solid ${colors.gray[300]}`,
                                 borderRadius: "6px",
                                 boxShadow: shadows.lg,
-                                zIndex: 1000,
+                                zIndex: 1001,
                                 minWidth: "200px",
                                 marginTop: spacing.xs
                             }}>
