@@ -708,6 +708,15 @@ function Homepage() {
                                             onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
                                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                         >
+                                            <img
+                                                src={getSubjectIcon(subject)}
+                                                alt={subject}
+                                                style={{
+                                                    width: "20px",
+                                                    height: "20px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
                                             {subject}
                                         </button>
                                     ))}
@@ -768,11 +777,23 @@ function Homepage() {
                                                 color: "#374151",
                                                 cursor: "pointer",
                                                 fontSize: "14px",
-                                                borderBottom: "1px solid #f3f4f6"
+                                                borderBottom: "1px solid #f3f4f6",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "8px"
                                             }}
                                             onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
                                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                             >
+                                                <img
+                                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Profile_Icon_Green_t3zoz5.svg"
+                                                    alt="Profile"
+                                                    style={{
+                                                        width: "16px",
+                                                        height: "16px",
+                                                        objectFit: "contain"
+                                                    }}
+                                                />
                                                 Profile
                                             </div>
                                         </Link>
@@ -782,11 +803,23 @@ function Homepage() {
                                                 color: "#374151",
                                                 cursor: "pointer",
                                                 fontSize: "14px",
-                                                borderBottom: "1px solid #f3f4f6"
+                                                borderBottom: "1px solid #f3f4f6",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "8px"
                                             }}
                                             onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
                                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                             >
+                                                <img
+                                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
+                                                    alt="Settings"
+                                                    style={{
+                                                        width: "16px",
+                                                        height: "16px",
+                                                        objectFit: "contain"
+                                                    }}
+                                                />
                                                 Settings
                                             </div>
                                         </Link>
@@ -796,11 +829,23 @@ function Homepage() {
                                                 padding: "12px 16px",
                                                 color: "#dc2626",
                                                 cursor: "pointer",
-                                                fontSize: "14px"
+                                                fontSize: "14px",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "8px"
                                             }}
                                             onMouseEnter={(e) => e.target.style.backgroundColor = "#fef2f2"}
                                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                         >
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760802149/LOG_OUT_RED_d1wwc3.svg"
+                                                alt="Logout"
+                                                style={{
+                                                    width: "16px",
+                                                    height: "16px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
                                             Logout
                                         </div>
                                     </div>
@@ -1114,7 +1159,7 @@ function Homepage() {
                 position: "fixed",
                 top: 0,
                 left: showHamburgerMenu ? "0" : "-100%",
-                width: isMobile ? "100%" : "25%",
+                width: isMobile ? "60%" : "25%",
                 height: "100vh",
                 backgroundColor: "white",
                 boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
