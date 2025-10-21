@@ -642,17 +642,70 @@ function Homepage() {
                         }}>
                             Forums
                         </Link>
-                        <Link to="/subject/mathematics" style={{ 
-                            color: "white", 
-                            textDecoration: "none", 
-                            fontSize: "14px",
-                            fontWeight: "500",
-                            padding: "8px 12px",
-                            borderRadius: "4px",
-                            backgroundColor: "rgba(255, 255, 255, 0.1)"
-                        }}>
-                            Subject
-                        </Link>
+                        <div style={{ position: "relative" }}>
+                            <button
+                                onClick={() => setShowSubjectDropdown(!showSubjectDropdown)}
+                                style={{ 
+                                    color: "white", 
+                                    textDecoration: "none", 
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    padding: "8px 12px",
+                                    borderRadius: "4px",
+                                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px"
+                                }}
+                            >
+                                Subject
+                                <span style={{ fontSize: "10px" }}>▼</span>
+                            </button>
+                            
+                            {showSubjectDropdown && (
+                                <div style={{
+                                    position: "absolute",
+                                    top: "100%",
+                                    left: 0,
+                                    backgroundColor: "white",
+                                    border: "1px solid #e5e7eb",
+                                    borderRadius: "6px",
+                                    boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+                                    zIndex: 1000,
+                                    minWidth: "150px",
+                                    marginTop: "4px"
+                                }}>
+                                    {subjects.map((subject) => (
+                                        <button
+                                            key={subject}
+                                            onClick={() => {
+                                                navigate(`/subject/${subject.toLowerCase().replace(/\s+/g, '-')}`);
+                                                setShowSubjectDropdown(false);
+                                            }}
+                                            style={{
+                                                width: "100%",
+                                                padding: "12px 16px",
+                                                border: "none",
+                                                backgroundColor: "transparent",
+                                                color: "#374151",
+                                                textAlign: "left",
+                                                cursor: "pointer",
+                                                fontSize: "14px",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "8px"
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                        >
+                                            {subject}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                         {currentUser ? (
                             <button
                                 onClick={() => setShowUserDropdown(!showUserDropdown)}
@@ -982,6 +1035,7 @@ function Homepage() {
                 boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
                 zIndex: 1000,
                 transition: "left 0.3s ease-in-out",
+                display: showHamburgerMenu ? "block" : "none",
                 overflowY: "auto",
                 padding: "1.5rem"
             }}>
@@ -1019,7 +1073,7 @@ function Homepage() {
                         onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                     >
                         <img
-                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/Sandwich_icon_efioyq.svg"
+                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
                             alt="Close Menu"
                             style={{
                                 width: "16px",

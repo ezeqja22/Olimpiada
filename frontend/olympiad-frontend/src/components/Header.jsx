@@ -703,13 +703,14 @@ function Header({ showHomeButton = false }) {
             <div style={{
                 position: "fixed",
                 top: 0,
-                left: showHamburgerMenu ? "0" : (isMobile ? "-100%" : "-100%"),
+                left: showHamburgerMenu ? "0" : "-100%",
                 width: isMobile ? "100%" : "25%",
                 height: "100vh",
                 backgroundColor: colors.white,
                 boxShadow: shadows.xl,
                 zIndex: 1000,
                 transition: "left 0.3s ease-in-out",
+                display: showHamburgerMenu ? "block" : "none",
                 overflowY: "auto",
                 padding: spacing.lg
             }}>
