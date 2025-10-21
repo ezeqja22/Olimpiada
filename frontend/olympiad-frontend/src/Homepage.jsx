@@ -76,6 +76,18 @@ function Homepage() {
         }
     }, [currentUser, settingsLoading, checkFeatureEnabled]);
 
+    // Get icon based on subject
+    const getSubjectIcon = (subject) => {
+        const subjectLower = subject?.toLowerCase() || '';
+        if (subjectLower.includes('biology')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/Biology_subject_pcxmoa.svg';
+        if (subjectLower.includes('chemistry')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/chemistry_subject_r4n7jq.svg';
+        if (subjectLower.includes('mathematics') || subjectLower.includes('math')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/math_subject_iqigfx.svg';
+        if (subjectLower.includes('physics')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/physics_subject_m90gto.svg';
+        if (subjectLower.includes('computer')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/computer_engineerin_subject_u2m2ze.svg';
+        if (subjectLower.includes('other')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
+        return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
+    };
+
     // Actual subjects from the system
     const subjects = [
         "Mathematics",
