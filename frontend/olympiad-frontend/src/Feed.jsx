@@ -806,15 +806,21 @@ function Feed() {
               
               <h3 style={{ marginTop: 0, color: "#333", pointerEvents: "none" }}>{renderMathContent(problem.title)}</h3>
               <div style={{ color: "#666", lineHeight: "1.5", whiteSpace: "pre-wrap", pointerEvents: "none" }}>{renderMathContent(problem.description)}</div>
-              <div style={{ display: "flex", gap: "10px", marginTop: "15px", alignItems: "center" }}>
+              <div style={{ 
+                display: "flex", 
+                gap: isMobile ? "6px" : "10px", 
+                marginTop: "15px", 
+                alignItems: "center",
+                flexWrap: isMobile ? "wrap" : "nowrap"
+              }}>
                 <span style={{
                   backgroundColor: "#e0e7ff",
                   color: "#3730a3",
-                  padding: "6px 12px",
+                  padding: isMobile ? "4px 8px" : "6px 12px",
                   borderRadius: "16px",
-                  fontSize: "12px",
+                  fontSize: isMobile ? "10px" : "12px",
                   fontWeight: "600",
-                  marginRight: "8px",
+                  marginRight: isMobile ? "4px" : "8px",
                   boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
                   transition: "all 0.2s ease",
                   pointerEvents: "none"
@@ -825,11 +831,11 @@ function Feed() {
                   <span style={{
                     backgroundColor: "#fef3c7",
                     color: "#92400e",
-                    padding: "6px 12px",
+                    padding: isMobile ? "4px 8px" : "6px 12px",
                     borderRadius: "16px",
-                    fontSize: "12px",
+                    fontSize: isMobile ? "10px" : "12px",
                     fontWeight: "600",
-                    marginRight: "8px",
+                    marginRight: isMobile ? "4px" : "8px",
                     boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
                     transition: "all 0.2s ease",
                     pointerEvents: "none"
@@ -841,11 +847,11 @@ function Feed() {
                   <span style={{
                     backgroundColor: "#dcfce7", 
                     color: "#166534",
-                    padding: "6px 12px",
+                    padding: isMobile ? "4px 8px" : "6px 12px",
                     borderRadius: "16px",
-                    fontSize: "12px",
+                    fontSize: isMobile ? "10px" : "12px",
                     fontWeight: "600",
-                    marginRight: "8px",
+                    marginRight: isMobile ? "4px" : "8px",
                     boxShadow: "0 2px 6px rgba(26, 77, 58, 0.2)",
                     transition: "all 0.2s ease",
                     pointerEvents: "none"
@@ -854,7 +860,11 @@ function Feed() {
                   </span>
                 )}
                 {problem.tags && problem.tags.trim() && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                  <div style={{ 
+                    display: "flex", 
+                    flexWrap: "wrap", 
+                    gap: isMobile ? "4px" : "8px" 
+                  }}>
                     {problem.tags.split(",").map((tag, index) => {
                       const trimmedTag = tag.trim();
                       if (!trimmedTag) return null;
@@ -864,9 +874,9 @@ function Feed() {
                           style={{
                             backgroundColor: colors.tertiary,
                             color: "white",
-                            padding: "6px 12px",
+                            padding: isMobile ? "3px 6px" : "6px 12px",
                             borderRadius: "16px",
-                            fontSize: "12px",
+                            fontSize: isMobile ? "9px" : "12px",
                             fontWeight: "600",
                             whiteSpace: "nowrap",
                             boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
@@ -880,7 +890,13 @@ function Feed() {
                     })}
                   </div>
                 )}
-                <div style={{ marginLeft: "auto", display: "flex", gap: "10px", alignItems: "center" }}>
+                <div style={{ 
+                  marginLeft: "auto", 
+                  display: "flex", 
+                  gap: isMobile ? "6px" : "10px", 
+                  alignItems: "center",
+                  flexWrap: isMobile ? "wrap" : "nowrap"
+                }}>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -890,10 +906,10 @@ function Feed() {
                       backgroundColor: voteData[problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
                       border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
                       cursor: "pointer",
-                      fontSize: "14px",
+                      fontSize: isMobile ? "12px" : "14px",
                       color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
                       fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
-                      padding: "6px 12px",
+                      padding: isMobile ? "4px 8px" : "6px 12px",
                       borderRadius: "6px",
                       transition: "all 0.2s ease",
                       display: "flex",
@@ -917,8 +933,8 @@ function Feed() {
                       src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg" 
                       alt="Like"
                       style={{
-                        height: "14px",
-                        width: "14px",
+                        height: isMobile ? "10px" : "14px",
+                        width: isMobile ? "10px" : "14px",
                         objectFit: "contain"
                       }}
                     />
@@ -960,8 +976,8 @@ function Feed() {
                       src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg" 
                       alt="Dislike"
                       style={{
-                        height: "14px",
-                        width: "14px",
+                        height: isMobile ? "10px" : "14px",
+                        width: isMobile ? "10px" : "14px",
                         objectFit: "contain"
                       }}
                     />
@@ -979,8 +995,8 @@ function Feed() {
                       src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
                       alt="Comments"
                       style={{
-                        height: "14px",
-                        width: "14px",
+                        height: isMobile ? "10px" : "14px",
+                        width: isMobile ? "10px" : "14px",
                         objectFit: "contain"
                       }}
                     />

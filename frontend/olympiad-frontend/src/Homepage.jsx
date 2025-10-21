@@ -707,35 +707,94 @@ function Homepage() {
                             )}
                         </div>
                         {currentUser ? (
-                            <button
-                                onClick={() => setShowUserDropdown(!showUserDropdown)}
-                                style={{
-                                    backgroundColor: "transparent",
-                                    border: "none",
-                                    color: "white",
-                                    cursor: "pointer",
-                                    padding: "8px",
-                                    borderRadius: "4px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px"
-                                }}
-                            >
-                                <div style={{
-                                    width: "32px",
-                                    height: "32px",
-                                    borderRadius: "50%",
-                                    backgroundColor: "rgba(255, 255, 255, 0.2)",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    color: "white",
-                                    fontWeight: "bold",
-                                    fontSize: "14px"
-                                }}>
-                                    {getUserInitial(currentUser.username)}
-                                </div>
-                            </button>
+                            <div style={{ position: "relative" }}>
+                                <button
+                                    onClick={() => setShowUserDropdown(!showUserDropdown)}
+                                    style={{
+                                        backgroundColor: "transparent",
+                                        border: "none",
+                                        color: "white",
+                                        cursor: "pointer",
+                                        padding: "8px",
+                                        borderRadius: "4px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px"
+                                    }}
+                                >
+                                    <div style={{
+                                        width: "32px",
+                                        height: "32px",
+                                        borderRadius: "50%",
+                                        backgroundColor: "rgba(255, 255, 255, 0.2)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        fontSize: "14px"
+                                    }}>
+                                        {getUserInitial(currentUser.username)}
+                                    </div>
+                                </button>
+                                
+                                {showUserDropdown && (
+                                    <div style={{
+                                        position: "absolute",
+                                        top: "100%",
+                                        right: "0",
+                                        backgroundColor: "white",
+                                        border: "1px solid #e5e7eb",
+                                        borderRadius: "6px",
+                                        boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+                                        zIndex: 1000,
+                                        minWidth: "150px",
+                                        marginTop: "4px"
+                                    }}>
+                                        <Link to={`/profile/${currentUser.username}`} style={{ textDecoration: "none" }}>
+                                            <div style={{
+                                                padding: "12px 16px",
+                                                color: "#374151",
+                                                cursor: "pointer",
+                                                fontSize: "14px",
+                                                borderBottom: "1px solid #f3f4f6"
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                            >
+                                                Profile
+                                            </div>
+                                        </Link>
+                                        <Link to="/settings" style={{ textDecoration: "none" }}>
+                                            <div style={{
+                                                padding: "12px 16px",
+                                                color: "#374151",
+                                                cursor: "pointer",
+                                                fontSize: "14px",
+                                                borderBottom: "1px solid #f3f4f6"
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                            >
+                                                Settings
+                                            </div>
+                                        </Link>
+                                        <div 
+                                            onClick={handleLogout}
+                                            style={{
+                                                padding: "12px 16px",
+                                                color: "#dc2626",
+                                                cursor: "pointer",
+                                                fontSize: "14px"
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = "#fef2f2"}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                        >
+                                            Logout
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         ) : (
                             <Link to="/login" style={{ 
                                 color: "white", 
