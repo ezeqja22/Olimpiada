@@ -517,7 +517,7 @@ function Homepage() {
                                     minWidth: "160px",
                                     marginTop: "5px"
                                 }}>
-                                    <Link to="/profile" style={{ textDecoration: "none" }}>
+                                    <Link to={`/profile/${currentUser.username}`} style={{ textDecoration: "none" }}>
                                         <button style={{
                                             width: "100%",
                                             padding: "12px 16px",

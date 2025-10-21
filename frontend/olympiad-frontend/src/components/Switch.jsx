@@ -57,7 +57,8 @@ function Switch({ checked, onChange, disabled = false, size = "md" }) {
                 transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 boxShadow: checked 
                     ? `0 0 0 2px ${colors.primary}20` 
-                    : "inset 0 2px 4px rgba(0,0,0,0.1)"
+                    : "inset 0 2px 4px rgba(0,0,0,0.1)",
+                border: `1px solid ${checked ? colors.primary : colors.gray[300]}`
             }}>
                 <span style={{
                     position: "absolute",
@@ -71,7 +72,8 @@ function Switch({ checked, onChange, disabled = false, size = "md" }) {
                     borderRadius: "50%",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     boxShadow: "0 2px 4px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.1)",
-                    transform: checked ? "scale(1.1)" : "scale(1)"
+                    transform: checked ? "scale(1.05)" : "scale(1)",
+                    border: `1px solid ${checked ? colors.primary : colors.gray[300]}`
                 }} />
             </span>
         </label>
