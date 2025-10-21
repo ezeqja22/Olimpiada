@@ -448,7 +448,11 @@ function Homepage() {
                             {/* User Dropdown */}
                             <div style={{ position: "relative" }}>
                             <button
-                                onClick={() => setShowUserDropdown(!showUserDropdown)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log('Homepage user dropdown clicked');
+                                    setShowUserDropdown(!showUserDropdown);
+                                }}
                                 style={{
                                     display: "flex",
                                     alignItems: "center",
@@ -497,7 +501,7 @@ function Homepage() {
                                     border: "1px solid #e9ecef",
                                     borderRadius: "8px",
                                     boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                                    zIndex: 1000,
+                                    zIndex: 1001,
                                     minWidth: "160px",
                                     marginTop: "5px"
                                 }}>
@@ -713,7 +717,11 @@ function Homepage() {
                         {currentUser ? (
                             <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                                 <button
-                                    onClick={() => setShowUserDropdown(!showUserDropdown)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        console.log('Homepage mobile user dropdown clicked');
+                                        setShowUserDropdown(!showUserDropdown);
+                                    }}
                                     style={{
                                         backgroundColor: "transparent",
                                         border: "none",
