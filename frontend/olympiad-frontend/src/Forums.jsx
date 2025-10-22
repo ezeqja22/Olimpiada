@@ -787,6 +787,20 @@ const Forums = () => {
                                     ))}
                                 </div>
                                 
+                                {/* Forum Creator */}
+                                <div style={{ 
+                                    marginBottom: "8px",
+                                    pointerEvents: "none"
+                                }}>
+                                    <span style={{ 
+                                        color: colors.gray[600], 
+                                        fontSize: "0.8rem",
+                                        fontWeight: "500"
+                                    }}>
+                                        Created by: <strong>{forum.creator_username || 'Unknown'}</strong>
+                                    </span>
+                                </div>
+                                
                                 <div style={{ 
                                     display: "flex", 
                                     justifyContent: "space-between", 
@@ -817,7 +831,7 @@ const Forums = () => {
                                         </div>
                                     </div>
                                     <span style={{ 
-                                        color: forum.is_private ? colors.warning : colors.success,
+                                        color: colors.gray[700], // Changed from colors.warning to black
                                         fontSize: "0.85rem",
                                         fontWeight: "600"
                                     }}>

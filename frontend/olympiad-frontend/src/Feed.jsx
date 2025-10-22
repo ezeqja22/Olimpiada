@@ -180,16 +180,25 @@ function Feed() {
       // The backend returns an object with 'problems' array
       const allProblems = Array.isArray(response.data.problems) ? response.data.problems : [];
       
-      // Filter out forum problems - only show standalone problems
-      const standaloneProblems = allProblems.filter(problem => problem.forum_id === null || problem.forum_id === undefined);
-      setProblems(standaloneProblems);
+      // Filter logic: Show standalone problems OR forum problems where user is a member
+      const filteredProblems = allProblems.filter(problem => {
+        // Always show standalone problems
+        if (problem.forum_id === null || problem.forum_id === undefined) {
+          return true;
+        }
+        // For forum problems, only show if user is a member of that forum
+        // The backend should already handle this logic, but we double-check
+        return problem.user_is_forum_member === true;
+      });
       
-      // Only fetch vote data and follow status if we have standalone problems
-      if (standaloneProblems.length > 0) {
-        const problemIds = standaloneProblems.map(problem => problem.id);
+      setProblems(filteredProblems);
+      
+      // Only fetch vote data and follow status if we have problems
+      if (filteredProblems.length > 0) {
+        const problemIds = filteredProblems.map(problem => problem.id);
         await fetchVoteData(problemIds);
         await fetchBookmarkData(problemIds);
-        await fetchFollowStatus(standaloneProblems);
+        await fetchFollowStatus(filteredProblems);
       }
     } catch (error) {
       console.error("Error fetching following problems:", error);
@@ -211,7 +220,7 @@ function Feed() {
       });
       const allProblems = response.data.problems || [];
       
-      // Filter out forum problems - only show standalone problems
+      // Filter out ALL forum problems from trending - only show standalone problems
       const standaloneProblems = allProblems.filter(problem => problem.forum_id === null || problem.forum_id === undefined);
       setProblems(standaloneProblems);
       setCurrentPage(page);
