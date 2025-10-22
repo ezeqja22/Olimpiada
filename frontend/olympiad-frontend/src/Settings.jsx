@@ -365,7 +365,7 @@ function Settings() {
 
     return (
         <Layout>
-            <div style={{ maxWidth: "800px", margin: "0 auto", padding: spacing.xl }}>
+            <div style={{ maxWidth: "1000px", margin: "0 auto", padding: spacing.xl }}>
                 <BackButton />
                 
                 <div style={{ marginBottom: spacing.xl }}>
@@ -492,22 +492,25 @@ function Settings() {
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "space-between",
-                                            padding: spacing.md,
+                                            padding: spacing.lg,
                                             backgroundColor: colors.gray[50],
                                             borderRadius: borderRadius.md,
-                                            cursor: "pointer"
+                                            cursor: "pointer",
+                                            marginBottom: spacing.sm
                                         }}>
                                             <div>
                                                 <div style={{
                                                     fontWeight: typography.fontWeight.medium,
                                                     color: colors.dark,
-                                                    marginBottom: spacing.xs
+                                                    marginBottom: spacing.xs,
+                                                    fontSize: typography.fontSize.md
                                                 }}>
                                                     Likes & Comments
                                                 </div>
                                                 <div style={{
                                                     color: colors.gray[600],
-                                                    fontSize: typography.fontSize.sm
+                                                    fontSize: typography.fontSize.md,
+                                                    lineHeight: 1.5
                                                 }}>
                                                     Get notified when someone likes or comments on your problems
                                                 </div>
@@ -515,7 +518,7 @@ function Settings() {
                                             <Switch
                                                 checked={notificationPrefs.email_likes}
                                                 onChange={(e) => handlePreferenceChange('email_likes', e.target.checked)}
-                                                size="md"
+                                                size="lg"
                                             />
                                         </label>
 
@@ -523,22 +526,25 @@ function Settings() {
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "space-between",
-                                            padding: spacing.md,
+                                            padding: spacing.lg,
                                             backgroundColor: colors.gray[50],
                                             borderRadius: borderRadius.md,
-                                            cursor: "pointer"
+                                            cursor: "pointer",
+                                            marginBottom: spacing.sm
                                         }}>
                                             <div>
                                                 <div style={{
                                                     fontWeight: typography.fontWeight.medium,
                                                     color: colors.dark,
-                                                    marginBottom: spacing.xs
+                                                    marginBottom: spacing.xs,
+                                                    fontSize: typography.fontSize.md
                                                 }}>
                                                     Follows
                                                 </div>
                                                 <div style={{
                                                     color: colors.gray[600],
-                                                    fontSize: typography.fontSize.sm
+                                                    fontSize: typography.fontSize.md,
+                                                    lineHeight: 1.5
                                                 }}>
                                                     Get notified when someone follows you
                                                 </div>
@@ -546,7 +552,7 @@ function Settings() {
                                             <Switch
                                                 checked={notificationPrefs.email_follows}
                                                 onChange={(e) => handlePreferenceChange('email_follows', e.target.checked)}
-                                                size="md"
+                                                size="lg"
                                             />
                                         </label>
 
@@ -554,22 +560,25 @@ function Settings() {
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "space-between",
-                                            padding: spacing.md,
+                                            padding: spacing.lg,
                                             backgroundColor: colors.gray[50],
                                             borderRadius: borderRadius.md,
-                                            cursor: "pointer"
+                                            cursor: "pointer",
+                                            marginBottom: spacing.sm
                                         }}>
                                             <div>
                                                 <div style={{
                                                     fontWeight: typography.fontWeight.medium,
                                                     color: colors.dark,
-                                                    marginBottom: spacing.xs
+                                                    marginBottom: spacing.xs,
+                                                    fontSize: typography.fontSize.md
                                                 }}>
                                                     Forum Invitations
                                                 </div>
                                                 <div style={{
                                                     color: colors.gray[600],
-                                                    fontSize: typography.fontSize.sm
+                                                    fontSize: typography.fontSize.md,
+                                                    lineHeight: 1.5
                                                 }}>
                                                     Get notified when you're invited to join a forum
                                                 </div>
@@ -577,7 +586,7 @@ function Settings() {
                                             <Switch
                                                 checked={notificationPrefs.email_forum_invitations}
                                                 onChange={(e) => handlePreferenceChange('email_forum_invitations', e.target.checked)}
-                                                size="md"
+                                                size="lg"
                                             />
                                         </label>
 
@@ -585,22 +594,25 @@ function Settings() {
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "space-between",
-                                            padding: spacing.md,
+                                            padding: spacing.lg,
                                             backgroundColor: colors.gray[50],
                                             borderRadius: borderRadius.md,
-                                            cursor: "pointer"
+                                            cursor: "pointer",
+                                            marginBottom: spacing.sm
                                         }}>
                                             <div>
                                                 <div style={{
                                                     fontWeight: typography.fontWeight.medium,
                                                     color: colors.dark,
-                                                    marginBottom: spacing.xs
+                                                    marginBottom: spacing.xs,
+                                                    fontSize: typography.fontSize.md
                                                 }}>
                                                     Forum Join Requests
                                                 </div>
                                                 <div style={{
                                                     color: colors.gray[600],
-                                                    fontSize: typography.fontSize.sm
+                                                    fontSize: typography.fontSize.md,
+                                                    lineHeight: 1.5
                                                 }}>
                                                     Get notified when someone requests to join your forum
                                                 </div>
@@ -608,7 +620,7 @@ function Settings() {
                                             <Switch
                                                 checked={notificationPrefs.email_forum_join_requests}
                                                 onChange={(e) => handlePreferenceChange('email_forum_join_requests', e.target.checked)}
-                                                size="md"
+                                                size="lg"
                                             />
                                         </label>
 
@@ -616,22 +628,25 @@ function Settings() {
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "space-between",
-                                            padding: spacing.md,
+                                            padding: spacing.lg,
                                             backgroundColor: colors.gray[50],
                                             borderRadius: borderRadius.md,
-                                            cursor: "pointer"
+                                            cursor: "pointer",
+                                            marginBottom: spacing.sm
                                         }}>
                                             <div>
                                                 <div style={{
                                                     fontWeight: typography.fontWeight.medium,
                                                     color: colors.dark,
-                                                    marginBottom: spacing.xs
+                                                    marginBottom: spacing.xs,
+                                                    fontSize: typography.fontSize.md
                                                 }}>
                                                     Forum Deleted
                                                 </div>
                                                 <div style={{
                                                     color: colors.gray[600],
-                                                    fontSize: typography.fontSize.sm
+                                                    fontSize: typography.fontSize.md,
+                                                    lineHeight: 1.5
                                                 }}>
                                                     Get notified when a forum you're a member of gets deleted
                                                 </div>
@@ -639,7 +654,7 @@ function Settings() {
                                             <Switch
                                                 checked={notificationPrefs.email_forum_deleted}
                                                 onChange={(e) => handlePreferenceChange('email_forum_deleted', e.target.checked)}
-                                                size="md"
+                                                size="lg"
                                             />
                                         </label>
 
@@ -647,22 +662,25 @@ function Settings() {
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "space-between",
-                                            padding: spacing.md,
+                                            padding: spacing.lg,
                                             backgroundColor: colors.gray[50],
                                             borderRadius: borderRadius.md,
-                                            cursor: "pointer"
+                                            cursor: "pointer",
+                                            marginBottom: spacing.sm
                                         }}>
                                             <div>
                                                 <div style={{
                                                     fontWeight: typography.fontWeight.medium,
                                                     color: colors.dark,
-                                                    marginBottom: spacing.xs
+                                                    marginBottom: spacing.xs,
+                                                    fontSize: typography.fontSize.md
                                                 }}>
                                                     Marketing Updates
                                                 </div>
                                                 <div style={{
                                                     color: colors.gray[600],
-                                                    fontSize: typography.fontSize.sm
+                                                    fontSize: typography.fontSize.md,
+                                                    lineHeight: 1.5
                                                 }}>
                                                     Receive occasional updates about new features and improvements
                                                 </div>
@@ -670,7 +688,7 @@ function Settings() {
                                             <Switch
                                                 checked={notificationPrefs.email_marketing}
                                                 onChange={(e) => handlePreferenceChange('email_marketing', e.target.checked)}
-                                                size="md"
+                                                size="lg"
                                             />
                                         </label>
                                     </div>
@@ -692,22 +710,25 @@ function Settings() {
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "space-between",
-                                            padding: spacing.md,
+                                            padding: spacing.lg,
                                             backgroundColor: colors.gray[50],
                                             borderRadius: borderRadius.md,
-                                            cursor: "pointer"
+                                            cursor: "pointer",
+                                            marginBottom: spacing.sm
                                         }}>
                                             <div>
                                                 <div style={{
                                                     fontWeight: typography.fontWeight.medium,
                                                     color: colors.dark,
-                                                    marginBottom: spacing.xs
+                                                    marginBottom: spacing.xs,
+                                                    fontSize: typography.fontSize.md
                                                 }}>
                                                     Likes & Comments
                                                 </div>
                                                 <div style={{
                                                     color: colors.gray[600],
-                                                    fontSize: typography.fontSize.sm
+                                                    fontSize: typography.fontSize.md,
+                                                    lineHeight: 1.5
                                                 }}>
                                                     Show notifications in the bell icon when someone likes or comments
                                                 </div>
@@ -715,7 +736,7 @@ function Settings() {
                                             <Switch
                                                 checked={notificationPrefs.in_app_likes}
                                                 onChange={(e) => handlePreferenceChange('in_app_likes', e.target.checked)}
-                                                size="md"
+                                                size="lg"
                                             />
                                         </label>
 
@@ -723,22 +744,25 @@ function Settings() {
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "space-between",
-                                            padding: spacing.md,
+                                            padding: spacing.lg,
                                             backgroundColor: colors.gray[50],
                                             borderRadius: borderRadius.md,
-                                            cursor: "pointer"
+                                            cursor: "pointer",
+                                            marginBottom: spacing.sm
                                         }}>
                                             <div>
                                                 <div style={{
                                                     fontWeight: typography.fontWeight.medium,
                                                     color: colors.dark,
-                                                    marginBottom: spacing.xs
+                                                    marginBottom: spacing.xs,
+                                                    fontSize: typography.fontSize.md
                                                 }}>
                                                     Follows
                                                 </div>
                                                 <div style={{
                                                     color: colors.gray[600],
-                                                    fontSize: typography.fontSize.sm
+                                                    fontSize: typography.fontSize.md,
+                                                    lineHeight: 1.5
                                                 }}>
                                                     Show notifications in the bell icon when someone follows you
                                                 </div>
@@ -746,7 +770,7 @@ function Settings() {
                                             <Switch
                                                 checked={notificationPrefs.in_app_follows}
                                                 onChange={(e) => handlePreferenceChange('in_app_follows', e.target.checked)}
-                                                size="md"
+                                                size="lg"
                                             />
                                         </label>
 
@@ -754,22 +778,25 @@ function Settings() {
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "space-between",
-                                            padding: spacing.md,
+                                            padding: spacing.lg,
                                             backgroundColor: colors.gray[50],
                                             borderRadius: borderRadius.md,
-                                            cursor: "pointer"
+                                            cursor: "pointer",
+                                            marginBottom: spacing.sm
                                         }}>
                                             <div>
                                                 <div style={{
                                                     fontWeight: typography.fontWeight.medium,
                                                     color: colors.dark,
-                                                    marginBottom: spacing.xs
+                                                    marginBottom: spacing.xs,
+                                                    fontSize: typography.fontSize.md
                                                 }}>
                                                     Forum Deleted
                                                 </div>
                                                 <div style={{
                                                     color: colors.gray[600],
-                                                    fontSize: typography.fontSize.sm
+                                                    fontSize: typography.fontSize.md,
+                                                    lineHeight: 1.5
                                                 }}>
                                                     Show notifications in the bell icon when a forum you're a member of gets deleted
                                                 </div>
@@ -777,7 +804,7 @@ function Settings() {
                                             <Switch
                                                 checked={notificationPrefs.in_app_forum_deleted}
                                                 onChange={(e) => handlePreferenceChange('in_app_forum_deleted', e.target.checked)}
-                                                size="md"
+                                                size="lg"
                                             />
                                         </label>
                                     </div>
@@ -993,7 +1020,7 @@ function Settings() {
                                             placeholder="Enter verification code"
                                             style={{
                                                 width: "200px",
-                                                padding: spacing.md,
+                                                padding: spacing.lg,
                                                 border: `1px solid ${colors.gray[300]}`,
                                                 borderRadius: borderRadius.md,
                                                 fontSize: typography.fontSize.base,
