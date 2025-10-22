@@ -101,6 +101,11 @@ const Forums = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
+            console.log("Forum data structure:", response.data);
+            if (response.data.length > 0) {
+                console.log("First forum object:", response.data[0]);
+                console.log("Available fields:", Object.keys(response.data[0]));
+            }
             setForums(response.data);
             setAllForums(response.data); // Store all forums for filtering
             
@@ -152,25 +157,50 @@ const Forums = () => {
             const token = localStorage.getItem("token");
             if (!token) return;
 
-            const creatorPromises = forums.map(async (forum) => {
+            // Try to get all unique creator IDs first
+            const uniqueCreatorIds = [...new Set(forums.map(forum => forum.creator_id))];
+            console.log("Unique creator IDs:", uniqueCreatorIds);
+
+            const creatorPromises = uniqueCreatorIds.map(async (creatorId) => {
                 try {
-                    const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/users/${forum.creator_id}`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    return { forumId: forum.id, username: response.data.username };
+                    // Try different possible endpoints
+                    let response;
+                    try {
+                        response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/users/${creatorId}`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                    } catch (error) {
+                        // If that fails, try the search endpoint
+                        console.log(`Trying search endpoint for creator ${creatorId}`);
+                        response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/users/search?q=`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                        // This might not work either, but let's see what we get
+                    }
+                    
+                    console.log(`Response for creator ${creatorId}:`, response.data);
+                    return { creatorId, username: response.data.username || 'Unknown' };
                 } catch (error) {
-                    console.error(`Error fetching creator for forum ${forum.id}:`, error);
-                    return { forumId: forum.id, username: 'Unknown' };
+                    console.error(`Error fetching creator ${creatorId}:`, error);
+                    return { creatorId, username: 'Unknown' };
                 }
             });
 
             const results = await Promise.all(creatorPromises);
             const creatorMap = {};
-            results.forEach(({ forumId, username }) => {
-                creatorMap[forumId] = username;
+            
+            // Map creator IDs to usernames
+            results.forEach(({ creatorId, username }) => {
+                creatorMap[creatorId] = username;
             });
             
-            setCreatorUsernames(creatorMap);
+            // Now map forum IDs to usernames
+            const forumCreatorMap = {};
+            forums.forEach(forum => {
+                forumCreatorMap[forum.id] = creatorMap[forum.creator_id] || 'Unknown';
+            });
+            
+            setCreatorUsernames(forumCreatorMap);
         } catch (error) {
             console.error("Error fetching creator usernames:", error);
         }
