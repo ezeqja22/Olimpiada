@@ -797,7 +797,7 @@ const Forums = () => {
                                         fontSize: "0.8rem",
                                         fontWeight: "500"
                                     }}>
-                                        Created by: <strong>{forum.creator_username || 'Unknown'}</strong>
+                                        Created by: <strong>{forum.creator || forum.creator_username || 'Unknown'}</strong>
                                     </span>
                                 </div>
                                 

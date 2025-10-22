@@ -588,6 +588,8 @@ const ForumDetail = () => {
     });
     const [sortOrder, setSortOrder] = useState('newest'); // 'newest' or 'oldest'
     const [showSortDropdown, setShowSortDropdown] = useState(false);
+    const [touchStartY, setTouchStartY] = useState(null);
+    const [touchStartTime, setTouchStartTime] = useState(null);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -2269,15 +2271,55 @@ const ForumDetail = () => {
 
                 {/* Chat Panel */}
                 {showChat && (
-                    <div style={{
-                        width: isMobile ? '100%' : '70%',
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        backgroundColor: colors.light,
-                        transition: 'all 0.3s ease-in-out',
-                        position: 'relative'
-                    }}>
+                    <div 
+                        style={{
+                            width: isMobile ? '100%' : '70%',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            backgroundColor: colors.light,
+                            transition: 'all 0.3s ease-in-out',
+                            position: 'relative'
+                        }}
+                        onTouchStart={(e) => {
+                            if (isMobile) {
+                                const touch = e.touches[0];
+                                setTouchStartY(touch.clientY);
+                                setTouchStartTime(Date.now());
+                            }
+                        }}
+                        onTouchMove={(e) => {
+                            if (isMobile && touchStartY) {
+                                const touch = e.touches[0];
+                                const deltaY = touch.clientY - touchStartY;
+                                
+                                // If swiping down more than 50px, show visual feedback
+                                if (deltaY > 50) {
+                                    e.currentTarget.style.transform = `translateY(${Math.min(deltaY * 0.5, 100)}px)`;
+                                    e.currentTarget.style.opacity = Math.max(0.7, 1 - (deltaY / 200));
+                                }
+                            }
+                        }}
+                        onTouchEnd={(e) => {
+                            if (isMobile && touchStartY) {
+                                const touch = e.changedTouches[0];
+                                const deltaY = touch.clientY - touchStartY;
+                                const deltaTime = Date.now() - touchStartTime;
+                                
+                                // Reset transform
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.opacity = '1';
+                                
+                                // Close chat if swiped down more than 100px or fast swipe
+                                if (deltaY > 100 || (deltaY > 50 && deltaTime < 300)) {
+                                    toggleChat();
+                                }
+                                
+                                setTouchStartY(null);
+                                setTouchStartTime(null);
+                            }
+                        }}
+                    >
                         {/* Chat Header */}
                         <div style={{
                             backgroundColor: colors.gray[100],
@@ -2304,6 +2346,43 @@ const ForumDetail = () => {
                                     </p>
                                 </div>
                             </div>
+                            
+                            {/* Close Chat Button */}
+                            <button
+                                onClick={toggleChat}
+                                style={{
+                                    backgroundColor: colors.primary,
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: '40px',
+                                    height: '40px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = colors.secondary;
+                                    e.target.style.transform = 'scale(1.05)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = colors.primary;
+                                    e.target.style.transform = 'scale(1)';
+                                }}
+                            >
+                                <img
+                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/X_Icon_White_ehzzaz.svg"
+                                    alt="Close Chat"
+                                    style={{
+                                        width: '20px',
+                                        height: '20px',
+                                        objectFit: 'contain'
+                                    }}
+                                />
+                            </button>
+                            
                             {isMobile && (
                                 <button
                                     onClick={() => setShowSidebar(!showSidebar)}
@@ -2390,7 +2469,9 @@ const ForumDetail = () => {
                                 flexDirection: 'column',
                                 gap: spacing.sm,
                                 position: 'relative',
-                                zIndex: showMessageDropdown ? 0 : 1
+                                zIndex: showMessageDropdown ? 0 : 1,
+                                minHeight: 0, // Prevent flex stretching
+                                maxHeight: '100%' // Prevent overflow
                             }}>
                             {messages.length === 0 ? (
                                 <div style={{ 
@@ -2452,14 +2533,17 @@ const ForumDetail = () => {
                                             <div 
                                                 data-message-bubble
                                                 style={{
-                                                    maxWidth: '70%',
+                                                    maxWidth: isMobile ? '85%' : '70%',
                                                     backgroundColor: isOwnMessage ? colors.primary : colors.white,
                                                     color: isOwnMessage ? colors.white : colors.gray[800],
-                                                    padding: spacing.md,
+                                                    padding: isMobile ? spacing.sm : spacing.md,
                                                     borderRadius: borderRadius.lg,
                                                     boxShadow: shadows.sm,
                                                     position: 'relative',
-                                                    zIndex: showMessageDropdown === message.id ? 10001 : 0
+                                                    zIndex: showMessageDropdown === message.id ? 10001 : 0,
+                                                    wordWrap: 'break-word',
+                                                    overflowWrap: 'break-word',
+                                                    minWidth: 0 // Prevent flex stretching
                                                 }}>
                                                 {!isOwnMessage && (
                                                     <div style={{
@@ -2527,7 +2611,7 @@ const ForumDetail = () => {
                                                     justifyContent: 'space-between',
                                                     alignItems: 'center'
                                                 }}>
-                                                    <span>{new Date(message.created_at).toLocaleTimeString()}</span>
+                                                    <span>{new Date(message.created_at).toLocaleString()}</span>
                                                     
                                                 {/* Message Actions Dropdown - Available to all members */}
                                                 {(
