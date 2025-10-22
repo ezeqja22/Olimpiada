@@ -335,7 +335,7 @@ function Homepage() {
                             <div style={{
                                 position: "absolute",
                                 top: "100%",
-                                left: "0",
+                                right: "0",
                                 backgroundColor: "white",
                                 border: "1px solid #e9ecef",
                                 borderRadius: "8px",
@@ -697,7 +697,7 @@ function Homepage() {
                                 <div style={{
                                     position: "absolute",
                                     top: "100%",
-                                    left: 0,
+                                    right: 0,
                                     backgroundColor: "white",
                                     border: "1px solid #e5e7eb",
                                     borderRadius: "6px",

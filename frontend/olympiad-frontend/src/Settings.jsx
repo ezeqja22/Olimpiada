@@ -35,12 +35,24 @@ function Settings() {
     const [prefsLoading, setPrefsLoading] = useState(false);
     const [prefsError, setPrefsError] = useState("");
     const [prefsSuccess, setPrefsSuccess] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchCurrentUser();
         fetchNotificationPreferences();
+    }, []);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     const fetchCurrentUser = async () => {
@@ -365,7 +377,7 @@ function Settings() {
 
     return (
         <Layout>
-            <div style={{ width: "100%", maxWidth: "none", padding: spacing.xl }}>
+            <div style={{ maxWidth: "800px", margin: "0 auto", padding: spacing.xl }}>
                 <BackButton />
                 
                 <div style={{ marginBottom: spacing.xl }}>
@@ -515,11 +527,25 @@ function Settings() {
                                                     Get notified when someone likes or comments on your problems
                                                 </div>
                                             </div>
-                                            <Switch
-                                                checked={notificationPrefs.email_likes}
-                                                onChange={(e) => handlePreferenceChange('email_likes', e.target.checked)}
-                                                size="lg"
-                                            />
+                                            {isMobile ? (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={notificationPrefs.email_likes}
+                                                    onChange={(e) => handlePreferenceChange('email_likes', e.target.checked)}
+                                                    style={{
+                                                        width: "20px",
+                                                        height: "20px",
+                                                        accentColor: "rgb(26, 77, 58)",
+                                                        cursor: "pointer"
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Switch
+                                                    checked={notificationPrefs.email_likes}
+                                                    onChange={(e) => handlePreferenceChange('email_likes', e.target.checked)}
+                                                    size="lg"
+                                                />
+                                            )}
                                         </label>
 
                                         <label style={{
@@ -549,11 +575,25 @@ function Settings() {
                                                     Get notified when someone follows you
                                                 </div>
                                             </div>
-                                            <Switch
-                                                checked={notificationPrefs.email_follows}
-                                                onChange={(e) => handlePreferenceChange('email_follows', e.target.checked)}
-                                                size="lg"
-                                            />
+                                            {isMobile ? (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={notificationPrefs.email_follows}
+                                                    onChange={(e) => handlePreferenceChange('email_follows', e.target.checked)}
+                                                    style={{
+                                                        width: "20px",
+                                                        height: "20px",
+                                                        accentColor: "rgb(26, 77, 58)",
+                                                        cursor: "pointer"
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Switch
+                                                    checked={notificationPrefs.email_follows}
+                                                    onChange={(e) => handlePreferenceChange('email_follows', e.target.checked)}
+                                                    size="lg"
+                                                />
+                                            )}
                                         </label>
 
                                         <label style={{
@@ -583,11 +623,25 @@ function Settings() {
                                                     Get notified when you're invited to join a forum
                                                 </div>
                                             </div>
-                                            <Switch
-                                                checked={notificationPrefs.email_forum_invitations}
-                                                onChange={(e) => handlePreferenceChange('email_forum_invitations', e.target.checked)}
-                                                size="lg"
-                                            />
+                                            {isMobile ? (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={notificationPrefs.email_forum_invitations}
+                                                    onChange={(e) => handlePreferenceChange('email_forum_invitations', e.target.checked)}
+                                                    style={{
+                                                        width: "20px",
+                                                        height: "20px",
+                                                        accentColor: "rgb(26, 77, 58)",
+                                                        cursor: "pointer"
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Switch
+                                                    checked={notificationPrefs.email_forum_invitations}
+                                                    onChange={(e) => handlePreferenceChange('email_forum_invitations', e.target.checked)}
+                                                    size="lg"
+                                                />
+                                            )}
                                         </label>
 
                                         <label style={{
@@ -617,11 +671,25 @@ function Settings() {
                                                     Get notified when someone requests to join your forum
                                                 </div>
                                             </div>
-                                            <Switch
-                                                checked={notificationPrefs.email_forum_join_requests}
-                                                onChange={(e) => handlePreferenceChange('email_forum_join_requests', e.target.checked)}
-                                                size="lg"
-                                            />
+                                            {isMobile ? (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={notificationPrefs.email_forum_join_requests}
+                                                    onChange={(e) => handlePreferenceChange('email_forum_join_requests', e.target.checked)}
+                                                    style={{
+                                                        width: "20px",
+                                                        height: "20px",
+                                                        accentColor: "rgb(26, 77, 58)",
+                                                        cursor: "pointer"
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Switch
+                                                    checked={notificationPrefs.email_forum_join_requests}
+                                                    onChange={(e) => handlePreferenceChange('email_forum_join_requests', e.target.checked)}
+                                                    size="lg"
+                                                />
+                                            )}
                                         </label>
 
                                         <label style={{
@@ -651,11 +719,25 @@ function Settings() {
                                                     Get notified when a forum you're a member of gets deleted
                                                 </div>
                                             </div>
-                                            <Switch
-                                                checked={notificationPrefs.email_forum_deleted}
-                                                onChange={(e) => handlePreferenceChange('email_forum_deleted', e.target.checked)}
-                                                size="lg"
-                                            />
+                                            {isMobile ? (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={notificationPrefs.email_forum_deleted}
+                                                    onChange={(e) => handlePreferenceChange('email_forum_deleted', e.target.checked)}
+                                                    style={{
+                                                        width: "20px",
+                                                        height: "20px",
+                                                        accentColor: "rgb(26, 77, 58)",
+                                                        cursor: "pointer"
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Switch
+                                                    checked={notificationPrefs.email_forum_deleted}
+                                                    onChange={(e) => handlePreferenceChange('email_forum_deleted', e.target.checked)}
+                                                    size="lg"
+                                                />
+                                            )}
                                         </label>
 
                                         <label style={{
@@ -685,11 +767,25 @@ function Settings() {
                                                     Receive occasional updates about new features and improvements
                                                 </div>
                                             </div>
-                                            <Switch
-                                                checked={notificationPrefs.email_marketing}
-                                                onChange={(e) => handlePreferenceChange('email_marketing', e.target.checked)}
-                                                size="lg"
-                                            />
+                                            {isMobile ? (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={notificationPrefs.email_marketing}
+                                                    onChange={(e) => handlePreferenceChange('email_marketing', e.target.checked)}
+                                                    style={{
+                                                        width: "20px",
+                                                        height: "20px",
+                                                        accentColor: "rgb(26, 77, 58)",
+                                                        cursor: "pointer"
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Switch
+                                                    checked={notificationPrefs.email_marketing}
+                                                    onChange={(e) => handlePreferenceChange('email_marketing', e.target.checked)}
+                                                    size="lg"
+                                                />
+                                            )}
                                         </label>
                                     </div>
                                 </div>
@@ -733,11 +829,25 @@ function Settings() {
                                                     Show notifications in the bell icon when someone likes or comments
                                                 </div>
                                             </div>
-                                            <Switch
-                                                checked={notificationPrefs.in_app_likes}
-                                                onChange={(e) => handlePreferenceChange('in_app_likes', e.target.checked)}
-                                                size="lg"
-                                            />
+                                            {isMobile ? (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={notificationPrefs.in_app_likes}
+                                                    onChange={(e) => handlePreferenceChange('in_app_likes', e.target.checked)}
+                                                    style={{
+                                                        width: "20px",
+                                                        height: "20px",
+                                                        accentColor: "rgb(26, 77, 58)",
+                                                        cursor: "pointer"
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Switch
+                                                    checked={notificationPrefs.in_app_likes}
+                                                    onChange={(e) => handlePreferenceChange('in_app_likes', e.target.checked)}
+                                                    size="lg"
+                                                />
+                                            )}
                                         </label>
 
                                         <label style={{
@@ -767,11 +877,25 @@ function Settings() {
                                                     Show notifications in the bell icon when someone follows you
                                                 </div>
                                             </div>
-                                            <Switch
-                                                checked={notificationPrefs.in_app_follows}
-                                                onChange={(e) => handlePreferenceChange('in_app_follows', e.target.checked)}
-                                                size="lg"
-                                            />
+                                            {isMobile ? (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={notificationPrefs.in_app_follows}
+                                                    onChange={(e) => handlePreferenceChange('in_app_follows', e.target.checked)}
+                                                    style={{
+                                                        width: "20px",
+                                                        height: "20px",
+                                                        accentColor: "rgb(26, 77, 58)",
+                                                        cursor: "pointer"
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Switch
+                                                    checked={notificationPrefs.in_app_follows}
+                                                    onChange={(e) => handlePreferenceChange('in_app_follows', e.target.checked)}
+                                                    size="lg"
+                                                />
+                                            )}
                                         </label>
 
                                         <label style={{
@@ -801,11 +925,25 @@ function Settings() {
                                                     Show notifications in the bell icon when a forum you're a member of gets deleted
                                                 </div>
                                             </div>
-                                            <Switch
-                                                checked={notificationPrefs.in_app_forum_deleted}
-                                                onChange={(e) => handlePreferenceChange('in_app_forum_deleted', e.target.checked)}
-                                                size="lg"
-                                            />
+                                            {isMobile ? (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={notificationPrefs.in_app_forum_deleted}
+                                                    onChange={(e) => handlePreferenceChange('in_app_forum_deleted', e.target.checked)}
+                                                    style={{
+                                                        width: "20px",
+                                                        height: "20px",
+                                                        accentColor: "rgb(26, 77, 58)",
+                                                        cursor: "pointer"
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Switch
+                                                    checked={notificationPrefs.in_app_forum_deleted}
+                                                    onChange={(e) => handlePreferenceChange('in_app_forum_deleted', e.target.checked)}
+                                                    size="lg"
+                                                />
+                                            )}
                                         </label>
                                     </div>
                                 </div>
