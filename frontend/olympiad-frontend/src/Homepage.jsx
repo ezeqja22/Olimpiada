@@ -647,15 +647,15 @@ function Homepage() {
 
                 {/* Mobile Menu Button */}
                 {isMobile && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        {/* Mobile Navigation Links */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "3px", flexWrap: "wrap" }}>
+                        {/* Mobile Navigation Links - Smaller */}
                         <Link to="/feed" style={{ 
                             color: "white", 
                             textDecoration: "none", 
-                            fontSize: "11px",
+                            fontSize: "9px",
                             fontWeight: "500",
-                            padding: "4px 6px",
-                            borderRadius: "4px",
+                            padding: "2px 4px",
+                            borderRadius: "3px",
                             backgroundColor: "rgba(255, 255, 255, 0.1)"
                         }}>
                             Feed
@@ -663,10 +663,10 @@ function Homepage() {
                         <Link to="/forums" style={{ 
                             color: "white", 
                             textDecoration: "none", 
-                            fontSize: "11px",
+                            fontSize: "9px",
                             fontWeight: "500",
-                            padding: "4px 6px",
-                            borderRadius: "4px",
+                            padding: "2px 4px",
+                            borderRadius: "3px",
                             backgroundColor: "rgba(255, 255, 255, 0.1)"
                         }}>
                             Forums
@@ -677,20 +677,20 @@ function Homepage() {
                                 style={{ 
                                     color: "white", 
                                     textDecoration: "none", 
-                                    fontSize: "11px",
+                                    fontSize: "9px",
                                     fontWeight: "500",
-                                    padding: "4px 6px",
-                                    borderRadius: "4px",
+                                    padding: "2px 4px",
+                                    borderRadius: "3px",
                                     backgroundColor: "rgba(255, 255, 255, 0.1)",
                                     border: "none",
                                     cursor: "pointer",
                                     display: "flex",
                                     alignItems: "center",
-                                    gap: "4px"
+                                    gap: "2px"
                                 }}
                             >
                                 Subject
-                                <span style={{ fontSize: "10px" }}>▼</span>
+                                <span style={{ fontSize: "8px" }}>▼</span>
                             </button>
                             
                             {showSubjectDropdown && (
@@ -703,7 +703,7 @@ function Homepage() {
                                     borderRadius: "6px",
                                     boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
                                     zIndex: 1000,
-                                    minWidth: "150px",
+                                    minWidth: "120px",
                                     marginTop: "4px"
                                 }}>
                                     {subjects.map((subject) => (
@@ -715,16 +715,16 @@ function Homepage() {
                                             }}
                                             style={{
                                                 width: "100%",
-                                                padding: "12px 16px",
+                                                padding: "8px 12px",
                                                 border: "none",
                                                 backgroundColor: "transparent",
                                                 color: "#374151",
                                                 textAlign: "left",
                                                 cursor: "pointer",
-                                                fontSize: "14px",
+                                                fontSize: "12px",
                                                 display: "flex",
                                                 alignItems: "center",
-                                                gap: "8px"
+                                                gap: "6px"
                                             }}
                                             onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
                                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
@@ -733,8 +733,8 @@ function Homepage() {
                                                 src={getSubjectIcon(subject)}
                                                 alt={subject}
                                                 style={{
-                                                    width: "20px",
-                                                    height: "20px",
+                                                    width: "16px",
+                                                    height: "16px",
                                                     objectFit: "contain"
                                                 }}
                                             />
@@ -745,9 +745,11 @@ function Homepage() {
                             )}
                         </div>
                         {currentUser ? (
-                            <div style={{ display: "flex", alignItems: "center", gap: "4px", position: "relative" }}>
-                                {/* Mobile Notification Bell */}
-                                <NotificationBell />
+                            <div style={{ display: "flex", alignItems: "center", gap: "2px", position: "relative" }}>
+                                {/* Mobile Notification Bell - Smaller */}
+                                <div style={{ transform: "scale(0.8)" }}>
+                                    <NotificationBell />
+                                </div>
                                 
                                 <button
                                     onClick={(e) => {
@@ -760,8 +762,8 @@ function Homepage() {
                                         border: "none",
                                         color: "white",
                                         cursor: "pointer",
-                                        padding: "4px",
-                                        borderRadius: "4px",
+                                        padding: "2px",
+                                        borderRadius: "3px",
                                         display: "flex",
                                         alignItems: "center"
                                     }}
@@ -771,16 +773,16 @@ function Homepage() {
                                             src={currentUser.profile_picture}
                                             alt="Profile"
                                             style={{
-                                                width: "24px",
-                                                height: "24px",
+                                                width: "20px",
+                                                height: "20px",
                                                 borderRadius: "50%",
                                                 objectFit: "cover"
                                             }}
                                         />
                                     ) : (
                                         <div style={{
-                                            width: "24px",
-                                            height: "24px",
+                                            width: "20px",
+                                            height: "20px",
                                             borderRadius: "50%",
                                             backgroundColor: colors.secondary,
                                             display: "flex",
@@ -788,7 +790,7 @@ function Homepage() {
                                             justifyContent: "center",
                                             color: "white",
                                             fontWeight: "bold",
-                                            fontSize: "10px"
+                                            fontSize: "9px"
                                         }}>
                                             {getUserInitial(currentUser.username)}
                                         </div>
@@ -805,19 +807,19 @@ function Homepage() {
                                         borderRadius: "6px",
                                         boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
                                         zIndex: 1001,
-                                        minWidth: "150px",
+                                        minWidth: "120px",
                                         marginTop: "4px"
                                     }}>
                                         <Link to="/profile" style={{ textDecoration: "none" }}>
                                             <div style={{
-                                                padding: "12px 16px",
+                                                padding: "8px 12px",
                                                 color: "#374151",
                                                 cursor: "pointer",
-                                                fontSize: "14px",
+                                                fontSize: "12px",
                                                 borderBottom: "1px solid #f3f4f6",
                                                 display: "flex",
                                                 alignItems: "center",
-                                                gap: "8px"
+                                                gap: "6px"
                                             }}
                                             onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
                                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
@@ -826,8 +828,8 @@ function Homepage() {
                                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Profile_Icon_Green_t3zoz5.svg"
                                                     alt="Profile"
                                                     style={{
-                                                        width: "16px",
-                                                        height: "16px",
+                                                        width: "14px",
+                                                        height: "14px",
                                                         objectFit: "contain"
                                                     }}
                                                 />
@@ -836,14 +838,14 @@ function Homepage() {
                                         </Link>
                                         <Link to="/settings" style={{ textDecoration: "none" }}>
                                             <div style={{
-                                                padding: "12px 16px",
+                                                padding: "8px 12px",
                                                 color: "#374151",
                                                 cursor: "pointer",
-                                                fontSize: "14px",
+                                                fontSize: "12px",
                                                 borderBottom: "1px solid #f3f4f6",
                                                 display: "flex",
                                                 alignItems: "center",
-                                                gap: "8px"
+                                                gap: "6px"
                                             }}
                                             onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
                                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
@@ -852,8 +854,8 @@ function Homepage() {
                                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
                                                     alt="Settings"
                                                     style={{
-                                                        width: "16px",
-                                                        height: "16px",
+                                                        width: "14px",
+                                                        height: "14px",
                                                         objectFit: "contain"
                                                     }}
                                                 />
@@ -863,13 +865,13 @@ function Homepage() {
                                         <div 
                                             onClick={handleLogout}
                                             style={{
-                                                padding: "12px 16px",
+                                                padding: "8px 12px",
                                                 color: "#dc2626",
                                                 cursor: "pointer",
-                                                fontSize: "14px",
+                                                fontSize: "12px",
                                                 display: "flex",
                                                 alignItems: "center",
-                                                gap: "8px"
+                                                gap: "6px"
                                             }}
                                             onMouseEnter={(e) => e.target.style.backgroundColor = "#fef2f2"}
                                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
@@ -878,8 +880,8 @@ function Homepage() {
                                                 src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760802149/LOG_OUT_RED_d1wwc3.svg"
                                                 alt="Logout"
                                                 style={{
-                                                    width: "16px",
-                                                    height: "16px",
+                                                    width: "14px",
+                                                    height: "14px",
                                                     objectFit: "contain"
                                                 }}
                                             />
@@ -892,10 +894,10 @@ function Homepage() {
                             <Link to="/login" style={{ 
                                 color: "white", 
                                 textDecoration: "none", 
-                                fontSize: "11px",
+                                fontSize: "9px",
                                 fontWeight: "500",
-                                padding: "4px 6px",
-                                borderRadius: "4px",
+                                padding: "2px 4px",
+                                borderRadius: "3px",
                                 backgroundColor: "rgba(255, 255, 255, 0.1)"
                             }}>
                                 Login
