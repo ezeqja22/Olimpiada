@@ -517,7 +517,7 @@ function Homepage() {
                                     minWidth: "160px",
                                     marginTop: "5px"
                                 }}>
-                                    <Link to={`/profile/${currentUser.username}`} style={{ textDecoration: "none" }}>
+                                    <Link to="/profile" style={{ textDecoration: "none" }}>
                                         <button style={{
                                             width: "100%",
                                             padding: "12px 16px",
@@ -783,7 +783,7 @@ function Homepage() {
                                         minWidth: "150px",
                                         marginTop: "4px"
                                     }}>
-                                        <Link to={`/profile/${currentUser.username}`} style={{ textDecoration: "none" }}>
+                                        <Link to="/profile" style={{ textDecoration: "none" }}>
                                             <div style={{
                                                 padding: "12px 16px",
                                                 color: "#374151",

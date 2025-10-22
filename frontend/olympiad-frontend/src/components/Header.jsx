@@ -767,7 +767,7 @@ function Header({ showHomeButton = false }) {
                 position: "fixed",
                 top: 0,
                 left: showHamburgerMenu ? "0" : "-100%",
-                width: isMobile ? "100%" : "25%",
+                width: isMobile ? "60%" : "25%",
                 height: "100vh",
                 backgroundColor: colors.white,
                 boxShadow: shadows.xl,
