@@ -720,7 +720,7 @@ function Feed() {
           >
               {/* Author Info Section - Twitter Style */}
               {problem.author ? (
-                <div style={{ display: "flex", alignItems: "center", marginBottom: "15px", gap: "10px", pointerEvents: "none" }}>
+                <div style={{ display: "flex", alignItems: "center", marginBottom: "15px", gap: "10px" }}>
                   {/* Profile Picture */}
                   <div style={{
                     width: "40px",
@@ -735,14 +735,15 @@ function Feed() {
                     fontWeight: "bold",
                     backgroundImage: problem.author.profile_picture ? `url(${problem.author.profile_picture})` : "none",
                     backgroundSize: "cover",
-                    backgroundPosition: "center"
+                    backgroundPosition: "center",
+                    pointerEvents: "none"
                   }}>
                     {!problem.author.profile_picture && getUserInitial(problem.author.username)}
                   </div>
                   
                   {/* Author Name and Follow Button */}
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
-                    <div>
+                    <div style={{ pointerEvents: "none" }}>
                       <div 
             style={{
                           fontWeight: "bold", 
@@ -764,7 +765,7 @@ function Feed() {
                       >
                         {getDisplayName(problem.author.username)}
                       </div>
-                      <div style={{ fontSize: "12px", color: "#666", pointerEvents: "none" }}>
+                      <div style={{ fontSize: "12px", color: "#666" }}>
                         {new Date(problem.created_at).toLocaleDateString()}
                       </div>
                     </div>
@@ -918,134 +919,162 @@ function Feed() {
                     })}
                   </div>
                 )}
+                {/* Interaction Buttons - Bottom of Card */}
                 <div style={{ 
-                  marginLeft: isMobile ? "0" : "auto", 
                   display: "flex", 
-                  gap: isMobile ? "2px" : "10px", 
+                  justifyContent: "space-between",
                   alignItems: "center",
-                  flexWrap: isMobile ? "wrap" : "nowrap",
-                  width: isMobile ? "100%" : "auto",
-                  justifyContent: isMobile ? "space-between" : "flex-end",
-                  boxSizing: "border-box"
+                  marginTop: "15px",
+                  paddingTop: "10px",
+                  borderTop: "1px solid #e9ecef"
                 }}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleVote(problem.id, "like");
-                    }}
-                    style={{
-                      backgroundColor: voteData[problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
-                      border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
-                      cursor: "pointer",
-                      fontSize: isMobile ? "9px" : "14px",
-                      color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
-                      fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
-                      padding: isMobile ? "2px 4px" : "6px 12px",
-                      borderRadius: "6px",
-                      transition: "all 0.2s ease",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: isMobile ? "2px" : "4px"
-                    }}
-                    onMouseEnter={(e) => {
-                      if (voteData[problem.id]?.user_vote !== "like") {
-                        e.target.style.backgroundColor = "#e9ecef";
-                        e.target.style.borderColor = "#adb5bd";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (voteData[problem.id]?.user_vote !== "like") {
-                        e.target.style.backgroundColor = "#f8f9fa";
-                        e.target.style.borderColor = "#dee2e6";
-                      }
-                    }}
-                  >
-                    <img 
-                      src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg" 
-                      alt="Like"
-                      style={{
-                        height: isMobile ? "6px" : "14px",
-                        width: isMobile ? "6px" : "14px",
-                        objectFit: "contain"
-                      }}
-                    />
-                    {voteData[problem.id]?.like_count || 0}
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleVote(problem.id, "dislike");
-                    }}
-                    style={{
-                      backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
-                      border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
-                      cursor: "pointer",
-                      fontSize: isMobile ? "9px" : "14px",
-                      color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
-                      fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
-                      padding: isMobile ? "2px 4px" : "6px 12px",
-                      borderRadius: "6px",
-                      transition: "all 0.2s ease",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: isMobile ? "2px" : "4px"
-                    }}
-                    onMouseEnter={(e) => {
-                      if (voteData[problem.id]?.user_vote !== "dislike") {
-                        e.target.style.backgroundColor = "#e9ecef";
-                        e.target.style.borderColor = "#adb5bd";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (voteData[problem.id]?.user_vote !== "dislike") {
-                        e.target.style.backgroundColor = "#f8f9fa";
-                        e.target.style.borderColor = "#dee2e6";
-                      }
-                    }}
-                  >
-                    <img 
-                      src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg" 
-                      alt="Dislike"
-                      style={{
-                        height: isMobile ? "6px" : "14px",
-                        width: isMobile ? "6px" : "14px",
-                        objectFit: "contain"
-                      }}
-                    />
-                    {voteData[problem.id]?.dislike_count || 0}
-                  </button>
-                  <span style={{ 
-                    fontSize: isMobile ? "9px" : "12px", 
-                    color: "#666", 
-                    pointerEvents: "none",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: isMobile ? "2px" : "4px"
+                  {/* Like, Dislike, Comment - Left Side */}
+                  <div style={{ 
+                    display: "flex", 
+                    gap: isMobile ? "8px" : "12px", 
+                    alignItems: "center"
                   }}>
-                    <img 
-                      src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
-                      alt="Comments"
-                      style={{
-                        height: isMobile ? "6px" : "14px",
-                        width: isMobile ? "6px" : "14px",
-                        objectFit: "contain"
+                    {/* Like Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleVote(problem.id, "like");
                       }}
-                    />
-                    {problem.comment_count || 0}
-                  </span>
+                      style={{
+                        backgroundColor: voteData[problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
+                        border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
+                        cursor: "pointer",
+                        fontSize: isMobile ? "12px" : "14px",
+                        color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
+                        fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
+                        padding: isMobile ? "8px 12px" : "10px 16px",
+                        borderRadius: "8px",
+                        transition: "all 0.2s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: isMobile ? "6px" : "8px"
+                      }}
+                      onMouseEnter={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "like") {
+                          e.target.style.backgroundColor = "#e9ecef";
+                          e.target.style.borderColor = "#adb5bd";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "like") {
+                          e.target.style.backgroundColor = "#f8f9fa";
+                          e.target.style.borderColor = "#dee2e6";
+                        }
+                      }}
+                    >
+                      <img 
+                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg" 
+                        alt="Like"
+                        style={{
+                          height: isMobile ? "14px" : "18px",
+                          width: isMobile ? "14px" : "18px",
+                          objectFit: "contain"
+                        }}
+                      />
+                      {voteData[problem.id]?.like_count || 0}
+                    </button>
+
+                    {/* Dislike Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleVote(problem.id, "dislike");
+                      }}
+                      style={{
+                        backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
+                        border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
+                        cursor: "pointer",
+                        fontSize: isMobile ? "12px" : "14px",
+                        color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
+                        fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
+                        padding: isMobile ? "8px 12px" : "10px 16px",
+                        borderRadius: "8px",
+                        transition: "all 0.2s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: isMobile ? "6px" : "8px"
+                      }}
+                      onMouseEnter={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "dislike") {
+                          e.target.style.backgroundColor = "#e9ecef";
+                          e.target.style.borderColor = "#adb5bd";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "dislike") {
+                          e.target.style.backgroundColor = "#f8f9fa";
+                          e.target.style.borderColor = "#dee2e6";
+                        }
+                      }}
+                    >
+                      <img 
+                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg" 
+                        alt="Dislike"
+                        style={{
+                          height: isMobile ? "14px" : "18px",
+                          width: isMobile ? "14px" : "18px",
+                          objectFit: "contain"
+                        }}
+                      />
+                      {voteData[problem.id]?.dislike_count || 0}
+                    </button>
+
+                    {/* Comment Count */}
+                    <div style={{ 
+                      display: "flex",
+                      alignItems: "center",
+                      gap: isMobile ? "6px" : "8px",
+                      padding: isMobile ? "8px 12px" : "10px 16px",
+                      backgroundColor: "#f8f9fa",
+                      borderRadius: "8px",
+                      border: "1px solid #dee2e6"
+                    }}>
+                      <img 
+                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
+                        alt="Comments"
+                        style={{
+                          height: isMobile ? "14px" : "18px",
+                          width: isMobile ? "14px" : "18px",
+                          objectFit: "contain"
+                        }}
+                      />
+                      <span style={{ 
+                        fontSize: isMobile ? "12px" : "14px", 
+                        color: "#666",
+                        fontWeight: "500"
+                      }}>
+                        {problem.comment_count || 0}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bookmark - Right Side */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleBookmark(problem.id);
                     }}
                     style={{
-                      padding: isMobile ? "1px 2px" : "4px 8px",
+                      padding: isMobile ? "8px 12px" : "10px 16px",
                       backgroundColor: "transparent",
                       border: "none",
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
-                      gap: isMobile ? "2px" : "4px"
+                      gap: isMobile ? "6px" : "8px",
+                      borderRadius: "8px",
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = "#f8f9fa";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = "transparent";
                     }}
                   >
                     <img 
@@ -1055,11 +1084,18 @@ function Feed() {
                       } 
                       alt="Bookmark"
                       style={{
-                        height: isMobile ? "10px" : "16px",
-                        width: isMobile ? "10px" : "16px",
+                        height: isMobile ? "16px" : "20px",
+                        width: isMobile ? "16px" : "20px",
                         objectFit: "contain"
                       }}
                     />
+                    <span style={{ 
+                      fontSize: isMobile ? "12px" : "14px",
+                      color: bookmarkData[problem.id]?.isBookmarked ? "rgb(26, 77, 58)" : "#666",
+                      fontWeight: "500"
+                    }}>
+                      {bookmarkData[problem.id]?.isBookmarked ? "Saved" : "Save"}
+                    </span>
                   </button>
                 </div>
               </div>

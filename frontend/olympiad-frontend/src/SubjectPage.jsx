@@ -8,6 +8,7 @@ import BackButton from "./components/BackButton";
 import AnimatedLoader from "./components/AnimatedLoader";
 import Layout from "./components/Layout";
 import SearchBar from "./SearchBar";
+import FollowButton from "./components/FollowButton";
 import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 
@@ -38,6 +39,8 @@ function SubjectPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [voteData, setVoteData] = useState({});
     const [bookmarkData, setBookmarkData] = useState({});
+    const [followStatus, setFollowStatus] = useState({});
+    const [currentUser, setCurrentUser] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
     
@@ -52,6 +55,16 @@ function SubjectPage() {
     useEffect(() => {
         fetchProblems();
     }, [subject, currentPage]);
+
+    useEffect(() => {
+        fetchCurrentUser();
+    }, []);
+
+    useEffect(() => {
+        if (problems.length > 0) {
+            fetchFollowStatus(problems);
+        }
+    }, [problems]);
 
     const fetchProblems = async () => {
         console.log("🚀 fetchProblems called for subject:", subjectName);
@@ -336,6 +349,94 @@ function SubjectPage() {
         }
     };
 
+    const fetchCurrentUser = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (token) {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setCurrentUser(response.data);
+            }
+        } catch (error) {
+            console.error("Error fetching current user:", error);
+        }
+    };
+
+    const fetchFollowStatus = async (problems) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+            
+            const followPromises = problems.map(async (problem) => {
+                if (!problem.author) return { authorId: null, isFollowing: false };
+                try {
+                    const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/status/${problem.author.id}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    return { authorId: problem.author.id, isFollowing: response.data.is_following };
+                } catch (error) {
+                    return { authorId: problem.author.id, isFollowing: false };
+                }
+            });
+            
+            const results = await Promise.all(followPromises);
+            const followStatusMap = {};
+            results.forEach(result => {
+                followStatusMap[result.authorId] = result.isFollowing;
+            });
+            setFollowStatus(followStatusMap);
+        } catch (error) {
+            console.error("Error fetching follow status:", error);
+        }
+    };
+
+    const handleFollowUser = async (authorId) => {
+        // Check if following is enabled
+        if (!checkFeatureEnabled('following_enabled')) {
+            showFeatureDisabledAlert('Following');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Please log in to follow users");
+                return;
+            }
+
+            await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/${authorId}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setFollowStatus(prev => ({ ...prev, [authorId]: true }));
+        } catch (error) {
+            console.error("Error following user:", error);
+        }
+    };
+
+    const handleUnfollowUser = async (authorId) => {
+        // Check if following is enabled
+        if (!checkFeatureEnabled('following_enabled')) {
+            showFeatureDisabledAlert('Following');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Please log in to follow users");
+                return;
+            }
+
+            await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/${authorId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setFollowStatus(prev => ({ ...prev, [authorId]: false }));
+        } catch (error) {
+            console.error("Error unfollowing user:", error);
+        }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem("token");
         navigate("/homepage", { replace: true });
@@ -571,8 +672,7 @@ function SubjectPage() {
                                             display: "flex", 
                                             alignItems: "center", 
                                             marginBottom: "1rem", 
-                                            gap: "10px",
-                                            pointerEvents: "none"
+                                            gap: "10px"
                                         }}>
                                             <div style={{
                                                 width: "32px",
@@ -588,22 +688,46 @@ function SubjectPage() {
                                                 backgroundImage: problem.author.profile_picture ? 
                                                     `url(${problem.author.profile_picture})` : "none",
                                                 backgroundSize: "cover",
-                                                backgroundPosition: "center"
+                                                backgroundPosition: "center",
+                                                pointerEvents: "none"
                                             }}>
                                                 {!problem.author.profile_picture && getUserInitial(problem.author.username)}
                                             </div>
-                                            <div>
+                                            <div style={{ flex: 1 }}>
                                                 <div style={{ 
                                                     fontWeight: "600", 
                                                     fontSize: "14px", 
-                                                    color: "#1a4d3a"
+                                                    color: "#1a4d3a",
+                                                    cursor: "pointer",
+                                                    textDecoration: "underline",
+                                                    pointerEvents: "auto"
+                                                }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (currentUser && problem.author.id === currentUser.id) {
+                                                        navigate('/profile');
+                                                    } else {
+                                                        navigate(`/user/${problem.author.username}`);
+                                                    }
                                                 }}>
                                                     {getDisplayName(problem.author.username)}
                                                 </div>
-                                                <div style={{ fontSize: "12px", color: "#666" }}>
+                                                <div style={{ fontSize: "12px", color: "#666", pointerEvents: "none" }}>
                                                     {new Date(problem.created_at).toLocaleDateString()}
                                                 </div>
                                             </div>
+                                            
+                                            {/* Follow Button - Hide for own posts */}
+                                            {currentUser && problem.author.id !== currentUser.id && (
+                                                <FollowButton
+                                                    isFollowing={followStatus[problem.author.id]}
+                                                    onFollow={() => handleFollowUser(problem.author.id)}
+                                                    onUnfollow={() => handleUnfollowUser(problem.author.id)}
+                                                    size="sm"
+                                                    style={{ marginLeft: "auto" }}
+                                                    isDeletedUser={problem.author.username.startsWith('__deleted_user_')}
+                                                />
+                                            )}
                                         </div>
                                     )}
 
