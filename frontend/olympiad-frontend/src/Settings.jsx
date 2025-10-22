@@ -91,7 +91,6 @@ function Settings() {
         try {
             setPrefsLoading(true);
             setPrefsError("");
-            setPrefsSuccess(false);
 
             const token = localStorage.getItem("token");
             const response = await axios.put(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/notification-preferences`, updatedPrefs, {
