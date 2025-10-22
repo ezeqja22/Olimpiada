@@ -480,24 +480,33 @@ function Homepage() {
                                 onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
                                 onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                             >
-                                <div style={{
-                                    width: "32px",
-                                    height: "32px",
-                                    borderRadius: "50%",
-                                    backgroundColor: colors.secondary,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    color: "white",
-                                    fontSize: "14px",
-                                    fontWeight: "bold",
-                                    backgroundImage: currentUser.profile_picture ? 
-                                        `url(${currentUser.profile_picture})` : "none",
-                                    backgroundSize: "cover",
-                                    backgroundPosition: "center"
-                                }}>
-                                    {!currentUser.profile_picture && getUserInitial(currentUser.username)}
-                                </div>
+                                {currentUser.profile_picture ? (
+                                    <img
+                                        src={currentUser.profile_picture}
+                                        alt="Profile"
+                                        style={{
+                                            width: "32px",
+                                            height: "32px",
+                                            borderRadius: "50%",
+                                            objectFit: "cover"
+                                        }}
+                                    />
+                                ) : (
+                                    <div style={{
+                                        width: "32px",
+                                        height: "32px",
+                                        borderRadius: "50%",
+                                        backgroundColor: colors.primary,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "white",
+                                        fontSize: "14px",
+                                        fontWeight: "bold"
+                                    }}>
+                                        {getUserInitial(currentUser.username)}
+                                    </div>
+                                )}
                                 <span style={{ fontSize: "14px", fontWeight: "500" }}>
                                     {currentUser.username}
                                 </span>
@@ -754,20 +763,33 @@ function Homepage() {
                                         alignItems: "center"
                                     }}
                                 >
-                                    <div style={{
-                                        width: "24px",
-                                        height: "24px",
-                                        borderRadius: "50%",
-                                        backgroundColor: "rgba(118, 75, 162, 0.8)",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        color: "white",
-                                        fontWeight: "bold",
-                                        fontSize: "10px"
-                                    }}>
-                                        {getUserInitial(currentUser.username)}
-                                    </div>
+                                    {currentUser.profile_picture ? (
+                                        <img
+                                            src={currentUser.profile_picture}
+                                            alt="Profile"
+                                            style={{
+                                                width: "24px",
+                                                height: "24px",
+                                                borderRadius: "50%",
+                                                objectFit: "cover"
+                                            }}
+                                        />
+                                    ) : (
+                                        <div style={{
+                                            width: "24px",
+                                            height: "24px",
+                                            borderRadius: "50%",
+                                            backgroundColor: colors.primary,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            color: "white",
+                                            fontWeight: "bold",
+                                            fontSize: "10px"
+                                        }}>
+                                            {getUserInitial(currentUser.username)}
+                                        </div>
+                                    )}
                                 </button>
                                 
                                 {showUserDropdown && (
