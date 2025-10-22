@@ -26,7 +26,7 @@ function Layout({ children, showHomeButton = false, maxWidth = "1200px" }) {
             <Header showHomeButton={showHomeButton} />
             <main style={{
                 flex: 1,
-                padding: isMobile ? spacing.sm : spacing.xl,
+                padding: isMobile ? "4px" : spacing.xl,
                 maxWidth: maxWidth,
                 margin: "0 auto",
                 width: "100%",

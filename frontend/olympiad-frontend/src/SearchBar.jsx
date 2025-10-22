@@ -85,8 +85,10 @@ function SearchBar({
     <div style={{ position: 'relative', width: '100%' }}>
       <form onSubmit={handleSearch} style={{ 
         display: 'flex', 
-        gap: isMobile ? '6px' : '10px', 
+        flexDirection: 'row',
+        gap: isMobile ? '4px' : '10px', 
         alignItems: 'center',
+        width: '100%',
         flexWrap: isMobile ? 'wrap' : 'nowrap'
       }}>
 
@@ -98,15 +100,16 @@ function SearchBar({
           placeholder={placeholder}
           style={{
             flex: 1,
-            minWidth: isMobile ? '200px' : '300px',
-            padding: isMobile ? '10px 16px' : '12px 20px',
+            minWidth: isMobile ? '150px' : '200px',
+            padding: isMobile ? '10px 12px' : '12px 20px',
             border: '2px solid #e9ecef',
             borderRadius: '25px',
             fontSize: isMobile ? '14px' : '16px',
             outline: 'none',
             transition: 'border-color 0.2s ease',
             backgroundColor: 'white',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            boxSizing: 'border-box'
           }}
           onFocus={(e) => {
             e.target.style.borderColor = '#1a4d3a';
@@ -120,17 +123,18 @@ function SearchBar({
         <button
           type="submit"
           style={{
-            padding: isMobile ? '10px 16px' : '12px 24px',
+            padding: isMobile ? '8px 12px' : '12px 24px',
             backgroundColor: '#1a4d3a',
             color: 'white',
             border: 'none',
             borderRadius: '25px',
             cursor: 'pointer',
-            fontSize: isMobile ? '14px' : '16px',
+            fontSize: isMobile ? '12px' : '16px',
             fontWeight: 'bold',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
             transition: 'background-color 0.2s ease',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            flexShrink: 0
           }}
           onMouseEnter={(e) => {
             e.target.style.backgroundColor = '#2d7a5f';
@@ -158,17 +162,18 @@ function SearchBar({
             type="button"
             onClick={openAdvancedSearch}
             style={{
-              padding: isMobile ? '10px 16px' : '12px 24px',
+              padding: isMobile ? '8px 12px' : '12px 24px',
               backgroundColor: 'rgba(118, 75, 162)',
               color: 'white',
               border: 'none',
               borderRadius: '25px',
               cursor: 'pointer',
-              fontSize: isMobile ? '14px' : '16px',
+              fontSize: isMobile ? '12px' : '16px',
               fontWeight: 'bold',
               whiteSpace: 'nowrap',
               boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              transition: 'background-color 0.2s ease'
+              transition: 'background-color 0.2s ease',
+              flexShrink: 0
             }}
             onMouseEnter={(e) => {
               e.target.style.backgroundColor = 'rgba(98, 62, 135)';

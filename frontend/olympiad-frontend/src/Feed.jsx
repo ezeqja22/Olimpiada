@@ -614,14 +614,14 @@ function Feed() {
           onClick={() => setActiveTab("all")}
           style={{
             flex: 1,
-            padding: isMobile ? "8px 4px" : `${spacing.sm} ${spacing.md}`,
+            padding: isMobile ? "10px 2px" : `${spacing.sm} ${spacing.md}`,
             border: "none",
             backgroundColor: activeTab === "all" ? colors.primary : "transparent",
             color: activeTab === "all" ? colors.white : colors.gray[600],
             cursor: "pointer",
             fontWeight: activeTab === "all" ? typography.fontWeight.bold : typography.fontWeight.medium,
             transition: "all 0.2s ease",
-            fontSize: isMobile ? "12px" : typography.fontSize.base
+            fontSize: isMobile ? "11px" : typography.fontSize.base
           }}
         >
           All Problems
@@ -630,14 +630,14 @@ function Feed() {
           onClick={() => setActiveTab("following")}
           style={{
             flex: 1,
-            padding: isMobile ? "8px 4px" : `${spacing.sm} ${spacing.md}`,
+            padding: isMobile ? "10px 2px" : `${spacing.sm} ${spacing.md}`,
             border: "none",
             backgroundColor: activeTab === "following" ? colors.primary : "transparent",
             color: activeTab === "following" ? colors.white : colors.gray[600],
             cursor: "pointer",
             fontWeight: activeTab === "following" ? typography.fontWeight.bold : typography.fontWeight.medium,
             transition: "all 0.2s ease",
-            fontSize: isMobile ? "12px" : typography.fontSize.base
+            fontSize: isMobile ? "11px" : typography.fontSize.base
           }}
         >
           Following
@@ -646,14 +646,14 @@ function Feed() {
           onClick={() => setActiveTab("trending")}
           style={{
             flex: 1,
-            padding: isMobile ? "8px 4px" : `${spacing.sm} ${spacing.md}`,
+            padding: isMobile ? "10px 2px" : `${spacing.sm} ${spacing.md}`,
             border: "none", 
             backgroundColor: activeTab === "trending" ? colors.primary : "transparent",
             color: activeTab === "trending" ? colors.white : colors.gray[600],
             cursor: "pointer",
             fontWeight: activeTab === "trending" ? typography.fontWeight.bold : typography.fontWeight.medium,
             transition: "all 0.2s ease",
-            fontSize: isMobile ? "12px" : typography.fontSize.base
+            fontSize: isMobile ? "11px" : typography.fontSize.base
           }}
         >
           Trending
@@ -830,10 +830,11 @@ function Feed() {
                 display: "flex", 
                 gap: isMobile ? "4px" : "10px", 
                 marginTop: "15px", 
-                alignItems: "center",
+                alignItems: isMobile ? "flex-start" : "center",
                 flexWrap: isMobile ? "wrap" : "nowrap",
                 flexDirection: isMobile ? "column" : "row",
-                alignItems: isMobile ? "flex-start" : "center"
+                width: "100%",
+                boxSizing: "border-box"
               }}>
                 <div style={{ 
                   display: "flex", 
@@ -920,11 +921,12 @@ function Feed() {
                 <div style={{ 
                   marginLeft: isMobile ? "0" : "auto", 
                   display: "flex", 
-                  gap: isMobile ? "4px" : "10px", 
+                  gap: isMobile ? "2px" : "10px", 
                   alignItems: "center",
                   flexWrap: isMobile ? "wrap" : "nowrap",
                   width: isMobile ? "100%" : "auto",
-                  justifyContent: isMobile ? "space-between" : "flex-end"
+                  justifyContent: isMobile ? "space-between" : "flex-end",
+                  boxSizing: "border-box"
                 }}>
                   <button
                     onClick={(e) => {
@@ -935,10 +937,10 @@ function Feed() {
                       backgroundColor: voteData[problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
                       border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
                       cursor: "pointer",
-                      fontSize: isMobile ? "10px" : "14px",
+                      fontSize: isMobile ? "9px" : "14px",
                       color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
                       fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
-                      padding: isMobile ? "3px 6px" : "6px 12px",
+                      padding: isMobile ? "2px 4px" : "6px 12px",
                       borderRadius: "6px",
                       transition: "all 0.2s ease",
                       display: "flex",
@@ -962,8 +964,8 @@ function Feed() {
                       src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg" 
                       alt="Like"
                       style={{
-                        height: isMobile ? "8px" : "14px",
-                        width: isMobile ? "8px" : "14px",
+                        height: isMobile ? "6px" : "14px",
+                        width: isMobile ? "6px" : "14px",
                         objectFit: "contain"
                       }}
                     />
@@ -978,10 +980,10 @@ function Feed() {
                       backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
                       border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
                       cursor: "pointer",
-                      fontSize: isMobile ? "10px" : "14px",
+                      fontSize: isMobile ? "9px" : "14px",
                       color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
                       fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
-                      padding: isMobile ? "3px 6px" : "6px 12px",
+                      padding: isMobile ? "2px 4px" : "6px 12px",
                       borderRadius: "6px",
                       transition: "all 0.2s ease",
                       display: "flex",
@@ -1005,15 +1007,15 @@ function Feed() {
                       src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg" 
                       alt="Dislike"
                       style={{
-                        height: isMobile ? "8px" : "14px",
-                        width: isMobile ? "8px" : "14px",
+                        height: isMobile ? "6px" : "14px",
+                        width: isMobile ? "6px" : "14px",
                         objectFit: "contain"
                       }}
                     />
                     {voteData[problem.id]?.dislike_count || 0}
                   </button>
                   <span style={{ 
-                    fontSize: isMobile ? "10px" : "12px", 
+                    fontSize: isMobile ? "9px" : "12px", 
                     color: "#666", 
                     pointerEvents: "none",
                     display: "flex",
@@ -1024,8 +1026,8 @@ function Feed() {
                       src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
                       alt="Comments"
                       style={{
-                        height: isMobile ? "8px" : "14px",
-                        width: isMobile ? "8px" : "14px",
+                        height: isMobile ? "6px" : "14px",
+                        width: isMobile ? "6px" : "14px",
                         objectFit: "contain"
                       }}
                     />
@@ -1037,7 +1039,7 @@ function Feed() {
                       handleBookmark(problem.id);
                     }}
                     style={{
-                      padding: isMobile ? "2px 4px" : "4px 8px",
+                      padding: isMobile ? "1px 2px" : "4px 8px",
                       backgroundColor: "transparent",
                       border: "none",
                       cursor: "pointer",
@@ -1053,8 +1055,8 @@ function Feed() {
                       } 
                       alt="Bookmark"
                       style={{
-                        height: isMobile ? "12px" : "16px",
-                        width: isMobile ? "12px" : "16px",
+                        height: isMobile ? "10px" : "16px",
+                        width: isMobile ? "10px" : "16px",
                         objectFit: "contain"
                       }}
                     />
