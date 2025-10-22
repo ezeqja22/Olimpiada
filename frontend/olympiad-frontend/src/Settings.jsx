@@ -34,7 +34,6 @@ function Settings() {
     const [notificationPrefs, setNotificationPrefs] = useState(null);
     const [prefsLoading, setPrefsLoading] = useState(false);
     const [prefsError, setPrefsError] = useState("");
-    const [prefsSuccess, setPrefsSuccess] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     
     const navigate = useNavigate();
@@ -100,8 +99,6 @@ function Settings() {
             });
             
             setNotificationPrefs(response.data);
-            setPrefsSuccess(true);
-            setTimeout(() => setPrefsSuccess(false), 3000);
         } catch (error) {
             console.error("Error updating notification preferences:", error);
             setPrefsError("Failed to update notification preferences");
@@ -473,18 +470,6 @@ function Settings() {
                             </div>
                         )}
                         
-                        {prefsSuccess && (
-                            <div style={{
-                                backgroundColor: colors.success + "20",
-                                color: colors.success,
-                                padding: spacing.md,
-                                borderRadius: borderRadius.md,
-                                marginBottom: spacing.md,
-                                border: `1px solid ${colors.success}40`
-                            }}>
-                                 Notification preferences updated successfully!
-                            </div>
-                        )}
 
                         {notificationPrefs ? (
                             <div>
