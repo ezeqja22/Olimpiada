@@ -34,6 +34,7 @@ const Forums = () => {
     const [allForums, setAllForums] = useState([]); // Store all forums for filtering
     const [searchQuery, setSearchQuery] = useState("");
     const [forumOnlineCounts, setForumOnlineCounts] = useState({});
+    const [creatorUsernames, setCreatorUsernames] = useState({});
 
     const navigate = useNavigate();
 
@@ -103,8 +104,9 @@ const Forums = () => {
             setForums(response.data);
             setAllForums(response.data); // Store all forums for filtering
             
-            // Fetch online counts for all forums
+            // Fetch online counts and creator usernames for all forums
             fetchAllOnlineCounts(response.data);
+            fetchCreatorUsernames(response.data);
         } catch (error) {
             console.error("Error fetching forums:", error);
             console.error("Error response:", error.response);
@@ -142,6 +144,35 @@ const Forums = () => {
             setForumOnlineCounts(onlineCountsMap);
         } catch (error) {
             console.error("Error fetching online counts:", error);
+        }
+    };
+
+    const fetchCreatorUsernames = async (forums) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            const creatorPromises = forums.map(async (forum) => {
+                try {
+                    const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/users/${forum.creator_id}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    return { forumId: forum.id, username: response.data.username };
+                } catch (error) {
+                    console.error(`Error fetching creator for forum ${forum.id}:`, error);
+                    return { forumId: forum.id, username: 'Unknown' };
+                }
+            });
+
+            const results = await Promise.all(creatorPromises);
+            const creatorMap = {};
+            results.forEach(({ forumId, username }) => {
+                creatorMap[forumId] = username;
+            });
+            
+            setCreatorUsernames(creatorMap);
+        } catch (error) {
+            console.error("Error fetching creator usernames:", error);
         }
     };
 
@@ -797,7 +828,7 @@ const Forums = () => {
                                         fontSize: "0.8rem",
                                         fontWeight: "500"
                                     }}>
-                                        Created by: <strong>{forum.creator || forum.creator_username || 'Unknown'}</strong>
+                                        Created by: <strong>{creatorUsernames[forum.id] || 'Unknown'}</strong>
                                     </span>
                                 </div>
                                 

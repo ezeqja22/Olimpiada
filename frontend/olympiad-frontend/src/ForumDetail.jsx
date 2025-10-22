@@ -588,8 +588,6 @@ const ForumDetail = () => {
     });
     const [sortOrder, setSortOrder] = useState('newest'); // 'newest' or 'oldest'
     const [showSortDropdown, setShowSortDropdown] = useState(false);
-    const [touchStartY, setTouchStartY] = useState(null);
-    const [touchStartTime, setTouchStartTime] = useState(null);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -1253,8 +1251,34 @@ const ForumDetail = () => {
     };
 
     return (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <Header />
+        <>
+            <style>
+                {`
+                    @keyframes slideInFromBottom {
+                        0% {
+                            transform: translateY(100%);
+                            opacity: 0;
+                        }
+                        100% {
+                            transform: translateY(0);
+                            opacity: 1;
+                        }
+                    }
+                    
+                    @keyframes slideOutToTop {
+                        0% {
+                            transform: translateY(0);
+                            opacity: 1;
+                        }
+                        100% {
+                            transform: translateY(-100%);
+                            opacity: 0;
+                        }
+                    }
+                `}
+            </style>
+            <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+                <Header />
             
             {/* Main Content */}
             <div style={{
@@ -2272,52 +2296,18 @@ const ForumDetail = () => {
                 {/* Chat Panel */}
                 {showChat && (
                     <div 
+                        data-chat-panel
                         style={{
                             width: isMobile ? '100%' : '70%',
                             height: '100%',
                             display: 'flex',
                             flexDirection: 'column',
                             backgroundColor: colors.light,
-                            transition: 'all 0.3s ease-in-out',
-                            position: 'relative'
-                        }}
-                        onTouchStart={(e) => {
-                            if (isMobile) {
-                                const touch = e.touches[0];
-                                setTouchStartY(touch.clientY);
-                                setTouchStartTime(Date.now());
-                            }
-                        }}
-                        onTouchMove={(e) => {
-                            if (isMobile && touchStartY) {
-                                const touch = e.touches[0];
-                                const deltaY = touch.clientY - touchStartY;
-                                
-                                // If swiping down more than 50px, show visual feedback
-                                if (deltaY > 50) {
-                                    e.currentTarget.style.transform = `translateY(${Math.min(deltaY * 0.5, 100)}px)`;
-                                    e.currentTarget.style.opacity = Math.max(0.7, 1 - (deltaY / 200));
-                                }
-                            }
-                        }}
-                        onTouchEnd={(e) => {
-                            if (isMobile && touchStartY) {
-                                const touch = e.changedTouches[0];
-                                const deltaY = touch.clientY - touchStartY;
-                                const deltaTime = Date.now() - touchStartTime;
-                                
-                                // Reset transform
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.opacity = '1';
-                                
-                                // Close chat if swiped down more than 100px or fast swipe
-                                if (deltaY > 100 || (deltaY > 50 && deltaTime < 300)) {
-                                    toggleChat();
-                                }
-                                
-                                setTouchStartY(null);
-                                setTouchStartTime(null);
-                            }
+                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                            position: 'relative',
+                            transform: 'translateY(0)',
+                            opacity: 1,
+                            animation: 'slideInFromBottom 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                     >
                         {/* Chat Header */}
@@ -2349,7 +2339,18 @@ const ForumDetail = () => {
                             
                             {/* Close Chat Button */}
                             <button
-                                onClick={toggleChat}
+                                onClick={() => {
+                                    // Add slide out animation
+                                    const chatPanel = document.querySelector('[data-chat-panel]');
+                                    if (chatPanel) {
+                                        chatPanel.style.animation = 'slideOutToTop 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                                        setTimeout(() => {
+                                            toggleChat();
+                                        }, 300);
+                                    } else {
+                                        toggleChat();
+                                    }
+                                }}
                                 style={{
                                     backgroundColor: colors.primary,
                                     border: 'none',
@@ -2611,7 +2612,7 @@ const ForumDetail = () => {
                                                     justifyContent: 'space-between',
                                                     alignItems: 'center'
                                                 }}>
-                                                    <span>{new Date(message.created_at).toLocaleString()}</span>
+                                                    <span>{new Date(message.created_at).toLocaleTimeString()}</span>
                                                     
                                                 {/* Message Actions Dropdown - Available to all members */}
                                                 {(
@@ -4011,6 +4012,7 @@ const ForumDetail = () => {
                 />
             )}
         </div>
+        </>
     );
 };
 
