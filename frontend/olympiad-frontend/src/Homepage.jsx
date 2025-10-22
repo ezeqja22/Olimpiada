@@ -746,6 +746,9 @@ function Homepage() {
                         </div>
                         {currentUser ? (
                             <div style={{ display: "flex", alignItems: "center", gap: "4px", position: "relative" }}>
+                                {/* Mobile Notification Bell */}
+                                <NotificationBell />
+                                
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
