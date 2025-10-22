@@ -1262,12 +1262,12 @@ const ForumDetail = () => {
             }}>
                 {/* Forum Info Panel */}
                 <div style={{
-                    width: showChat ? (isMobile ? (showSidebar ? '60%' : '0%') : '30%') : '100%',
-                    minWidth: showChat ? (isMobile ? (showSidebar ? 'auto' : '0px') : '300px') : 'auto',
+                    width: showChat ? (isMobile ? (showSidebar ? '60%' : '100%') : '30%') : '100%',
+                    minWidth: showChat ? (isMobile ? (showSidebar ? 'auto' : 'auto') : '300px') : 'auto',
                     transition: 'all 0.3s ease-in-out',
                     overflow: 'hidden',
                     borderRight: showChat ? `1px solid ${colors.gray[200]}` : 'none',
-                    display: isMobile && !showSidebar ? 'none' : 'block'
+                    display: 'block' // Always show on mobile, let width handle the layout
                 }}>
                     <div style={{ padding: spacing.lg, height: '100%', overflowY: 'auto' }}>
                         <BackButton fallbackPath="/forums" />
