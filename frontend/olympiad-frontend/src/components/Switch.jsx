@@ -32,7 +32,14 @@ function Switch({ checked, onChange, disabled = false, size = "md" }) {
             width: currentSize.width,
             height: currentSize.height,
             cursor: disabled ? "not-allowed" : "pointer",
-            opacity: disabled ? 0.6 : 1
+            opacity: disabled ? 0.6 : 1,
+            borderRadius: "9999px",
+            backgroundColor: checked ? colors.primary : colors.gray[300],
+            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            border: `2px solid ${checked ? colors.primary : colors.gray[300]}`,
+            boxShadow: checked 
+                ? `0 0 0 2px ${colors.primary}20` 
+                : "inset 0 2px 4px rgba(0,0,0,0.1)"
         }}>
             <input
                 type="checkbox"
@@ -48,34 +55,19 @@ function Switch({ checked, onChange, disabled = false, size = "md" }) {
             />
             <span style={{
                 position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: checked ? colors.primary : colors.gray[300],
-                borderRadius: "9999px",
+                top: currentSize.thumbOffset,
+                left: checked 
+                    ? `calc(100% - ${currentSize.thumbSize} - ${currentSize.thumbOffset})` 
+                    : currentSize.thumbOffset,
+                width: currentSize.thumbSize,
+                height: currentSize.thumbSize,
+                backgroundColor: colors.white,
+                borderRadius: "50%",
                 transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                boxShadow: checked 
-                    ? `0 0 0 2px ${colors.primary}20` 
-                    : "inset 0 2px 4px rgba(0,0,0,0.1)",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.1)",
+                transform: checked ? "scale(1.05)" : "scale(1)",
                 border: `1px solid ${checked ? colors.primary : colors.gray[300]}`
-            }}>
-                <span style={{
-                    position: "absolute",
-                    top: currentSize.thumbOffset,
-                    left: checked 
-                        ? `calc(100% - ${currentSize.thumbSize} - ${currentSize.thumbOffset})` 
-                        : currentSize.thumbOffset,
-                    width: currentSize.thumbSize,
-                    height: currentSize.thumbSize,
-                    backgroundColor: colors.white,
-                    borderRadius: "50%",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.1)",
-                    transform: checked ? "scale(1.05)" : "scale(1)",
-                    border: `1px solid ${checked ? colors.primary : colors.gray[300]}`
-                }} />
-            </span>
+            }} />
         </label>
     );
 }
