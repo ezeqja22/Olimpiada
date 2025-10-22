@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { colors, spacing, typography, shadows, borderRadius } from "../designSystem";
 import { getUserInitial } from "../utils";
@@ -17,12 +17,18 @@ function Header({ showHomeButton = false }) {
     const [isMobile, setIsMobile] = useState(false);
     const [pinnedForums, setPinnedForums] = useState([]);
     const navigate = useNavigate();
+    const location = useLocation();
     
     // Site settings
     const { siteSettings, loading: settingsLoading } = useSiteSettings();
     
     // Feature settings
     const { checkFeatureEnabled, showFeatureDisabledAlert } = useFeatureSettings();
+    
+    // Smart navigation hiding logic (mobile only)
+    const shouldHideFeedButton = isMobile && (location.pathname === '/feed' || location.pathname.startsWith('/feed'));
+    const shouldHideForumsButton = isMobile && (location.pathname === '/forums' || location.pathname.startsWith('/forum/'));
+    const shouldHideSubjectDropdown = isMobile && (location.pathname.startsWith('/subject/'));
     
     // Mobile detection
     useEffect(() => {
@@ -134,6 +140,18 @@ function Header({ showHomeButton = false }) {
     const handleSubjectClick = (subject) => {
         navigate(`/subject/${subject.toLowerCase().replace(/\s+/g, '-')}`);
         setShowSubjectDropdown(false);
+    };
+
+    // Get icon based on subject
+    const getSubjectIcon = (subject) => {
+        const subjectLower = subject?.toLowerCase() || '';
+        if (subjectLower.includes('biology')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/Biology_subject_pcxmoa.svg';
+        if (subjectLower.includes('chemistry')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/chemistry_subject_r4n7jq.svg';
+        if (subjectLower.includes('mathematics') || subjectLower.includes('math')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/math_subject_iqigfx.svg';
+        if (subjectLower.includes('physics')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/physics_subject_m90gto.svg';
+        if (subjectLower.includes('computer')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/computer_engineerin_subject_u2m2ze.svg';
+        if (subjectLower.includes('other')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
+        return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
     };
 
     const handleHamburgerClick = () => {
@@ -660,29 +678,111 @@ function Header({ showHomeButton = false }) {
             {/* Mobile Navigation */}
             {isMobile && (
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    {/* Mobile Navigation Links */}
-                    <Link to="/feed" style={{ 
-                        color: "white", 
-                        textDecoration: "none", 
-                        fontSize: "11px",
-                        fontWeight: "500",
-                        padding: "4px 6px",
-                        borderRadius: "4px",
-                        backgroundColor: "rgba(255, 255, 255, 0.1)"
-                    }}>
-                        Feed
-                    </Link>
-                    <Link to="/forums" style={{ 
-                        color: "white", 
-                        textDecoration: "none", 
-                        fontSize: "11px",
-                        fontWeight: "500",
-                        padding: "4px 6px",
-                        borderRadius: "4px",
-                        backgroundColor: "rgba(255, 255, 255, 0.1)"
-                    }}>
-                        Forums
-                    </Link>
+                    {/* Mobile Navigation Links - Smart Hiding */}
+                    {!shouldHideFeedButton && (
+                        <Link to="/feed" style={{ 
+                            color: "white", 
+                            textDecoration: "none", 
+                            fontSize: "11px",
+                            fontWeight: "500",
+                            padding: "4px 6px",
+                            borderRadius: "4px",
+                            backgroundColor: "rgba(255, 255, 255, 0.1)"
+                        }}>
+                            Feed
+                        </Link>
+                    )}
+                    {!shouldHideForumsButton && (
+                        <Link to="/forums" style={{ 
+                            color: "white", 
+                            textDecoration: "none", 
+                            fontSize: "11px",
+                            fontWeight: "500",
+                            padding: "4px 6px",
+                            borderRadius: "4px",
+                            backgroundColor: "rgba(255, 255, 255, 0.1)"
+                        }}>
+                            Forums
+                        </Link>
+                    )}
+                    
+                    {/* Mobile Subject Dropdown - Smart Hiding */}
+                    {!shouldHideSubjectDropdown && (
+                        <div style={{ position: "relative" }}>
+                            <button
+                                onClick={() => setShowSubjectDropdown(!showSubjectDropdown)}
+                                style={{ 
+                                    color: "white", 
+                                    textDecoration: "none", 
+                                    fontSize: "11px",
+                                    fontWeight: "500",
+                                    padding: "4px 6px",
+                                    borderRadius: "4px",
+                                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "3px"
+                                }}
+                            >
+                                Subject
+                                <span style={{ fontSize: "9px" }}>▼</span>
+                            </button>
+                            
+                            {showSubjectDropdown && (
+                                <div style={{
+                                    position: "absolute",
+                                    top: "100%",
+                                    right: 0,
+                                    backgroundColor: "white",
+                                    border: "1px solid #e5e7eb",
+                                    borderRadius: "6px",
+                                    boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+                                    zIndex: 1000,
+                                    minWidth: "150px",
+                                    marginTop: "4px"
+                                }}>
+                                    {subjects.map((subject) => (
+                                        <button
+                                            key={subject}
+                                            onClick={() => {
+                                                navigate(`/subject/${subject.toLowerCase().replace(/\s+/g, '-')}`);
+                                                setShowSubjectDropdown(false);
+                                            }}
+                                            style={{
+                                                width: "100%",
+                                                padding: "12px 16px",
+                                                border: "none",
+                                                backgroundColor: "transparent",
+                                                color: "#374151",
+                                                textAlign: "left",
+                                                cursor: "pointer",
+                                                fontSize: "14px",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "8px"
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                        >
+                                            <img
+                                                src={getSubjectIcon(subject)}
+                                                alt={subject}
+                                                style={{
+                                                    width: "20px",
+                                                    height: "20px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            {subject}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    
                     {currentUser ? (
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                             <NotificationBell />

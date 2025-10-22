@@ -648,14 +648,14 @@ function Homepage() {
                 {/* Mobile Menu Button */}
                 {isMobile && (
                         <div style={{ display: "flex", alignItems: "center", gap: "3px", flexWrap: "wrap" }}>
-                        {/* Mobile Navigation Links - Smaller */}
+                        {/* Mobile Navigation Links - Slightly Bigger */}
                         <Link to="/feed" style={{ 
                             color: "white", 
                             textDecoration: "none", 
-                            fontSize: "9px",
+                            fontSize: "10px",
                             fontWeight: "500",
-                            padding: "2px 4px",
-                            borderRadius: "3px",
+                            padding: "3px 6px",
+                            borderRadius: "4px",
                             backgroundColor: "rgba(255, 255, 255, 0.1)"
                         }}>
                             Feed
@@ -663,10 +663,10 @@ function Homepage() {
                         <Link to="/forums" style={{ 
                             color: "white", 
                             textDecoration: "none", 
-                            fontSize: "9px",
+                            fontSize: "10px",
                             fontWeight: "500",
-                            padding: "2px 4px",
-                            borderRadius: "3px",
+                            padding: "3px 6px",
+                            borderRadius: "4px",
                             backgroundColor: "rgba(255, 255, 255, 0.1)"
                         }}>
                             Forums
@@ -677,20 +677,20 @@ function Homepage() {
                                 style={{ 
                                     color: "white", 
                                     textDecoration: "none", 
-                                    fontSize: "9px",
+                                    fontSize: "10px",
                                     fontWeight: "500",
-                                    padding: "2px 4px",
-                                    borderRadius: "3px",
+                                    padding: "3px 6px",
+                                    borderRadius: "4px",
                                     backgroundColor: "rgba(255, 255, 255, 0.1)",
                                     border: "none",
                                     cursor: "pointer",
                                     display: "flex",
                                     alignItems: "center",
-                                    gap: "2px"
+                                    gap: "3px"
                                 }}
                             >
                                 Subject
-                                <span style={{ fontSize: "8px" }}>▼</span>
+                                <span style={{ fontSize: "9px" }}>▼</span>
                             </button>
                             
                             {showSubjectDropdown && (
@@ -894,10 +894,10 @@ function Homepage() {
                             <Link to="/login" style={{ 
                                 color: "white", 
                                 textDecoration: "none", 
-                                fontSize: "9px",
+                                fontSize: "10px",
                                 fontWeight: "500",
-                                padding: "2px 4px",
-                                borderRadius: "3px",
+                                padding: "3px 6px",
+                                borderRadius: "4px",
                                 backgroundColor: "rgba(255, 255, 255, 0.1)"
                             }}>
                                 Login
