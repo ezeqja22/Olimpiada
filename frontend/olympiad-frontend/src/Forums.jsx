@@ -105,6 +105,9 @@ const Forums = () => {
             if (response.data.length > 0) {
                 console.log("First forum object:", response.data[0]);
                 console.log("Available fields:", Object.keys(response.data[0]));
+                console.log("Creator ID:", response.data[0].creator_id);
+                console.log("Creator object:", response.data[0].creator);
+                console.log("All forum objects:", response.data);
             }
             setForums(response.data);
             setAllForums(response.data); // Store all forums for filtering
@@ -154,53 +157,86 @@ const Forums = () => {
 
     const fetchCreatorUsernames = async (forums) => {
         try {
+            // First, check if creator information is already in the forum data
+            console.log("Checking if creator info is already available...");
+            
+            const forumCreatorMap = {};
+            let hasCreatorInfo = false;
+            
+            forums.forEach(forum => {
+                console.log(`Forum ${forum.id} creator info:`, {
+                    creator_id: forum.creator_id,
+                    creator: forum.creator,
+                    creator_username: forum.creator_username,
+                    creator_name: forum.creator_name
+                });
+                
+                // Try different possible creator fields
+                const creatorName = forum.creator?.username || 
+                                  forum.creator_username || 
+                                  forum.creator_name || 
+                                  forum.creator?.name ||
+                                  'Unknown';
+                
+                if (creatorName !== 'Unknown') {
+                    hasCreatorInfo = true;
+                }
+                
+                forumCreatorMap[forum.id] = creatorName;
+            });
+            
+            if (hasCreatorInfo) {
+                console.log("Creator info found in forum data!");
+                setCreatorUsernames(forumCreatorMap);
+                return;
+            }
+            
+            // If not found, try API approach
+            console.log("Creator info not found in forum data, trying API...");
+            
             const token = localStorage.getItem("token");
             if (!token) return;
 
-            // Try to get all unique creator IDs first
+            // Get all unique creator IDs
             const uniqueCreatorIds = [...new Set(forums.map(forum => forum.creator_id))];
             console.log("Unique creator IDs:", uniqueCreatorIds);
 
-            const creatorPromises = uniqueCreatorIds.map(async (creatorId) => {
-                try {
-                    // Try different possible endpoints
-                    let response;
-                    try {
-                        response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/users/${creatorId}`, {
-                            headers: { Authorization: `Bearer ${token}` }
-                        });
-                    } catch (error) {
-                        // If that fails, try the search endpoint
-                        console.log(`Trying search endpoint for creator ${creatorId}`);
-                        response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/users/search?q=`, {
-                            headers: { Authorization: `Bearer ${token}` }
-                        });
-                        // This might not work either, but let's see what we get
-                    }
+            // Try to get all users with a broad search
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/users/search?q=a`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                console.log("All users response:", response.data);
+                
+                if (response.data.users && response.data.users.length > 0) {
+                    // Create a map of user ID to username
+                    const userMap = {};
+                    response.data.users.forEach(user => {
+                        userMap[user.id] = user.username;
+                    });
                     
-                    console.log(`Response for creator ${creatorId}:`, response.data);
-                    return { creatorId, username: response.data.username || 'Unknown' };
-                } catch (error) {
-                    console.error(`Error fetching creator ${creatorId}:`, error);
-                    return { creatorId, username: 'Unknown' };
+                    // Map forum IDs to usernames
+                    const apiForumCreatorMap = {};
+                    forums.forEach(forum => {
+                        apiForumCreatorMap[forum.id] = userMap[forum.creator_id] || 'Unknown';
+                    });
+                    
+                    setCreatorUsernames(apiForumCreatorMap);
+                    return;
                 }
-            });
+            } catch (error) {
+                console.error("Error fetching all users:", error);
+            }
 
-            const results = await Promise.all(creatorPromises);
-            const creatorMap = {};
-            
-            // Map creator IDs to usernames
-            results.forEach(({ creatorId, username }) => {
-                creatorMap[creatorId] = username;
-            });
-            
-            // Now map forum IDs to usernames
-            const forumCreatorMap = {};
+            // Final fallback: set all to Unknown
+            console.log("No creator info found, setting all to Unknown");
+            const fallbackMap = {};
             forums.forEach(forum => {
-                forumCreatorMap[forum.id] = creatorMap[forum.creator_id] || 'Unknown';
+                fallbackMap[forum.id] = 'Unknown';
             });
+            setCreatorUsernames(fallbackMap);
             
-            setCreatorUsernames(forumCreatorMap);
         } catch (error) {
             console.error("Error fetching creator usernames:", error);
         }
