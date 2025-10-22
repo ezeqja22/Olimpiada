@@ -34,7 +34,6 @@ const Forums = () => {
     const [allForums, setAllForums] = useState([]); // Store all forums for filtering
     const [searchQuery, setSearchQuery] = useState("");
     const [forumOnlineCounts, setForumOnlineCounts] = useState({});
-    const [creatorUsernames, setCreatorUsernames] = useState({});
 
     const navigate = useNavigate();
 
@@ -101,20 +100,11 @@ const Forums = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
-            console.log("Forum data structure:", response.data);
-            if (response.data.length > 0) {
-                console.log("First forum object:", response.data[0]);
-                console.log("Available fields:", Object.keys(response.data[0]));
-                console.log("Creator ID:", response.data[0].creator_id);
-                console.log("Creator object:", response.data[0].creator);
-                console.log("All forum objects:", response.data);
-            }
             setForums(response.data);
             setAllForums(response.data); // Store all forums for filtering
             
-            // Fetch online counts and creator usernames for all forums
+            // Fetch online counts for all forums
             fetchAllOnlineCounts(response.data);
-            fetchCreatorUsernames(response.data);
         } catch (error) {
             console.error("Error fetching forums:", error);
             console.error("Error response:", error.response);
@@ -155,92 +145,6 @@ const Forums = () => {
         }
     };
 
-    const fetchCreatorUsernames = async (forums) => {
-        try {
-            // First, check if creator information is already in the forum data
-            console.log("Checking if creator info is already available...");
-            
-            const forumCreatorMap = {};
-            let hasCreatorInfo = false;
-            
-            forums.forEach(forum => {
-                console.log(`Forum ${forum.id} creator info:`, {
-                    creator_id: forum.creator_id,
-                    creator: forum.creator,
-                    creator_username: forum.creator_username,
-                    creator_name: forum.creator_name
-                });
-                
-                // Try different possible creator fields
-                const creatorName = forum.creator?.username || 
-                                  forum.creator_username || 
-                                  forum.creator_name || 
-                                  forum.creator?.name ||
-                                  'Unknown';
-                
-                if (creatorName !== 'Unknown') {
-                    hasCreatorInfo = true;
-                }
-                
-                forumCreatorMap[forum.id] = creatorName;
-            });
-            
-            if (hasCreatorInfo) {
-                console.log("Creator info found in forum data!");
-                setCreatorUsernames(forumCreatorMap);
-                return;
-            }
-            
-            // If not found, try API approach
-            console.log("Creator info not found in forum data, trying API...");
-            
-            const token = localStorage.getItem("token");
-            if (!token) return;
-
-            // Get all unique creator IDs
-            const uniqueCreatorIds = [...new Set(forums.map(forum => forum.creator_id))];
-            console.log("Unique creator IDs:", uniqueCreatorIds);
-
-            // Try to get all users with a broad search
-            try {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/users/search?q=a`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                
-                console.log("All users response:", response.data);
-                
-                if (response.data.users && response.data.users.length > 0) {
-                    // Create a map of user ID to username
-                    const userMap = {};
-                    response.data.users.forEach(user => {
-                        userMap[user.id] = user.username;
-                    });
-                    
-                    // Map forum IDs to usernames
-                    const apiForumCreatorMap = {};
-                    forums.forEach(forum => {
-                        apiForumCreatorMap[forum.id] = userMap[forum.creator_id] || 'Unknown';
-                    });
-                    
-                    setCreatorUsernames(apiForumCreatorMap);
-                    return;
-                }
-            } catch (error) {
-                console.error("Error fetching all users:", error);
-            }
-
-            // Final fallback: set all to Unknown
-            console.log("No creator info found, setting all to Unknown");
-            const fallbackMap = {};
-            forums.forEach(forum => {
-                fallbackMap[forum.id] = 'Unknown';
-            });
-            setCreatorUsernames(fallbackMap);
-            
-        } catch (error) {
-            console.error("Error fetching creator usernames:", error);
-        }
-    };
 
     const handleCreateForum = async (e) => {
         e.preventDefault();
@@ -884,19 +788,6 @@ const Forums = () => {
                                     ))}
                                 </div>
                                 
-                                {/* Forum Creator */}
-                                <div style={{ 
-                                    marginBottom: "8px",
-                                    pointerEvents: "none"
-                                }}>
-                                    <span style={{ 
-                                        color: colors.gray[600], 
-                                        fontSize: "0.8rem",
-                                        fontWeight: "500"
-                                    }}>
-                                        Created by: <strong>{creatorUsernames[forum.id] || 'Unknown'}</strong>
-                                    </span>
-                                </div>
                                 
                                 <div style={{ 
                                     display: "flex", 
