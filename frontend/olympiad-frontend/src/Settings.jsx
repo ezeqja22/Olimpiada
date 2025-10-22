@@ -365,7 +365,7 @@ function Settings() {
 
     return (
         <Layout>
-            <div style={{ maxWidth: "1000px", margin: "0 auto", padding: spacing.xl }}>
+            <div style={{ width: "100%", maxWidth: "none", padding: spacing.xl }}>
                 <BackButton />
                 
                 <div style={{ marginBottom: spacing.xl }}>
