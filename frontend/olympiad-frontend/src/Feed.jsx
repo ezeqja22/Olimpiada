@@ -572,16 +572,20 @@ function Feed() {
   return (
     <Layout showHomeButton={true}>
       <div style={{ 
-        marginBottom: spacing.xl,
-        padding: isMobile ? "0 0.5rem" : "0"
+        width: "100%", 
+        maxWidth: "100%", 
+        overflow: "hidden",
+        boxSizing: "border-box"
+      }}>
+      <div style={{ 
+        marginBottom: spacing.xl
       }}>
         <h1 style={{
           fontSize: isMobile ? "1.5rem" : typography.fontSize["3xl"],
           fontWeight: typography.fontWeight.bold,
           color: colors.primary,
           marginBottom: spacing.lg,
-          textAlign: "center",
-          padding: isMobile ? "0 0.5rem" : "0"
+          textAlign: "center"
         }}>
           Science Problems Feed
         </h1>
@@ -590,8 +594,7 @@ function Feed() {
 
       {/* Enhanced Search Bar */}
       <div style={{ 
-        marginBottom: "20px",
-        padding: isMobile ? "0 0.5rem" : "0"
+        marginBottom: "20px"
       }}>
         <SearchBar placeholder="Search problems, users, tags, levels..." />
       </div>
@@ -604,7 +607,6 @@ function Feed() {
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         overflow: "hidden",
-        margin: isMobile ? "0 0.5rem 1.5rem 0.5rem" : "0 0 1.5rem 0",
         boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
         border: `1px solid ${colors.gray[200]}`
       }}>
@@ -705,15 +707,14 @@ function Feed() {
           )}
         </div>
       ) : (
-        <div style={{ padding: isMobile ? "0 0.5rem" : "0" }}>
+        <div>
           {problems.map((problem) => (
             <Card 
             key={problem.id} 
             hover={true}
             style={{
               marginBottom: spacing.lg,
-              cursor: "pointer",
-              padding: isMobile ? "12px" : "20px"
+              cursor: "pointer"
             }}
             onClick={() => navigate(`/problem/${problem.id}?from=feed&tab=${activeTab}`)}
           >
@@ -808,8 +809,23 @@ function Feed() {
                 </div>
               )}
               
-              <h3 style={{ marginTop: 0, color: "#333", pointerEvents: "none" }}>{renderMathContent(problem.title)}</h3>
-              <div style={{ color: "#666", lineHeight: "1.5", whiteSpace: "pre-wrap", pointerEvents: "none" }}>{renderMathContent(problem.description)}</div>
+              <h3 style={{ 
+                marginTop: 0, 
+                color: "#333", 
+                pointerEvents: "none",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                maxWidth: "100%"
+              }}>{renderMathContent(problem.title)}</h3>
+              <div style={{ 
+                color: "#666", 
+                lineHeight: "1.5", 
+                whiteSpace: "pre-wrap", 
+                pointerEvents: "none",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                maxWidth: "100%"
+              }}>{renderMathContent(problem.description)}</div>
               <div style={{ 
                 display: "flex", 
                 gap: isMobile ? "4px" : "10px", 
@@ -1152,6 +1168,7 @@ function Feed() {
         </Link>
     </div>
 
+      </div>
     </Layout>
   );
 }

@@ -1,8 +1,21 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./Header";
 import { colors, spacing } from "../designSystem";
 
 function Layout({ children, showHomeButton = false, maxWidth = "1200px" }) {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     return (
         <div style={{
             minHeight: "100vh",
@@ -13,7 +26,7 @@ function Layout({ children, showHomeButton = false, maxWidth = "1200px" }) {
             <Header showHomeButton={showHomeButton} />
             <main style={{
                 flex: 1,
-                padding: spacing.xl,
+                padding: isMobile ? spacing.sm : spacing.xl,
                 maxWidth: maxWidth,
                 margin: "0 auto",
                 width: "100%",

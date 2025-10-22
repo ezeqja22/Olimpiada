@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function SearchBar({ 
@@ -12,7 +12,20 @@ function SearchBar({
 }) {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [showAdvancedModal, setShowAdvancedModal] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -70,7 +83,12 @@ function SearchBar({
 
   return (
     <div style={{ position: 'relative', width: '100%' }}>
-      <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+      <form onSubmit={handleSearch} style={{ 
+        display: 'flex', 
+        gap: isMobile ? '6px' : '10px', 
+        alignItems: 'center',
+        flexWrap: isMobile ? 'wrap' : 'nowrap'
+      }}>
 
         {/* Search Input */}
         <input
@@ -80,10 +98,11 @@ function SearchBar({
           placeholder={placeholder}
           style={{
             flex: 1,
-            padding: '12px 20px',
+            minWidth: isMobile ? '200px' : '300px',
+            padding: isMobile ? '10px 16px' : '12px 20px',
             border: '2px solid #e9ecef',
             borderRadius: '25px',
-            fontSize: '16px',
+            fontSize: isMobile ? '14px' : '16px',
             outline: 'none',
             transition: 'border-color 0.2s ease',
             backgroundColor: 'white',
@@ -101,16 +120,17 @@ function SearchBar({
         <button
           type="submit"
           style={{
-            padding: '12px 24px',
+            padding: isMobile ? '10px 16px' : '12px 24px',
             backgroundColor: '#1a4d3a',
             color: 'white',
             border: 'none',
             borderRadius: '25px',
             cursor: 'pointer',
-            fontSize: '16px',
+            fontSize: isMobile ? '14px' : '16px',
             fontWeight: 'bold',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            transition: 'background-color 0.2s ease'
+            transition: 'background-color 0.2s ease',
+            whiteSpace: 'nowrap'
           }}
           onMouseEnter={(e) => {
             e.target.style.backgroundColor = '#2d7a5f';
@@ -123,10 +143,10 @@ function SearchBar({
             src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795126/Search_Icon_White_wj1ka1.svg" 
             alt="Search"
             style={{
-              height: "16px",
-              width: "16px",
+              height: isMobile ? "14px" : "16px",
+              width: isMobile ? "14px" : "16px",
               objectFit: "contain",
-              marginRight: "4px"
+              marginRight: isMobile ? "3px" : "4px"
             }}
           />
           Search
@@ -138,14 +158,15 @@ function SearchBar({
             type="button"
             onClick={openAdvancedSearch}
             style={{
-              padding: '12px 24px',
+              padding: isMobile ? '10px 16px' : '12px 24px',
               backgroundColor: 'rgba(118, 75, 162)',
               color: 'white',
               border: 'none',
               borderRadius: '25px',
               cursor: 'pointer',
-              fontSize: '16px',
+              fontSize: isMobile ? '14px' : '16px',
               fontWeight: 'bold',
+              whiteSpace: 'nowrap',
               boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
               transition: 'background-color 0.2s ease'
             }}
