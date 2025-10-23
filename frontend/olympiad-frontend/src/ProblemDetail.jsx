@@ -59,6 +59,17 @@ const CommentThread = ({
 }) => {
     const maxDepth = 3; // Limit nesting depth
     const isNested = depth > 0;
+    const [showReplies, setShowReplies] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
+    
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
     
     return (
         <div style={{
@@ -69,13 +80,13 @@ const CommentThread = ({
                 backgroundColor: comment.is_solution ? "#f0fdf4" : isNested ? "#f1f5f9" : "#ffffff",
                 border: comment.is_solution ? "3px solid rgb(26, 77, 58)" : isNested ? "1px solid #94a3b8" : "1px solid #e2e8f0",
                 borderRadius: isNested ? "8px" : "16px",
-                padding: isNested ? "12px" : "18px",
+                padding: isNested ? (isMobile ? "8px" : "12px") : (isMobile ? "12px" : "18px"),
                 boxShadow: comment.is_solution ? "0 4px 20px rgba(26, 77, 58, 0.2)" : isNested ? "0 1px 4px rgba(0,0,0,0.05)" : "0 4px 12px rgba(0,0,0,0.1)",
                 position: "relative",
                 transition: "all 0.3s ease",
-                marginLeft: isNested ? "60px" : "0",
+                marginLeft: isNested ? (isMobile ? "20px" : "60px") : "0",
                 borderLeft: isNested ? "4px solid #6366f1" : "none",
-                transform: isNested ? "translateX(6px)" : "translateX(0)",
+                transform: isNested ? (isMobile ? "translateX(0)" : "translateX(6px)") : "translateX(0)",
                 opacity: isNested ? "0.95" : "1",
                 outline: comment.is_solution ? "1px solid rgb(26, 77, 58)" : "none",
                 outlineOffset: comment.is_solution ? "2px" : "0"
@@ -131,15 +142,27 @@ const CommentThread = ({
                     </div>
                     
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                            <span style={{ fontWeight: "600", color: "#333", fontSize: "14px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
+                            <span style={{ fontWeight: "600", color: "#333", fontSize: isMobile ? "13px" : "14px" }}>
                                 {getDisplayName(comment.author.username)}
                             </span>
-                            <span style={{ color: "#6c757d", fontSize: "12px" }}>
+                            {isNested && (
+                                <span style={{ 
+                                    color: "#6366f1", 
+                                    fontSize: isMobile ? "10px" : "11px",
+                                    backgroundColor: "#f0f4ff",
+                                    padding: "2px 6px",
+                                    borderRadius: "4px",
+                                    fontWeight: "500"
+                                }}>
+                                    Reply
+                                </span>
+                            )}
+                            <span style={{ color: "#6c757d", fontSize: isMobile ? "11px" : "12px" }}>
                                 {new Date(comment.created_at).toLocaleDateString()}
                             </span>
                             {comment.updated_at && new Date(comment.updated_at).getTime() > new Date(comment.created_at).getTime() && (
-                                <span style={{ color: "#6c757d", fontSize: "11px" }}>(Edited)</span>
+                                <span style={{ color: "#6c757d", fontSize: isMobile ? "10px" : "11px" }}>(Edited)</span>
                             )}
                         </div>
                         
@@ -412,71 +435,108 @@ const CommentThread = ({
                 <div style={{ 
                     marginTop: "12px",
                     position: "relative",
-                    marginLeft: "30px"
+                    marginLeft: isMobile ? "10px" : "30px"
                 }}>
-                    {/* L-shaped connection line from parent center to replies center */}
+                    {/* Hide/Show Replies Button */}
                     <div style={{
-                        position: "absolute",
-                        left: "-80px",
-                        top: "-80px",
-                        width: "2px",
-                        height: "calc(100% + 30px)",
-                        backgroundColor: "#6366f1",
-                        borderRadius: "1px",
-                        opacity: 0.7
-                    }} />
-                    
-                    {/* Horizontal line connecting to parent center */}
-                    <div style={{
-                        position: "absolute",
-                        left: "-80px",
-                        top: "-80px",
-                        width: "50px",
-                        height: "2px",
-                        backgroundColor: "#6366f1",
-                        borderRadius: "1px",
-                        opacity: 0.7
-                    }} />
-                    
-                    {/* Connection dot at the junction */}
-                    <div style={{
-                        position: "absolute",
-                        left: "-82px",
-                        top: "-82px",
-                        width: "6px",
-                        height: "6px",
-                        backgroundColor: "#6366f1",
-                        borderRadius: "50%",
-                        zIndex: 1
-                    }} />
-                    
-                    {comment.replies.map((reply, index) => (
-                        <div key={reply.id} style={{ 
-                            position: "relative",
-                            marginBottom: "8px"
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        marginBottom: "8px",
+                        cursor: "pointer",
+                        padding: "4px 8px",
+                        borderRadius: "6px",
+                        backgroundColor: "#f8f9fa",
+                        border: "1px solid #e9ecef",
+                        transition: "all 0.2s ease"
+                    }}
+                    onClick={() => setShowReplies(!showReplies)}
+                    onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = "#e9ecef";
+                    }}
+                    onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = "#f8f9fa";
+                    }}>
+                        <span style={{
+                            fontSize: isMobile ? "12px" : "13px",
+                            fontWeight: "500",
+                            color: "#6366f1"
                         }}>
-                            <CommentThread
-                                comment={reply}
-                                currentUser={currentUser}
-                                problem={problem}
-                                onEditComment={onEditComment}
-                                onDeleteComment={onDeleteComment}
-                                onMarkAsSolution={onMarkAsSolution}
-                                onReply={onReply}
-                                replyingTo={replyingTo}
-                                setReplyingTo={setReplyingTo}
-                                replyText={replyText}
-                                setReplyText={setReplyText}
-                                replyImages={replyImages}
-                                setReplyImages={setReplyImages}
-                                onSubmitReply={onSubmitReply}
-                                onReportComment={onReportComment}
-                                setCurrentImageIndex={setCurrentImageIndex}
-                                setShowImageModal={setShowImageModal}
-                                depth={depth + 1}
-                            />
-                        </div>
-                    ))}
+                            {showReplies ? "▼" : "▶"} {comment.replies.length} {comment.replies.length === 1 ? "reply" : "replies"}
+                        </span>
+                    </div>
+                    
+                    {showReplies && (
+                        <>
+                        {/* L-shaped connection line from parent center to replies center - only on desktop */}
+                        {!isMobile && (
+                            <>
+                                <div style={{
+                                    position: "absolute",
+                                    left: "-80px",
+                                    top: "-80px",
+                                    width: "2px",
+                                    height: "calc(100% + 30px)",
+                                    backgroundColor: "#6366f1",
+                                    borderRadius: "1px",
+                                    opacity: 0.7
+                                }} />
+                                
+                                {/* Horizontal line connecting to parent center */}
+                                <div style={{
+                                    position: "absolute",
+                                    left: "-80px",
+                                    top: "-80px",
+                                    width: "50px",
+                                    height: "2px",
+                                    backgroundColor: "#6366f1",
+                                    borderRadius: "1px",
+                                    opacity: 0.7
+                                }} />
+                                
+                                {/* Connection dot at the junction */}
+                                <div style={{
+                                    position: "absolute",
+                                    left: "-82px",
+                                    top: "-82px",
+                                    width: "6px",
+                                    height: "6px",
+                                    backgroundColor: "#6366f1",
+                                    borderRadius: "50%",
+                                    zIndex: 1
+                                }} />
+                            </>
+                        )}
+                    
+                        {comment.replies.map((reply, index) => (
+                            <div key={reply.id} style={{ 
+                                position: "relative",
+                                marginBottom: "8px"
+                            }}>
+                                <CommentThread
+                                    comment={reply}
+                                    currentUser={currentUser}
+                                    problem={problem}
+                                    onEditComment={onEditComment}
+                                    onDeleteComment={onDeleteComment}
+                                    onMarkAsSolution={onMarkAsSolution}
+                                    onReply={onReply}
+                                    replyingTo={replyingTo}
+                                    setReplyingTo={setReplyingTo}
+                                    replyText={replyText}
+                                    setReplyText={setReplyText}
+                                    replyImages={replyImages}
+                                    setReplyImages={setReplyImages}
+                                    onSubmitReply={onSubmitReply}
+                                    onReportComment={onReportComment}
+                                    setCurrentImageIndex={setCurrentImageIndex}
+                                    setShowImageModal={setShowImageModal}
+                                    depth={depth + 1}
+                                />
+                            </div>
+                        ))}
+                        </>
+                    )}
                 </div>
             )}
         </div>
@@ -2119,11 +2179,14 @@ function ProblemDetail() {
                                     
                                     {/* Username */}
                                     <div style={{
-                                        fontSize: isMobile ? "13px" : "14px",
+                                        fontSize: isMobile ? "12px" : "14px",
                                         fontWeight: "600",
                                         color: "rgb(26, 77, 58)",
                                         whiteSpace: "nowrap",
-                                        display: isMobile ? "none" : "block"
+                                        display: "block",
+                                        maxWidth: isMobile ? "80px" : "auto",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis"
                                     }}>
                                         {currentUser?.username || "User"}
                                     </div>
@@ -2133,9 +2196,10 @@ function ProblemDetail() {
                                 <div style={{ 
                                     display: "flex", 
                                     alignItems: "center", 
-                                    gap: isMobile ? "8px" : "6px", 
+                                    gap: isMobile ? "4px" : "6px", 
                                     marginLeft: isMobile ? "0" : "-8px",
-                                    flex: isMobile ? "none" : "none"
+                                    flex: isMobile ? "none" : "none",
+                                    flexWrap: isMobile ? "wrap" : "nowrap"
                                 }}>
                                     {/* Math Button - Small */}
                                     <span
@@ -2143,20 +2207,20 @@ function ProblemDetail() {
                                         style={{
                                             color: "#6b7280",
                                             cursor: "pointer",
-                                            fontSize: isMobile ? "12px" : "11px",
+                                            fontSize: isMobile ? "10px" : "11px",
                                             fontWeight: "500",
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
                                             gap: "2px",
                                             transition: "all 0.2s ease",
-                                            padding: isMobile ? "8px 12px" : "4px 6px",
+                                            padding: isMobile ? "4px 6px" : "4px 6px",
                                             whiteSpace: "nowrap",
                                             borderRadius: "4px",
                                             backgroundColor: "transparent",
                                             border: "none",
-                                            height: isMobile ? "36px" : "20px",
-                                            minHeight: isMobile ? "36px" : "20px",
+                                            height: isMobile ? "28px" : "20px",
+                                            minHeight: isMobile ? "28px" : "20px",
                                             lineHeight: "1",
                                             transform: isMobile ? "none" : "translateY(-1px)"
                                         }}
@@ -2174,7 +2238,12 @@ function ProblemDetail() {
                                     </span>
                                     
                                     {/* Add Image Button - Small */}
-                                    <div style={{ height: "20px", display: "flex", alignItems: "center" }}>
+                                    <div style={{ 
+                                        height: isMobile ? "28px" : "20px", 
+                                        display: "flex", 
+                                        alignItems: "center",
+                                        transform: isMobile ? "scale(0.8)" : "scale(1)"
+                                    }}>
                                         <ImageUpload
                                             onImagesChange={setCommentImages}
                                             maxImages={5}
