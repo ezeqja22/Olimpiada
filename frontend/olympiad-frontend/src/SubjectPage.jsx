@@ -1002,28 +1002,27 @@ function SubjectPage() {
                                             onMouseLeave={(e) => {
                                                 e.target.style.backgroundColor = "transparent";
                                             }}
-                                            >
-                                                <img 
-                                                    src={bookmarkData[problem.id] 
-                                                        ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
-                                                        : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
-                                                    } 
-                                                    alt="Bookmark"
-                                                    style={{
-                                                        height: isMobile ? "16px" : "20px",
-                                                        width: isMobile ? "16px" : "20px",
-                                                        objectFit: "contain"
-                                                    }}
-                                                />
-                                                <span style={{ 
-                                                    fontSize: isMobile ? "12px" : "14px",
-                                                    color: bookmarkData[problem.id] ? "rgb(26, 77, 58)" : "#666",
-                                                    fontWeight: "500"
-                                                }}>
-                                                    {bookmarkData[problem.id] ? "Saved" : "Save"}
-                                                </span>
-                                            </button>
-                                        </div>
+                                        >
+                                            <img 
+                                                src={bookmarkData[problem.id] 
+                                                    ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
+                                                    : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
+                                                } 
+                                                alt="Bookmark"
+                                                style={{
+                                                    height: isMobile ? "16px" : "20px",
+                                                    width: isMobile ? "16px" : "20px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            <span style={{ 
+                                                fontSize: isMobile ? "12px" : "14px",
+                                                color: bookmarkData[problem.id] ? "rgb(26, 77, 58)" : "#666",
+                                                fontWeight: "500"
+                                            }}>
+                                                {bookmarkData[problem.id] ? "Saved" : "Save"}
+                                            </span>
+                                        </button>
                                     </div>
                                 </div>
                             ))}
