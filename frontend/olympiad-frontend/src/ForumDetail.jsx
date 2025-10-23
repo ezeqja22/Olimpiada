@@ -2496,7 +2496,7 @@ const ForumDetail = () => {
                                 backgroundSize: '120px 120px',
                                 backgroundPosition: 'center',
                                 backgroundRepeat: 'no-repeat',
-                                opacity: 0.15
+                                opacity: 0.1
                             }}>
                             {messages.length === 0 ? (
                                 <div style={{ 

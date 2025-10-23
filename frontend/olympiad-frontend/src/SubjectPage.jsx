@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { colors, spacing, typography } from "./designSystem";
+import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { getUserInitial, getDisplayName } from "./utils";
 import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import BackButton from "./components/BackButton";
 import AnimatedLoader from "./components/AnimatedLoader";
 import Layout from "./components/Layout";
+import Card from "./components/Card";
 import SearchBar from "./SearchBar";
 import FollowButton from "./components/FollowButton";
 import { InlineMath, BlockMath } from 'react-katex';
@@ -653,39 +654,27 @@ function SubjectPage() {
                         {/* Responsive Grid Layout */}
                         <div style={{ 
                             display: "grid", 
-                            gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(500px, 1fr))", 
-                            gap: isMobile ? "1rem" : "1.5rem",
+                            gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(400px, 1fr))", 
+                            gap: isMobile ? "0.75rem" : "1rem",
                             marginBottom: "3rem"
                         }}>
                             {paginatedProblems.map((problem) => (
-                                <div 
+                                <Card 
                                     key={problem.id} 
-                                    onClick={() => navigate(`/problem/${problem.id}?from=subject&subject=${encodeURIComponent(subject)}`)}
+                                    hover={true}
                                     style={{
-                                        backgroundColor: "white",
-                                        border: "1px solid #e9ecef",
-                                        borderRadius: "12px",
-                                        padding: isMobile ? "1rem" : "1.5rem",
-                                        cursor: "pointer",
-                                        transition: "all 0.2s",
-                                        boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                                        marginBottom: spacing.lg,
+                                        cursor: "pointer"
                                     }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.transform = "translateY(-2px)";
-                                        e.target.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.transform = "translateY(0)";
-                                        e.target.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-                                    }}
+                                    onClick={() => navigate(`/problem/${problem.id}?from=subject&subject=${encodeURIComponent(subject)}`)}
                                 >
                                     {/* Author Info */}
                                     {problem.author && (
                                         <div style={{ 
                                             display: "flex", 
                                             alignItems: "center", 
-                                            marginBottom: isMobile ? "0.75rem" : "1rem", 
-                                            gap: isMobile ? "8px" : "10px"
+                                            marginBottom: isMobile ? "0.5rem" : "0.75rem", 
+                                            gap: isMobile ? "6px" : "8px"
                                         }}>
                                             <div style={{
                                                 width: isMobile ? "28px" : "32px",
@@ -745,9 +734,9 @@ function SubjectPage() {
                                     )}
 
                                     <h3 style={{ 
-                                        margin: "0 0 1rem 0", 
+                                        margin: "0 0 0.75rem 0", 
                                         color: "#333",
-                                        fontSize: isMobile ? "1rem" : "1.25rem",
+                                        fontSize: isMobile ? "0.9rem" : "1.1rem",
                                         fontWeight: "600",
                                         lineHeight: "1.4",
                                         pointerEvents: "none"
@@ -757,9 +746,9 @@ function SubjectPage() {
                                     
                                     <div style={{ 
                                         color: "#666", 
-                                        lineHeight: "1.6",
-                                        marginBottom: "1rem",
-                                        fontSize: isMobile ? "0.85rem" : "0.95rem",
+                                        lineHeight: "1.5",
+                                        marginBottom: "0.75rem",
+                                        fontSize: isMobile ? "0.8rem" : "0.9rem",
                                         whiteSpace: "pre-wrap",
                                         pointerEvents: "none"
                                     }}>
@@ -771,8 +760,8 @@ function SubjectPage() {
 
                                     <div style={{ 
                                         display: "flex", 
-                                        gap: isMobile ? "4px" : "8px", 
-                                        marginBottom: "1rem", 
+                                        gap: isMobile ? "3px" : "6px", 
+                                        marginBottom: "0.75rem", 
                                         alignItems: "center",
                                         flexWrap: "wrap",
                                         pointerEvents: "none"
@@ -854,7 +843,7 @@ function SubjectPage() {
                                         color: "#666",
                                         pointerEvents: "none",
                                         borderTop: "1px solid #e9ecef",
-                                        paddingTop: "15px"
+                                        paddingTop: "10px"
                                     }}>
                                         {/* Like, Dislike, Comment - Left Side */}
                                         <div style={{ 
@@ -1024,7 +1013,7 @@ function SubjectPage() {
                                             </span>
                                         </button>
                                     </div>
-                                </div>
+                                </Card>
                             ))}
                         </div>
 
