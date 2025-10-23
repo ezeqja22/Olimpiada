@@ -1275,6 +1275,21 @@ const ForumDetail = () => {
                             opacity: 0;
                         }
                     }
+                    
+                    /* Android navigation button fix */
+                    @media screen and (max-width: 768px) {
+                        [data-chat-input-form] {
+                            padding-bottom: 80px !important;
+                            margin-bottom: 0 !important;
+                        }
+                        
+                        /* Additional Android-specific fixes */
+                        @supports (padding: max(0px)) {
+                            [data-chat-input-form] {
+                                padding-bottom: max(80px, env(safe-area-inset-bottom) + 20px) !important;
+                            }
+                        }
+                    }
                 `}
             </style>
             <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -2961,13 +2976,19 @@ const ForumDetail = () => {
                         )}
 
                         {/* Message Input */}
-                        <form onSubmit={sendMessage} style={{
-                            padding: isMobile ? spacing.md : spacing.md,
-                            paddingBottom: isMobile ? 'calc(env(safe-area-inset-bottom) + 20px)' : spacing.md, // Add space for phone buttons
-                            backgroundColor: colors.white,
-                            borderTop: `1px solid ${colors.gray[200]}`,
-                            flexShrink: 0
-                        }}>
+                        <form 
+                            data-chat-input-form
+                            onSubmit={sendMessage} 
+                            style={{
+                                padding: isMobile ? spacing.md : spacing.md,
+                                paddingBottom: isMobile ? '80px' : spacing.md, // Fixed padding for Android navigation buttons
+                                backgroundColor: colors.white,
+                                borderTop: `1px solid ${colors.gray[200]}`,
+                                flexShrink: 0,
+                                position: isMobile ? 'sticky' : 'static',
+                                bottom: isMobile ? '0' : 'auto',
+                                zIndex: isMobile ? 1001 : 'auto'
+                            }}>
                             <div style={{ 
                                 display: 'flex', 
                                 gap: isMobile ? spacing.sm : spacing.sm, 
