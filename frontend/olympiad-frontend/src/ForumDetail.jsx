@@ -2464,15 +2464,15 @@ const ForumDetail = () => {
                             data-messages-container
                             style={{
                                 flex: 1,
-                                padding: spacing.md,
+                                padding: isMobile ? spacing.sm : spacing.md,
                                 overflowY: 'auto',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: spacing.sm,
+                                gap: isMobile ? spacing.xs : spacing.sm,
                                 position: 'relative',
                                 zIndex: showMessageDropdown ? 0 : 1,
                                 minHeight: 0, // Prevent flex stretching
-                                maxHeight: '100%' // Prevent overflow
+                                maxHeight: '100%' // Prevent vertical stretching
                             }}>
                             {messages.length === 0 ? (
                                 <div style={{ 
@@ -2959,11 +2959,17 @@ const ForumDetail = () => {
 
                         {/* Message Input */}
                         <form onSubmit={sendMessage} style={{
-                            padding: spacing.md,
+                            padding: isMobile ? spacing.sm : spacing.md,
                             backgroundColor: colors.white,
-                            borderTop: `1px solid ${colors.gray[200]}`
+                            borderTop: `1px solid ${colors.gray[200]}`,
+                            flexShrink: 0
                         }}>
-                            <div style={{ display: 'flex', gap: spacing.sm, alignItems: 'flex-end' }}>
+                            <div style={{ 
+                                display: 'flex', 
+                                gap: isMobile ? spacing.xs : spacing.sm, 
+                                alignItems: 'center',
+                                flexWrap: 'nowrap'
+                            }}>
                                 <button
                                     type="button"
                                     onClick={handleAttachmentClick}
@@ -2972,16 +2978,17 @@ const ForumDetail = () => {
                                         color: colors.white,
                                         border: 'none',
                                         borderRadius: '50%',
-                                        width: '40px',
-                                        height: '40px',
+                                        width: isMobile ? '36px' : '40px',
+                                        height: isMobile ? '36px' : '40px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         cursor: 'pointer',
-                                        fontSize: '20px',
+                                        fontSize: isMobile ? '16px' : '20px',
                                         fontWeight: 'bold',
                                         transition: 'all 0.2s ease',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                        flexShrink: 0
                                     }}
                                     onMouseEnter={(e) => {
                                         e.target.style.backgroundColor = colors.secondary;
@@ -3005,11 +3012,14 @@ const ForumDetail = () => {
                                     placeholder="Type a message..."
                                     style={{
                                         flex: 1,
-                                        padding: spacing.md,
+                                        padding: isMobile ? spacing.sm : spacing.md,
                                         border: `1px solid ${colors.gray[300]}`,
                                         borderRadius: borderRadius.md,
-                                        fontSize: typography.fontSize.base,
-                                        outline: 'none'
+                                        fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
+                                        outline: 'none',
+                                        height: isMobile ? '36px' : 'auto',
+                                        minHeight: isMobile ? '36px' : 'auto',
+                                        maxHeight: isMobile ? '36px' : 'auto'
                                     }}
                                 />
                                 <Button
@@ -3018,11 +3028,14 @@ const ForumDetail = () => {
                                         backgroundColor: colors.primary,
                                         color: colors.white,
                                         border: 'none',
-                                        padding: '12px 24px',
+                                        padding: isMobile ? '8px 16px' : '12px 24px',
                                         borderRadius: borderRadius.md,
                                         cursor: 'pointer',
-                                        fontSize: typography.fontSize.base,
-                                        fontWeight: '600'
+                                        fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
+                                        fontWeight: '600',
+                                        height: isMobile ? '36px' : 'auto',
+                                        minHeight: isMobile ? '36px' : 'auto',
+                                        flexShrink: 0
                                     }}
                                 >
                                     Send
