@@ -1279,14 +1279,14 @@ const ForumDetail = () => {
                     /* Android navigation button fix */
                     @media screen and (max-width: 768px) {
                         [data-chat-input-form] {
-                            padding-bottom: 80px !important;
+                            padding-bottom: 50px !important;
                             margin-bottom: 0 !important;
                         }
                         
                         /* Additional Android-specific fixes */
                         @supports (padding: max(0px)) {
                             [data-chat-input-form] {
-                                padding-bottom: max(80px, env(safe-area-inset-bottom) + 20px) !important;
+                                padding-bottom: max(50px, env(safe-area-inset-bottom) + 10px) !important;
                             }
                         }
                     }
@@ -2980,8 +2980,8 @@ const ForumDetail = () => {
                             data-chat-input-form
                             onSubmit={sendMessage} 
                             style={{
-                                padding: isMobile ? spacing.md : spacing.md,
-                                paddingBottom: isMobile ? '80px' : spacing.md, // Fixed padding for Android navigation buttons
+                                padding: isMobile ? spacing.sm : spacing.md,
+                                paddingBottom: isMobile ? '50px' : spacing.md, // Reduced padding for Android navigation buttons
                                 backgroundColor: colors.white,
                                 borderTop: `1px solid ${colors.gray[200]}`,
                                 flexShrink: 0,
@@ -3003,13 +3003,13 @@ const ForumDetail = () => {
                                         color: colors.white,
                                         border: 'none',
                                         borderRadius: '50%',
-                                        width: isMobile ? '40px' : '40px',
-                                        height: isMobile ? '40px' : '40px',
+                                        width: isMobile ? '36px' : '40px',
+                                        height: isMobile ? '36px' : '40px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         cursor: 'pointer',
-                                        fontSize: isMobile ? '18px' : '20px',
+                                        fontSize: isMobile ? '16px' : '20px',
                                         fontWeight: 'bold',
                                         transition: 'all 0.2s ease',
                                         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -3037,14 +3037,14 @@ const ForumDetail = () => {
                                     placeholder="Type a message..."
                                     style={{
                                         flex: 1,
-                                        padding: isMobile ? spacing.md : spacing.md,
+                                        padding: isMobile ? spacing.sm : spacing.md,
                                         border: `1px solid ${colors.gray[300]}`,
                                         borderRadius: borderRadius.md,
-                                        fontSize: isMobile ? typography.fontSize.base : typography.fontSize.base,
+                                        fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
                                         outline: 'none',
-                                        height: isMobile ? '40px' : 'auto',
-                                        minHeight: isMobile ? '40px' : 'auto',
-                                        maxHeight: isMobile ? '40px' : 'auto'
+                                        height: isMobile ? '36px' : 'auto',
+                                        minHeight: isMobile ? '36px' : 'auto',
+                                        maxHeight: isMobile ? '36px' : 'auto'
                                     }}
                                 />
                                 <Button
@@ -3053,13 +3053,13 @@ const ForumDetail = () => {
                                         backgroundColor: colors.primary,
                                         color: colors.white,
                                         border: 'none',
-                                        padding: isMobile ? '10px 20px' : '12px 24px',
+                                        padding: isMobile ? '8px 16px' : '12px 24px',
                                         borderRadius: borderRadius.md,
                                         cursor: 'pointer',
-                                        fontSize: isMobile ? typography.fontSize.base : typography.fontSize.base,
+                                        fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
                                         fontWeight: '600',
-                                        height: isMobile ? '40px' : 'auto',
-                                        minHeight: isMobile ? '40px' : 'auto',
+                                        height: isMobile ? '36px' : 'auto',
+                                        minHeight: isMobile ? '36px' : 'auto',
                                         flexShrink: 0
                                     }}
                                 >
