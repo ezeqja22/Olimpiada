@@ -1276,7 +1276,7 @@ function ProblemDetail() {
                                 e.target.style.boxShadow = "0 2px 8px rgba(30, 64, 175, 0.3)";
                             }}
                         >
-                            📐 Math
+                            📐 Symbols
                         </button>
                     </div>
             <div style={{ marginBottom: "20px" }}>
@@ -1437,7 +1437,7 @@ function ProblemDetail() {
                                 alignSelf: "flex-start"
                             }}
                         >
-                            📐 Math
+                            📐 Symbols
                         </button>
                     </div>
                     {/* Image Management */}
@@ -2233,9 +2233,9 @@ function ProblemDetail() {
                                             e.target.style.color = "#6b7280";
                                             e.target.style.backgroundColor = "transparent";
                                         }}
-                                        title="Add Math"
+                                        title="Add Symbols"
                                     >
-                                        Math
+                                        Symbols
                                     </span>
                                     
                                     {/* Add Image Button - Small */}

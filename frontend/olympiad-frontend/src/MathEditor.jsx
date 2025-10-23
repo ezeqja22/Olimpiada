@@ -269,7 +269,7 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
         
         <div className="math-actions">
           <button onClick={handleCancel} className="cancel-btn">Cancel</button>
-          <button onClick={handleInsert} className="insert-btn">Insert Math</button>
+          <button onClick={handleInsert} className="insert-btn">Insert Symbols</button>
         </div>
       </div>
     </div>

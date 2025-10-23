@@ -421,7 +421,7 @@ function CreateProblem() {
                 e.target.style.boxShadow = "0 2px 8px rgba(30, 64, 175, 0.3)";
               }}
             >
-              📐 Math
+              📐 Symbols
             </button>
           </div>
         </div>
@@ -490,7 +490,7 @@ function CreateProblem() {
                   e.target.style.boxShadow = "0 2px 8px rgba(30, 64, 175, 0.3)";
                 }}
               >
-                📐 Math
+                📐 Symbols
               </button>
             </div>
           </div>

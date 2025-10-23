@@ -3110,7 +3110,16 @@ const ForumDetail = () => {
                                             e.target.style.backgroundColor = 'transparent';
                                         }}
                                     >
-                                        <div style={{ fontSize: "24px", marginBottom: spacing.xs }}></div>
+                                        <img 
+                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761254783/PROBLEM_icon_green_imu7rq.svg"
+                                            alt="Problem"
+                                            style={{
+                                                width: "24px",
+                                                height: "24px",
+                                                objectFit: "contain",
+                                                marginBottom: spacing.xs
+                                            }}
+                                        />
                                         <span style={{ 
                                             fontSize: typography.fontSize.sm,
                                             fontWeight: typography.fontWeight.medium
@@ -3141,7 +3150,16 @@ const ForumDetail = () => {
                                             e.target.style.backgroundColor = 'transparent';
                                         }}
                                     >
-                                        <div style={{ fontSize: "24px", marginBottom: spacing.xs }}>🖼️</div>
+                                        <img 
+                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761254783/foto_icon_green_ywrime.svg"
+                                            alt="Image"
+                                            style={{
+                                                width: "24px",
+                                                height: "24px",
+                                                objectFit: "contain",
+                                                marginBottom: spacing.xs
+                                            }}
+                                        />
                                         <span style={{ 
                                             fontSize: typography.fontSize.sm,
                                             fontWeight: typography.fontWeight.medium
@@ -3172,12 +3190,21 @@ const ForumDetail = () => {
                                             e.target.style.backgroundColor = 'transparent';
                                         }}
                                     >
-                                        <div style={{ fontSize: "24px", marginBottom: spacing.xs }}>🧮</div>
+                                        <img 
+                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761254783/foto_icon_green_ywrime.svg"
+                                            alt="Symbols"
+                                            style={{
+                                                width: "24px",
+                                                height: "24px",
+                                                objectFit: "contain",
+                                                marginBottom: spacing.xs
+                                            }}
+                                        />
                                         <span style={{ 
                                             fontSize: typography.fontSize.sm,
                                             fontWeight: typography.fontWeight.medium
                                         }}>
-                                            Math
+                                            Symbols
                                         </span>
                                     </button>
                                 </div>
