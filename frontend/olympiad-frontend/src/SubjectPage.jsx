@@ -42,6 +42,7 @@ function SubjectPage() {
     const [followStatus, setFollowStatus] = useState({});
     const [currentUser, setCurrentUser] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
+    const [isMobile, setIsMobile] = useState(false);
     const navigate = useNavigate();
     
     // Feature settings
@@ -58,6 +59,18 @@ function SubjectPage() {
 
     useEffect(() => {
         fetchCurrentUser();
+    }, []);
+
+    // Mobile detection
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     useEffect(() => {
@@ -569,7 +582,7 @@ function SubjectPage() {
                     </div>
                     
                     <h1 style={{ 
-                        fontSize: "2.5rem", 
+                        fontSize: isMobile ? "1.5rem" : "2.5rem", 
                         fontWeight: "700", 
                         color: "#1a4d3a",
                         marginBottom: "0.5rem"
@@ -577,7 +590,7 @@ function SubjectPage() {
                         {subjectName} Problems
                     </h1>
                     <p style={{ 
-                        fontSize: "1.1rem", 
+                        fontSize: isMobile ? "0.9rem" : "1.1rem", 
                         color: "#666",
                         marginBottom: "1rem"
                     }}>
@@ -637,11 +650,11 @@ function SubjectPage() {
                     </div>
                 ) : (
                     <>
-                        {/* 2-Column Grid Layout */}
+                        {/* Responsive Grid Layout */}
                         <div style={{ 
                             display: "grid", 
-                            gridTemplateColumns: "repeat(auto-fit, minmax(500px, 1fr))", 
-                            gap: "1.5rem",
+                            gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(500px, 1fr))", 
+                            gap: isMobile ? "1rem" : "1.5rem",
                             marginBottom: "3rem"
                         }}>
                             {paginatedProblems.map((problem) => (
@@ -652,7 +665,7 @@ function SubjectPage() {
                                         backgroundColor: "white",
                                         border: "1px solid #e9ecef",
                                         borderRadius: "12px",
-                                        padding: "1.5rem",
+                                        padding: isMobile ? "1rem" : "1.5rem",
                                         cursor: "pointer",
                                         transition: "all 0.2s",
                                         boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
@@ -671,19 +684,19 @@ function SubjectPage() {
                                         <div style={{ 
                                             display: "flex", 
                                             alignItems: "center", 
-                                            marginBottom: "1rem", 
-                                            gap: "10px"
+                                            marginBottom: isMobile ? "0.75rem" : "1rem", 
+                                            gap: isMobile ? "8px" : "10px"
                                         }}>
                                             <div style={{
-                                                width: "32px",
-                                                height: "32px",
+                                                width: isMobile ? "28px" : "32px",
+                                                height: isMobile ? "28px" : "32px",
                                                 borderRadius: "50%",
                                                 backgroundColor: "#1a4d3a",
                                                 display: "flex",
                                                 alignItems: "center",
                                                 justifyContent: "center",
                                                 color: "white",
-                                                fontSize: "12px",
+                                                fontSize: isMobile ? "10px" : "12px",
                                                 fontWeight: "bold",
                                                 backgroundImage: problem.author.profile_picture ? 
                                                     `url(${problem.author.profile_picture})` : "none",
@@ -696,7 +709,7 @@ function SubjectPage() {
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ 
                                                     fontWeight: "600", 
-                                                    fontSize: "14px", 
+                                                    fontSize: isMobile ? "12px" : "14px", 
                                                     color: "#1a4d3a",
                                                     cursor: "pointer",
                                                     textDecoration: "underline",
@@ -712,7 +725,7 @@ function SubjectPage() {
                                                 }}>
                                                     {getDisplayName(problem.author.username)}
                                                 </div>
-                                                <div style={{ fontSize: "12px", color: "#666", pointerEvents: "none" }}>
+                                                <div style={{ fontSize: isMobile ? "10px" : "12px", color: "#666", pointerEvents: "none" }}>
                                                     {new Date(problem.created_at).toLocaleDateString()}
                                                 </div>
                                             </div>
@@ -734,7 +747,7 @@ function SubjectPage() {
                                     <h3 style={{ 
                                         margin: "0 0 1rem 0", 
                                         color: "#333",
-                                        fontSize: "1.25rem",
+                                        fontSize: isMobile ? "1rem" : "1.25rem",
                                         fontWeight: "600",
                                         lineHeight: "1.4",
                                         pointerEvents: "none"
@@ -746,7 +759,7 @@ function SubjectPage() {
                                         color: "#666", 
                                         lineHeight: "1.6",
                                         marginBottom: "1rem",
-                                        fontSize: "0.95rem",
+                                        fontSize: isMobile ? "0.85rem" : "0.95rem",
                                         whiteSpace: "pre-wrap",
                                         pointerEvents: "none"
                                     }}>
@@ -758,7 +771,7 @@ function SubjectPage() {
 
                                     <div style={{ 
                                         display: "flex", 
-                                        gap: "8px", 
+                                        gap: isMobile ? "4px" : "8px", 
                                         marginBottom: "1rem", 
                                         alignItems: "center",
                                         flexWrap: "wrap",
@@ -767,9 +780,9 @@ function SubjectPage() {
                                         <span style={{
                                             backgroundColor: "#e0e7ff",
                                             color: "#3730a3",
-                                            padding: "6px 12px",
+                                            padding: isMobile ? "3px 6px" : "6px 12px",
                                             borderRadius: "16px",
-                                            fontSize: "12px",
+                                            fontSize: isMobile ? "9px" : "12px",
                                             fontWeight: "600",
                                             marginRight: "8px",
                                             boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
@@ -781,9 +794,9 @@ function SubjectPage() {
                                             <span style={{
                                                 backgroundColor: "#fef3c7",
                                                 color: "#92400e",
-                                                padding: "6px 12px",
+                                                padding: isMobile ? "3px 6px" : "6px 12px",
                                                 borderRadius: "16px",
-                                                fontSize: "12px",
+                                                fontSize: isMobile ? "9px" : "12px",
                                                 fontWeight: "600",
                                                 marginRight: "8px",
                                                 boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
@@ -797,9 +810,9 @@ function SubjectPage() {
                                                 <span key={index} style={{
                                                     backgroundColor: colors.tertiary,
                                                     color: "white",
-                                                    padding: "6px 12px",
+                                                    padding: isMobile ? "3px 6px" : "6px 12px",
                                                     borderRadius: "16px",
-                                                    fontSize: "12px",
+                                                    fontSize: isMobile ? "9px" : "12px",
                                                     fontWeight: "600",
                                                     boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
                                                     transition: "all 0.2s ease"
@@ -820,9 +833,9 @@ function SubjectPage() {
                                             <span style={{ 
                                                 backgroundColor: "#dcfce7", 
                                                 color: "#166534",
-                                                padding: "6px 12px",
+                                                padding: isMobile ? "3px 6px" : "6px 12px",
                                                 borderRadius: "16px",
-                                                fontSize: "12px",
+                                                fontSize: isMobile ? "9px" : "12px",
                                                 fontWeight: "600",
                                                 marginRight: "8px",
                                                 boxShadow: "0 2px 6px rgba(26, 77, 58, 0.2)",
@@ -837,11 +850,18 @@ function SubjectPage() {
                                         display: "flex", 
                                         justifyContent: "space-between", 
                                         alignItems: "center",
-                                        fontSize: "12px",
+                                        fontSize: isMobile ? "10px" : "12px",
                                         color: "#666",
-                                        pointerEvents: "none"
+                                        pointerEvents: "none",
+                                        flexDirection: isMobile ? "column" : "row",
+                                        gap: isMobile ? "8px" : "0"
                                     }}>
-                                        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                                        <div style={{ 
+                                            display: "flex", 
+                                            gap: isMobile ? "8px" : "1rem", 
+                                            alignItems: "center",
+                                            flexWrap: isMobile ? "wrap" : "nowrap"
+                                        }}>
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -851,15 +871,15 @@ function SubjectPage() {
                                                     backgroundColor: voteData[problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
                                                     border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
                                                     cursor: "pointer",
-                                                    fontSize: "14px",
+                                                    fontSize: isMobile ? "12px" : "14px",
                                                     color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
                                                     fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
-                                                    padding: "6px 12px",
+                                                    padding: isMobile ? "4px 8px" : "6px 12px",
                                                     borderRadius: "6px",
                                                     transition: "all 0.2s ease",
                                                     display: "flex",
                                                     alignItems: "center",
-                                                    gap: "4px",
+                                                    gap: isMobile ? "3px" : "4px",
                                                     pointerEvents: "auto"
                                                 }}
                                                 onMouseEnter={(e) => {
@@ -879,8 +899,8 @@ function SubjectPage() {
                                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg" 
                                                     alt="Like"
                                                     style={{
-                                                        height: "14px",
-                                                        width: "14px",
+                                                        height: isMobile ? "12px" : "14px",
+                                                        width: isMobile ? "12px" : "14px",
                                                         objectFit: "contain"
                                                     }}
                                                 />
@@ -895,15 +915,15 @@ function SubjectPage() {
                                                     backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
                                                     border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
                                                     cursor: "pointer",
-                                                    fontSize: "14px",
+                                                    fontSize: isMobile ? "12px" : "14px",
                                                     color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
                                                     fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
-                                                    padding: "6px 12px",
+                                                    padding: isMobile ? "4px 8px" : "6px 12px",
                                                     borderRadius: "6px",
                                                     transition: "all 0.2s ease",
                                                     display: "flex",
                                                     alignItems: "center",
-                                                    gap: "4px",
+                                                    gap: isMobile ? "3px" : "4px",
                                                     pointerEvents: "auto"
                                                 }}
                                                 onMouseEnter={(e) => {
@@ -923,8 +943,8 @@ function SubjectPage() {
                                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg" 
                                                     alt="Dislike"
                                                     style={{
-                                                        height: "14px",
-                                                        width: "14px",
+                                                        height: isMobile ? "12px" : "14px",
+                                                        width: isMobile ? "12px" : "14px",
                                                         objectFit: "contain"
                                                     }}
                                                 />
@@ -934,16 +954,16 @@ function SubjectPage() {
                                                 pointerEvents: "none", 
                                                 display: "flex", 
                                                 alignItems: "center", 
-                                                gap: "4px",
-                                                fontSize: "12px",
+                                                gap: isMobile ? "3px" : "4px",
+                                                fontSize: isMobile ? "10px" : "12px",
                                                 color: "#666"
                                             }}>
                                                 <img 
                                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
                                                     alt="Comments"
                                                     style={{
-                                                        height: "14px",
-                                                        width: "14px",
+                                                        height: isMobile ? "12px" : "14px",
+                                                        width: isMobile ? "12px" : "14px",
                                                         objectFit: "contain"
                                                     }}
                                                 />
@@ -959,13 +979,13 @@ function SubjectPage() {
                                                     e.stopPropagation();
                                                 }}
                                                 style={{
-                                                    padding: "4px 8px",
+                                                    padding: isMobile ? "3px 6px" : "4px 8px",
                                                     backgroundColor: "transparent",
                                                     border: "none",
                                                     cursor: "pointer",
                                                     display: "flex",
                                                     alignItems: "center",
-                                                    gap: "4px",
+                                                    gap: isMobile ? "3px" : "4px",
                                                     pointerEvents: "auto"
                                                 }}
                                             >
@@ -976,8 +996,8 @@ function SubjectPage() {
                                                     } 
                                                     alt="Bookmark"
                                                     style={{
-                                                        height: "16px",
-                                                        width: "16px",
+                                                        height: isMobile ? "14px" : "16px",
+                                                        width: isMobile ? "14px" : "16px",
                                                         objectFit: "contain"
                                                     }}
                                                 />
@@ -994,20 +1014,21 @@ function SubjectPage() {
                                 display: "flex", 
                                 justifyContent: "center", 
                                 alignItems: "center", 
-                                gap: "1rem",
-                                marginTop: "3rem"
+                                gap: isMobile ? "0.5rem" : "1rem",
+                                marginTop: "3rem",
+                                flexWrap: "wrap"
                             }}>
                                 <button
                                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                     disabled={currentPage === 1}
                                     style={{
-                                        padding: "10px 20px",
+                                        padding: isMobile ? "8px 16px" : "10px 20px",
                                         backgroundColor: currentPage === 1 ? "#ccc" : "#1a4d3a",
                                         color: "white",
                                         border: "none",
                                         borderRadius: "8px",
                                         cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                                        fontSize: "14px",
+                                        fontSize: isMobile ? "12px" : "14px",
                                         fontWeight: "500"
                                     }}
                                 >
@@ -1015,9 +1036,9 @@ function SubjectPage() {
                                 </button>
                                 
                                 <span style={{ 
-                                    padding: "0 20px", 
+                                    padding: isMobile ? "0 10px" : "0 20px", 
                                     color: "#666",
-                                    fontSize: "14px"
+                                    fontSize: isMobile ? "12px" : "14px"
                                 }}>
                                     Page {currentPage} of {totalPages}
                                 </span>
@@ -1026,13 +1047,13 @@ function SubjectPage() {
                                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                     disabled={currentPage === totalPages}
                                     style={{
-                                        padding: "10px 20px",
+                                        padding: isMobile ? "8px 16px" : "10px 20px",
                                         backgroundColor: currentPage === totalPages ? "#ccc" : "#1a4d3a",
                                         color: "white",
                                         border: "none",
                                         borderRadius: "8px",
                                         cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-                                        fontSize: "14px",
+                                        fontSize: isMobile ? "12px" : "14px",
                                         fontWeight: "500"
                                     }}
                                 >
@@ -1046,14 +1067,14 @@ function SubjectPage() {
                 {/* Enhanced Floating Create Problem Button with Subject Pre-fill */}
                 <div style={{
                     position: "fixed",
-                    bottom: spacing.xl,
-                    right: spacing.xl,
+                    bottom: isMobile ? spacing.md : spacing.xl,
+                    right: isMobile ? spacing.md : spacing.xl,
                     zIndex: 1000
                 }}>
                     <Link to={`/create-problem?subject=${encodeURIComponent(subjectName)}&from=/subject/${encodeURIComponent(subjectName)}`} style={{ textDecoration: "none" }}>
                         <div style={{
-                            width: "60px",
-                            height: "60px",
+                            width: isMobile ? "50px" : "60px",
+                            height: isMobile ? "50px" : "60px",
                             backgroundColor: colors.primary,
                             borderRadius: "50%",
                             display: "flex",
@@ -1062,7 +1083,7 @@ function SubjectPage() {
                             cursor: "pointer",
                             boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
                             transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                            fontSize: "24px",
+                            fontSize: isMobile ? "20px" : "24px",
                             color: colors.white,
                             fontWeight: typography.fontWeight.bold,
                             overflow: "hidden",
@@ -1070,22 +1091,26 @@ function SubjectPage() {
                             position: "relative"
                         }}
                         onMouseEnter={(e) => {
-                            e.target.style.width = "220px";
-                            e.target.style.borderRadius = "30px";
-                            e.target.style.justifyContent = "flex-start";
-                            e.target.style.paddingLeft = "20px";
-                            e.target.style.backgroundColor = colors.secondary;
-                            e.target.style.boxShadow = "0 6px 25px rgba(0,0,0,0.2)";
-                            e.target.innerHTML = '<span style="font-size: 16px;">Create New Problem</span><span style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 24px;">+</span>';
+                            if (!isMobile) {
+                                e.target.style.width = "220px";
+                                e.target.style.borderRadius = "30px";
+                                e.target.style.justifyContent = "flex-start";
+                                e.target.style.paddingLeft = "20px";
+                                e.target.style.backgroundColor = colors.secondary;
+                                e.target.style.boxShadow = "0 6px 25px rgba(0,0,0,0.2)";
+                                e.target.innerHTML = '<span style="font-size: 16px;">Create New Problem</span><span style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 24px;">+</span>';
+                            }
                         }}
                         onMouseLeave={(e) => {
-                            e.target.style.width = "60px";
-                            e.target.style.borderRadius = "50%";
-                            e.target.style.justifyContent = "center";
-                            e.target.style.paddingLeft = "0px";
-                            e.target.style.backgroundColor = colors.primary;
-                            e.target.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
-                            e.target.innerHTML = '+';
+                            if (!isMobile) {
+                                e.target.style.width = isMobile ? "50px" : "60px";
+                                e.target.style.borderRadius = "50%";
+                                e.target.style.justifyContent = "center";
+                                e.target.style.paddingLeft = "0px";
+                                e.target.style.backgroundColor = colors.primary;
+                                e.target.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
+                                e.target.innerHTML = '+';
+                            }
                         }}
                         title={`Create New ${subjectName} Problem`}
                         >

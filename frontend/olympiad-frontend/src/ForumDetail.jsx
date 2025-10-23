@@ -1397,7 +1397,7 @@ const ForumDetail = () => {
                                                         onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[50]}
                                                         onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                                                     >
-                                                        ✏️ Edit Forum
+                                                        Edit Forum
                                                     </button>
                                                     <button
                                                         onClick={() => {
@@ -1419,7 +1419,7 @@ const ForumDetail = () => {
                                                         onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[50]}
                                                         onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                                                     >
-                                                        👥 Invite Users
+                                                        Invite Users
                                                     </button>
                                                     <button
                                                         onClick={() => {
@@ -1473,7 +1473,7 @@ const ForumDetail = () => {
                                                     onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[50]}
                                                     onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                                                 >
-                                                    🚪 Leave Forum
+                                                    Leave Forum
                                                 </button>
                                             ) : null}
                                         </div>
@@ -2719,7 +2719,7 @@ const ForumDetail = () => {
                                                                             e.target.style.backgroundColor = 'transparent';
                                                                         }}
                                                                     >
-                                                                        💬 Reply
+                                                                        Reply
                                                                     </button>
                                                                     
                                                                     {/* Report Option - Available to all users */}
@@ -2750,7 +2750,7 @@ const ForumDetail = () => {
                                                                             e.target.style.backgroundColor = 'transparent';
                                                                         }}
                                                                     >
-                                                                        🚨 Report
+                                                                        Report
                                                                     </button>
                                                                     
                                                                     {/* Delete Option - Only for own messages */}
@@ -2815,7 +2815,7 @@ const ForumDetail = () => {
                                                                                 e.target.style.backgroundColor = 'transparent';
                                                                             }}
                                                                         >
-                                                                            📍 Pin Message
+                                                                            Pin Message
                                                                         </button>
                                                                     )}
                                                                 </div>
@@ -3191,7 +3191,7 @@ const ForumDetail = () => {
                                         }}
                                     >
                                         <img 
-                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761254783/foto_icon_green_ywrime.svg"
+                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761254783/Untitled-3_gv62pc.svg"
                                             alt="Symbols"
                                             style={{
                                                 width: "24px",
