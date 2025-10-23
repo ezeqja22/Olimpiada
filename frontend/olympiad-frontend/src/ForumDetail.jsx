@@ -2490,7 +2490,13 @@ const ForumDetail = () => {
                                 position: 'relative',
                                 zIndex: showMessageDropdown ? 0 : 1,
                                 minHeight: 0, // Prevent flex stretching
-                                maxHeight: '100%' // Prevent vertical stretching
+                                maxHeight: '100%', // Prevent vertical stretching
+                                backgroundColor: '#ffffff',
+                                backgroundImage: 'url("https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809847/Olimpiada_Logo_green_1_n9agy9.png")',
+                                backgroundSize: '120px 120px',
+                                backgroundPosition: 'center',
+                                backgroundRepeat: 'no-repeat',
+                                opacity: 0.15
                             }}>
                             {messages.length === 0 ? (
                                 <div style={{ 

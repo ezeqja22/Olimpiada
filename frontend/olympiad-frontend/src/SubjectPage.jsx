@@ -853,14 +853,14 @@ function SubjectPage() {
                                         fontSize: isMobile ? "10px" : "12px",
                                         color: "#666",
                                         pointerEvents: "none",
-                                        flexDirection: isMobile ? "column" : "row",
-                                        gap: isMobile ? "8px" : "0"
+                                        borderTop: "1px solid #e9ecef",
+                                        paddingTop: "15px"
                                     }}>
+                                        {/* Like, Dislike, Comment - Left Side */}
                                         <div style={{ 
                                             display: "flex", 
-                                            gap: isMobile ? "8px" : "1rem", 
-                                            alignItems: "center",
-                                            flexWrap: isMobile ? "wrap" : "nowrap"
+                                            gap: isMobile ? "8px" : "12px", 
+                                            alignItems: "center"
                                         }}>
                                             <button
                                                 onClick={(e) => {
@@ -874,12 +874,12 @@ function SubjectPage() {
                                                     fontSize: isMobile ? "12px" : "14px",
                                                     color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
                                                     fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
-                                                    padding: isMobile ? "4px 8px" : "6px 12px",
-                                                    borderRadius: "6px",
+                                                    padding: isMobile ? "8px 12px" : "10px 16px",
+                                                    borderRadius: "8px",
                                                     transition: "all 0.2s ease",
                                                     display: "flex",
                                                     alignItems: "center",
-                                                    gap: isMobile ? "3px" : "4px",
+                                                    gap: isMobile ? "6px" : "8px",
                                                     pointerEvents: "auto"
                                                 }}
                                                 onMouseEnter={(e) => {
@@ -899,8 +899,8 @@ function SubjectPage() {
                                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg" 
                                                     alt="Like"
                                                     style={{
-                                                        height: isMobile ? "12px" : "14px",
-                                                        width: isMobile ? "12px" : "14px",
+                                                        height: isMobile ? "14px" : "18px",
+                                                        width: isMobile ? "14px" : "18px",
                                                         objectFit: "contain"
                                                     }}
                                                 />
@@ -918,12 +918,12 @@ function SubjectPage() {
                                                     fontSize: isMobile ? "12px" : "14px",
                                                     color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
                                                     fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
-                                                    padding: isMobile ? "4px 8px" : "6px 12px",
-                                                    borderRadius: "6px",
+                                                    padding: isMobile ? "8px 12px" : "10px 16px",
+                                                    borderRadius: "8px",
                                                     transition: "all 0.2s ease",
                                                     display: "flex",
                                                     alignItems: "center",
-                                                    gap: isMobile ? "3px" : "4px",
+                                                    gap: isMobile ? "6px" : "8px",
                                                     pointerEvents: "auto"
                                                 }}
                                                 onMouseEnter={(e) => {
@@ -943,51 +943,65 @@ function SubjectPage() {
                                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg" 
                                                     alt="Dislike"
                                                     style={{
-                                                        height: isMobile ? "12px" : "14px",
-                                                        width: isMobile ? "12px" : "14px",
+                                                        height: isMobile ? "14px" : "18px",
+                                                        width: isMobile ? "14px" : "18px",
                                                         objectFit: "contain"
                                                     }}
                                                 />
                                                 {voteData[problem.id]?.dislike_count || 0}
                                             </button>
-                                            <span style={{ 
-                                                pointerEvents: "none", 
-                                                display: "flex", 
-                                                alignItems: "center", 
-                                                gap: isMobile ? "3px" : "4px",
-                                                fontSize: isMobile ? "10px" : "12px",
-                                                color: "#666"
+                                            <div style={{ 
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: isMobile ? "6px" : "8px",
+                                                padding: isMobile ? "8px 12px" : "10px 16px",
+                                                backgroundColor: "#f8f9fa",
+                                                borderRadius: "8px",
+                                                border: "1px solid #dee2e6"
                                             }}>
                                                 <img 
                                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
                                                     alt="Comments"
                                                     style={{
-                                                        height: isMobile ? "12px" : "14px",
-                                                        width: isMobile ? "12px" : "14px",
+                                                        height: isMobile ? "14px" : "18px",
+                                                        width: isMobile ? "14px" : "18px",
                                                         objectFit: "contain"
                                                     }}
                                                 />
-                                                {problem.comment_count || 0}
-                                            </span>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    handleBookmark(problem.id);
-                                                }}
-                                                onMouseDown={(e) => {
-                                                    e.stopPropagation();
-                                                }}
-                                                style={{
-                                                    padding: isMobile ? "3px 6px" : "4px 8px",
-                                                    backgroundColor: "transparent",
-                                                    border: "none",
-                                                    cursor: "pointer",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    gap: isMobile ? "3px" : "4px",
-                                                    pointerEvents: "auto"
-                                                }}
+                                                <span style={{ 
+                                                    fontSize: isMobile ? "12px" : "14px", 
+                                                    color: "#666",
+                                                    fontWeight: "500"
+                                                }}>
+                                                    {problem.comment_count || 0}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Bookmark - Right Side */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleBookmark(problem.id);
+                                            }}
+                                            style={{
+                                                padding: isMobile ? "8px 12px" : "10px 16px",
+                                                backgroundColor: "transparent",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: isMobile ? "6px" : "8px",
+                                                borderRadius: "8px",
+                                                transition: "all 0.2s ease",
+                                                pointerEvents: "auto"
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.target.style.backgroundColor = "#f8f9fa";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.target.style.backgroundColor = "transparent";
+                                            }}
                                             >
                                                 <img 
                                                     src={bookmarkData[problem.id] 
@@ -996,11 +1010,18 @@ function SubjectPage() {
                                                     } 
                                                     alt="Bookmark"
                                                     style={{
-                                                        height: isMobile ? "14px" : "16px",
-                                                        width: isMobile ? "14px" : "16px",
+                                                        height: isMobile ? "16px" : "20px",
+                                                        width: isMobile ? "16px" : "20px",
                                                         objectFit: "contain"
                                                     }}
                                                 />
+                                                <span style={{ 
+                                                    fontSize: isMobile ? "12px" : "14px",
+                                                    color: bookmarkData[problem.id] ? "rgb(26, 77, 58)" : "#666",
+                                                    fontWeight: "500"
+                                                }}>
+                                                    {bookmarkData[problem.id] ? "Saved" : "Save"}
+                                                </span>
                                             </button>
                                         </div>
                                     </div>
