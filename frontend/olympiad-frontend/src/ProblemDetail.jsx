@@ -2127,15 +2127,16 @@ function ProblemDetail() {
                                     style={{
                                         display: "flex",
                                         alignItems: "center",
-                                        gap: isMobile ? "8px" : "10px",
-                                        padding: isMobile ? "6px 10px" : "8px 12px",
+                                        gap: isMobile ? "6px" : "10px",
+                                        padding: isMobile ? "4px 8px" : "8px 12px",
                                         borderRadius: "12px",
                                         backgroundColor: "white",
                                         border: "2px solid transparent",
                                         cursor: "pointer",
                                         transition: "all 0.2s ease",
                                         boxShadow: "0 2px 4px rgba(26, 77, 58, 0.1)",
-                                        flex: isMobile ? "1" : "none"
+                                        flex: isMobile ? "0 0 auto" : "none",
+                                        maxWidth: isMobile ? "120px" : "auto"
                                     }}
                                     onClick={() => {
                                         // Navigate to user profile
@@ -2156,8 +2157,8 @@ function ProblemDetail() {
                                 >
                                     {/* User Profile Picture */}
                                     <div style={{
-                                        width: isMobile ? "32px" : "36px",
-                                        height: isMobile ? "32px" : "36px",
+                                        width: isMobile ? "24px" : "36px",
+                                        height: isMobile ? "24px" : "36px",
                                         borderRadius: "50%",
                                         backgroundColor: "rgb(26, 77, 58)",
                                         display: "flex",
@@ -2165,7 +2166,7 @@ function ProblemDetail() {
                                         justifyContent: "center",
                                         color: "white",
                                         fontWeight: "bold",
-                                        fontSize: isMobile ? "12px" : "14px",
+                                        fontSize: isMobile ? "10px" : "14px",
                                         backgroundImage: currentUser?.profile_picture ? 
                                             `url(${currentUser.profile_picture})` : 
                                             'none',
@@ -2179,12 +2180,12 @@ function ProblemDetail() {
                                     
                                     {/* Username */}
                                     <div style={{
-                                        fontSize: isMobile ? "12px" : "14px",
+                                        fontSize: isMobile ? "10px" : "14px",
                                         fontWeight: "600",
                                         color: "rgb(26, 77, 58)",
                                         whiteSpace: "nowrap",
                                         display: "block",
-                                        maxWidth: isMobile ? "80px" : "auto",
+                                        maxWidth: isMobile ? "60px" : "auto",
                                         overflow: "hidden",
                                         textOverflow: "ellipsis"
                                     }}>
