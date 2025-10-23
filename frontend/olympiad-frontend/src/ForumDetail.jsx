@@ -2299,13 +2299,13 @@ const ForumDetail = () => {
                         data-chat-panel
                         style={{
                             width: isMobile ? '100%' : '70%',
-                            height: isMobile ? '100vh' : '100%',
+                            height: isMobile ? 'calc(100vh - 60px)' : '100%', // Subtract header height
                             display: 'flex',
                             flexDirection: 'column',
                             backgroundColor: colors.light,
                             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                             position: isMobile ? 'fixed' : 'relative',
-                            top: isMobile ? '0' : 'auto',
+                            top: isMobile ? '60px' : 'auto', // Start below header
                             left: isMobile ? '0' : 'auto',
                             zIndex: isMobile ? 1000 : 'auto',
                             transform: 'translateY(0)',
@@ -2963,6 +2963,7 @@ const ForumDetail = () => {
                         {/* Message Input */}
                         <form onSubmit={sendMessage} style={{
                             padding: isMobile ? spacing.md : spacing.md,
+                            paddingBottom: isMobile ? 'calc(env(safe-area-inset-bottom) + 20px)' : spacing.md, // Add space for phone buttons
                             backgroundColor: colors.white,
                             borderTop: `1px solid ${colors.gray[200]}`,
                             flexShrink: 0
