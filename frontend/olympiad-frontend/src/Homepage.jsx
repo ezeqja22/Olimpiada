@@ -862,6 +862,36 @@ function Homepage() {
                                                 Settings
                                             </div>
                                         </Link>
+                                        {/* Admin Panel Link - Mobile */}
+                                        {currentUser && ['admin', 'moderator'].includes(currentUser.role) && (
+                                            <Link to="/admin" style={{ textDecoration: "none" }}>
+                                                <div style={{
+                                                    padding: "8px 12px",
+                                                    color: "#667eea",
+                                                    cursor: "pointer",
+                                                    fontSize: "12px",
+                                                    borderBottom: "1px solid #f3f4f6",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "6px",
+                                                    fontWeight: "500"
+                                                }}
+                                                onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+                                                onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                                >
+                                                    <img
+                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
+                                                        alt="Admin"
+                                                        style={{
+                                                            width: "14px",
+                                                            height: "14px",
+                                                            objectFit: "contain"
+                                                        }}
+                                                    />
+                                                    Admin Panel
+                                                </div>
+                                            </Link>
+                                        )}
                                         <div 
                                             onClick={handleLogout}
                                             style={{

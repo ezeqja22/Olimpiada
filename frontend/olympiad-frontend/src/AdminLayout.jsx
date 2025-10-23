@@ -9,9 +9,23 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     fetchCurrentUser();
+    
+    // Mobile detection
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth <= 768) {
+        setSidebarOpen(false); // Close sidebar on mobile by default
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const fetchCurrentUser = async () => {
@@ -113,6 +127,24 @@ const AdminLayout = () => {
 
   return (
     <div className="admin-layout">
+      {/* Mobile Hamburger Menu */}
+      {isMobile && (
+        <button 
+          className="mobile-menu-toggle"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          ☰
+        </button>
+      )}
+      
+      {/* Mobile Overlay */}
+      {isMobile && sidebarOpen && (
+        <div 
+          className="mobile-overlay show"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
       {/* Sidebar */}
       <div className={`admin-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="admin-sidebar-header">
@@ -132,7 +164,12 @@ const AdminLayout = () => {
               className={`admin-nav-item ${
                 location.pathname === item.path ? 'active' : ''
               }`}
-              onClick={() => navigate(item.path)}
+              onClick={() => {
+                navigate(item.path);
+                if (isMobile) {
+                  setSidebarOpen(false);
+                }
+              }}
             >
               <span className="nav-icon">
                 <img 
@@ -153,7 +190,12 @@ const AdminLayout = () => {
         <div className="admin-sidebar-footer">
           <button 
             className="back-to-site"
-            onClick={() => navigate('/')}
+            onClick={() => {
+              navigate('/');
+              if (isMobile) {
+                setSidebarOpen(false);
+              }
+            }}
           >
             <span className="nav-icon">
               <img 

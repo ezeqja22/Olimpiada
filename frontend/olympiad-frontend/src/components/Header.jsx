@@ -784,7 +784,7 @@ function Header({ showHomeButton = false }) {
                     )}
                     
                     {currentUser ? (
-                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px", position: "relative" }}>
                             <NotificationBell />
                             <button
                                 onClick={() => setShowUserDropdown(!showUserDropdown)}
@@ -814,6 +814,130 @@ function Header({ showHomeButton = false }) {
                                     {getUserInitial(currentUser.username)}
                                 </div>
                             </button>
+                            
+                            {/* Mobile User Dropdown */}
+                            {showUserDropdown && (
+                                <div style={{
+                                    position: "absolute",
+                                    top: "100%",
+                                    right: "0",
+                                    backgroundColor: "white",
+                                    border: "1px solid #e5e7eb",
+                                    borderRadius: "6px",
+                                    boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+                                    zIndex: 1001,
+                                    minWidth: "140px",
+                                    marginTop: "4px"
+                                }}>
+                                    <Link to="/profile" style={{ textDecoration: "none" }}>
+                                        <div style={{
+                                            padding: "8px 12px",
+                                            color: "#374151",
+                                            cursor: "pointer",
+                                            fontSize: "12px",
+                                            borderBottom: "1px solid #f3f4f6",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "6px"
+                                        }}
+                                        onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+                                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                        >
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Profile_Icon_Green_t3zoz5.svg"
+                                                alt="Profile"
+                                                style={{
+                                                    width: "14px",
+                                                    height: "14px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            Profile
+                                        </div>
+                                    </Link>
+                                    <Link to="/settings" style={{ textDecoration: "none" }}>
+                                        <div style={{
+                                            padding: "8px 12px",
+                                            color: "#374151",
+                                            cursor: "pointer",
+                                            fontSize: "12px",
+                                            borderBottom: "1px solid #f3f4f6",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "6px"
+                                        }}
+                                        onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+                                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                        >
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
+                                                alt="Settings"
+                                                style={{
+                                                    width: "14px",
+                                                    height: "14px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            Settings
+                                        </div>
+                                    </Link>
+                                    {/* Admin Panel Link - Mobile */}
+                                    {(currentUser.role === 'admin' || currentUser.role === 'moderator') && (
+                                        <Link to="/admin" style={{ textDecoration: "none" }}>
+                                            <div style={{
+                                                padding: "8px 12px",
+                                                color: "#667eea",
+                                                cursor: "pointer",
+                                                fontSize: "12px",
+                                                borderBottom: "1px solid #f3f4f6",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "6px",
+                                                fontWeight: "500"
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                            >
+                                                <img
+                                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
+                                                    alt="Admin"
+                                                    style={{
+                                                        width: "14px",
+                                                        height: "14px",
+                                                        objectFit: "contain"
+                                                    }}
+                                                />
+                                                Admin Panel
+                                            </div>
+                                        </Link>
+                                    )}
+                                    <div 
+                                        onClick={handleLogout}
+                                        style={{
+                                            padding: "8px 12px",
+                                            color: "#dc2626",
+                                            cursor: "pointer",
+                                            fontSize: "12px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "6px"
+                                        }}
+                                        onMouseEnter={(e) => e.target.style.backgroundColor = "#fef2f2"}
+                                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                    >
+                                        <img
+                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760802149/LOG_OUT_RED_d1wwc3.svg"
+                                            alt="Logout"
+                                            style={{
+                                                width: "14px",
+                                                height: "14px",
+                                                objectFit: "contain"
+                                            }}
+                                        />
+                                        Logout
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <Link to="/login" style={{ 
