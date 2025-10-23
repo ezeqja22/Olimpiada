@@ -3003,13 +3003,13 @@ const ForumDetail = () => {
                                         color: colors.white,
                                         border: 'none',
                                         borderRadius: '50%',
-                                        width: isMobile ? '32px' : '40px',
-                                        height: isMobile ? '32px' : '40px',
+                                        width: isMobile ? '28px' : '40px',
+                                        height: isMobile ? '28px' : '40px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         cursor: 'pointer',
-                                        fontSize: isMobile ? '14px' : '20px',
+                                        fontSize: isMobile ? '12px' : '20px',
                                         fontWeight: 'bold',
                                         transition: 'all 0.2s ease',
                                         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -3042,9 +3042,9 @@ const ForumDetail = () => {
                                         borderRadius: borderRadius.md,
                                         fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
                                         outline: 'none',
-                                        height: isMobile ? '32px' : 'auto',
-                                        minHeight: isMobile ? '32px' : 'auto',
-                                        maxHeight: isMobile ? '32px' : 'auto'
+                                        height: isMobile ? '28px' : 'auto',
+                                        minHeight: isMobile ? '28px' : 'auto',
+                                        maxHeight: isMobile ? '28px' : 'auto'
                                     }}
                                 />
                                 <Button
@@ -3053,13 +3053,13 @@ const ForumDetail = () => {
                                         backgroundColor: colors.primary,
                                         color: colors.white,
                                         border: 'none',
-                                        padding: isMobile ? '6px 12px' : '12px 24px',
+                                        padding: isMobile ? '6px 8px' : '12px 24px',
                                         borderRadius: borderRadius.md,
                                         cursor: 'pointer',
                                         fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
                                         fontWeight: '600',
-                                        height: isMobile ? '32px' : 'auto',
-                                        minHeight: isMobile ? '32px' : 'auto',
+                                        height: isMobile ? '28px' : 'auto',
+                                        minHeight: isMobile ? '28px' : 'auto',
                                         flexShrink: 0
                                     }}
                                 >
