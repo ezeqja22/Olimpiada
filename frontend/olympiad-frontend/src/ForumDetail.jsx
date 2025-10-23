@@ -2299,12 +2299,15 @@ const ForumDetail = () => {
                         data-chat-panel
                         style={{
                             width: isMobile ? '100%' : '70%',
-                            height: '100%',
+                            height: isMobile ? '100vh' : '100%',
                             display: 'flex',
                             flexDirection: 'column',
                             backgroundColor: colors.light,
                             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                            position: 'relative',
+                            position: isMobile ? 'fixed' : 'relative',
+                            top: isMobile ? '0' : 'auto',
+                            left: isMobile ? '0' : 'auto',
+                            zIndex: isMobile ? 1000 : 'auto',
                             transform: 'translateY(0)',
                             opacity: 1,
                             animation: 'slideInFromBottom 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -2464,11 +2467,11 @@ const ForumDetail = () => {
                             data-messages-container
                             style={{
                                 flex: 1,
-                                padding: isMobile ? spacing.sm : spacing.md,
+                                padding: isMobile ? spacing.md : spacing.md,
                                 overflowY: 'auto',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: isMobile ? spacing.xs : spacing.sm,
+                                gap: isMobile ? spacing.sm : spacing.sm,
                                 position: 'relative',
                                 zIndex: showMessageDropdown ? 0 : 1,
                                 minHeight: 0, // Prevent flex stretching
@@ -2959,14 +2962,14 @@ const ForumDetail = () => {
 
                         {/* Message Input */}
                         <form onSubmit={sendMessage} style={{
-                            padding: isMobile ? spacing.sm : spacing.md,
+                            padding: isMobile ? spacing.md : spacing.md,
                             backgroundColor: colors.white,
                             borderTop: `1px solid ${colors.gray[200]}`,
                             flexShrink: 0
                         }}>
                             <div style={{ 
                                 display: 'flex', 
-                                gap: isMobile ? spacing.xs : spacing.sm, 
+                                gap: isMobile ? spacing.sm : spacing.sm, 
                                 alignItems: 'center',
                                 flexWrap: 'nowrap'
                             }}>
@@ -2978,13 +2981,13 @@ const ForumDetail = () => {
                                         color: colors.white,
                                         border: 'none',
                                         borderRadius: '50%',
-                                        width: isMobile ? '36px' : '40px',
-                                        height: isMobile ? '36px' : '40px',
+                                        width: isMobile ? '40px' : '40px',
+                                        height: isMobile ? '40px' : '40px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         cursor: 'pointer',
-                                        fontSize: isMobile ? '16px' : '20px',
+                                        fontSize: isMobile ? '18px' : '20px',
                                         fontWeight: 'bold',
                                         transition: 'all 0.2s ease',
                                         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -3012,14 +3015,14 @@ const ForumDetail = () => {
                                     placeholder="Type a message..."
                                     style={{
                                         flex: 1,
-                                        padding: isMobile ? spacing.sm : spacing.md,
+                                        padding: isMobile ? spacing.md : spacing.md,
                                         border: `1px solid ${colors.gray[300]}`,
                                         borderRadius: borderRadius.md,
-                                        fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
+                                        fontSize: isMobile ? typography.fontSize.base : typography.fontSize.base,
                                         outline: 'none',
-                                        height: isMobile ? '36px' : 'auto',
-                                        minHeight: isMobile ? '36px' : 'auto',
-                                        maxHeight: isMobile ? '36px' : 'auto'
+                                        height: isMobile ? '40px' : 'auto',
+                                        minHeight: isMobile ? '40px' : 'auto',
+                                        maxHeight: isMobile ? '40px' : 'auto'
                                     }}
                                 />
                                 <Button
@@ -3028,13 +3031,13 @@ const ForumDetail = () => {
                                         backgroundColor: colors.primary,
                                         color: colors.white,
                                         border: 'none',
-                                        padding: isMobile ? '8px 16px' : '12px 24px',
+                                        padding: isMobile ? '10px 20px' : '12px 24px',
                                         borderRadius: borderRadius.md,
                                         cursor: 'pointer',
-                                        fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
+                                        fontSize: isMobile ? typography.fontSize.base : typography.fontSize.base,
                                         fontWeight: '600',
-                                        height: isMobile ? '36px' : 'auto',
-                                        minHeight: isMobile ? '36px' : 'auto',
+                                        height: isMobile ? '40px' : 'auto',
+                                        minHeight: isMobile ? '40px' : 'auto',
                                         flexShrink: 0
                                     }}
                                 >
