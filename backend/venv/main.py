@@ -51,12 +51,20 @@ except Exception as e:
     print(f"Warning: Could not create database tables: {e}")
     print("This is normal if the database is not available yet")
 
+# CORS: allow only explicit frontend origins (no "*" when using credentials)
+default_origins = [
+    "https://science-pioneers.vercel.app",
+    "http://localhost:3000",
+]
+env_origins = os.getenv("FRONTEND_ORIGINS", "").strip()
+allowed_origins = [o.strip() for o in env_origins.split(",") if o.strip()] or default_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for production
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
 )
 
 # Settings middleware
@@ -92,6 +100,12 @@ async def settings_middleware(request: Request, call_next):
     except Exception as e:
         response = await call_next(request)
         return response
+    finally:
+        try:
+            # Ensure DB session is closed to avoid pool exhaustion
+            db.close()
+        except Exception:
+            pass
 
 # Include routers only if they were imported successfully
 if auth_router:
