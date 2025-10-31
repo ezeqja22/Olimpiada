@@ -448,7 +448,6 @@ async def run_manual_migration():
             "error": str(e)
         }
 
-# Removed WebSocket endpoint for push notifications
 
 if __name__ == "__main__":
     import uvicorn

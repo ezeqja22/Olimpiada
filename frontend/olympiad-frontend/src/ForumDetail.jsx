@@ -2981,7 +2981,7 @@ const ForumDetail = () => {
                             onSubmit={sendMessage} 
                             style={{
                                 padding: isMobile ? spacing.xs : spacing.md,
-                                paddingBottom: isMobile ? '40px' : spacing.md, // Further reduced padding
+                                paddingBottom: isMobile ? '40px' : spacing.md, 
                                 backgroundColor: colors.white,
                                 borderTop: `1px solid ${colors.gray[200]}`,
                                 flexShrink: 0,
