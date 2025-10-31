@@ -36,13 +36,11 @@ function NotificationBell({ onNotificationClick }) {
             const token = localStorage.getItem("token");
             if (!token) return;
 
-            // Fetch all notifications and filter them
-            const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/notifications`, {
+            // Use lightweight count endpoint instead of downloading all notifications
+            const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/notifications/unread-count`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const filteredNotifications = filterNotificationsByPreferences(response.data);
-            const unreadFiltered = filteredNotifications.filter(n => !n.is_read);
-            setUnreadCount(unreadFiltered.length);
+            setUnreadCount(response.data?.unread_count ?? 0);
         } catch (error) {
             console.error("Error fetching unread count:", error);
         }

@@ -153,13 +153,13 @@ function Feed() {
       setTotalPages(response.data.total_pages || 1);
       setTotalProblems(response.data.total_problems || response.data.total || response.data.length);
       
-      // Fetch vote data for all standalone problems
+      // Fetch vote/bookmark/follow in parallel for speed
       const problemIds = standaloneProblems.map(problem => problem.id);
-      await fetchVoteData(problemIds);
-      await fetchBookmarkData(problemIds);
-      
-      // Fetch follow status for all authors
-      await fetchFollowStatus(standaloneProblems);
+      await Promise.all([
+        fetchVoteData(problemIds),
+        fetchBookmarkData(problemIds),
+        fetchFollowStatus(standaloneProblems)
+      ]);
     } catch (error) {
       console.error("Error fetching problems:", error);
     } finally {
@@ -274,29 +274,17 @@ function Feed() {
   const fetchVoteData = async (problemIds) => {
     try {
       const token = localStorage.getItem("token");
-      const votePromises = problemIds.map(async (problemId) => {
-        try {
-          const response = await axios.get(
-            `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/vote-status`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
-          );
-          return { problemId, voteData: response.data };
-        } catch (error) {
-          console.error(`Error fetching vote data for problem ${problemId}:`, error);
-          return { problemId, voteData: { like_count: 0, dislike_count: 0, user_vote: null } };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/vote-status-bulk`,
+        problemIds,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
-      });
-      
-      const voteResults = await Promise.all(votePromises);
-      const voteDataMap = {};
-      voteResults.forEach(({ problemId, voteData }) => {
-        voteDataMap[problemId] = voteData;
-      });
-      setVoteData(voteDataMap);
+      );
+      setVoteData(response.data || {});
     } catch (error) {
       console.error("Error fetching vote data:", error);
     }

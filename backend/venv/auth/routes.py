@@ -20,6 +20,7 @@ except ImportError:
     NotificationService = None
 from typing import List
 from datetime import datetime, timedelta
+from fastapi import Body
 
 def check_forum_permission(db: Session, forum_id: int, user_id: int, required_permission: str):
     """Check if user has required permission in forum"""
@@ -2677,6 +2678,55 @@ def get_forum(
     forum.member_count = member_count
     
     return forum
+
+# ---------- Performance helpers ----------
+@router.post("/problems/vote-status-bulk")
+def get_vote_status_bulk(
+    problem_ids: List[int] = Body(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Return vote counts and current user's vote for a list of problem ids in one request."""
+    if not problem_ids:
+        return {}
+
+    # Aggregate like/dislike counts
+    from sqlalchemy import func
+    counts = (
+        db.query(Vote.problem_id, Vote.vote_type, func.count().label("cnt"))
+        .filter(Vote.problem_id.in_(problem_ids))
+        .group_by(Vote.problem_id, Vote.vote_type)
+        .all()
+    )
+    result = {pid: {"like_count": 0, "dislike_count": 0, "user_vote": None} for pid in problem_ids}
+    for pid, vtype, cnt in counts:
+        key = "like_count" if vtype == "like" else "dislike_count"
+        if pid in result:
+            result[pid][key] = int(cnt)
+
+    # Current user's votes for these problems
+    user_votes = (
+        db.query(Vote.problem_id, Vote.vote_type)
+        .filter(Vote.problem_id.in_(problem_ids), Vote.user_id == current_user.id)
+        .all()
+    )
+    for pid, vtype in user_votes:
+        if pid in result:
+            result[pid]["user_vote"] = vtype
+
+    return result
+
+@router.get("/notifications/unread-count")
+def get_unread_notifications_count(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Return only the unread notifications count for the current user (fast/poll-friendly)."""
+    count = db.query(Notification).filter(
+        Notification.user_id == current_user.id,
+        Notification.is_read == False
+    ).count()
+    return {"unread_count": int(count)}
 
 @router.post("/forums/{forum_id}/join")
 def join_forum(
