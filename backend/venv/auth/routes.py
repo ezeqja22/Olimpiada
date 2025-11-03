@@ -3638,8 +3638,8 @@ async def delete_forum(
     forum_problems = db.query(Problem).filter(
         Problem.forum_id == forum_id
     ).all()
-    
-    # First, delete all forum messages that reference these problems
+
+    # Delete all forum messages that reference these problems
     problem_ids = [problem.id for problem in forum_problems]
     if problem_ids:
         db.query(ForumMessage).filter(ForumMessage.problem_id.in_(problem_ids)).delete()
@@ -3664,6 +3664,10 @@ async def delete_forum(
     db.commit()
     
     # Explicitly delete related records to avoid foreign key constraint issues
+    
+     # Delete forum replies first (they depend on messages)
+    db.query(ForumReply).filter(ForumReply.forum_id == forum_id).delete()
+
     # Delete user online status records
     db.query(UserOnlineStatus).filter(UserOnlineStatus.forum_id == forum_id).delete()
     
