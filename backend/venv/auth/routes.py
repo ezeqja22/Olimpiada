@@ -886,14 +886,21 @@ def delete_problem(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Check if problem exists and belongs to current user
-    db_problem = db.query(Problem).filter(
-        Problem.id == problem_id,
-        Problem.author_id == current_user.id
-    ).first()
+    # Check if problem exists
+    db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
     
     if not db_problem:
-        raise HTTPException(status_code=404, detail="Problem not found or you don't have permission to delete it")
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    # Check if user is the creator OR admin/moderator
+    is_owner = db_problem.author_id == current_user.id
+    is_admin_or_moderator = current_user.role in ["admin", "moderator"]
+    
+    if not is_owner and not is_admin_or_moderator:
+        raise HTTPException(
+            status_code=403, 
+            detail="You don't have permission to delete this problem"
+        )
     
     # Delete problem (this will cascade delete comments and votes)
     db.delete(db_problem)

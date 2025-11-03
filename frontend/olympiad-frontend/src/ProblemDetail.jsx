@@ -1774,7 +1774,7 @@ function ProblemDetail() {
                             {/* Problem Title */}
                             <h1 style={{ color: "#333", marginBottom: "20px", marginTop: "20px" }}>{renderMathContent(problem.title)}</h1>
                         </div>
-                        {currentUser && currentUser.id === problem.author_id && (
+                        {currentUser && (currentUser.id === problem.author_id || currentUser.role === 'admin' || currentUser.role === 'moderator') && (
                             <div style={{ display: "flex", gap: "12px" }}>
                                 <button
                                     onClick={handleEditProblem}
