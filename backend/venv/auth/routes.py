@@ -3620,7 +3620,7 @@ async def delete_forum(
         raise HTTPException(status_code=404, detail="Forum not found")
     
     # Check if user is the creator
-    if forum.creator_id != current_user.id and current_user.role != "ADMIN":
+    if forum.creator_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Only the forum creator can delete the forum")
     
     # Get all forum members for notifications
