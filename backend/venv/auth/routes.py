@@ -3620,7 +3620,7 @@ async def delete_forum(
         raise HTTPException(status_code=404, detail="Forum not found")
     
     # Check if user is the creator
-    if forum.creator_id != current_user.id:
+    if forum.creator_id != current_user.id and current_user.role != "ADMIN":
         raise HTTPException(status_code=403, detail="Only the forum creator can delete the forum")
     
     # Get all forum members for notifications
@@ -3664,7 +3664,7 @@ async def delete_forum(
     db.commit()
     
     # Explicitly delete related records to avoid foreign key constraint issues
-    
+
      # Delete forum replies first (they depend on messages)
     db.query(ForumReply).filter(ForumReply.forum_id == forum_id).delete()
 
