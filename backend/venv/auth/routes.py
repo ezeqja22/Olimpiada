@@ -320,6 +320,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     # Check maintenance mode first
     from main import get_settings_service
     settings_service = get_settings_service(db) if get_settings_service else None
+    print("debug message test")
     
     if settings_service and settings_service.is_maintenance_mode():
         # During maintenance, only allow admin/moderator login
@@ -886,34 +887,57 @@ def delete_problem(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    print(f"🔍 DELETE DEBUG: Admin {current_user.id} (role: {current_user.role}) deleting problem {problem_id}")
+    # THESE WILL APPEAR IN RAILWAY LOGS
+    print("🚀 DELETE PROBLEM ENDPOINT CALLED")
+    print(f"🔍 Problem ID: {problem_id}")
+    print(f"🔍 Current User - ID: {current_user.id}, Email: {current_user.email}, Role: {current_user.role}")
     
-    # For regular users: Use restrictive query (secure)
-    if current_user.role not in ["admin", "moderator"]:
-        print(f"🔍 DELETE DEBUG: Regular user path")
+    # Check admin status
+    is_admin = current_user.role in ["admin", "moderator"]
+    print(f"🔍 Is Admin: {is_admin}")
+    
+    # QUERY DEBUGGING
+    if not is_admin:
+        print("🔍 Using USER RESTRICTED query")
         db_problem = db.query(Problem).filter(
             Problem.id == problem_id,
             Problem.author_id == current_user.id
         ).first()
     else:
-        # For admins: Can query any problem
-        print(f"🔍 DELETE DEBUG: Admin path - querying problem {problem_id}")
+        print("🔍 Using ADMIN UNRESTRICTED query")
         db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
-        print(f"🔍 DELETE DEBUG: Query result: {db_problem}")
     
-    if not db_problem:
-        print(f"🔍 DELETE DEBUG: PROBLEM NOT FOUND - 404 will be raised")
+    print(f"🔍 Query Result: {db_problem}")
+    
+    if db_problem:
+        print(f"🔍 Problem Found - ID: {db_problem.id}, Title: {db_problem.title}, Author ID: {db_problem.author_id}")
+    else:
+        print(f"❌ Problem NOT FOUND in database")
+        
+        # Additional debugging
+        all_problems = db.query(Problem.id, Problem.title).all()
+        print(f"🔍 All problems in DB: {all_problems}")
+        
+        # Check if problem exists with raw query
+        from sqlalchemy import text
+        result = db.execute(text("SELECT id, title FROM problems WHERE id = :id"), {"id": problem_id})
+        raw_result = result.first()
+        print(f"🔍 Raw SQL result: {raw_result}")
+        
         raise HTTPException(status_code=404, detail="Problem not found")
     
-    print(f"🔍 DELETE DEBUG: Problem found - ID: {db_problem.id}, Title: {db_problem.title}, Author ID: {db_problem.author_id}")
-    
-    # Simple delete - Supabase now handles related records via CASCADE
-    db.delete(db_problem)
-    db.commit()
-    
-    print(f"🔍 DELETE DEBUG: Successfully deleted problem {problem_id}")
-    
-    return {"message": "Problem deleted successfully"}
+    # Try to delete
+    try:
+        print("🗑️ Attempting to delete problem...")
+        db.delete(db_problem)
+        db.commit()
+        print("✅ Problem deleted successfully")
+        
+        return {"message": "Problem deleted successfully"}
+    except Exception as e:
+        print(f"❌ Delete failed with error: {str(e)}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Delete failed: {str(e)}")
 
 @router.put("/problems/{problem_id}/comments/{comment_id}", response_model=CommentResponse)
 def update_comment(
