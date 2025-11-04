@@ -53,6 +53,8 @@ except Exception as e:
 
 # CORS: allow only explicit frontend origins (no "*" when using credentials)
 default_origins = [
+    "https://www.olimpiada.al",  # Add your custom domain
+    "https://olimpiada.al",      # Add both www and non-www
     "https://science-pioneers.vercel.app",
     "http://localhost:3000",
 ]
