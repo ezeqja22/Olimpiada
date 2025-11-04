@@ -886,39 +886,29 @@ def delete_problem(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    print(f"🚀 DEBUG: Delete endpoint called for problem {problem_id}")
-    print(f"👤 DEBUG: Current user - ID: {current_user.id}, Role: {current_user.role}, Email: {current_user.email}")
-    
-    # Check if problem exists
-    db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
-    print(f"📋 DEBUG: Database query result: {db_problem}")
-    
-    if not db_problem:
-        print(f"❌ DEBUG: Problem {problem_id} NOT FOUND in database")
-        raise HTTPException(status_code=404, detail="Problem not found")
-    else:
-        print(f"✅ DEBUG: Problem found - ID: {db_problem.id}, Title: {db_problem.title}, Author ID: {db_problem.author_id}")
-    
-    # Check if user is the creator OR admin/moderator
-    is_owner = db_problem.author_id == current_user.id
+    # Check if user is admin/moderator first
     is_admin_or_moderator = current_user.role in ["admin", "moderator"]
     
-    print(f"🔑 DEBUG: is_owner: {is_owner}, is_admin_or_moderator: {is_admin_or_moderator}")
+    if is_admin_or_moderator:
+        # Admins can query ANY problem
+        db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
+    else:
+        # Regular users can only query their own problems
+        db_problem = db.query(Problem).filter(
+            Problem.id == problem_id,
+            Problem.author_id == current_user.id
+        ).first()
     
-    if not is_owner and not is_admin_or_moderator:
-        print(f"🚫 DEBUG: User NOT authorized to delete this problem")
+    if not db_problem:
+        # Don't reveal whether problem exists or not
         raise HTTPException(
-            status_code=403, 
-            detail="You don't have permission to delete this problem"
+            status_code=404, 
+            detail="Problem not found or you don't have permission to delete it"
         )
     
-    print(f"🗑️ DEBUG: Proceeding with deletion...")
-    
-    # Delete problem (this will cascade delete comments and votes)
+    # Delete problem
     db.delete(db_problem)
     db.commit()
-    
-    print(f"✅ DEBUG: Problem {problem_id} successfully deleted")
     
     return {"message": "Problem deleted successfully"}
 
