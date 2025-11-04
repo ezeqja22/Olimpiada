@@ -754,20 +754,57 @@ def delete_problem(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Check if problem exists and belongs to current user
-    db_problem = db.query(Problem).filter(
-        Problem.id == problem_id,
-        Problem.author_id == current_user.id
-    ).first()
+    # THESE WILL APPEAR IN RAILWAY LOGS
+    print("🚀 DELETE PROBLEM ENDPOINT CALLED")
+    print(f"🔍 Problem ID: {problem_id}")
+    print(f"🔍 Current User - ID: {current_user.id}, Email: {current_user.email}, Role: {current_user.role}")
     
-    if not db_problem:
-        raise HTTPException(status_code=404, detail="Problem not found or you don't have permission to delete it")
+    # Check admin status
+    is_admin = current_user.role in ["admin", "moderator"]
+    print(f"🔍 Is Admin: {is_admin}")
     
-    # Delete problem (this will cascade delete comments and votes)
-    db.delete(db_problem)
-    db.commit()
+    # QUERY DEBUGGING
+    if not is_admin:
+        print("🔍 Using USER RESTRICTED query")
+        db_problem = db.query(Problem).filter(
+            Problem.id == problem_id,
+            Problem.author_id == current_user.id
+        ).first()
+    else:
+        print("🔍 Using ADMIN UNRESTRICTED query")
+        db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
     
-    return {"message": "Problem deleted successfully"}
+    print(f"🔍 Query Result: {db_problem}")
+    
+    if db_problem:
+        print(f"🔍 Problem Found - ID: {db_problem.id}, Title: {db_problem.title}, Author ID: {db_problem.author_id}")
+    else:
+        print(f"❌ Problem NOT FOUND in database")
+        
+        # Additional debugging
+        all_problems = db.query(Problem.id, Problem.title).all()
+        print(f"🔍 All problems in DB: {all_problems}")
+        
+        # Check if problem exists with raw query
+        from sqlalchemy import text
+        result = db.execute(text("SELECT id, title FROM problems WHERE id = :id"), {"id": problem_id})
+        raw_result = result.first()
+        print(f"🔍 Raw SQL result: {raw_result}")
+        
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    # Try to delete
+    try:
+        print("🗑️ Attempting to delete problem...")
+        db.delete(db_problem)
+        db.commit()
+        print("✅ Problem deleted successfully")
+        
+        return {"message": "Problem deleted successfully"}
+    except Exception as e:
+        print(f"❌ Delete failed with error: {str(e)}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Delete failed: {str(e)}")
 
 # Comment endpoints
 @router.post("/problems/{problem_id}/comments", response_model=CommentResponse)
@@ -879,65 +916,6 @@ def get_comments(problem_id: int, current_user: User = Depends(get_current_user)
     threaded_comments = [build_comment_tree(comment) for comment in top_level_comments]
     
     return threaded_comments
-
-
-@router.delete("/problems/{problem_id}")
-def delete_problem(
-    problem_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    # THESE WILL APPEAR IN RAILWAY LOGS
-    print("🚀 DELETE PROBLEM ENDPOINT CALLED")
-    print(f"🔍 Problem ID: {problem_id}")
-    print(f"🔍 Current User - ID: {current_user.id}, Email: {current_user.email}, Role: {current_user.role}")
-    
-    # Check admin status
-    is_admin = current_user.role in ["admin", "moderator"]
-    print(f"🔍 Is Admin: {is_admin}")
-    
-    # QUERY DEBUGGING
-    if not is_admin:
-        print("🔍 Using USER RESTRICTED query")
-        db_problem = db.query(Problem).filter(
-            Problem.id == problem_id,
-            Problem.author_id == current_user.id
-        ).first()
-    else:
-        print("🔍 Using ADMIN UNRESTRICTED query")
-        db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
-    
-    print(f"🔍 Query Result: {db_problem}")
-    
-    if db_problem:
-        print(f"🔍 Problem Found - ID: {db_problem.id}, Title: {db_problem.title}, Author ID: {db_problem.author_id}")
-    else:
-        print(f"❌ Problem NOT FOUND in database")
-        
-        # Additional debugging
-        all_problems = db.query(Problem.id, Problem.title).all()
-        print(f"🔍 All problems in DB: {all_problems}")
-        
-        # Check if problem exists with raw query
-        from sqlalchemy import text
-        result = db.execute(text("SELECT id, title FROM problems WHERE id = :id"), {"id": problem_id})
-        raw_result = result.first()
-        print(f"🔍 Raw SQL result: {raw_result}")
-        
-        raise HTTPException(status_code=404, detail="Problem not found")
-    
-    # Try to delete
-    try:
-        print("🗑️ Attempting to delete problem...")
-        db.delete(db_problem)
-        db.commit()
-        print("✅ Problem deleted successfully")
-        
-        return {"message": "Problem deleted successfully"}
-    except Exception as e:
-        print(f"❌ Delete failed with error: {str(e)}")
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Delete failed: {str(e)}")
 
 @router.put("/problems/{problem_id}/comments/{comment_id}", response_model=CommentResponse)
 def update_comment(
