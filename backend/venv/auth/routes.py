@@ -886,27 +886,20 @@ def delete_problem(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Check if user is admin/moderator first
-    is_admin_or_moderator = current_user.role in ["admin", "moderator"]
-    
-    if is_admin_or_moderator:
-        # Admins can query ANY problem
-        db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
-    else:
-        # Regular users can only query their own problems
+    # For regular users: Use restrictive query (secure)
+    if current_user.role not in ["admin", "moderator"]:
         db_problem = db.query(Problem).filter(
             Problem.id == problem_id,
-            Problem.author_id == current_user.id
+            Problem.author_id == current_user.id  # Only their own problems
         ).first()
+    else:
+        # For admins: Can query any problem
+        db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
     
     if not db_problem:
-        # Don't reveal whether problem exists or not
-        raise HTTPException(
-            status_code=404, 
-            detail="Problem not found or you don't have permission to delete it"
-        )
+        raise HTTPException(status_code=404, detail="Problem not found")
     
-    # Delete problem
+    # Simple delete - Supabase now handles related records via CASCADE
     db.delete(db_problem)
     db.commit()
     
