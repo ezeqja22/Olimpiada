@@ -149,25 +149,25 @@ class NotificationService:
     async def send_like_notification(self, user_id: int, liker_username: str, problem_title: str):
         """Send notification when someone likes a problem"""
         title = "Someone liked your problem!"
-        message = f"{liker_username} liked your problem '{problem_title}'"
+        message = f"{liker_username} liked your problem '{problem_title}'."
         return await self.create_notification(user_id, "like", title, message)
     
     async def send_comment_notification(self, user_id: int, commenter_username: str, problem_title: str):
         """Send notification when someone comments on a problem"""
         title = "New comment on your problem!"
-        message = f"{commenter_username} commented on your problem '{problem_title}'"
+        message = f"{commenter_username} commented on your problem '{problem_title}'."
         return await self.create_notification(user_id, "comment", title, message)
     
     async def send_follow_notification(self, user_id: int, follower_username: str):
         """Send notification when someone follows the user"""
         title = "New follower!"
-        message = f"{follower_username} started following you"
+        message = f"{follower_username} started following you."
         return await self.create_notification(user_id, "follow", title, message)
     
     async def send_forum_invitation_notification(self, user_id: int, inviter_username: str, forum_title: str, forum_id: int = None, invitation_id: int = None):
         """Send notification when invited to a forum"""
         title = "Forum Invitation"
-        message = f"{inviter_username} invited you to join '{forum_title}'"
+        message = f"{inviter_username} invited you to join '{forum_title}'."
         
         # Create notification with data for Accept/Decline buttons
         notification = await self.create_notification(user_id, "forum_invitation", title, message)
@@ -187,13 +187,13 @@ class NotificationService:
     async def send_forum_invitation_accepted_notification(self, user_id: int, invitee_username: str, forum_title: str):
         """Send notification when forum invitation is accepted"""
         title = "Invitation Accepted"
-        message = f"{invitee_username} accepted your invitation to '{forum_title}'"
+        message = f"{invitee_username} accepted your invitation to '{forum_title}'."
         return await self.create_notification(user_id, "forum_invitation_accepted", title, message)
     
     async def send_forum_join_request_notification(self, user_id: int, requester_username: str, forum_title: str, forum_id: int = None, request_id: int = None):
         """Send notification when someone requests to join a forum"""
         title = "Join Request"
-        message = f"{requester_username} wants to join '{forum_title}'"
+        message = f"{requester_username} wants to join '{forum_title}'."
         
         # Create notification with data for Accept/Decline buttons
         notification = await self.create_notification(user_id, "forum_join_request", title, message)
@@ -213,17 +213,17 @@ class NotificationService:
     async def send_forum_join_request_accepted_notification(self, user_id: int, forum_title: str):
         """Send notification when join request is accepted"""
         title = "Request Accepted"
-        message = f"Your request to join '{forum_title}' has been accepted"
+        message = f"Your request to join '{forum_title}' has been accepted."
         return await self.create_notification(user_id, "forum_join_request_accepted", title, message)
     
     async def send_forum_join_request_declined_notification(self, user_id: int, forum_title: str):
         """Send notification when join request is declined"""
         title = "Request Declined"
-        message = f"Your request to join '{forum_title}' has been declined"
+        message = f"Your request to join '{forum_title}' has been declined."
         return await self.create_notification(user_id, "forum_join_request_declined", title, message)
     
     async def send_forum_deleted_notification(self, user_id: int, forum_title: str, creator_username: str):
         """Send notification when a forum is deleted"""
         title = "Forum Deleted"
-        message = f"The forum '{forum_title}' created by {creator_username} has been deleted"
+        message = f"The forum '{forum_title}' created by {creator_username} has been deleted."
         return await self.create_notification(user_id, "forum_deleted", title, message)

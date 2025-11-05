@@ -63,7 +63,7 @@ class EmailService:
             <div class="container">
                 <div class="header">
                     <h1>
-                    <img src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760960586/LOGO_SIPER_ge2sdy.svg" alt="Olimpiada Logo" class="logo">
+                    <img src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png" alt="Olimpiada Logo" class="logo">
                     Olimpiada
                     </h1>
                     <h2>Email Verification</h2>
@@ -130,7 +130,7 @@ class EmailService:
             <div class="container">
                 <div class="header">
                     <h1>
-                    <img src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760960586/LOGO_SIPER_ge2sdy.svg" alt="Olimpiada Logo" class="logo">
+                    <img src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png" alt="Olimpiada Logo" class="logo">
                     Olimpiada
                     </h1>
                     <h2>Account Deletion Verification</h2>
@@ -351,7 +351,7 @@ class EmailService:
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                     <div style="background: #2d7a5f; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
                         <h1>
-                            <img src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760960586/LOGO_SIPER_ge2sdy.svg" alt="Olimpiada Logo" class="logo">
+                            <img src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png" alt="Olimpiada Logo" class="logo">
                             Olimpiada
                         </h1>
                     </div>
