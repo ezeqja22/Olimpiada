@@ -5,6 +5,7 @@ import axios from "axios";
 function LoginPopup({ isOpen, onClose, redirectTo }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
@@ -138,21 +139,52 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
                         }}>
                             Password
                         </label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            style={{
-                                width: "100%",
-                                padding: "0.75rem",
-                                border: "1px solid #ddd",
-                                borderRadius: "6px",
-                                fontSize: "1rem",
-                                boxSizing: "border-box"
-                            }}
-                            placeholder="Enter your password"
-                        />
+                        {/* Add wrapper div for password field */}
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                style={{
+                                    width: "100%",
+                                    padding: "0.75rem",
+                                    paddingRight: '45px',
+                                    border: "1px solid #ddd",
+                                    borderRadius: "6px",
+                                    fontSize: "1rem",
+                                    boxSizing: "border-box"
+                                }}
+                                placeholder="Enter your password"
+                            />
+                            {/* Add custom eye icon */}
+                            <span 
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{ 
+                                    cursor: 'pointer', 
+                                    position: 'absolute', 
+                                    right: '12px', 
+                                    top: '50%', 
+                                    transform: 'translateY(-50%)',
+                                    color: '#666',
+                                    padding: '8px',
+                                    userSelect: 'none',
+                                    zIndex: 10
+                                }}
+                            >
+                                <img
+                                    src={showPassword ? 
+                                        "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_MBYLL_cioicv.svg" : 
+                                        "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_HAP_yencim.svg"}
+                                    alt={showPassword ? "Hide password" : "Show password"}
+                                    style={{
+                                        width: '18px',
+                                        height: '18px',
+                                        objectFit: 'contain'
+                                    }}
+                                />
+                            </span>
+                        </div>
                     </div>
 
                     {error && (

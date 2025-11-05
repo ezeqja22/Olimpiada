@@ -321,7 +321,6 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     # Check maintenance mode first
     from main import get_settings_service
     settings_service = get_settings_service(db) if get_settings_service else None
-    print("debug message test")
     
     if settings_service and settings_service.is_maintenance_mode():
         # During maintenance, only allow admin/moderator login

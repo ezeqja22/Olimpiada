@@ -9,6 +9,7 @@ import { colors, spacing, typography, borderRadius } from "./designSystem";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -18,8 +19,6 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      console.log('Environment variable:', process.env.REACT_APP_API_URL);
-      console.log('Full URL will be:', `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/login`);
       const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/login`, {
         email,
         password,
@@ -140,25 +139,56 @@ function Login() {
               }}>
                 Password
               </label>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: spacing.md,
-                  border: `1px solid ${colors.gray[300]}`,
-                  borderRadius: borderRadius.md,
-                  fontSize: typography.fontSize.base,
-                  fontFamily: typography.fontFamily,
-                  boxSizing: "border-box",
-                  transition: "border-color 0.2s ease"
-                }}
-                onFocus={(e) => e.target.style.borderColor = colors.primary}
-                onBlur={(e) => e.target.style.borderColor = colors.gray[300]}
-              />
+              {/* Add wrapper div for password field */}
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: spacing.md,
+                    paddingRight: '50px',
+                    border: `1px solid ${colors.gray[300]}`,
+                    borderRadius: borderRadius.md,
+                    fontSize: typography.fontSize.base,
+                    fontFamily: typography.fontFamily,
+                    boxSizing: "border-box",
+                    transition: "border-color 0.2s ease"
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = colors.primary}
+                  onBlur={(e) => e.target.style.borderColor = colors.gray[300]}
+                />
+                {/* Add custom eye icon */}
+                <span 
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ 
+                    cursor: 'pointer', 
+                    position: 'absolute', 
+                    right: '15px', 
+                    top: '50%', 
+                    transform: 'translateY(-50%)',
+                    color: colors.gray[600],
+                    padding: '8px',
+                    userSelect: 'none',
+                    zIndex: 10
+                  }}
+                >
+                  <img
+                    src={showPassword ? 
+                      "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_MBYLL_cioicv.svg" : 
+                      "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_HAP_yencim.svg"}
+                    alt={showPassword ? "Hide password" : "Show password"}
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </span>
+              </div>
             </div>
 
             <Button 
