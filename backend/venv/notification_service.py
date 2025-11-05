@@ -127,16 +127,16 @@ class NotificationService:
         """Send email notification to user"""
         try:
             print(f"DEBUG: Attempting to send email notification to {user.email}")
-            subject = f"SciencePioneers: {notification.title}"
+            subject = f"Olimpiada: {notification.title}"
             body = f"""
             Hi {user.username},
             
             {notification.message}
             
-            Visit SciencePioneers to see more: http://localhost:3000
+            Visit Olimpiada to see more: https://www.olimpiada.al/
             
             Best regards,
-            SciencePioneers Team
+            Olimpiada Team
             """
             
             result = await self.email_service.send_notification_email(user.email, subject, body)
