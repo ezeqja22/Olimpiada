@@ -218,6 +218,9 @@ const EmailVerification = () => {
             <p style={{ color: '#666', fontSize: '14px', marginBottom: '10px' }}>
               Didn't receive the code?
             </p>
+            <p style={{ color: '#666', fontSize: '12px', marginBottom: '10px', fontStyle: 'italic' }}>
+              Check your spam folder
+            </p>
             <button
               type="button"
               onClick={handleResendCode}
