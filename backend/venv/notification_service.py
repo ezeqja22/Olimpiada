@@ -38,14 +38,11 @@ class NotificationService:
                 self.db.refresh(notification)
             
             # Send email notification if enabled (independent of in-app notifications)
-            print(f"DEBUG: Checking if should send email for user {user_id}, type {notification_type}")
             should_send = self._should_send_email(preferences, notification_type)
-            print(f"DEBUG: Should send email: {should_send}")
             
             if should_send:
                 # Email notification enabled
                 user = self.db.query(User).filter(User.id == user_id).first()
-                print(f"DEBUG: User found: {user is not None}, verified: {user.is_verified if user else 'N/A'}")
                 
                 if user and user.is_verified:
                     # User verified, sending email
@@ -126,7 +123,6 @@ class NotificationService:
     async def _send_email_notification(self, user: User, notification: Notification):
         """Send email notification to user"""
         try:
-            print(f"DEBUG: Attempting to send email notification to {user.email}")
             subject = f"Olimpiada: {notification.title}"
             body = f"""
             Hi {user.username},

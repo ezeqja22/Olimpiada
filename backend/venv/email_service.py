@@ -358,8 +358,6 @@ class EmailService:
                     <div style="background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
                         <h2>Notification</h2>
                         <p>{body}</p>
-                        <p>Visit <a href="https://www.olimpiada.al/">Olimpiada</a> to see more!</p>
-                        <p>Best regards,<br>Olimpiada Team</p>
                     </div>
                 </div>
             </body>
