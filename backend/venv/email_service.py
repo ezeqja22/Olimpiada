@@ -18,7 +18,7 @@ class EmailService:
         self.sender_email = os.getenv('SMTP_USERNAME')
         self.sender_password = os.getenv('SMTP_PASSWORD')
         self.smtp_use_tls = os.getenv('SMTP_USE_TLS', 'true').lower() == 'true'
-        self.email_from_name = os.getenv('EMAIL_FROM_NAME', 'Science Pioneers')
+        self.email_from_name = os.getenv('EMAIL_FROM_NAME', 'Olimpiada')
         self.email_from_address = os.getenv('EMAIL_FROM_ADDRESS', 'albyte.dev@gmail.com')
     
     def is_configured(self):
@@ -62,12 +62,15 @@ class EmailService:
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>🔬 Science Pioneers</h1>
+                    <h1>
+                    <img src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760960586/LOGO_SIPER_ge2sdy.svg" alt="Olimpiada Logo" class="logo">
+                    Olimpiada
+                    </h1>
                     <h2>Email Verification</h2>
                 </div>
                 <div class="content">
                     <h3>Hello {username}!</h3>
-                    <p>Welcome to Science Pioneers! To complete your registration, please verify your email address.</p>
+                    <p>Welcome to Olimpiada! To complete your registration, please verify your email address.</p>
                     
                     <p>Your verification code is:</p>
                     <div class="verification-code">{verification_code}</div>
@@ -82,7 +85,7 @@ class EmailService:
                     <p>If you have any questions, feel free to contact us!</p>
                 </div>
                 <div class="footer">
-                    <p>This is an automated message from Science Pioneers</p>
+                    <p>This is an automated message from Olimpiada</p>
                 </div>
             </div>
         </body>
@@ -126,15 +129,18 @@ class EmailService:
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>🔬 Science Pioneers</h1>
+                    <h1>
+                    <img src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760960586/LOGO_SIPER_ge2sdy.svg" alt="Olimpiada Logo" class="logo">
+                    Olimpiada
+                    </h1>
                     <h2>Account Deletion Verification</h2>
                 </div>
                 <div class="content">
                     <h3>Hello {username}!</h3>
-                    <p>You have requested to delete your Science Pioneers account. To confirm this action, please use the verification code below.</p>
+                    <p>You have requested to delete your Olimpiada account. To confirm this action, please use the verification code below.</p>
                     
                     <div class="warning">
-                        <strong>⚠️ WARNING:</strong> This action cannot be undone. Your account will be permanently deleted.
+                        <strong>WARNING:</strong> This action cannot be undone. Your account will be permanently deleted.
                     </div>
                     
                     <p>Your verification code is:</p>
@@ -151,7 +157,7 @@ class EmailService:
                     <p>If you have any questions, feel free to contact us!</p>
                 </div>
                 <div class="footer">
-                    <p>This is an automated message from Science Pioneers</p>
+                    <p>This is an automated message from Olimpiada</p>
                 </div>
             </div>
         </body>
@@ -162,8 +168,6 @@ class EmailService:
     async def send_verification_email(self, to_email: str, username: str, verification_code: str) -> bool:
         """Send verification email to user"""
         try:
-            print(f"DEBUG: Attempting to send verification email to {to_email}")
-            
             # Create HTML content
             html_content = self.create_verification_email(username, verification_code)
             
@@ -171,7 +175,7 @@ class EmailService:
             print("DEBUG: Trying SendGrid REST API...")
             success = await self.send_email_via_sendgrid_api(
                 to_email=to_email,
-                subject="🔬 Science Pioneers - Email Verification",
+                subject="Olimpiada - Email Verification",
                 html_content=html_content
             )
             
@@ -197,7 +201,7 @@ class EmailService:
             
             # Create message
             msg = MIMEMultipart('alternative')
-            msg['Subject'] = "🔬 Science Pioneers - Email Verification"
+            msg['Subject'] = "Olimpiada - Email Verification"
             msg['From'] = self.sender_email
             msg['To'] = to_email
             
@@ -241,7 +245,7 @@ class EmailService:
             
             # Create message
             msg = MIMEMultipart('alternative')
-            msg['Subject'] = "🔬 Science Pioneers - Account Deletion Verification"
+            msg['Subject'] = "Olimpiada - Account Deletion Verification"
             msg['From'] = self.sender_email
             msg['To'] = to_email
             
@@ -305,7 +309,7 @@ class EmailService:
                 ],
                 "from": {
                     "email": self.email_from_address or "albyte.dev@gmail.com",
-                    "name": self.email_from_name or "Science Pioneers"
+                    "name": self.email_from_name or "Olimpiada"
                 },
                 "content": [
                     {
@@ -314,11 +318,6 @@ class EmailService:
                     }
                 ]
             }
-            
-            print(f"DEBUG: Sending email via SendGrid API to {to_email}")
-            print(f"DEBUG: Using API key: {api_key[:10]}...")
-            print(f"DEBUG: From email: {self.sender_email}")
-            
             # Send request
             response = requests.post(url, headers=headers, json=data, timeout=30)
             
@@ -351,13 +350,16 @@ class EmailService:
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                     <div style="background: #2d7a5f; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                        <h1>🔬 Science Pioneers</h1>
+                        <h1>
+                            <img src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760960586/LOGO_SIPER_ge2sdy.svg" alt="Olimpiada Logo" class="logo">
+                            Olimpiada
+                        </h1>
                     </div>
                     <div style="background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
                         <h2>Notification</h2>
                         <p>{body}</p>
-                        <p>Visit <a href="http://localhost:3000">SciencePioneers</a> to see more!</p>
-                        <p>Best regards,<br>SciencePioneers Team</p>
+                        <p>Visit <a href="https://www.olimpiada.al/">Olimpiada</a> to see more!</p>
+                        <p>Best regards,<br>Olimpiada Team</p>
                     </div>
                 </div>
             </body>
@@ -377,7 +379,6 @@ class EmailService:
                 return True
             
             # Fallback to SMTP if API fails
-            print("DEBUG: SendGrid API failed, trying SMTP fallback for notification...")
             return self._send_notification_email_smtp(to_email, subject, html_content)
             
         except Exception as e:
