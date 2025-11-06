@@ -40,6 +40,7 @@ class User(Base):
     received_invitations = relationship("ForumInvitation", foreign_keys="ForumInvitation.invitee_id", back_populates="invitee")
     forum_join_requests = relationship("ForumJoinRequest", back_populates="user")
     drafts = relationship("Draft", back_populates="author")
+    password_reset_tokens = relationship("PasswordResetToken", back_populates="user")
 
 class Problem(Base):
     __tablename__ = "problems"
@@ -378,3 +379,15 @@ class SystemSettings(Base):
     
     # Relationships
     updater = relationship("User")
+
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    token = Column(String(255), unique=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    used = Column(Boolean, default=False, nullable=False)
+
+    user = relationship("User", back_populates="password_reset_tokens")
