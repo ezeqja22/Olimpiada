@@ -9,3 +9,4 @@ __pycache__/
 *.pyc
 backend/pyvenv.cfg
 .env
+alembic.ini
