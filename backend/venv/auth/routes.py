@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import func, or_
 from database import get_db
-from models import User, Problem, Comment, Vote, Bookmark, Follow, ProblemImage, Notification, NotificationPreferences, Forum, ForumMembership, ForumMessage, ForumInvitation, ForumJoinRequest, Draft, UserOnlineStatus, ForumReply, SiteReport
+from models import User, Problem, Comment, Vote, Bookmark, Follow, ProblemImage, Notification, NotificationPreferences, Forum, ForumMembership, ForumMessage, ForumInvitation, ForumJoinRequest, Draft, UserOnlineStatus, ForumReply, SiteReport, PasswordResetToken
 from auth.utils import hash_password, verify_password, create_jwt
 from auth.dependencies import get_current_user, get_verified_user
 from auth.schemas import RegisterRequest, LoginRequest, TokenResponse, UserOut, UserUpdate, PasswordVerifyRequest, PasswordChangeRequest, ForgotPasswordRequest, ResetPasswordRequest
@@ -14,6 +14,8 @@ from auth.schemas import ProblemCreate, ProblemResponse, CommentCreate, CommentR
 from auth.schemas import NotificationPreferencesCreate, NotificationPreferencesResponse, NotificationResponse, NotificationCreate
 from auth.schemas import ForumCreate, ForumUpdate, Forum as ForumSchema, ForumMembershipCreate, ForumMembership as ForumMembershipSchema, ForumMessageCreate, ForumMessage as ForumMessageSchema, ForumInvitationCreate, ForumInvitation as ForumInvitationSchema, ForumJoinRequestCreate, ForumJoinRequest as ForumJoinRequestSchema, DraftCreate, DraftUpdate, DraftResponse, UserOnlineStatusResponse, ForumReplyCreate, ForumReply as ForumReplySchema
 from sqlalchemy import text
+import uuid
+from email_service import email_service
 # Import notification service with error handling
 try:
     from notification_service import NotificationService
@@ -4841,3 +4843,65 @@ async def get_my_reports(
         return {"reports": reports}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/forgot-password")
+async def forgot_password(email: str, db: Session = Depends(get_db)):
+    # Check if the user exists
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return {"message": "If the email exists, a password reset link has been sent."}
+
+    # Generate a secure token
+    import uuid
+    reset_token = str(uuid.uuid4())
+    expires_at = datetime.utcnow() + timedelta(minutes=30)  # Token expires in 30 minutes
+
+    # Store the token in the database
+    db_token = PasswordResetToken(
+        user_id=user.id,
+        token=reset_token,
+        created_at=datetime.utcnow(),
+        expires_at=expires_at,
+        used=False,
+    )
+    db.add(db_token)
+    db.commit()
+
+    # Send email with reset link
+    reset_link = f"https://olimpiada.al/reset-password?token={reset_token}"
+    subject = "Olimpiada - Password Reset Request"
+    body = f"""
+    Hi {user.username},
+
+    You requested to reset your password. Click the link below to reset it:
+    {reset_link}
+
+    If you didn't request this, please ignore this email.
+
+    Best regards,
+    Olimpiada Team
+    """
+    success = await email_service.send_notification_email(user.email, subject, body)
+
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to send email.")
+
+    return {"message": "Password reset link sent to your email."}
+
+@router.post("/reset-password")
+async def reset_password(token: str, new_password: str, db: Session = Depends(get_db)):
+    # Verify the token
+    db_token = db.query(PasswordResetToken).filter(PasswordResetToken.token == token).first()
+    if not db_token or db_token.expires_at < datetime.utcnow() or db_token.used:
+        raise HTTPException(status_code=400, detail="Invalid or expired token.")
+
+    # Update the user's password
+    user = db.query(User).filter(User.id == db_token.user_id).first()
+    user.password_hash = hash_password(new_password)  # Assuming you have a hash_password function
+    db.commit()
+
+    # Mark the token as used
+    db_token.used = True
+    db.commit()
+
+    return {"message": "Password reset successfully."}
