@@ -3898,66 +3898,6 @@ def change_password(
         db.rollback()
         raise HTTPException(status_code=500, detail="Failed to change password")
 
-@router.post("/forgot-password")
-def forgot_password(
-    request: ForgotPasswordRequest,
-    db: Session = Depends(get_db)
-):
-    """Send password reset email"""
-    try:
-        # Check if user exists
-        user = db.query(User).filter(User.email == request.email).first()
-        if not user:
-            # Don't reveal if email exists or not for security
-            return {"message": "If the email exists, a password reset link has been sent"}
-        
-        # Generate reset token (simple UUID for now)
-        import uuid
-        reset_token = str(uuid.uuid4())
-        
-        # Store token in database
-        user.reset_token = reset_token
-        db.commit()
-        
-        # TODO: Send email with reset link
-        # For now, just return the token (in production, send via email)
-        reset_link = f"http://localhost:3000/reset-password?token={reset_token}"
-        
-        return {
-            "message": "Password reset link sent to your email",
-            "reset_link": reset_link  # Remove this in production
-        }
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Failed to send reset email")
-
-@router.post("/reset-password")
-def reset_password(
-    request: ResetPasswordRequest,
-    db: Session = Depends(get_db)
-):
-    """Reset password using token from email"""
-    try:
-        # Find user with reset token
-        user = db.query(User).filter(User.reset_token == request.token).first()
-        if not user:
-            raise HTTPException(status_code=400, detail="Invalid or expired reset token")
-        
-        # Hash new password
-        new_hashed_password = hash_password(request.new_password)
-        
-        # Update password and clear reset token
-        user.password_hash = new_hashed_password
-        user.reset_token = None
-        db.commit()
-        
-        return {"message": "Password reset successfully"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Failed to reset password")
-
 # Online Status Endpoints
 @router.post("/forums/{forum_id}/online")
 def mark_user_online(
