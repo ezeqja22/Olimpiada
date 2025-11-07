@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 function LoginPopup({ isOpen, onClose, redirectTo }) {
     const [email, setEmail] = useState("");

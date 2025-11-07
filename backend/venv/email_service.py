@@ -365,7 +365,6 @@ class EmailService:
             """
             
             # Try SendGrid API first (more reliable)
-            print("DEBUG: Trying SendGrid REST API for notification...")
             success = await self.send_email_via_sendgrid_api(
                 to_email=to_email,
                 subject=subject,
@@ -373,14 +372,12 @@ class EmailService:
             )
             
             if success:
-                print(f"SUCCESS: Notification email sent via SendGrid API to {to_email}")
                 return True
             
             # Fallback to SMTP if API fails
             return self._send_notification_email_smtp(to_email, subject, html_content)
             
         except Exception as e:
-            print(f"ERROR: Notification email failed: {e}")
             return False
     
     def _send_notification_email_smtp(self, to_email: str, subject: str, html_content: str) -> bool:
