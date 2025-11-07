@@ -220,6 +220,9 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
                         {loading ? "Signing In..." : "Sign In"}
                     </button>
                 </form>
+                <Link to="/forgot-password" style={{ color: "blue", textDecoration: "underline" }}>
+                    Forgot Password?
+                </Link>
 
                 {/* Signup Link */}
                 <div style={{

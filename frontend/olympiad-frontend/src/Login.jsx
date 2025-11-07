@@ -200,7 +200,9 @@ function Login() {
               Sign In
             </Button>
           </form>
-
+          <Link to="/forgot-password" style={{ color: "blue", textDecoration: "underline" }}>
+            Forgot Password?
+          </Link>
           <div style={{
             textAlign: "center",
             paddingTop: spacing.lg,
