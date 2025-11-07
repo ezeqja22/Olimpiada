@@ -6,6 +6,8 @@ import Card from "./components/Card";
 import Button from "./components/Button";
 import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { Link } from "react-router-dom";
+import ForgotPassword from "./ForgotPassword";
+
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -201,7 +203,7 @@ function Login() {
               Sign In
             </Button>
           </form>
-          <Link to="/forgot-password" style={{ color: "blue", textDecoration: "underline" }}>
+          <Link to="/forgot-password" style={{ color: "#1a4d3a", textDecoration: "underline" }}>
             Forgot Password?
           </Link>
           <div style={{

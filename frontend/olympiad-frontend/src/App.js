@@ -31,6 +31,7 @@ import AdminUserHistory from "./AdminUserHistory";
 import AdminSettings from "./AdminSettings";
 import AdminEmail from "./AdminEmail";
 import AdminAnalytics from "./AdminAnalytics";
+import ForgotPassword from "./ForgotPassword";
 
 function App() {
   // Removed WebSocket functionality
@@ -42,6 +43,7 @@ function App() {
           <Route path="/" element={<Navigate to="/homepage" replace />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} /> 
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route 
           path="/homepage" 

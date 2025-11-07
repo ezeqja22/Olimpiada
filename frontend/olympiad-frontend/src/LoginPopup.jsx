@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import ForgotPassword from "./ForgotPassword";
 
 function LoginPopup({ isOpen, onClose, redirectTo }) {
     const [email, setEmail] = useState("");
@@ -221,7 +222,7 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
                         {loading ? "Signing In..." : "Sign In"}
                     </button>
                 </form>
-                <Link to="/forgot-password" style={{ color: "blue", textDecoration: "underline" }}>
+                <Link to="/forgot-password" style={{ color: "#1a4d3a", textDecoration: "underline" }}>
                     Forgot Password?
                 </Link>
 
