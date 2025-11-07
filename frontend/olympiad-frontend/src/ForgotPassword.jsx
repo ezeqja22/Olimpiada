@@ -22,7 +22,7 @@ function ForgotPassword() {
     setError("");
 
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/forgot-password`, { email });
+      await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/forgot-password`, { email });
       setSuccess(true);
     } catch (err) {
       console.error("Error sending reset link:", err);
