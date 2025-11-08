@@ -17,56 +17,37 @@ function Button({
                 return {
                     backgroundColor: colors.primary,
                     color: colors.white,
-                    border: `1px solid ${colors.primary}`,
-                    "&:hover": {
-                        backgroundColor: colors.secondary
-                    }
+                    border: `1px solid ${colors.primary}`
                 };
             case "secondary":
                 return {
                     backgroundColor: colors.secondary,
                     color: colors.white,
-                    border: `1px solid ${colors.secondary}`,
-                    "&:hover": {
-                        backgroundColor: colors.primary
-                    }
+                    border: `1px solid ${colors.secondary}`
                 };
             case "accent":
                 return {
                     backgroundColor: colors.accent,
                     color: colors.white,
-                    border: `1px solid ${colors.accent}`,
-                    "&:hover": {
-                        backgroundColor: "#218838"
-                    }
+                    border: `1px solid ${colors.accent}`
                 };
             case "danger":
                 return {
                     backgroundColor: colors.danger,
                     color: colors.white,
-                    border: `1px solid ${colors.danger}`,
-                    "&:hover": {
-                        backgroundColor: "#c82333"
-                    }
+                    border: `1px solid ${colors.danger}`
                 };
             case "outline":
                 return {
                     backgroundColor: "transparent",
                     color: colors.primary,
-                    border: `1px solid ${colors.primary}`,
-                    "&:hover": {
-                        backgroundColor: colors.primary,
-                        color: colors.white
-                    }
+                    border: `1px solid ${colors.primary}`
                 };
             case "ghost":
                 return {
                     backgroundColor: "transparent",
                     color: colors.primary,
-                    border: "none",
-                    "&:hover": {
-                        backgroundColor: colors.gray[100]
-                    }
+                    border: "none"
                 };
             default:
                 return {
