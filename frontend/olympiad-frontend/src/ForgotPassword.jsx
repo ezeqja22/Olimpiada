@@ -69,8 +69,8 @@ function ForgotPassword() {
                 src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1762615234/EMAIL_SENT_rmh0e0.svg"
                 alt="Menu"
                 style={{
-                width: "20px",
-                height: "20px",
+                width: "80px",
+                height: "80px",
                 objectFit: "contain"
                   }}
               />
@@ -128,8 +128,8 @@ function ForgotPassword() {
                 src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1762615233/dryri_wvbhuh.svg"
                 alt="Menu"
                 style={{
-                width: "20px",
-                height: "20px",
+                width: "80px",
+                height: "80px",
                 objectFit: "contain"
                 }}
               />
