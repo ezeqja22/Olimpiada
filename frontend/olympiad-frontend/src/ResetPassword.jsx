@@ -45,14 +45,9 @@ function ResetPassword() {
         setError("");
         
         try {
-            await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/reset-password`, {
-                token: token,
-                new_password: newPassword
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            await axios.post(
+            `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/reset-password?token=${encodeURIComponent(token)}&new_password=${encodeURIComponent(newPassword)}`
+             );
             
             setSuccess(true);
             
