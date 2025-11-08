@@ -42,6 +42,7 @@ function AuthGuard({ children }) {
         location.pathname === "/homepage" || 
         location.pathname === "/login" || 
         location.pathname === "/signup" ||
+        location.pathname === "/forgot-password" ||
         location.pathname === "/verify-email") {
       setIsAuthenticated(false);
       setIsValidating(false);
