@@ -11,26 +11,41 @@ function ForgotPassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!email) {
-      setError("Email is required");
-      return;
-    }
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!email) {
+    setError("Email is required");
+    return;
+  }
 
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    try {
-      await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/forgot-password`, { email });
-      setSuccess(true);
-    } catch (err) {
-      console.error("Error sending reset link:", err);
-      setError(err.response?.data?.detail || "Failed to send reset link");
-    } finally {
-      setLoading(false);
+  try {
+    await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/forgot-password`, { email });
+    setSuccess(true);
+  } catch (err) {
+    console.error("Full error:", err);
+    
+    // SAFE ERROR HANDLING
+    let errorMessage = "Failed to send reset link";
+    
+    // Check if the error data exists and is renderable
+    const errorDetail = err.response?.data?.detail;
+    if (errorDetail) {
+      if (typeof errorDetail === 'string') {
+        errorMessage = errorDetail;
+      } else if (typeof errorDetail === 'object') {
+        // Handle object errors safely
+        errorMessage = "Invalid email address";
+      }
     }
-  };
+    
+    setError(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (success) {
     return (
