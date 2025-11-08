@@ -27,9 +27,8 @@ function ForgotPassword() {
     formData.append('email', email);
 
     await axios.post(
-      `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/forgot-password`, 
-      formData
-    );
+  `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/forgot-password?email=${encodeURIComponent(email)}`
+);
     setSuccess(true);
   } catch (err) {
     console.error("Full error:", err);
