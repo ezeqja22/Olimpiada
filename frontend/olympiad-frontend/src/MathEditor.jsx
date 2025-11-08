@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 
 const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
   const [activeTab, setActiveTab] = useState('basic');
   const [mathInput, setMathInput] = useState(initialValue);
-  const [cursorPosition, setCursorPosition] = useState(0);
+  const [delimiterMode, setDelimiterMode] = useState('inline'); // 'inline' or 'block'
   const textareaRef = useRef(null);
 
   const symbolCategories = {
@@ -153,30 +153,19 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const text = mathInput;
-    
-    let newText;
-    if (template) {
-      // For templates, insert and position cursor
-      newText = text.substring(0, start) + latex + text.substring(end);
-      setMathInput(newText);
-      
-      // Position cursor inside the first {} if it exists
-      setTimeout(() => {
-        const newPosition = start + latex.indexOf('{}') + 1;
-        textarea.setSelectionRange(newPosition, newPosition);
-        textarea.focus();
-      }, 0);
-    } else {
-      newText = text.substring(0, start) + latex + text.substring(end);
-      setMathInput(newText);
-      
-      // Position cursor after the inserted symbol
-      setTimeout(() => {
-        const newPosition = start + latex.length;
-        textarea.setSelectionRange(newPosition, newPosition);
-        textarea.focus();
-      }, 0);
-    }
+
+    const delimiters = delimiterMode === 'inline' ? ['$','$'] : ['$$','$$'];
+
+    let newLatex = delimiters[0] + latex + delimiters[1];
+    const newText = text.substring(0, start) + newLatex + text.substring(end);
+    setMathInput(newText);
+
+    // Adjust cursor
+    setTimeout(() => {
+      const newPosition = start + newLatex.length;
+      textarea.setSelectionRange(newPosition, newPosition);
+      textarea.focus();
+    }, 0);
   };
 
   const handleInsert = () => {
@@ -188,23 +177,6 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
     onClose();
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      // Insert spaces for indentation
-      const start = e.target.selectionStart;
-      const end = e.target.selectionEnd;
-      const text = mathInput;
-      const newText = text.substring(0, start) + '  ' + text.substring(end);
-      setMathInput(newText);
-      
-      setTimeout(() => {
-        const newPosition = start + 2;
-        e.target.setSelectionRange(newPosition, newPosition);
-      }, 0);
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -214,7 +186,20 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
           <h3>Math Editor</h3>
           <button onClick={handleCancel} className="close-btn">×</button>
         </div>
-        
+
+        {/* NEW: Delimiter toggle */}
+        <div className="delimiter-toggle">
+          <label>Delimiter Mode:</label>
+          <select
+            value={delimiterMode}
+            onChange={(e) => setDelimiterMode(e.target.value)}
+            className="delimiter-select"
+          >
+            <option value="inline">$...$ (Inline)</option>
+            <option value="block">$$...$$ (Block)</option>
+          </select>
+        </div>
+
         <div className="math-toolbar">
           <div className="toolbar-tabs">
             {Object.entries(symbolCategories).map(([key, category]) => (
@@ -227,7 +212,7 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
               </button>
             ))}
           </div>
-          
+
           <div className="symbol-grid">
             {symbolCategories[activeTab].symbols.map((symbolData, index) => (
               <button
@@ -241,7 +226,7 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
             ))}
           </div>
         </div>
-        
+
         <div className="math-input-area">
           <div className="input-section">
             <label>LaTeX Input:</label>
@@ -249,24 +234,29 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
               ref={textareaRef}
               value={mathInput}
               onChange={(e) => setMathInput(e.target.value)}
-              onKeyDown={handleKeyDown}
               placeholder="Type LaTeX or click symbols above..."
               className="math-textarea"
             />
           </div>
-          
+
           <div className="preview-section">
             <label>Preview:</label>
             <div className="math-preview">
               {mathInput ? (
-                <BlockMath math={mathInput} />
+                delimiterMode === 'inline' ? (
+                  <InlineMath math={mathInput.replace(/\$/g, '')} />
+                ) : (
+                  <BlockMath math={mathInput.replace(/\$/g, '')} />
+                )
               ) : (
-                <div className="preview-placeholder">Math preview will appear here...</div>
+                <div className="preview-placeholder">
+                  Math preview will appear here...
+                </div>
               )}
             </div>
           </div>
         </div>
-        
+
         <div className="math-actions">
           <button onClick={handleCancel} className="cancel-btn">Cancel</button>
           <button onClick={handleInsert} className="insert-btn">Insert Symbols</button>

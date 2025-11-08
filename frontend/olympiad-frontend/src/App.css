@@ -36,3 +36,10 @@
     transform: rotate(360deg);
   }
 }
+.katex-display {
+  margin: 0;            /* remove vertical spacing */
+  text-align: left;     /* left-align displayed equations */
+}
+.katex-display .katex {
+  display: inline-block; /* avoid full-width centering behavior */
+}

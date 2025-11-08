@@ -29,7 +29,7 @@ const renderMathContent = (text) => {
       // Block math mode
       const content = part.slice(2, -2);
       return (
-        <div key={index} style={{ textAlign: 'center', margin: '8px 0' }}>
+        <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
           <BlockMath math={content} />
         </div>
       );
