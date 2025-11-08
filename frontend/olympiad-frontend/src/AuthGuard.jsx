@@ -36,12 +36,6 @@ function AuthGuard({ children }) {
 
   const validateSession = async () => {
     const token = localStorage.getItem("token");
-
-    console.log("=== AUTHGUARD DEBUG ===");
-    console.log("Current path:", location.pathname);
-    console.log("Has token:", !!token);
-    console.log("Is protected route:", isProtectedRoute(location.pathname));
-    
     // Allow homepage, login, and signup to be accessible without authentication
     if (location.pathname === "/" || 
         location.pathname === "/homepage" || 
@@ -49,7 +43,6 @@ function AuthGuard({ children }) {
         location.pathname === "/signup" ||
         location.pathname === "/forgot-password" ||
         location.pathname === "/verify-email") {
-        console.log("✅ Allowing access to public route");
       setIsAuthenticated(false);
       setIsValidating(false);
       return;

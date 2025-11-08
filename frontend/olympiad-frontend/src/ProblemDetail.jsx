@@ -19,21 +19,37 @@ import { useFeatureSettings } from "./hooks/useFeatureSettings";
 
 // Helper function to render math content
 const renderMathContent = (text) => {
-    if (!text) return '';
-    
-    // Check if text contains LaTeX patterns or math symbols
-    const latexPattern = /\\[a-zA-Z]+|\\[^a-zA-Z]|\$\$|\\\(|\\\)|\\\[|\\\]|\^|\_|\{|\}|\[|\]|∫|∑|∏|√|α|β|γ|δ|ε|ζ|η|θ|ι|κ|λ|μ|ν|ξ|ο|π|ρ|σ|τ|υ|φ|χ|ψ|ω|∞|±|∓|×|÷|≤|≥|≠|≈|≡|∈|∉|⊂|⊃|∪|∩|∅|∇|∂|∆|Ω|Φ|Ψ|Λ|Σ|Π|Θ|Ξ|Γ|Δ/;
-    if (!latexPattern.test(text)) {
-        return text;
+  if (!text) return "";
+
+  // Split text into lines to preserve formatting
+  const lines = text.split(/\n+/);
+
+  return lines.map((line, index) => {
+    // If a line clearly looks like math (has =, ^, \, or LaTeX keywords)
+    const looksLikeMath = /(\$.*\$)|=|\\|(\^)|(_)|√|∑|∫|±|≤|≥|∞/.test(line);
+
+    // Render math lines with KaTeX
+    if (looksLikeMath) {
+      try {
+        // Double $ -> block math, single $ -> inline math
+        if (line.trim().startsWith("$$") && line.trim().endsWith("$$")) {
+          const clean = line.trim().slice(2, -2);
+          return <BlockMath key={index} math={clean} />;
+        } else {
+          return <BlockMath key={index} math={line.trim()} />;
+        }
+      } catch (error) {
+        return <div key={index}>{line}</div>;
+      }
     }
-    
-    try {
-        // If text contains LaTeX, render it with InlineMath
-        return <InlineMath math={text} />;
-    } catch (error) {
-        // If KaTeX fails, return plain text
-        return text;
-    }
+
+    // Otherwise render as plain text
+    return (
+      <div key={index} style={{ whiteSpace: "pre-line" }}>
+        {line}
+      </div>
+    );
+  });
 };
 
 // Recursive Comment Thread Component
@@ -1437,7 +1453,7 @@ function ProblemDetail() {
                                 alignSelf: "flex-start"
                             }}
                         >
-                            📐 Symbols
+                             Symbols
                         </button>
                     </div>
                     {/* Image Management */}
