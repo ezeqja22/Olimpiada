@@ -64,7 +64,17 @@ function ForgotPassword() {
           padding: spacing.lg
         }}>
           <Card style={{ maxWidth: "500px", textAlign: "center" }}>
-            <div style={{ fontSize: "64px", marginBottom: "20px" }}>📧</div>
+            <div style={{ fontSize: "64px", marginBottom: "20px" }}>
+              <img
+                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1762615234/EMAIL_SENT_rmh0e0.svg"
+                alt="Menu"
+                style={{
+                width: "20px",
+                height: "20px",
+                objectFit: "contain"
+                  }}
+              />
+            </div>
             <h1 style={{
               color: colors.success,
               marginBottom: "20px",
@@ -113,7 +123,17 @@ function ForgotPassword() {
       }}>
         <Card style={{ maxWidth: "500px" }}>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "48px", marginBottom: "20px" }}>🔒</div>
+            <div style={{ fontSize: "48px", marginBottom: "20px" }}>
+              <img
+                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1762615233/dryri_wvbhuh.svg"
+                alt="Menu"
+                style={{
+                width: "20px",
+                height: "20px",
+                objectFit: "contain"
+                }}
+              />
+            </div>
             <h1 style={{
               color: colors.primary,
               marginBottom: "20px",

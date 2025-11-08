@@ -222,13 +222,23 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
                         {loading ? "Signing In..." : "Sign In"}
                     </button>
                 </form>
-                <Link 
-                    to="/forgot-password" 
-                    onClick={onClose} // Add this line to close the modal
-                    style={{ color: "#1a4d3a", textDecoration: "underline" }}
+                <button
+                    onClick={() => {
+                    onClose(); // Close the modal first
+                    navigate("/forgot-password", { replace: true }); // Then navigate
+                        }}
+                    style={{
+                    backgroundColor: "transparent",
+                    border: "none",
+                    color: "#1a4d3a",
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                    fontSize: "inherit",
+                    padding: 0
+                    }}
                 >
-                    Forgot Password?
-                </Link>
+                Forgot Password?
+                </button>
 
                 {/* Signup Link */}
                 <div style={{
