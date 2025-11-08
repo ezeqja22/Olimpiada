@@ -203,12 +203,8 @@ function Login() {
               Sign In
             </Button>
           </form>
-          <Link 
-            to="/forgot-password" 
-            onClick={onClose} // Add this line to close the modal
-            style={{ color: "#1a4d3a", textDecoration: "underline" }}
-          >
-          Forgot Password?
+          <Link to="/forgot-password" style={{ color: "#1a4d3a", textDecoration: "underline" }}>
+            Forgot Password?
           </Link>
           <div style={{
             textAlign: "center",
