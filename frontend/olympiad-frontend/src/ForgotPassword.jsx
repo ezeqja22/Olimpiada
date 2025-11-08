@@ -22,7 +22,14 @@ function ForgotPassword() {
   setError("");
 
   try {
-    await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/forgot-password`, { email });
+    //sending as form data
+    const formData = new FormData();
+    formData.append('email', email);
+
+    await axios.post(
+      `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/forgot-password`, 
+      formData
+    );
     setSuccess(true);
   } catch (err) {
     console.error("Full error:", err);
