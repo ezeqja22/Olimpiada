@@ -19,38 +19,31 @@ import { useFeatureSettings } from "./hooks/useFeatureSettings";
 
 // Helper function to render math content
 const renderMathContent = (text) => {
-  if (!text) return "";
+  if (!text) return '';
 
-  // Split text into lines to preserve formatting
-  const lines = text.split(/\n+/);
+  // Split text into math and non-math segments
+  const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
 
-  return lines.map((line, index) => {
-    // If a line clearly looks like math (has =, ^, \, or LaTeX keywords)
-    const looksLikeMath = /(\$.*\$)|=|\\|(\^)|(_)|√|∑|∫|±|≤|≥|∞/.test(line);
-
-    // Render math lines with KaTeX
-    if (looksLikeMath) {
-      try {
-        // Double $ -> block math, single $ -> inline math
-        if (line.trim().startsWith("$$") && line.trim().endsWith("$$")) {
-          const clean = line.trim().slice(2, -2);
-          return <BlockMath key={index} math={clean} />;
-        } else {
-          return <BlockMath key={index} math={line.trim()} />;
-        }
-      } catch (error) {
-        return <div key={index}>{line}</div>;
-      }
+  return parts.map((part, index) => {
+    if (part.startsWith('$$') && part.endsWith('$$')) {
+      // Block math mode
+      const content = part.slice(2, -2);
+      return (
+        <div key={index} style={{ textAlign: 'center', margin: '8px 0' }}>
+          <BlockMath math={content} />
+        </div>
+      );
+    } else if (part.startsWith('$') && part.endsWith('$')) {
+      // Inline math mode
+      const content = part.slice(1, -1);
+      return <InlineMath key={index} math={content} />;
+    } else {
+      // Regular text — keep it as-is
+      return <span key={index}>{part}</span>;
     }
-
-    // Otherwise render as plain text
-    return (
-      <div key={index} style={{ whiteSpace: "pre-line" }}>
-        {line}
-      </div>
-    );
   });
 };
+
 
 // Recursive Comment Thread Component
 const CommentThread = ({ 
