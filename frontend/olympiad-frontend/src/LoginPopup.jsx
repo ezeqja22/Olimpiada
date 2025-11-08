@@ -223,22 +223,25 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
                     </button>
                 </form>
                 <button
-                    onClick={() => {
-                    onClose(); // Close the modal first
-                    navigate("/forgot-password", { replace: true }); // Then navigate
-                        }}
-                    style={{
-                    backgroundColor: "transparent",
-                    border: "none",
-                    color: "#1a4d3a",
-                    textDecoration: "underline",
-                    cursor: "pointer",
-                    fontSize: "inherit",
-                    padding: 0
-                    }}
-                >
-                Forgot Password?
-                </button>
+  onClick={(e) => {
+    e.preventDefault(); // Prevent any form submission
+    e.stopPropagation(); // Stop event bubbling
+    console.log("Forgot Password clicked - closing modal and navigating");
+    onClose();
+    navigate("/forgot-password", { replace: true });
+  }}
+  style={{
+    backgroundColor: "transparent",
+    border: "none",
+    color: "#1a4d3a",
+    textDecoration: "underline",
+    cursor: "pointer",
+    fontSize: "inherit",
+    padding: 0
+  }}
+>
+  Forgot Password?
+</button>
 
                 {/* Signup Link */}
                 <div style={{
