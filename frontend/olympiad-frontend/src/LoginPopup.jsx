@@ -222,13 +222,14 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
                         {loading ? "Signing In..." : "Sign In"}
                     </button>
                 </form>
-                <button
-  onClick={(e) => {
-    e.preventDefault(); // Prevent any form submission
-    e.stopPropagation(); // Stop event bubbling
-    console.log("Forgot Password clicked - closing modal and navigating");
+<button
+  onClick={() => {
+    console.log("Closing modal and redirecting...");
     onClose();
-    navigate("/forgot-password", { replace: true });
+    // Force navigation after a tiny delay to ensure modal is closed
+    setTimeout(() => {
+      window.location.href = "/forgot-password";
+    }, 10);
   }}
   style={{
     backgroundColor: "transparent",
