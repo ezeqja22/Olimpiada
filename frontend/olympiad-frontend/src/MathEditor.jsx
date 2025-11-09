@@ -27,6 +27,18 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
         { symbol: '∅', latex: '\\emptyset' }
       ]
     },
+    fractions: {
+      name: 'Fractions',
+      symbols: [
+        { symbol: '½', latex: '\\frac{1}{2}' },
+        { symbol: '⅓', latex: '\\frac{1}{3}' },
+        { symbol: '¼', latex: '\\frac{1}{4}' },
+        { symbol: '⅔', latex: '\\frac{2}{3}' },
+        { symbol: '¾', latex: '\\frac{3}{4}' },
+        { symbol: 'Fraction', latex: '\\frac{}{}', template: true },
+        { symbol: 'Mixed', latex: '\\frac{}{} \\frac{}{}', template: true }
+      ]
+    },
     powers: {
       name: 'Powers',
       symbols: [
@@ -35,8 +47,31 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
         { symbol: 'xⁿ', latex: 'x^n' },
         { symbol: '√', latex: '\\sqrt{}', template: true },
         { symbol: '∛', latex: '\\sqrt[3]{}', template: true },
+        { symbol: '∜', latex: '\\sqrt[4]{}', template: true },
         { symbol: 'x₁', latex: 'x_1' },
         { symbol: 'x₂', latex: 'x_2' }
+      ]
+    },
+    integrals: {
+      name: 'Integrals',
+      symbols: [
+        { symbol: '∫', latex: '\\int' },
+        { symbol: '∬', latex: '\\iint' },
+        { symbol: '∭', latex: '\\iiint' },
+        { symbol: '∮', latex: '\\oint' },
+        { symbol: '∫₀^∞', latex: '\\int_0^{\\infty}', template: true },
+        { symbol: '∫_a^b', latex: '\\int_a^b', template: true }
+      ]
+    },
+    derivatives: {
+      name: 'Derivatives',
+      symbols: [
+        { symbol: '∂', latex: '\\partial' },
+        { symbol: 'd/dx', latex: '\\frac{d}{dx}', template: true },
+        { symbol: 'd²/dx²', latex: '\\frac{d^2}{dx^2}', template: true },
+        { symbol: '∂/∂x', latex: '\\frac{\\partial}{\\partial x}', template: true },
+        { symbol: '∇', latex: '\\nabla' },
+        { symbol: 'Δ', latex: '\\Delta' }
       ]
     },
     greek: {
@@ -47,12 +82,48 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
         { symbol: 'γ', latex: '\\gamma' },
         { symbol: 'δ', latex: '\\delta' },
         { symbol: 'ε', latex: '\\varepsilon' },
+        { symbol: 'ζ', latex: '\\zeta' },
+        { symbol: 'η', latex: '\\eta' },
+        { symbol: 'θ', latex: '\\theta' },
         { symbol: 'λ', latex: '\\lambda' },
         { symbol: 'μ', latex: '\\mu' },
         { symbol: 'π', latex: '\\pi' },
         { symbol: 'σ', latex: '\\sigma' },
-        { symbol: 'θ', latex: '\\theta' },
+        { symbol: 'τ', latex: '\\tau' },
+        { symbol: 'φ', latex: '\\phi' },
+        { symbol: 'ψ', latex: '\\psi' },
         { symbol: 'ω', latex: '\\omega' }
+      ]
+    },
+    sets: {
+      name: 'Sets',
+      symbols: [
+        { symbol: '∈', latex: '\\in' },
+        { symbol: '∉', latex: '\\notin' },
+        { symbol: '⊂', latex: '\\subset' },
+        { symbol: '⊃', latex: '\\supset' },
+        { symbol: '∪', latex: '\\cup' },
+        { symbol: '∩', latex: '\\cap' },
+        { symbol: 'ℝ', latex: '\\mathbb{R}' },
+        { symbol: 'ℕ', latex: '\\mathbb{N}' },
+        { symbol: 'ℤ', latex: '\\mathbb{Z}' },
+        { symbol: 'ℚ', latex: '\\mathbb{Q}' },
+        { symbol: 'ℂ', latex: '\\mathbb{C}' }
+      ]
+    },
+    arrows: {
+      name: 'Arrows',
+      symbols: [
+        { symbol: '→', latex: '\\rightarrow' },
+        { symbol: '←', latex: '\\leftarrow' },
+        { symbol: '↔', latex: '\\leftrightarrow' },
+        { symbol: '⇒', latex: '\\Rightarrow' },
+        { symbol: '⇐', latex: '\\Leftarrow' },
+        { symbol: '⇔', latex: '\\Leftrightarrow' },
+        { symbol: '↑', latex: '\\uparrow' },
+        { symbol: '↓', latex: '\\downarrow' },
+        { symbol: '↗', latex: '\\nearrow' },
+        { symbol: '↘', latex: '\\searrow' }
       ]
     },
     functions: {
@@ -64,8 +135,13 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
         { symbol: 'log', latex: '\\log' },
         { symbol: 'ln', latex: '\\ln' },
         { symbol: 'exp', latex: '\\exp' },
-        { symbol: '∑', latex: '\\sum' },
-        { symbol: '∏', latex: '\\prod' }
+        { symbol: 'lim', latex: '\\lim', template: true },
+        { symbol: 'max', latex: '\\max' },
+        { symbol: 'min', latex: '\\min' },
+        { symbol: 'sup', latex: '\\sup' },
+        { symbol: 'inf', latex: '\\inf' },
+        { symbol: '∑', latex: '\\sum', template: true },
+        { symbol: '∏', latex: '\\prod', template: true }
       ]
     }
   };
