@@ -434,7 +434,14 @@ function CreateProblem() {
             color: colors.dark,
             fontSize: "16px"
           }}>
-            Description *
+            Description * 
+            <span style={{ 
+    fontWeight: "400", 
+    color: "#666", 
+    fontSize: "13px" 
+  }}>
+    (For math symbols to be displayed nicely on the Feed, wrap them in $...$)
+  </span>
           </label>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>

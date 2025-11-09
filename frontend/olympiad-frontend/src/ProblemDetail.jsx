@@ -1285,7 +1285,7 @@ function ProblemDetail() {
                                 e.target.style.boxShadow = "0 2px 8px rgba(30, 64, 175, 0.3)";
                             }}
                         >
-                            📐 Symbols
+                             Symbols
                         </button>
                     </div>
             <div style={{ marginBottom: "20px" }}>
