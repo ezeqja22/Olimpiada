@@ -1,11 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { InlineMath, BlockMath } from 'react-katex';
+import { InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 
 const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
   const [activeTab, setActiveTab] = useState('basic');
-  const [mathInput, setMathInput] = useState(initialValue);
-  const [delimiterMode, setDelimiterMode] = useState('inline'); // 'inline' or 'block'
+  const [mathInput, setMathInput] = useState(initialValue || "$");
   const textareaRef = useRef(null);
 
   const symbolCategories = {
@@ -28,18 +27,6 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
         { symbol: '∅', latex: '\\emptyset' }
       ]
     },
-    fractions: {
-      name: 'Fractions',
-      symbols: [
-        { symbol: '½', latex: '\\frac{1}{2}' },
-        { symbol: '⅓', latex: '\\frac{1}{3}' },
-        { symbol: '¼', latex: '\\frac{1}{4}' },
-        { symbol: '⅔', latex: '\\frac{2}{3}' },
-        { symbol: '¾', latex: '\\frac{3}{4}' },
-        { symbol: 'Fraction', latex: '\\frac{}{}', template: true },
-        { symbol: 'Mixed', latex: '\\frac{}{} \\frac{}{}', template: true }
-      ]
-    },
     powers: {
       name: 'Powers',
       symbols: [
@@ -48,31 +35,8 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
         { symbol: 'xⁿ', latex: 'x^n' },
         { symbol: '√', latex: '\\sqrt{}', template: true },
         { symbol: '∛', latex: '\\sqrt[3]{}', template: true },
-        { symbol: '∜', latex: '\\sqrt[4]{}', template: true },
         { symbol: 'x₁', latex: 'x_1' },
         { symbol: 'x₂', latex: 'x_2' }
-      ]
-    },
-    integrals: {
-      name: 'Integrals',
-      symbols: [
-        { symbol: '∫', latex: '\\int' },
-        { symbol: '∬', latex: '\\iint' },
-        { symbol: '∭', latex: '\\iiint' },
-        { symbol: '∮', latex: '\\oint' },
-        { symbol: '∫₀^∞', latex: '\\int_0^{\\infty}', template: true },
-        { symbol: '∫_a^b', latex: '\\int_a^b', template: true }
-      ]
-    },
-    derivatives: {
-      name: 'Derivatives',
-      symbols: [
-        { symbol: '∂', latex: '\\partial' },
-        { symbol: 'd/dx', latex: '\\frac{d}{dx}', template: true },
-        { symbol: 'd²/dx²', latex: '\\frac{d^2}{dx^2}', template: true },
-        { symbol: '∂/∂x', latex: '\\frac{\\partial}{\\partial x}', template: true },
-        { symbol: '∇', latex: '\\nabla' },
-        { symbol: 'Δ', latex: '\\Delta' }
       ]
     },
     greek: {
@@ -83,48 +47,12 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
         { symbol: 'γ', latex: '\\gamma' },
         { symbol: 'δ', latex: '\\delta' },
         { symbol: 'ε', latex: '\\varepsilon' },
-        { symbol: 'ζ', latex: '\\zeta' },
-        { symbol: 'η', latex: '\\eta' },
-        { symbol: 'θ', latex: '\\theta' },
         { symbol: 'λ', latex: '\\lambda' },
         { symbol: 'μ', latex: '\\mu' },
         { symbol: 'π', latex: '\\pi' },
         { symbol: 'σ', latex: '\\sigma' },
-        { symbol: 'τ', latex: '\\tau' },
-        { symbol: 'φ', latex: '\\phi' },
-        { symbol: 'ψ', latex: '\\psi' },
+        { symbol: 'θ', latex: '\\theta' },
         { symbol: 'ω', latex: '\\omega' }
-      ]
-    },
-    sets: {
-      name: 'Sets',
-      symbols: [
-        { symbol: '∈', latex: '\\in' },
-        { symbol: '∉', latex: '\\notin' },
-        { symbol: '⊂', latex: '\\subset' },
-        { symbol: '⊃', latex: '\\supset' },
-        { symbol: '∪', latex: '\\cup' },
-        { symbol: '∩', latex: '\\cap' },
-        { symbol: 'ℝ', latex: '\\mathbb{R}' },
-        { symbol: 'ℕ', latex: '\\mathbb{N}' },
-        { symbol: 'ℤ', latex: '\\mathbb{Z}' },
-        { symbol: 'ℚ', latex: '\\mathbb{Q}' },
-        { symbol: 'ℂ', latex: '\\mathbb{C}' }
-      ]
-    },
-    arrows: {
-      name: 'Arrows',
-      symbols: [
-        { symbol: '→', latex: '\\rightarrow' },
-        { symbol: '←', latex: '\\leftarrow' },
-        { symbol: '↔', latex: '\\leftrightarrow' },
-        { symbol: '⇒', latex: '\\Rightarrow' },
-        { symbol: '⇐', latex: '\\Leftarrow' },
-        { symbol: '⇔', latex: '\\Leftrightarrow' },
-        { symbol: '↑', latex: '\\uparrow' },
-        { symbol: '↓', latex: '\\downarrow' },
-        { symbol: '↗', latex: '\\nearrow' },
-        { symbol: '↘', latex: '\\searrow' }
       ]
     },
     functions: {
@@ -136,13 +64,8 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
         { symbol: 'log', latex: '\\log' },
         { symbol: 'ln', latex: '\\ln' },
         { symbol: 'exp', latex: '\\exp' },
-        { symbol: 'lim', latex: '\\lim', template: true },
-        { symbol: 'max', latex: '\\max' },
-        { symbol: 'min', latex: '\\min' },
-        { symbol: 'sup', latex: '\\sup' },
-        { symbol: 'inf', latex: '\\inf' },
-        { symbol: '∑', latex: '\\sum', template: true },
-        { symbol: '∏', latex: '\\prod', template: true }
+        { symbol: '∑', latex: '\\sum' },
+        { symbol: '∏', latex: '\\prod' }
       ]
     }
   };
@@ -154,26 +77,35 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
     const end = textarea.selectionEnd;
     const text = mathInput;
 
-    const delimiters = delimiterMode === 'inline' ? ['$','$'] : ['$$','$$'];
+    let newText;
+    if (template) {
+      newText = text.substring(0, start) + latex + text.substring(end);
+      setMathInput(newText);
 
-    let newLatex = delimiters[0] + latex + delimiters[1];
-    const newText = text.substring(0, start) + newLatex + text.substring(end);
-    setMathInput(newText);
+      setTimeout(() => {
+        const newPosition = start + latex.indexOf('{}') + 1;
+        textarea.setSelectionRange(newPosition, newPosition);
+        textarea.focus();
+      }, 0);
+    } else {
+      newText = text.substring(0, start) + latex + text.substring(end);
+      setMathInput(newText);
 
-    // Adjust cursor
-    setTimeout(() => {
-      const newPosition = start + newLatex.length;
-      textarea.setSelectionRange(newPosition, newPosition);
-      textarea.focus();
-    }, 0);
+      setTimeout(() => {
+        const newPosition = start + latex.length;
+        textarea.setSelectionRange(newPosition, newPosition);
+        textarea.focus();
+      }, 0);
+    }
   };
 
   const handleInsert = () => {
-    onInsert(mathInput);
-    onClose();
-  };
+    let finalInput = mathInput.trim();
+    // Ensure it starts with $ and ends with $
+    if (!finalInput.startsWith('$')) finalInput = '$' + finalInput;
+    if (!finalInput.endsWith('$')) finalInput += '$';
 
-  const handleCancel = () => {
+    onInsert(finalInput);
     onClose();
   };
 
@@ -184,20 +116,7 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
       <div className="math-editor">
         <div className="math-editor-header">
           <h3>Math Editor</h3>
-          <button onClick={handleCancel} className="close-btn">×</button>
-        </div>
-
-        {/* NEW: Delimiter toggle */}
-        <div className="delimiter-toggle">
-          <label>Delimiter Mode:</label>
-          <select
-            value={delimiterMode}
-            onChange={(e) => setDelimiterMode(e.target.value)}
-            className="delimiter-select"
-          >
-            <option value="inline">$...$ (Inline)</option>
-            <option value="block">$$...$$ (Block)</option>
-          </select>
+          <button onClick={onClose} className="close-btn">×</button>
         </div>
 
         <div className="math-toolbar">
@@ -243,22 +162,16 @@ const MathEditor = ({ isOpen, onClose, onInsert, initialValue = "" }) => {
             <label>Preview:</label>
             <div className="math-preview">
               {mathInput ? (
-                delimiterMode === 'inline' ? (
-                  <InlineMath math={mathInput.replace(/\$/g, '')} />
-                ) : (
-                  <BlockMath math={mathInput.replace(/\$/g, '')} />
-                )
+                <InlineMath math={mathInput.replace(/\$/g, '')} />
               ) : (
-                <div className="preview-placeholder">
-                  Math preview will appear here...
-                </div>
+                <div className="preview-placeholder">Math preview will appear here...</div>
               )}
             </div>
           </div>
         </div>
 
         <div className="math-actions">
-          <button onClick={handleCancel} className="cancel-btn">Cancel</button>
+          <button onClick={onClose} className="cancel-btn">Cancel</button>
           <button onClick={handleInsert} className="insert-btn">Insert Symbols</button>
         </div>
       </div>
