@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import MathEditor from "./MathEditor";
 import "./MathEditor.css";
 import { InlineMath, BlockMath } from 'react-katex';
