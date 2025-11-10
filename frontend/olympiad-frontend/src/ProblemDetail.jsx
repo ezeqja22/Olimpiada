@@ -1470,6 +1470,7 @@ function ProblemDetail() {
                     </div>
                     <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
                         <textarea
+                            ref={descriptionRef}
                             value={editProblemData.description}
                             onChange={(e) => setEditProblemData({...editProblemData, description: e.target.value})}
                             placeholder="Problem description"
