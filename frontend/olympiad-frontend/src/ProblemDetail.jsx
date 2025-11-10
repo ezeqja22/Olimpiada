@@ -617,6 +617,12 @@ function ProblemDetail() {
         like_count: 0,
         dislike_count: 0
     });
+    //to insert math at cursor position
+    const titleRef = useRef(null);
+    const descriptionRef = useRef(null);
+    const commentRef = useRef(null);
+    const editCommentRef = useRef(null);
+
     const [voteLoading, setVoteLoading] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [editingComment, setEditingComment] = useState(null);
@@ -654,17 +660,47 @@ function ProblemDetail() {
     };
 
     const handleMathInsert = (mathContent) => {
+        let targetRef = null;
+        let currentValue = "";
+
         if (mathEditorTarget === 'editComment') {
-            setEditText(prev => prev + mathContent);
-        } else if (mathEditorTarget) {
+            targetRef = editCommentRef.current;
+            currentValue = editText;
+        } else if (mathEditorTarget && (mathEditorTarget === 'title' || mathEditorTarget === 'description')) {
+            targetRef = mathEditorTarget === 'title' ? titleRef.current : descriptionRef.current;
+            currentValue = editProblemData[mathEditorTarget];
+        }
+
+        if (targetRef) {
+            const start = targetRef.selectionStart;
+            const end = targetRef.selectionEnd;
+
+            const newText =
+            currentValue.substring(0, start) +
+            mathContent +
+            currentValue.substring(end);
+
+            if (mathEditorTarget === 'editComment') {
+            setEditText(newText);
+            } else if (mathEditorTarget) {
             setEditProblemData({
                 ...editProblemData,
-                [mathEditorTarget]: editProblemData[mathEditorTarget] + mathContent
+                [mathEditorTarget]: newText,
             });
+            }
+
+    // restore cursor
+            setTimeout(() => {
+            const newPosition = start + mathContent.length;
+            targetRef.setSelectionRange(newPosition, newPosition);
+            targetRef.focus();
+            }, 0);
         }
+
         setShowMathEditor(false);
         setMathEditorTarget(null);
     };
+
 
     const closeMathEditor = () => {
         setShowMathEditor(false);
@@ -676,9 +712,26 @@ function ProblemDetail() {
     };
 
     const handleCommentMathInsert = (mathContent) => {
-        setNewComment(prev => prev + mathContent);
+        const target = commentRef.current;
+        if (target) {
+            const start = target.selectionStart;
+            const end = target.selectionEnd;
+            const newText =
+            newComment.substring(0, start) +
+            mathContent +
+            newComment.substring(end);
+
+            setNewComment(newText);
+
+            setTimeout(() => {
+            const newPosition = start + mathContent.length;
+            target.setSelectionRange(newPosition, newPosition);
+            target.focus();
+            }, 0);
+        }
+
         setShowCommentMathEditor(false);
-    };
+        };
 
     const closeCommentMathEditor = () => {
         setShowCommentMathEditor(false);

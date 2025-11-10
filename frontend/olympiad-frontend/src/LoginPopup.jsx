@@ -55,11 +55,10 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
     };
 
     const handleSignupClick = () => {
-        setShowLoginPopup(false); // make sure popup is closed
         localStorage.removeItem("token"); // clear any old invalid token
-        onClose();
+        onClose(); // this already closes the popup
         navigate("/signup", { replace: true });
-        };
+};
 
 
     if (!isOpen) return null;
