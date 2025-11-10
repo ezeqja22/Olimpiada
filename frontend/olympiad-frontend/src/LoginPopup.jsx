@@ -55,9 +55,12 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
     };
 
     const handleSignupClick = () => {
+        setShowLoginPopup(false); // make sure popup is closed
+        localStorage.removeItem("token"); // clear any old invalid token
         onClose();
-        navigate("/signup", { state: { redirectTo } });
-    };
+        navigate("/signup", { replace: true });
+        };
+
 
     if (!isOpen) return null;
 
@@ -80,7 +83,8 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
                 padding: "2rem",
                 width: "400px",
                 maxWidth: "90vw",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
+                boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+                position: "relative"
             }}>
                 {/* Header */}
                 <div style={{
