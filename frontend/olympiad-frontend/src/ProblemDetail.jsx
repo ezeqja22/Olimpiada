@@ -2325,6 +2325,7 @@ function ProblemDetail() {
                                 backgroundColor: "white"
                             }}>
                                 <textarea
+                                    ref={commentRef}
                                     value={newComment}
                                     onChange={(e) => setNewComment(e.target.value)}
                                     placeholder="Write your comment here..."
