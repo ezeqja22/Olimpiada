@@ -624,19 +624,23 @@ function Header({ showHomeButton = false }) {
                                 </Link>
                                 {(currentUser.role === 'admin' || currentUser.role === 'moderator') && (
                                     <Link to="/admin" style={{ textDecoration: "none" }}>
-                                        <div style={{
-                                            padding: `${spacing.md} ${spacing.md}`,
-                                            color: colors.primary,
-                                            cursor: "pointer",
-                                            transition: "background-color 0.2s",
-                                            borderBottom: `1px solid ${colors.gray[200]}`,
-                                            fontWeight: typography.fontWeight.medium
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[100]}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
-                                        >
-                                        Admin Panel
-                                        </div>
+                                        <button style={{
+                                                width: "100%",
+                                                padding: "12px 16px",
+                                                border: "none",
+                                                backgroundColor: "transparent",
+                                                color: "#667eea",
+                                                textAlign: "left",
+                                                cursor: "pointer",
+                                                fontSize: "14px",
+                                                fontWeight: "500",
+                                                transition: "background-color 0.2s"
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                            >
+                                                 Admin Panel
+                                            </button>
                                     </Link>
                                 )}
                                 <button
