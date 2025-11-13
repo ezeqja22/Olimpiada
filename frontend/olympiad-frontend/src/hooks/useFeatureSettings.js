@@ -12,7 +12,7 @@ export const useFeatureSettings = () => {
 
   const fetchFeatureSettings = async () => {
     try {
-      const response = await axios.get('https://olimpiada-backend.onrender.com/site-info');
+      const response = await axios.get('sciencepioneers-production.up.railway.app/site-info');
       setFeatureSettings(response.data);
     } catch (err) {
       setError(err);
