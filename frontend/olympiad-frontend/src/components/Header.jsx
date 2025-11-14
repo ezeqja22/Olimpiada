@@ -258,19 +258,19 @@ function Header({ showHomeButton = false }) {
                     }}>
                         {/* Site Logo */}
                         {siteSettings.site_logo && (
-                            <img 
-                                src={siteSettings.site_logo} 
+                            <img
+                                src={siteSettings.site_logo || "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png"}
                                 alt={siteSettings.site_name}
                                 style={{
-                                    height: isMobile ? "20px" : "32px",
-                                    width: "auto",
-                                    maxWidth: isMobile ? "80px" : "200px",
-                                    objectFit: "contain"
-                                }}
-                                onError={(e) => {
-                                    console.error('Failed to load site logo:', siteSettings.site_logo);
-                                    e.target.style.display = 'none';
-                                }}
+                                height: isMobile ? "20px" : "32px",
+                                width: "auto",
+                                maxWidth: isMobile ? "80px" : "200px",
+                                objectFit: "contain"
+                            }}
+                            onError={(e) => {
+                                console.error('Failed to load site logo:', siteSettings.site_logo);
+                                e.target.style.display = 'none';
+                            }}
                             />
                         )}
                         
