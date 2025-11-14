@@ -250,29 +250,34 @@ function Header({ showHomeButton = false }) {
                 )}
                 
                 <Link to="/homepage" style={{ textDecoration: "none", color: "inherit" }}>
-                    <div style={{ 
-                        display: "flex", 
-                        alignItems: "center", 
-                        gap: isMobile ? "4px" : spacing.sm, 
-                        marginLeft: isMobile ? "4px" : spacing.lg 
-                    }}>
-                        {/* Site Logo */}
-                        {siteSettings.site_logo && (
-                            <img
-                                src={siteSettings.site_logo || "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png"}
-                                alt={siteSettings.site_name}
-                                style={{
-                                height: isMobile ? "20px" : "32px",
-                                width: "auto",
-                                maxWidth: isMobile ? "80px" : "200px",
-                                objectFit: "contain"
-                            }}
-                            onError={(e) => {
-                                console.error('Failed to load site logo:', siteSettings.site_logo);
-                                e.target.style.display = 'none';
-                            }}
-                            />
-                        )}
+    <div
+        style={{
+            display: "flex",
+            alignItems: "center",
+            gap: isMobile ? "4px" : spacing.sm,
+            marginLeft: isMobile ? "4px" : spacing.lg
+        }}
+    >
+
+        <img
+            src={
+                siteSettings.site_logo && siteSettings.site_logo.trim() !== ""
+                    ? siteSettings.site_logo
+                    : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png"
+            }
+            alt={siteSettings.site_name}
+            style={{
+                height: isMobile ? "20px" : "32px",
+                width: "auto",
+                maxWidth: isMobile ? "80px" : "200px",
+                objectFit: "contain"
+            }}
+            onError={(e) => {
+                console.error("Failed to load site logo:", siteSettings.site_logo);
+                e.target.src =
+                    "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png";
+            }}
+        />
                         
                         {/* Site Name */}
                         <h1 style={{
