@@ -2344,6 +2344,7 @@ function ProblemDetail() {
                                         transition: "all 0.3s ease",
                                         cursor: "text",
                                         lineHeight: "1.5",
+                                        zIndex: 1,
                                         minHeight: isMobile ? "80px" : "auto"
                                     }}
                                     onFocus={() => {
@@ -2456,6 +2457,7 @@ function ProblemDetail() {
                                     transition: "all 0.3s ease",
                                     borderLeft: isMobile ? "none" : "2px solid rgb(118, 75, 162)",
                                     borderTop: isMobile ? "2px solid rgb(118, 75, 162)" : "none",
+                                    zIndex: 3,
                                     height: isMobile ? "50px" : "auto"
                                 }}
                                 onClick={handleSubmitComment}
