@@ -2346,7 +2346,7 @@ function ProblemDetail() {
                                         /* 🔥 FIX: Prevent text from reaching under Send button */
                                         paddingRight: isMobile ? "70px" : "90px",
 
-                                        maxWidth: isMobile ? "45ch" : "55ch",
+                                        maxWidth: isMobile ? "70ch" : "80ch",
 
                                         backgroundColor: isTextareaFocused ? "#fafbfc" : "transparent",
                                         transition: "all 0.3s ease",
