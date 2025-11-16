@@ -205,12 +205,12 @@ const CommentThread = ({
                                         transition: "all 0.2s ease"
                                     }}
                                     onMouseEnter={(e) => {
-                                        e.target.style.borderColor = "#3b82f6";
-                                        e.target.style.transform = "scale(1.02)";
+                                        e.currentTarget.style.borderColor = "#3b82f6";
+                                        e.currentTarget.style.transform = "scale(1.02)";
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.target.style.borderColor = "#e5e7eb";
-                                        e.target.style.transform = "scale(1)";
+                                        e.currentTarget.style.borderColor = "#e5e7eb";
+                                        e.currentTarget.style.transform = "scale(1)";
                                     }}
                                     onClick={() => {
                                         setCurrentImageIndex(index);
@@ -2331,26 +2331,28 @@ function ProblemDetail() {
                                     onChange={(e) => setNewComment(e.target.value)}
                                     placeholder="Write your comment here..."
                                     style={{ 
-        width: "100%", 
-        border: "none",
-        outline: "none",
-        resize: "none",
-        overflow: "hidden",
-        fontFamily: "inherit",
-        fontSize: isMobile ? "16px" : "15px",
-        padding: isMobile ? "15px" : "20px",
-        paddingBottom: commentImages.length > 0 
-            ? (isMobile ? "60px" : "50px") 
-            : (isMobile ? "15px" : "20px"),
+                                        width: "100%", 
+                                        border: "none",
+                                        outline: "none",
+                                        resize: "none",
+                                        overflow: "hidden",
+                                        fontFamily: "inherit",
+                                        fontSize: isMobile ? "16px" : "15px",
+                                        padding: isMobile ? "15px" : "20px",
+                                        paddingBottom: commentImages.length > 0 
+                                            ? (isMobile ? "60px" : "50px") 
+                                            : (isMobile ? "15px" : "20px"),
         
-        /* 🔥 FIX: Prevent text from reaching under Send button */
-        paddingRight: isMobile ? "70px" : "90px",
+                                        /* 🔥 FIX: Prevent text from reaching under Send button */
+                                        paddingRight: isMobile ? "70px" : "90px",
 
-        backgroundColor: isTextareaFocused ? "#fafbfc" : "transparent",
-        transition: "all 0.3s ease",
-        cursor: "text",
-        lineHeight: "1.5",
-        minHeight: isMobile ? "80px" : "auto"
+                                        maxWidth: isMobile ? "45ch" : "55ch",
+
+                                        backgroundColor: isTextareaFocused ? "#fafbfc" : "transparent",
+                                        transition: "all 0.3s ease",
+                                        cursor: "text",
+                                        lineHeight: "1.5",
+                                        minHeight: isMobile ? "80px" : "auto"
     }}
                                     onFocus={() => {
                                         setIsTextareaFocused(true);
