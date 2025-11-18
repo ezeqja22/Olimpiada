@@ -216,7 +216,12 @@ const CommentThread = ({
                     e.currentTarget.style.borderColor = "#e5e7eb";
                     e.currentTarget.style.transform = "scale(1)";
                 }}
-                onClick={() => openImageModal(index, commentImages, 'comment')}
+                onClick={() => {
+                    console.log("Opening image modal for comment images");
+                    setModalImages(comment.images);
+                    setCurrentImageIndex(index);
+                    setShowImageModal(true);
+                }}
             >
                 <img
                     src={imageUrl}
@@ -540,6 +545,7 @@ const CommentThread = ({
                                     onSubmitReply={onSubmitReply}
                                     onReportComment={onReportComment}
                                     setCurrentImageIndex={setCurrentImageIndex}
+                                    setModalImages={setModalImages}
                                     setShowImageModal={setShowImageModal}
                                     depth={depth + 1}
                                 />
@@ -2528,6 +2534,7 @@ function ProblemDetail() {
                         setReplyImages={setReplyImages}
                         onSubmitReply={handleSubmitReply}
                         onReportComment={handleReportComment}
+                        setCurrentImageIndex={setCurrentImageIndex}
                         setCurrentImageIndex={setCurrentImageIndex}
                         setShowImageModal={setShowImageModal}
                     />
