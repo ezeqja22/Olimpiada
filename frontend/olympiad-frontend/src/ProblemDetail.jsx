@@ -217,6 +217,7 @@ const CommentThread = ({
                     e.currentTarget.style.transform = "scale(1)";
                 }}
                 onClick={() => {
+                    console.log("Opening image modal for comment images");
                     setCurrentImageIndex(index);
                     setShowImageModal(true);
                 }}
