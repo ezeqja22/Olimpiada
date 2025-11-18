@@ -15,20 +15,29 @@ import 'katex/dist/katex.min.css';
 
 // Helper function to render math content
 const renderMathContent = (text) => {
-    if (!text) return '';
-    
-    const hasLatex = /\\[a-zA-Z]+|[\^_]\s*[a-zA-Z0-9]|[\+\-\*\/\=\<\>\≤\≥\±\∓\∞]/.test(text);
-    
-    if (hasLatex) {
-        try {
-            return <InlineMath math={text} />;
-        } catch (error) {
-            console.warn('KaTeX rendering failed:', error);
-            return <span>{text}</span>;
-        }
+  if (!text) return '';
+
+  // Split text into math and non-math segments
+  const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith('$$') && part.endsWith('$$')) {
+      // Block math mode
+      const content = part.slice(2, -2);
+      return (
+        <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
+          <BlockMath math={content} />
+        </div>
+      );
+    } else if (part.startsWith('$') && part.endsWith('$')) {
+      // Inline math mode
+      const content = part.slice(1, -1);
+      return <InlineMath key={index} math={content} />;
+    } else {
+      // Regular text — keep it as-is
+      return <span key={index}>{part}</span>;
     }
-    
-    return <span>{text}</span>;
+  });
 };
 
 function SubjectPage() {
