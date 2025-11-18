@@ -216,12 +216,7 @@ const CommentThread = ({
                     e.currentTarget.style.borderColor = "#e5e7eb";
                     e.currentTarget.style.transform = "scale(1)";
                 }}
-                onClick={() => {
-                    console.log("Opening image modal for comment images");
-                    setModalImages(comment.images);
-                    setCurrentImageIndex(index);
-                    setShowImageModal(true);
-                }}
+                onClick={() => openImageModal(index, commentImages, 'comment')}
             >
                 <img
                     src={imageUrl}
