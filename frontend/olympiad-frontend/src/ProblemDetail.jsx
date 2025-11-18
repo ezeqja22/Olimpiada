@@ -63,6 +63,7 @@ const CommentThread = ({
     onSubmitReply,
     onReportComment,
     setCurrentImageIndex,
+    setModalImages,
     setShowImageModal,
     depth = 0 
 }) => {
@@ -2535,7 +2536,7 @@ function ProblemDetail() {
                         onSubmitReply={handleSubmitReply}
                         onReportComment={handleReportComment}
                         setCurrentImageIndex={setCurrentImageIndex}
-                        setCurrentImageIndex={setCurrentImageIndex}
+                        setModalImages={setModalImages}
                         setShowImageModal={setShowImageModal}
                     />
     ))}
