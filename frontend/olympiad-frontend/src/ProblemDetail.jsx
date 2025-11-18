@@ -186,50 +186,54 @@ const CommentThread = ({
                         
                         {/* Comment Images */}
                         {comment.images && comment.images.length > 0 && (
-                            <div style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
-                                gap: "8px",
-                                marginBottom: "12px"
-                            }}>
-                                {comment.images.map((imageUrl, index) => (
-                                    <div key={index} style={{
-                                        position: "relative",
-                                        width: "120px",
-                                        height: "120px",
-                                        borderRadius: "8px",
-                                        overflow: "hidden",
-                                        border: "2px solid #e5e7eb",
-                                        backgroundColor: "#f9fafb",
-                                        cursor: "pointer",
-                                        transition: "all 0.2s ease"
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.borderColor = "#3b82f6";
-                                        e.currentTarget.style.transform = "scale(1.02)";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.borderColor = "#e5e7eb";
-                                        e.currentTarget.style.transform = "scale(1)";
-                                    }}
-                                    onClick={() => {
-                                        setCurrentImageIndex(index);
-                                        setShowImageModal(true);
-                                    }}
-                                    >
-                                        <img
-                                            src={imageUrl}
-                                            alt={`Comment image ${index + 1}`}
-                                            style={{
-                                                width: "100%",
-                                                height: "100%",
-                                                objectFit: "cover"
-                                            }}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+    <div
+        style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+            gap: "8px",
+            marginBottom: "12px"
+        }}
+    >
+        {comment.images.map((imageUrl, index) => (
+            <div
+                key={index}
+                style={{
+                    position: "relative",
+                    width: "120px",
+                    height: "120px",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    border: "2px solid #e5e7eb",
+                    backgroundColor: "#f9fafb",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "#3b82f6";
+                    e.currentTarget.style.transform = "scale(1.02)";
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "#e5e7eb";
+                    e.currentTarget.style.transform = "scale(1)";
+                }}
+                onClick={() => {
+                    setCurrentImageIndex(index);
+                    setShowImageModal(true);
+                }}
+            >
+                <img
+                    src={imageUrl}
+                    alt={`Comment image ${index + 1}`}
+                    style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover"
+                    }}
+                />
+            </div>
+        ))}
+    </div>
+)}
                         
                         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "16px" }}>
                             <button
@@ -1423,9 +1427,9 @@ function ProblemDetail() {
                                         placeholder={`Tag ${index + 1}`}
                                         style={{ 
                                             flex: 1,
-                    padding: "4px 8px",
+                                            padding: "4px 8px",
                                             border: "1px solid #ddd", 
-                    borderRadius: "4px",
+                                            borderRadius: "4px",
                                             fontSize: "12px"
                                         }}
                                     />
