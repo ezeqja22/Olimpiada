@@ -218,6 +218,7 @@ const CommentThread = ({
                 }}
                 onClick={() => {
                     console.log("Opening image modal for comment images");
+                    setModalImages(comment.images);
                     setCurrentImageIndex(index);
                     setShowImageModal(true);
                 }}
