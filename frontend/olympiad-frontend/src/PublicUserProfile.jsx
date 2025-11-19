@@ -16,21 +16,29 @@ import { useProfileVisibility } from './hooks/useProfileVisibility';
 
 // Helper function to render math content
 const renderMathContent = (text) => {
-    if (!text) return '';
-    
-    // Check if text contains LaTeX patterns or math symbols
-    const latexPattern = /\\[a-zA-Z]+|\\[^a-zA-Z]|\$\$|\\\(|\\\)|\\\[|\\\]|\^|\_|\{|\}|\[|\]|∫|∑|∏|√|α|β|γ|δ|ε|ζ|η|θ|ι|κ|λ|μ|ν|ξ|ο|π|ρ|σ|τ|υ|φ|χ|ψ|ω|∞|±|∓|×|÷|≤|≥|≠|≈|≡|∈|∉|⊂|⊃|∪|∩|∅|∇|∂|∆|Ω|Φ|Ψ|Λ|Σ|Π|Θ|Ξ|Γ|Δ/;
-    if (!latexPattern.test(text)) {
-        return text;
+  if (!text) return '';
+
+  // Split text into math and non-math segments
+  const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith('$$') && part.endsWith('$$')) {
+      // Block math mode
+      const content = part.slice(2, -2);
+      return (
+        <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
+          <BlockMath math={content} />
+        </div>
+      );
+    } else if (part.startsWith('$') && part.endsWith('$')) {
+      // Inline math mode
+      const content = part.slice(1, -1);
+      return <InlineMath key={index} math={content} />;
+    } else {
+      // Regular text — keep it as-is
+      return <span key={index}>{part}</span>;
     }
-    
-    try {
-        // If text contains LaTeX, render it with InlineMath
-        return <InlineMath math={text} />;
-    } catch (error) {
-        // If KaTeX fails, return plain text
-        return text;
-    }
+  });
 };
 
 const PublicUserProfile = () => {
