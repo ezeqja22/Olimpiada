@@ -1,5 +1,5 @@
 // src/CreateProblem.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useRef} from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import MathEditor from "./MathEditor";
