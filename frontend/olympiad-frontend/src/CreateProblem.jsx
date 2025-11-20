@@ -77,6 +77,10 @@ function CreateProblem() {
   const [showMathEditor, setShowMathEditor] = useState(false);
   const [mathEditorTarget, setMathEditorTarget] = useState(null); // 'title' or 'description'
   const [savingDraft, setSavingDraft] = useState(false);
+  const titleRef = useRef(null);
+  const descriptionRef = useRef(null);
+  const [cursorIndex, setCursorIndex] = useState(null);
+
   const navigate = useNavigate();
 
   // Function to determine where to redirect after successful creation
@@ -107,20 +111,43 @@ function CreateProblem() {
   };
 
   const openMathEditor = (target) => {
-    setMathEditorTarget(target);
-    setShowMathEditor(true);
-  };
+  let ref = null;
+
+  if (target === "title") ref = titleRef.current;
+  if (target === "description") ref = descriptionRef.current;
+
+  if (ref) {
+    setCursorIndex({
+      start: ref.selectionStart,
+      end: ref.selectionEnd
+    });
+  }
+
+  setMathEditorTarget(target);
+  setShowMathEditor(true);
+};
+
 
   const handleMathInsert = (mathContent) => {
-    if (mathEditorTarget) {
-      setFormData({
-        ...formData,
-        [mathEditorTarget]: formData[mathEditorTarget] + mathContent
-      });
-    }
-    setShowMathEditor(false);
-    setMathEditorTarget(null);
-  };
+  if (mathEditorTarget && cursorIndex) {
+    const text = formData[mathEditorTarget];
+
+    const newText =
+      text.slice(0, cursorIndex.start) +
+      mathContent +
+      text.slice(cursorIndex.end);
+
+    setFormData({
+      ...formData,
+      [mathEditorTarget]: newText
+    });
+  }
+
+  setShowMathEditor(false);
+  setMathEditorTarget(null);
+  setCursorIndex(null);
+};
+
 
   const closeMathEditor = () => {
     setShowMathEditor(false);
@@ -373,6 +400,7 @@ function CreateProblem() {
           </label>
           <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
           <input
+            ref={titleRef}
             type="text"
             name="title"
             value={formData.title}
@@ -446,6 +474,7 @@ function CreateProblem() {
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
           <textarea
+            ref={descriptionRef}
             name="description"
             value={formData.description}
             onChange={handleChange}
