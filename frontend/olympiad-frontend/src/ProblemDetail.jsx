@@ -631,6 +631,13 @@ function ProblemDetail() {
     const commentRef = useRef(null);
     const editCommentRef = useRef(null);
     const [cursorIndex, setCursorIndex] = useState(null);
+    const [formData, setFormData] = useState({
+        title: "",
+        description: "",
+        subject: "",
+        level: "",
+        year: ""
+      });
 
     const [voteLoading, setVoteLoading] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
