@@ -626,7 +626,7 @@ function ProblemDetail() {
         dislike_count: 0
     });
     //to insert math at cursor position
-    const teditTitleRef = useRef(null);
+    const editTitleRef = useRef(null);
     const editDescriptionRef = useRef(null);
     const editCommentRef = useRef(null);
     const [cursorIndex, setCursorIndex] = useState(null);
@@ -672,8 +672,8 @@ function ProblemDetail() {
 const openMathEditor = (target) => {
   let ref = null;
 
-  if (target === "title") ref = titleRef.current;
-  if (target === "description") ref = descriptionRef.current;
+  if (target === "title") ref = editTitleRef.current;
+  if (target === "description") ref = editDescriptionRef.current;
 
   if (ref) {
     setCursorIndex({
@@ -686,27 +686,6 @@ const openMathEditor = (target) => {
   setShowMathEditor(true);
 };
 
-    const handleMathInsert = (mathContent) => {
-  if (mathEditorTarget && cursorIndex) {
-    const text = formData[mathEditorTarget];
-
-    const newText =
-      text.slice(0, cursorIndex.start) +
-      mathContent +
-      text.slice(cursorIndex.end);
-
-    setFormData({
-      ...formData,
-      [mathEditorTarget]: newText
-    });
-  }
-
-  setShowMathEditor(false);
-  setMathEditorTarget(null);
-  setCursorIndex(null);
-};
-
-
     const closeMathEditor = () => {
         setShowMathEditor(false);
         setMathEditorTarget(null);
@@ -717,7 +696,7 @@ const openMathEditor = (target) => {
     };
 
     const handleCommentMathInsert = (mathContent) => {
-        const target = commentRef.current;
+        const target = editCommentRef.current;
         if (target) {
             const start = target.selectionStart;
             const end = target.selectionEnd;
@@ -2348,7 +2327,7 @@ const openMathEditor = (target) => {
                                 backgroundColor: "white"
                             }}>
                                 <textarea
-                                    ref={commentRef}
+                                    ref={editCommentRef}
                                     value={newComment}
                                     onChange={(e) => setNewComment(e.target.value)}
                                     placeholder="Write your comment here..."
