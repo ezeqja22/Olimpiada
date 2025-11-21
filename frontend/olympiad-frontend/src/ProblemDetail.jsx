@@ -630,6 +630,7 @@ function ProblemDetail() {
     const descriptionRef = useRef(null);
     const commentRef = useRef(null);
     const editCommentRef = useRef(null);
+    const [cursorIndex, setCursorIndex] = useState(null);
 
     const [voteLoading, setVoteLoading] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
@@ -663,51 +664,41 @@ function ProblemDetail() {
     const [reportTarget, setReportTarget] = useState(null);
 
     const openMathEditor = (target) => {
-        setMathEditorTarget(target);
-        setShowMathEditor(true);
-    };
+  let ref = null;
+
+  if (target === "title") ref = titleRef.current;
+  if (target === "description") ref = descriptionRef.current;
+
+  if (ref) {
+    setCursorIndex({
+      start: ref.selectionStart,
+      end: ref.selectionEnd
+    });
+  }
+
+  setMathEditorTarget(target);
+  setShowMathEditor(true);
+};
 
     const handleMathInsert = (mathContent) => {
-        let targetRef = null;
-        let currentValue = "";
+  if (mathEditorTarget && cursorIndex) {
+    const text = formData[mathEditorTarget];
 
-        if (mathEditorTarget === 'editComment') {
-            targetRef = editCommentRef.current;
-            currentValue = editText;
-        } else if (mathEditorTarget && (mathEditorTarget === 'title' || mathEditorTarget === 'description')) {
-            targetRef = mathEditorTarget === 'title' ? titleRef.current : descriptionRef.current;
-            currentValue = editProblemData[mathEditorTarget];
-        }
+    const newText =
+      text.slice(0, cursorIndex.start) +
+      mathContent +
+      text.slice(cursorIndex.end);
 
-        if (targetRef) {
-            const start = targetRef.selectionStart;
-            const end = targetRef.selectionEnd;
+    setFormData({
+      ...formData,
+      [mathEditorTarget]: newText
+    });
+  }
 
-            const newText =
-            currentValue.substring(0, start) +
-            mathContent +
-            currentValue.substring(end);
-
-            if (mathEditorTarget === 'editComment') {
-            setEditText(newText);
-            } else if (mathEditorTarget) {
-            setEditProblemData({
-                ...editProblemData,
-                [mathEditorTarget]: newText,
-            });
-            }
-
-    // restore cursor
-            setTimeout(() => {
-            const newPosition = start + mathContent.length;
-            targetRef.setSelectionRange(newPosition, newPosition);
-            targetRef.focus();
-            }, 0);
-        }
-
-        setShowMathEditor(false);
-        setMathEditorTarget(null);
-    };
+  setShowMathEditor(false);
+  setMathEditorTarget(null);
+  setCursorIndex(null);
+};
 
 
     const closeMathEditor = () => {
@@ -1299,6 +1290,7 @@ function ProblemDetail() {
                 <div>
                     <div style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
                         <input
+                            ref={titleRef}
                             type="text"
                             value={editProblemData.title}
                             onChange={(e) => setEditProblemData({...editProblemData, title: e.target.value})}
