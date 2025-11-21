@@ -626,6 +626,9 @@ function ProblemDetail() {
         dislike_count: 0
     });
     //to insert math at cursor position
+    const [mathEditorType, setMathEditorType] = useState(null);
+    const [editProblemTitle, setEditProblemTitle] = useState("");
+    const [editProblemDescription, setEditProblemDescription] = useState("");
     const editTitleRef = useRef(null);
     const editDescriptionRef = useRef(null);
     const editCommentRef = useRef(null);
