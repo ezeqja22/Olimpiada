@@ -2563,7 +2563,8 @@ const openMathEditor = (target) => {
             <MathEditor
                 isOpen={showMathEditor}
                 onClose={closeMathEditor}
-                onInsert={handleMathInsert}
+                onInsert={(symbol) => handleMathInsert(symbol)}
+                initialValue=""
             />
 
             {/* Comment Math Editor Modal */}
