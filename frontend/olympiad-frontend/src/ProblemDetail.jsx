@@ -458,6 +458,7 @@ const CommentThread = ({
 
                                 {/* Reply Image Upload */}
                                 <ImageUpload
+                                    images={replyImages}
                                     onImagesChange={setReplyImages}
                                     maxImages={5}
                                 />
@@ -2398,6 +2399,7 @@ function ProblemDetail() {
                                         transform: isMobile ? "scale(0.8)" : "scale(1)"
                                     }}>
                                         <ImageUpload
+                                            images={commentImages}
                                             onImagesChange={setCommentImages}
                                             maxImages={5}
                                             resetTrigger={imageResetKey}

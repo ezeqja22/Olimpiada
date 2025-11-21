@@ -1,23 +1,29 @@
 import React, { useState, useRef } from 'react';
 
-const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTrigger, variant = 'default', showHelper = true }) => {
-    const [images, setImages] = useState([]);
+const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTrigger, variant = 'default', showHelper = true, images: controlledImages }) => {
+    const [internalImages, setInternalImages] = useState([]);
     const [isHovered, setIsHovered] = useState(false);
     const fileInputRef = useRef(null);
 
+    // Use controlled images if provided, otherwise use internal state
+    const currentImages = controlledImages || internalImages;
+
     // Allow parent to reset the internal state (after successful submit)
     React.useEffect(() => {
-        setImages([]);
-        onImagesChange([]);
+        if (!controlledImages) {
+            setInternalImages([]);
+        }
+        // We don't call onImagesChange([]) here to avoid loops if parent triggers reset
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
-    }, [resetTrigger]);
+    }, [resetTrigger, controlledImages]);
 
     const handleFileSelect = (event) => {
         const files = Array.from(event.target.files);
-        const newImages = [...images];
-        
+        // Use currentImages instead of just internal state
+        const newImagesList = [...currentImages];
+
         // Filter valid image files
         const validFiles = files.filter(file => {
             const isValidType = file.type.startsWith('image/');
@@ -26,9 +32,9 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
         });
 
         // Add new images if under limit
-        const remainingSlots = maxImages - images.length;
+        const remainingSlots = maxImages - currentImages.length;
         const filesToAdd = validFiles.slice(0, remainingSlots);
-        
+
         filesToAdd.forEach(file => {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -38,9 +44,13 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                     preview: e.target.result,
                     name: file.name
                 };
-                newImages.push(newImage);
-                setImages(newImages);
-                onImagesChange(newImages);
+                newImagesList.push(newImage);
+
+                // Update internal state only if uncontrolled
+                if (!controlledImages) {
+                    setInternalImages([...newImagesList]);
+                }
+                onImagesChange(newImagesList);
             };
             reader.readAsDataURL(file);
         });
@@ -50,9 +60,13 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
     };
 
     const removeImage = (imageId) => {
-        const newImages = images.filter(img => img.id !== imageId);
-        setImages(newImages);
-        onImagesChange(newImages);
+        const newImagesList = currentImages.filter(img => img.id !== imageId);
+
+        // Update internal state only if uncontrolled
+        if (!controlledImages) {
+            setInternalImages(newImagesList);
+        }
+        onImagesChange(newImagesList);
     };
 
     const openFileDialog = () => {
@@ -66,14 +80,14 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
             {/* No thumbnails for compact variant - they're displayed inline in the textarea */}
 
             {/* Large Preview Grid - Only show for default variant */}
-            {images.length > 0 && variant === 'default' && (
+            {currentImages.length > 0 && variant === 'default' && (
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
                     gap: '10px',
                     marginBottom: '12px'
                 }}>
-                    {images.map((image) => (
+                    {currentImages.map((image) => (
                         <div key={image.id} style={{
                             position: 'relative',
                             width: '90px',
@@ -127,7 +141,7 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
             )}
 
             {/* Add Image Button */}
-            {images.length < maxImages && (
+            {currentImages.length < maxImages && (
                 <div
                     onClick={openFileDialog}
                     onMouseEnter={() => setIsHovered(true)}
@@ -167,15 +181,15 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                     }}>
                         +
                     </div>
-                <span style={{
-                    fontSize: variant === 'compact' ? '13px' : '14px',
-                    color: 'rgba(118, 75, 162)',
-                    fontWeight: '600',
-                    whiteSpace: 'nowrap',
-                    marginLeft: variant === 'compact' ? '6px' : '8px'
-                }}>
-                    {variant === 'compact' ? 'Add Images' : `Add Image (${images.length}/${maxImages})`}
-                </span>
+                    <span style={{
+                        fontSize: variant === 'compact' ? '13px' : '14px',
+                        color: 'rgba(118, 75, 162)',
+                        fontWeight: '600',
+                        whiteSpace: 'nowrap',
+                        marginLeft: variant === 'compact' ? '6px' : '8px'
+                    }}>
+                        {variant === 'compact' ? 'Add Images' : `Add Image (${currentImages.length}/${maxImages})`}
+                    </span>
                 </div>
             )}
 
@@ -197,8 +211,8 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
                     color: '#6b7280',
                     marginTop: '6px'
                 }}>
-                    {images.length > 0 && `${images.length}/${maxImages} images selected`}
-                    {images.length === 0 && `Upload up to ${maxImages} images (max 5MB each)`}
+                    {currentImages.length > 0 && `${currentImages.length}/${maxImages} images selected`}
+                    {currentImages.length === 0 && `Upload up to ${maxImages} images (max 5MB each)`}
                 </div>
             )}
         </div>
