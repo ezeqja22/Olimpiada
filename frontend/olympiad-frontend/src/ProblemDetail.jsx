@@ -19,40 +19,40 @@ import { useFeatureSettings } from "./hooks/useFeatureSettings";
 
 // Helper function to render math content
 const renderMathContent = (text) => {
-  if (!text) return '';
+    if (!text) return '';
 
-  // Split text into math and non-math segments
-  const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
+    // Split text into math and non-math segments
+    const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
 
-  return parts.map((part, index) => {
-    if (part.startsWith('$$') && part.endsWith('$$')) {
-      // Block math mode
-      const content = part.slice(2, -2);
-      return (
-        <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
-          <BlockMath math={content} />
-        </div>
-      );
-    } else if (part.startsWith('$') && part.endsWith('$')) {
-      // Inline math mode
-      const content = part.slice(1, -1);
-      return <InlineMath key={index} math={content} />;
-    } else {
-      // Regular text — keep it as-is
-      return <span key={index}>{part}</span>;
-    }
-  });
+    return parts.map((part, index) => {
+        if (part.startsWith('$$') && part.endsWith('$$')) {
+            // Block math mode
+            const content = part.slice(2, -2);
+            return (
+                <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
+                    <BlockMath math={content} />
+                </div>
+            );
+        } else if (part.startsWith('$') && part.endsWith('$')) {
+            // Inline math mode
+            const content = part.slice(1, -1);
+            return <InlineMath key={index} math={content} />;
+        } else {
+            // Regular text — keep it as-is
+            return <span key={index}>{part}</span>;
+        }
+    });
 };
 
 
 // Recursive Comment Thread Component
-const CommentThread = ({ 
-    comment, 
-    currentUser, 
-    problem, 
-    onEditComment, 
-    onDeleteComment, 
-    onMarkAsSolution, 
+const CommentThread = ({
+    comment,
+    currentUser,
+    problem,
+    onEditComment,
+    onDeleteComment,
+    onMarkAsSolution,
     onReply,
     replyingTo,
     setReplyingTo,
@@ -64,14 +64,20 @@ const CommentThread = ({
     onReportComment,
     setCurrentImageIndex,
     setModalImages,
+
     setShowImageModal,
-    depth = 0 
+    editingCommentId,
+    editText,
+    setEditText,
+    onSaveEdit,
+    onCancelEdit,
+    depth = 0
 }) => {
     const maxDepth = 3; // Limit nesting depth
     const isNested = depth > 0;
     const [showReplies, setShowReplies] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
-    
+
     useEffect(() => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth <= 768);
@@ -80,7 +86,7 @@ const CommentThread = ({
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
-    
+
     return (
         <div style={{
             marginBottom: "16px",
@@ -114,13 +120,13 @@ const CommentThread = ({
                         fontWeight: "bold",
                         zIndex: 1
                     }}>
-                         SOLUTION
+                        SOLUTION
                     </div>
                 )}
-                
-                
+
+
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                    <div 
+                    <div
                         style={{
                             width: "32px",
                             height: "32px",
@@ -150,15 +156,15 @@ const CommentThread = ({
                     >
                         {getUserInitial(comment.author.username)}
                     </div>
-                    
+
                     <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
                             <span style={{ fontWeight: "600", color: "#333", fontSize: isMobile ? "13px" : "14px" }}>
                                 {getDisplayName(comment.author.username)}
                             </span>
                             {isNested && (
-                                <span style={{ 
-                                    color: "#6366f1", 
+                                <span style={{
+                                    color: "#6366f1",
                                     fontSize: isMobile ? "10px" : "11px",
                                     backgroundColor: "#f0f4ff",
                                     padding: "2px 6px",
@@ -175,69 +181,121 @@ const CommentThread = ({
                                 <span style={{ color: "#6c757d", fontSize: isMobile ? "10px" : "11px" }}>(Edited)</span>
                             )}
                         </div>
-                        
-                        <div style={{ 
-                            color: "#333", 
+
+                        <div style={{
+                            color: "#333",
                             lineHeight: "1.5",
                             marginBottom: "12px",
                             wordBreak: "break-word"
                         }}>
-                            {renderMathContent(comment.text)}
+                            {editingCommentId === comment.id ? (
+                                <div style={{ marginBottom: "10px" }}>
+                                    <textarea
+                                        value={editText}
+                                        onChange={(e) => setEditText(e.target.value)}
+                                        style={{
+                                            width: "100%",
+                                            minHeight: "80px",
+                                            padding: "10px",
+                                            borderRadius: "8px",
+                                            border: "1px solid #3b82f6",
+                                            fontFamily: "inherit",
+                                            fontSize: "14px",
+                                            resize: "vertical",
+                                            marginBottom: "8px"
+                                        }}
+                                        autoFocus
+                                    />
+                                    <div style={{ display: "flex", gap: "8px" }}>
+                                        <button
+                                            onClick={() => onSaveEdit(comment.id)}
+                                            style={{
+                                                padding: "6px 12px",
+                                                backgroundColor: "#3b82f6",
+                                                color: "white",
+                                                border: "none",
+                                                borderRadius: "6px",
+                                                cursor: "pointer",
+                                                fontSize: "13px",
+                                                fontWeight: "500"
+                                            }}
+                                        >
+                                            Save
+                                        </button>
+                                        <button
+                                            onClick={onCancelEdit}
+                                            style={{
+                                                padding: "6px 12px",
+                                                backgroundColor: "#6c757d",
+                                                color: "white",
+                                                border: "none",
+                                                borderRadius: "6px",
+                                                cursor: "pointer",
+                                                fontSize: "13px"
+                                            }}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                renderMathContent(comment.text)
+                            )}
                         </div>
-                        
+
                         {/* Comment Images */}
                         {comment.images && comment.images.length > 0 && (
-    <div
-        style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
-            gap: "8px",
-            marginBottom: "12px"
-        }}
-    >
-        {comment.images.map((imageUrl, index) => (
-            <div
-                key={index}
-                style={{
-                    position: "relative",
-                    width: "120px",
-                    height: "120px",
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                    border: "2px solid #e5e7eb",
-                    backgroundColor: "#f9fafb",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease"
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "#3b82f6";
-                    e.currentTarget.style.transform = "scale(1.02)";
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "#e5e7eb";
-                    e.currentTarget.style.transform = "scale(1)";
-                }}
-                onClick={() => {
-                    console.log("Opening image modal for comment images");
-                    setModalImages(comment.images);
-                    setCurrentImageIndex(index);
-                    setShowImageModal(true);
-                }}
-            >
-                <img
-                    src={imageUrl}
-                    alt={`Comment image ${index + 1}`}
-                    style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover"
-                    }}
-                />
-            </div>
-        ))}
-    </div>
-)}
-                        
+                            <div
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                                    gap: "8px",
+                                    marginBottom: "12px"
+                                }}
+                            >
+                                {comment.images.map((imageUrl, index) => (
+                                    <div
+                                        key={index}
+                                        style={{
+                                            position: "relative",
+                                            width: "120px",
+                                            height: "120px",
+                                            borderRadius: "8px",
+                                            overflow: "hidden",
+                                            border: "2px solid #e5e7eb",
+                                            backgroundColor: "#f9fafb",
+                                            cursor: "pointer",
+                                            transition: "all 0.2s ease"
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.borderColor = "#3b82f6";
+                                            e.currentTarget.style.transform = "scale(1.02)";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.borderColor = "#e5e7eb";
+                                            e.currentTarget.style.transform = "scale(1)";
+                                        }}
+                                        onClick={() => {
+                                            console.log("Opening image modal for comment images");
+                                            setModalImages(comment.images);
+                                            setCurrentImageIndex(index);
+                                            setShowImageModal(true);
+                                        }}
+                                    >
+                                        <img
+                                            src={imageUrl}
+                                            alt={`Comment image ${index + 1}`}
+                                            style={{
+                                                width: "100%",
+                                                height: "100%",
+                                                objectFit: "cover"
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "16px" }}>
                             <button
                                 onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
@@ -262,9 +320,9 @@ const CommentThread = ({
                                     e.target.style.boxShadow = "0 4px 15px rgba(102, 126, 234, 0.4)";
                                 }}
                             >
-                                 Reply
+                                Reply
                             </button>
-                            
+
                             {/* Report Comment Button */}
                             <button
                                 onClick={() => onReportComment(comment)}
@@ -287,9 +345,9 @@ const CommentThread = ({
                                     e.target.style.color = "#dc3545";
                                 }}
                             >
-                                 Report
+                                Report
                             </button>
-                            
+
                             {currentUser && currentUser.id === comment.author_id && (
                                 <>
                                     <button
@@ -350,7 +408,7 @@ const CommentThread = ({
                                     </button>
                                 </>
                             )}
-                            
+
                             {currentUser && currentUser.id === problem.author_id && (
                                 <button
                                     onClick={() => onMarkAsSolution(comment.id)}
@@ -379,7 +437,7 @@ const CommentThread = ({
                                 </button>
                             )}
                         </div>
-                        
+
                         {replyingTo === comment.id && (
                             <div style={{ marginTop: "12px", padding: "12px", backgroundColor: "#f8f9fa", borderRadius: "8px" }}>
                                 <textarea
@@ -397,13 +455,13 @@ const CommentThread = ({
                                         fontSize: "14px"
                                     }}
                                 />
-                                
+
                                 {/* Reply Image Upload */}
                                 <ImageUpload
                                     onImagesChange={setReplyImages}
                                     maxImages={5}
                                 />
-                                
+
                                 <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
                                     <button
                                         onClick={() => onSubmitReply(comment.id)}
@@ -445,10 +503,10 @@ const CommentThread = ({
                     </div>
                 </div>
             </div>
-            
+
             {/* Render replies with proper L-shaped connection lines */}
             {comment.replies && comment.replies.length > 0 && depth < maxDepth && (
-                <div style={{ 
+                <div style={{
                     marginTop: "12px",
                     position: "relative",
                     marginLeft: isMobile ? "10px" : "30px"
@@ -466,13 +524,13 @@ const CommentThread = ({
                         border: "1px solid #e9ecef",
                         transition: "all 0.2s ease"
                     }}
-                    onClick={() => setShowReplies(!showReplies)}
-                    onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = "#e9ecef";
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = "#f8f9fa";
-                    }}>
+                        onClick={() => setShowReplies(!showReplies)}
+                        onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = "#e9ecef";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#f8f9fa";
+                        }}>
                         <span style={{
                             fontSize: isMobile ? "12px" : "13px",
                             fontWeight: "500",
@@ -481,77 +539,83 @@ const CommentThread = ({
                             {showReplies ? "▼" : "▶"} {comment.replies.length} {comment.replies.length === 1 ? "reply" : "replies"}
                         </span>
                     </div>
-                    
+
                     {showReplies && (
                         <>
-                        {/* L-shaped connection line from parent center to replies center - only on desktop */}
-                        {!isMobile && (
-                            <>
-                                <div style={{
-                                    position: "absolute",
-                                    left: "-80px",
-                                    top: "-80px",
-                                    width: "2px",
-                                    height: "calc(100% + 30px)",
-                                    backgroundColor: "#6366f1",
-                                    borderRadius: "1px",
-                                    opacity: 0.7
-                                }} />
-                                
-                                {/* Horizontal line connecting to parent center */}
-                                <div style={{
-                                    position: "absolute",
-                                    left: "-80px",
-                                    top: "-80px",
-                                    width: "50px",
-                                    height: "2px",
-                                    backgroundColor: "#6366f1",
-                                    borderRadius: "1px",
-                                    opacity: 0.7
-                                }} />
-                                
-                                {/* Connection dot at the junction */}
-                                <div style={{
-                                    position: "absolute",
-                                    left: "-82px",
-                                    top: "-82px",
-                                    width: "6px",
-                                    height: "6px",
-                                    backgroundColor: "#6366f1",
-                                    borderRadius: "50%",
-                                    zIndex: 1
-                                }} />
-                            </>
-                        )}
-                    
-                        {comment.replies.map((reply, index) => (
-                            <div key={reply.id} style={{ 
-                                position: "relative",
-                                marginBottom: "8px"
-                            }}>
-                                <CommentThread
-                                    comment={reply}
-                                    currentUser={currentUser}
-                                    problem={problem}
-                                    onEditComment={onEditComment}
-                                    onDeleteComment={onDeleteComment}
-                                    onMarkAsSolution={onMarkAsSolution}
-                                    onReply={onReply}
-                                    replyingTo={replyingTo}
-                                    setReplyingTo={setReplyingTo}
-                                    replyText={replyText}
-                                    setReplyText={setReplyText}
-                                    replyImages={replyImages}
-                                    setReplyImages={setReplyImages}
-                                    onSubmitReply={onSubmitReply}
-                                    onReportComment={onReportComment}
-                                    setCurrentImageIndex={setCurrentImageIndex}
-                                    setModalImages={setModalImages}
-                                    setShowImageModal={setShowImageModal}
-                                    depth={depth + 1}
-                                />
-                            </div>
-                        ))}
+                            {/* L-shaped connection line from parent center to replies center - only on desktop */}
+                            {!isMobile && (
+                                <>
+                                    <div style={{
+                                        position: "absolute",
+                                        left: "-80px",
+                                        top: "-80px",
+                                        width: "2px",
+                                        height: "calc(100% + 30px)",
+                                        backgroundColor: "#6366f1",
+                                        borderRadius: "1px",
+                                        opacity: 0.7
+                                    }} />
+
+                                    {/* Horizontal line connecting to parent center */}
+                                    <div style={{
+                                        position: "absolute",
+                                        left: "-80px",
+                                        top: "-80px",
+                                        width: "50px",
+                                        height: "2px",
+                                        backgroundColor: "#6366f1",
+                                        borderRadius: "1px",
+                                        opacity: 0.7
+                                    }} />
+
+                                    {/* Connection dot at the junction */}
+                                    <div style={{
+                                        position: "absolute",
+                                        left: "-82px",
+                                        top: "-82px",
+                                        width: "6px",
+                                        height: "6px",
+                                        backgroundColor: "#6366f1",
+                                        borderRadius: "50%",
+                                        zIndex: 1
+                                    }} />
+                                </>
+                            )}
+
+                            {comment.replies.map((reply, index) => (
+                                <div key={reply.id} style={{
+                                    position: "relative",
+                                    marginBottom: "8px"
+                                }}>
+                                    <CommentThread
+                                        comment={reply}
+                                        currentUser={currentUser}
+                                        problem={problem}
+                                        onEditComment={onEditComment}
+                                        onDeleteComment={onDeleteComment}
+                                        onMarkAsSolution={onMarkAsSolution}
+                                        onReply={onReply}
+                                        replyingTo={replyingTo}
+                                        setReplyingTo={setReplyingTo}
+                                        replyText={replyText}
+                                        setReplyText={setReplyText}
+                                        replyImages={replyImages}
+                                        setReplyImages={setReplyImages}
+                                        onSubmitReply={onSubmitReply}
+                                        onReportComment={onReportComment}
+                                        setCurrentImageIndex={setCurrentImageIndex}
+                                        setModalImages={setModalImages}
+                                        setShowImageModal={setShowImageModal}
+
+                                        editingCommentId={editingCommentId}
+                                        editText={editText}
+                                        setEditText={setEditText}
+                                        onSaveEdit={onSaveEdit}
+                                        onCancelEdit={onCancelEdit}
+                                        depth={depth + 1}
+                                    />
+                                </div>
+                            ))}
                         </>
                     )}
                 </div>
@@ -566,10 +630,10 @@ function ProblemDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     // Feature settings
     const { checkFeatureEnabled, showFeatureDisabledAlert } = useFeatureSettings();
-    
+
     // Create smart fallback path based on URL parameters
     const getSmartFallbackPath = () => {
         const urlParams = new URLSearchParams(location.search);
@@ -578,17 +642,17 @@ function ProblemDetail() {
         const subject = urlParams.get('subject');
         const searchQuery = urlParams.get('q');
         const searchTab = urlParams.get('searchTab');
-        
+
         if (from === 'feed' && tab) {
             // Return to specific feed tab
             return `/feed?tab=${tab}`;
         }
-        
+
         if (from === '/profile') {
             // Return to user profile
             return '/profile';
         }
-        
+
         if (from === 'search' && searchQuery) {
             // Return to search results with query and tab
             let searchPath = `/search?q=${encodeURIComponent(searchQuery)}`;
@@ -597,22 +661,22 @@ function ProblemDetail() {
             }
             return searchPath;
         }
-        
+
         if (from === 'subject' && subject) {
             // Return to subject page
             return `/subject/${encodeURIComponent(subject)}`;
         }
-        
+
         if (from === 'forum' && urlParams.get('forumId')) {
             // Return to forum
             return `/forum/${urlParams.get('forumId')}`;
         }
-        
+
         if (from === 'user' && urlParams.get('username')) {
             // Return to user profile
             return `/user/${encodeURIComponent(urlParams.get('username'))}`;
         }
-        
+
         // Default fallback
         return '/feed';
     };
@@ -639,7 +703,7 @@ function ProblemDetail() {
         subject: "",
         level: "",
         year: ""
-      });
+    });
 
     const [voteLoading, setVoteLoading] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
@@ -672,22 +736,22 @@ function ProblemDetail() {
     const [showReportModal, setShowReportModal] = useState(false);
     const [reportTarget, setReportTarget] = useState(null);
 
-const openMathEditor = (target) => {
-  let ref = null;
+    const openMathEditor = (target) => {
+        let ref = null;
 
-  if (target === "title") ref = editTitleRef.current;
-  if (target === "description") ref = editDescriptionRef.current;
+        if (target === "title") ref = editTitleRef.current;
+        if (target === "description") ref = editDescriptionRef.current;
 
-  if (ref) {
-    setCursorIndex({
-      start: ref.selectionStart,
-      end: ref.selectionEnd
-    });
-  }
+        if (ref) {
+            setCursorIndex({
+                start: ref.selectionStart,
+                end: ref.selectionEnd
+            });
+        }
 
-  setMathEditorTarget(target);
-  setShowMathEditor(true);
-};
+        setMathEditorTarget(target);
+        setShowMathEditor(true);
+    };
 
     const closeMathEditor = () => {
         setShowMathEditor(false);
@@ -696,24 +760,24 @@ const openMathEditor = (target) => {
 
     const handleMathInsert = (mathContent) => {
         if (mathEditorTarget && cursorIndex) {
-          const text = editProblemData[mathEditorTarget];
-      
-          const newText =
-            text.slice(0, cursorIndex.start) +
-            mathContent +
-            text.slice(cursorIndex.end);
-      
+            const text = editProblemData[mathEditorTarget];
+
+            const newText =
+                text.slice(0, cursorIndex.start) +
+                mathContent +
+                text.slice(cursorIndex.end);
+
             setEditProblemData({
-            ...editProblemData,
-            [mathEditorTarget]: newText
-          });
+                ...editProblemData,
+                [mathEditorTarget]: newText
+            });
         }
-      
+
         setShowMathEditor(false);
         setMathEditorTarget(null);
         setCursorIndex(null);
-      };
-      
+    };
+
 
     const openCommentMathEditor = () => {
         setShowCommentMathEditor(true);
@@ -725,40 +789,40 @@ const openMathEditor = (target) => {
             const start = target.selectionStart;
             const end = target.selectionEnd;
             const newText =
-            newComment.substring(0, start) +
-            mathContent +
-            newComment.substring(end);
+                newComment.substring(0, start) +
+                mathContent +
+                newComment.substring(end);
 
             setNewComment(newText);
 
             setTimeout(() => {
-            const newPosition = start + mathContent.length;
-            target.setSelectionRange(newPosition, newPosition);
-            target.focus();
+                const newPosition = start + mathContent.length;
+                target.setSelectionRange(newPosition, newPosition);
+                target.focus();
             }, 0);
         }
 
         setShowCommentMathEditor(false);
-        };
+    };
 
     const closeCommentMathEditor = () => {
         setShowCommentMathEditor(false);
     };
 
     const insertSymbolAtCursor = (ref, setter, symbol) => {
-    if (!ref.current) return;
+        if (!ref.current) return;
 
-    const el = ref.current;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
+        const el = ref.current;
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
 
-    setter(prev => prev.slice(0, start) + symbol + prev.slice(end));
+        setter(prev => prev.slice(0, start) + symbol + prev.slice(end));
 
-    setTimeout(() => {
-        el.focus();
-        el.selectionStart = el.selectionEnd = start + symbol.length;
-    }, 0);
-};
+        setTimeout(() => {
+            el.focus();
+            el.selectionStart = el.selectionEnd = start + symbol.length;
+        }, 0);
+    };
 
 
     // Mobile detection
@@ -766,10 +830,10 @@ const openMathEditor = (target) => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth <= 768);
         };
-        
+
         checkMobile();
         window.addEventListener('resize', checkMobile);
-        
+
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
@@ -797,7 +861,7 @@ const openMathEditor = (target) => {
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (!showImageModal) return;
-            
+
             switch (event.key) {
                 case 'Escape':
                     closeImageModal();
@@ -827,12 +891,12 @@ const openMathEditor = (target) => {
     const fetchProblem = async () => {
         try {
             const token = localStorage.getItem("token");
-            
+
             const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/id/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setProblem(response.data);
-            
+
             // Increment view count
             try {
                 const token = localStorage.getItem("token");
@@ -842,7 +906,7 @@ const openMathEditor = (target) => {
             } catch (viewError) {
                 // View count error is non-critical
             }
-            
+
             // Fetch problem images
             try {
                 const imagesResponse = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${id}/images`, {
@@ -854,7 +918,7 @@ const openMathEditor = (target) => {
             }
         } catch (error) {
             console.error("Error fetching problem:", error);
-            
+
             // Handle 403 error (Access denied for forum problems)
             if (error.response?.status === 403) {
                 alert("Access denied: You are not a member of this forum.");
@@ -872,7 +936,7 @@ const openMathEditor = (target) => {
             const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${id}/comments`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            
+
             // Sort comments with solutions first, then by creation date
             const sortedComments = response.data.sort((a, b) => {
                 if (a.is_solution && !b.is_solution) return -1;
@@ -951,7 +1015,7 @@ const openMathEditor = (target) => {
 
         try {
             const token = localStorage.getItem("token");
-            
+
             // Upload images to Cloudinary first
             let imageUrls = [];
             if (commentImages.length > 0) {
@@ -970,12 +1034,12 @@ const openMathEditor = (target) => {
                         throw new Error(`Failed to upload image: ${error.response?.data?.detail || error.message}`);
                     }
                 });
-                
+
                 imageUrls = await Promise.all(uploadPromises);
             }
-            
+
             const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${id}/comments`,
-                { 
+                {
                     text: newComment,
                     images: imageUrls
                 },
@@ -984,7 +1048,7 @@ const openMathEditor = (target) => {
                         Authorization: `Bearer ${token}`
                     }
                 });
-            
+
             // Refresh comments to get the updated threaded structure
             fetchComments();
             setNewComment("");
@@ -1007,7 +1071,7 @@ const openMathEditor = (target) => {
 
         try {
             const token = localStorage.getItem("token");
-            
+
             // Upload images to Cloudinary first
             let imageUrls = [];
             if (replyImages.length > 0) {
@@ -1021,12 +1085,12 @@ const openMathEditor = (target) => {
                     );
                     return uploadResponse.data.url;
                 });
-                
+
                 imageUrls = await Promise.all(uploadPromises);
             }
-            
+
             const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${id}/comments`,
-                { 
+                {
                     text: replyText,
                     parent_comment_id: parentCommentId,
                     images: imageUrls
@@ -1036,7 +1100,7 @@ const openMathEditor = (target) => {
                         Authorization: `Bearer ${token}`
                     }
                 });
-            
+
             // Refresh comments to get the updated threaded structure
             fetchComments();
             setReplyText("");
@@ -1064,8 +1128,8 @@ const openMathEditor = (target) => {
                         Authorization: `Bearer ${token}`
                     }
                 });
-            
-            setComments(comments.map(comment => 
+
+            setComments(comments.map(comment =>
                 comment.id === commentId ? response.data : comment
             ));
             setEditingComment(null);
@@ -1092,7 +1156,7 @@ const openMathEditor = (target) => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            
+
             setComments(comments.filter(comment => comment.id !== commentId));
         } catch (error) {
             console.error("Error deleting comment:", error);
@@ -1120,7 +1184,7 @@ const openMathEditor = (target) => {
                     }
                 }
             );
-            
+
             // Recursive function to update comment in nested structure
             const updateCommentInTree = (commentList) => {
                 return commentList.map(comment => {
@@ -1133,10 +1197,10 @@ const openMathEditor = (target) => {
                     return comment;
                 });
             };
-            
+
             // Update the comment in the state and re-sort
             const updatedComments = updateCommentInTree(comments);
-            
+
             // Re-sort with solutions first
             const sortedComments = updatedComments.sort((a, b) => {
                 if (a.is_solution && !b.is_solution) return -1;
@@ -1189,27 +1253,27 @@ const openMathEditor = (target) => {
         if (!editProblemData.title.trim() || !editProblemData.description.trim()) return;
 
         try {
-            
+
             // Validate tags
             const validTags = editTags.filter(tag => tag.trim() !== "");
             if (validTags.length > 5) {
                 alert("Maximum 5 tags allowed");
                 return;
             }
-            
+
             // Process tags: filter out empty tags and join with commas
             const processedTags = validTags.join(", ");
-            
+
             const token = localStorage.getItem("token");
-            
+
             // Ensure year is a number or null
             const requestData = {
                 ...editProblemData,
                 tags: processedTags,
                 year: editProblemData.year ? parseInt(editProblemData.year) : null
             };
-            
-            
+
+
             const response = await axios.put(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${id}`,
                 requestData,
                 {
@@ -1217,7 +1281,7 @@ const openMathEditor = (target) => {
                         Authorization: `Bearer ${token}`
                     }
                 });
-            
+
             // Preserve author information when updating problem
             setProblem(prevProblem => {
                 return {
@@ -1257,7 +1321,7 @@ const openMathEditor = (target) => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            
+
             // Smart navigation: redirect to the previous page with context
             const smartPath = getSmartFallbackPath();
             navigate(smartPath);
@@ -1267,7 +1331,7 @@ const openMathEditor = (target) => {
         }
     };
 
-    
+
 
     useEffect(() => {
         fetchProblem();
@@ -1291,9 +1355,9 @@ const openMathEditor = (target) => {
     if (loading) {
         return (
             <Layout showHomeButton={true}>
-                <AnimatedLoader 
-                    type="problems" 
-                    message="Loading problem..." 
+                <AnimatedLoader
+                    type="problems"
+                    message="Loading problem..."
                     size="large"
                 />
             </Layout>
@@ -1301,7 +1365,7 @@ const openMathEditor = (target) => {
     }
 
     if (!problem) {
-    return (
+        return (
             <div style={{ padding: "20px", textAlign: "center" }}>
                 <h2>Problem not found</h2>
                 <p>This problem may have been deleted or doesn't exist.</p>
@@ -1318,12 +1382,12 @@ const openMathEditor = (target) => {
                             ref={editTitleRef}
                             type="text"
                             value={editProblemData.title}
-                            onChange={(e) => setEditProblemData({...editProblemData, title: e.target.value})}
+                            onChange={(e) => setEditProblemData({ ...editProblemData, title: e.target.value })}
                             placeholder="Problem title"
-                            style={{ 
+                            style={{
                                 flex: 1,
-                                padding: "12px 16px", 
-                                border: "2px solid #e9ecef", 
+                                padding: "12px 16px",
+                                border: "2px solid #e9ecef",
                                 borderRadius: "8px",
                                 fontSize: "24px",
                                 fontWeight: "bold",
@@ -1363,19 +1427,19 @@ const openMathEditor = (target) => {
                                 e.target.style.boxShadow = "0 2px 8px rgba(30, 64, 175, 0.3)";
                             }}
                         >
-                             Symbols
+                            Symbols
                         </button>
                     </div>
-            <div style={{ marginBottom: "20px" }}>
+                    <div style={{ marginBottom: "20px" }}>
                         <input
                             type="text"
                             value={editProblemData.subject}
-                            onChange={(e) => setEditProblemData({...editProblemData, subject: e.target.value})}
+                            onChange={(e) => setEditProblemData({ ...editProblemData, subject: e.target.value })}
                             placeholder="Subject"
-                            style={{ 
-                                padding: "8px 12px", 
-                                marginRight: "10px", 
-                                border: "2px solid #e9ecef", 
+                            style={{
+                                padding: "8px 12px",
+                                marginRight: "10px",
+                                border: "2px solid #e9ecef",
                                 borderRadius: "6px",
                                 fontSize: "14px",
                                 outline: "none",
@@ -1392,12 +1456,12 @@ const openMathEditor = (target) => {
                         <input
                             type="text"
                             value={editProblemData.level}
-                            onChange={(e) => setEditProblemData({...editProblemData, level: e.target.value})}
+                            onChange={(e) => setEditProblemData({ ...editProblemData, level: e.target.value })}
                             placeholder="Level (e.g., IMO, EGMO Phase 2, etc.)"
-                            style={{ 
-                                padding: "8px 12px", 
-                                marginRight: "10px", 
-                                border: "2px solid #e9ecef", 
+                            style={{
+                                padding: "8px 12px",
+                                marginRight: "10px",
+                                border: "2px solid #e9ecef",
                                 borderRadius: "6px",
                                 fontSize: "14px",
                                 outline: "none",
@@ -1414,14 +1478,14 @@ const openMathEditor = (target) => {
                         <input
                             type="number"
                             value={editProblemData.year}
-                            onChange={(e) => setEditProblemData({...editProblemData, year: e.target.value})}
+                            onChange={(e) => setEditProblemData({ ...editProblemData, year: e.target.value })}
                             placeholder="Year (e.g., 2024)"
                             min="1900"
                             max="2030"
-                            style={{ 
-                                padding: "8px 12px", 
-                                marginRight: "10px", 
-                                border: "2px solid #e9ecef", 
+                            style={{
+                                padding: "8px 12px",
+                                marginRight: "10px",
+                                border: "2px solid #e9ecef",
                                 borderRadius: "6px",
                                 fontSize: "14px",
                                 outline: "none",
@@ -1446,10 +1510,10 @@ const openMathEditor = (target) => {
                                         value={tag}
                                         onChange={(e) => handleEditTagChange(index, e.target.value)}
                                         placeholder={`Tag ${index + 1}`}
-                                        style={{ 
+                                        style={{
                                             flex: 1,
                                             padding: "4px 8px",
-                                            border: "1px solid #ddd", 
+                                            border: "1px solid #ddd",
                                             borderRadius: "4px",
                                             fontSize: "12px"
                                         }}
@@ -1484,7 +1548,7 @@ const openMathEditor = (target) => {
                                         border: "none",
                                         borderRadius: "4px",
                                         cursor: "pointer",
-                    fontSize: "12px",
+                                        fontSize: "12px",
                                         alignSelf: "flex-start"
                                     }}
                                 >
@@ -1497,13 +1561,13 @@ const openMathEditor = (target) => {
                         <textarea
                             ref={editDescriptionRef}
                             value={editProblemData.description}
-                            onChange={(e) => setEditProblemData({...editProblemData, description: e.target.value})}
+                            onChange={(e) => setEditProblemData({ ...editProblemData, description: e.target.value })}
                             placeholder="Problem description"
-                            style={{ 
+                            style={{
                                 flex: 1,
-                                minHeight: "100px", 
-                                padding: "20px", 
-                                border: "1px solid #ddd", 
+                                minHeight: "100px",
+                                padding: "20px",
+                                border: "1px solid #ddd",
                                 borderRadius: "8px",
                                 lineHeight: "1.6",
                                 whiteSpace: "pre-wrap"
@@ -1525,7 +1589,7 @@ const openMathEditor = (target) => {
                                 alignSelf: "flex-start"
                             }}
                         >
-                             Symbols
+                            Symbols
                         </button>
                     </div>
                     {/* Image Management */}
@@ -1533,30 +1597,30 @@ const openMathEditor = (target) => {
                         <h4 style={{ marginBottom: "10px", color: "#333" }}>
                             Problem Images ({problemImages.length}/10)
                         </h4>
-                        
+
                         {/* Existing Images */}
                         {problemImages.length > 0 && (
                             <div style={{ marginBottom: "15px" }}>
                                 <div style={{ fontSize: "14px", fontWeight: "bold", marginBottom: "8px" }}>
                                     Current Images:
                                 </div>
-                                <div style={{ 
-                                    display: "grid", 
-                                    gridTemplateColumns: "repeat(auto-fit, minmax(150px, max-content))", 
+                                <div style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(auto-fit, minmax(150px, max-content))",
                                     gap: "16px",
                                     justifyContent: "start"
                                 }}>
                                     {problemImages.map((image, index) => (
-                                        <div key={index} style={{ 
+                                        <div key={index} style={{
                                             position: "relative",
-                                            border: "1px solid #ddd", 
-                                            borderRadius: "8px", 
+                                            border: "1px solid #ddd",
+                                            borderRadius: "8px",
                                             overflow: "hidden",
                                             backgroundColor: "white",
                                             width: "150px",
                                             height: "100px"
                                         }}>
-                                            <img 
+                                            <img
                                                 src={image}
                                                 alt={`Problem image ${index + 1}`}
                                                 style={{
@@ -1589,13 +1653,13 @@ const openMathEditor = (target) => {
                                                     position: "absolute",
                                                     top: "5px",
                                                     right: "5px",
-                        padding: "4px 8px",
+                                                    padding: "4px 8px",
                                                     backgroundColor: "#dc3545",
                                                     color: "white",
                                                     border: "none",
-                        borderRadius: "4px",
+                                                    borderRadius: "4px",
                                                     cursor: "pointer",
-                        fontSize: "12px"
+                                                    fontSize: "12px"
                                                 }}
                                             >
                                                 ×
@@ -1605,7 +1669,7 @@ const openMathEditor = (target) => {
                                 </div>
                             </div>
                         )}
-                        
+
                         {/* Add New Images */}
                         {problemImages.length < 10 && (
                             <div>
@@ -1616,25 +1680,25 @@ const openMathEditor = (target) => {
                                     accept="image/*"
                                     onChange={async (e) => {
                                         const files = Array.from(e.target.files);
-                                        
+
                                         if (files.length === 0) return;
-                                        
+
                                         // Check if adding these files would exceed the limit
                                         if (problemImages.length + files.length > 10) {
                                             alert("Maximum 10 images allowed. Please select fewer images.");
                                             return;
                                         }
-                                        
+
                                         try {
                                             for (const file of files) {
                                                 if (!file.type.startsWith('image/')) {
                                                     alert(`${file.name} is not an image file`);
                                                     continue;
                                                 }
-                                                
+
                                                 const formData = new FormData();
                                                 formData.append('file', file);
-                                                
+
                                                 const token = localStorage.getItem("token");
                                                 const uploadResponse = await axios.post(
                                                     `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${id}/images`,
@@ -1646,10 +1710,10 @@ const openMathEditor = (target) => {
                                                         }
                                                     }
                                                 );
-                                                
+
                                             }
                                             alert(`${files.length} image(s) uploaded successfully!`);
-                                            
+
                                             // Refresh the problem data to show the new images
                                             fetchProblem();
                                         } catch (error) {
@@ -1660,7 +1724,7 @@ const openMathEditor = (target) => {
                                     style={{ display: "none" }}
                                     id="edit-image-upload-input"
                                 />
-                                
+
                                 {/* Upload box */}
                                 <div
                                     onClick={() => document.getElementById('edit-image-upload-input').click()}
@@ -1707,17 +1771,17 @@ const openMathEditor = (target) => {
                                         Add Image
                                     </div>
                                 </div>
-                                
+
                                 <small style={{ color: "#666", fontSize: "12px", marginTop: "8px", display: "block" }}>
                                     Add up to {10 - problemImages.length} more images to your problem
                                 </small>
                             </div>
                         )}
-                        
+
                         {problemImages.length >= 10 && (
-                            <div style={{ 
-                                padding: "10px", 
-                                backgroundColor: "#f8f9fa", 
+                            <div style={{
+                                padding: "10px",
+                                backgroundColor: "#f8f9fa",
                                 borderRadius: "4px",
                                 color: "#666",
                                 fontSize: "12px"
@@ -1728,14 +1792,14 @@ const openMathEditor = (target) => {
                     </div>
 
                     <div style={{ display: "flex", gap: "10px", marginBottom: "30px" }}>
-                        <button 
-                            onClick={handleSaveProblem} 
-                            style={{ 
-                                padding: "12px 24px", 
-                                backgroundColor: colors.primary, 
-                                color: "white", 
-                                border: "none", 
-                                borderRadius: "8px", 
+                        <button
+                            onClick={handleSaveProblem}
+                            style={{
+                                padding: "12px 24px",
+                                backgroundColor: colors.primary,
+                                color: "white",
+                                border: "none",
+                                borderRadius: "8px",
                                 cursor: "pointer",
                                 fontSize: "16px",
                                 fontWeight: "600",
@@ -1753,14 +1817,14 @@ const openMathEditor = (target) => {
                         >
                             Save Problem
                         </button>
-                        <button 
-                            onClick={handleCancelProblemEdit} 
-                            style={{ 
-                                padding: "12px 24px", 
-                                backgroundColor: colors.gray[500], 
-                                color: "white", 
-                                border: "none", 
-                                borderRadius: "8px", 
+                        <button
+                            onClick={handleCancelProblemEdit}
+                            style={{
+                                padding: "12px 24px",
+                                backgroundColor: colors.gray[500],
+                                color: "white",
+                                border: "none",
+                                borderRadius: "8px",
                                 cursor: "pointer",
                                 fontSize: "16px",
                                 fontWeight: "600",
@@ -1786,15 +1850,15 @@ const openMathEditor = (target) => {
                     <div style={{ marginBottom: "20px" }}>
                         <BackButton fallbackPath={getSmartFallbackPath()} />
                     </div>
-                    
+
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
                         <div>
                             {/* Author Information */}
                             {problem.author && (
-                                <div style={{ 
-                                    display: "flex", 
-                                    alignItems: "center", 
-                                    gap: "10px", 
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px",
                                     marginBottom: "15px",
                                     padding: "10px",
                                     backgroundColor: "#f8f9fa",
@@ -1812,8 +1876,8 @@ const openMathEditor = (target) => {
                                         color: "white",
                                         fontWeight: "bold",
                                         fontSize: "16px",
-                                        backgroundImage: problem.author.profile_picture ? 
-                                            `url(${problem.author.profile_picture})` : 
+                                        backgroundImage: problem.author.profile_picture ?
+                                            `url(${problem.author.profile_picture})` :
                                             'none',
                                         backgroundSize: "cover",
                                         backgroundPosition: "center"
@@ -1821,10 +1885,10 @@ const openMathEditor = (target) => {
                                         {!problem.author.profile_picture && getUserInitial(problem.author.username)}
                                     </div>
                                     <div>
-                                        <div 
-                                            style={{ 
-                                                fontWeight: "bold", 
-                                                color: "#007bff", 
+                                        <div
+                                            style={{
+                                                fontWeight: "bold",
+                                                color: "#007bff",
                                                 cursor: "pointer",
                                                 textDecoration: "underline"
                                             }}
@@ -1852,13 +1916,13 @@ const openMathEditor = (target) => {
                                     </div>
                                 </div>
                             )}
-                            
+
                             {problem.updated_at && new Date(problem.updated_at).getTime() > new Date(problem.created_at).getTime() && (
                                 <div style={{ fontSize: "12px", color: "#666", marginTop: "-15px", marginBottom: "15px" }}>
                                     (Edited)
                                 </div>
                             )}
-                            
+
                             {/* Problem Title */}
                             <h1 style={{ color: "#333", marginBottom: "20px", marginTop: "20px" }}>{renderMathContent(problem.title)}</h1>
                         </div>
@@ -1928,19 +1992,19 @@ const openMathEditor = (target) => {
                         )}
                     </div>
 
-            <div style={{ marginBottom: "20px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                <span style={{
-                    backgroundColor: "#e0e7ff",
-                    color: "#3730a3",
-                    padding: "6px 12px",
-                    borderRadius: "16px",
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
-                    transition: "all 0.2s ease"
-                }}>
-                    {problem.subject}
-                </span>
+                    <div style={{ marginBottom: "20px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                        <span style={{
+                            backgroundColor: "#e0e7ff",
+                            color: "#3730a3",
+                            padding: "6px 12px",
+                            borderRadius: "16px",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
+                            transition: "all 0.2s ease"
+                        }}>
+                            {problem.subject}
+                        </span>
                         {problem.level && problem.level.trim() && (
                             <span style={{
                                 backgroundColor: "#fef3c7",
@@ -1953,11 +2017,11 @@ const openMathEditor = (target) => {
                                 transition: "all 0.2s ease"
                             }}>
                                 {problem.level}
-                    </span>
+                            </span>
                         )}
                         {problem.year && (
-                    <span style={{
-                                backgroundColor: "#dcfce7", 
+                            <span style={{
+                                backgroundColor: "#dcfce7",
                                 color: "#166534",
                                 padding: "6px 12px",
                                 borderRadius: "16px",
@@ -1969,132 +2033,132 @@ const openMathEditor = (target) => {
                                 Year: {problem.year}
                             </span>
                         )}
-                {problem.tags && problem.tags.trim() && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                        {problem.tags.split(",").map((tag, index) => {
-                            const trimmedTag = tag.trim();
-                            if (!trimmedTag) return null;
-                            return (
-                                <span
-                                    key={index}
-                                    style={{
-                                        backgroundColor: colors.tertiary,
-                                        color: "white",
-                                        padding: "6px 12px",
-                                        borderRadius: "16px",
-                                        fontSize: "12px",
-                                        fontWeight: "600",
-                                        whiteSpace: "nowrap",
-                                        boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
-                                        transition: "all 0.2s ease"
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.transform = "translateY(-1px)";
-                                        e.target.style.boxShadow = "0 4px 12px rgba(124, 58, 237, 0.4)";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.transform = "translateY(0)";
-                                        e.target.style.boxShadow = "0 2px 8px rgba(124, 58, 237, 0.3)";
-                                    }}
-                                >
-                                    {trimmedTag}
-                                </span>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
-
-            <div style={{
-                backgroundColor: "#f9f9f9",
-                padding: "20px",
-                borderRadius: "8px",
-                marginBottom: "30px"
-            }}>
-                <div style={{ lineHeight: "1.6", color: "#333", whiteSpace: "pre-wrap" }}>{renderMathContent(problem.description)}</div>
-            </div>
-            
-            {/* Problem Images */}
-            {problemImages && problemImages.length > 0 && (
-                <div style={{
-                    backgroundColor: "#f9f9f9",
-                    padding: "20px",
-                    borderRadius: "8px",
-                    marginBottom: "30px"
-                }}>
-                    <h3 style={{ marginBottom: "15px", color: "#333" }}>Problem Images</h3>
-                    <div style={{ 
-                        display: "grid", 
-                        gridTemplateColumns: "repeat(auto-fit, minmax(150px, max-content))", 
-                        gap: "15px",
-                        justifyContent: "start"
-                    }}>
-                        {problemImages.map((image, index) => {
-                            const isHovered = hoveredImageIndex === index;
-                            
-                            return (
-                                <div key={index} style={{ 
-                                    border: "1px solid #ddd", 
-                                    borderRadius: "8px", 
-                                    overflow: "hidden",
-                                    backgroundColor: "white",
-                                    maxWidth: "200px",
-                                    cursor: "pointer",
-                                    position: "relative",
-                                    transition: "transform 0.2s ease",
-                                    transform: isHovered ? "scale(1.02)" : "scale(1)"
-                                }}
-                                onMouseEnter={() => setHoveredImageIndex(index)}
-                                onMouseLeave={() => setHoveredImageIndex(null)}
-                                onClick={() => openImageModal(index, problemImages, 'problem')}
-                                >
-                                    <img 
-                                        src={image}
-                                        alt={`Problem image ${index + 1}`}
-                                        style={{
-                                            width: "100%",
-                                            height: "auto",
-                                            objectFit: "contain",
-                                            display: "block"
-                                        }}
-                                    />
-                                    <div 
-                                        style={{
-                                            position: "absolute",
-                                            top: "8px",
-                                            right: "8px",
-                                            backgroundColor: "rgba(0, 0, 0, 0.7)",
-                                            color: "white",
-                                            border: "none",
-                                            borderRadius: "4px",
-                                            padding: "6px 8px",
-                                            cursor: "pointer",
-                                            fontSize: "12px",
-                                            opacity: isHovered ? "1" : "0",
-                                            transition: "opacity 0.2s ease",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px"
-                                        }}
-                                    >
-                                        <img 
-                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795126/Search_Icon_White_wj1ka1.svg" 
-                                            alt="Fullscreen"
+                        {problem.tags && problem.tags.trim() && (
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                                {problem.tags.split(",").map((tag, index) => {
+                                    const trimmedTag = tag.trim();
+                                    if (!trimmedTag) return null;
+                                    return (
+                                        <span
+                                            key={index}
                                             style={{
-                                                height: "16px",
-                                                width: "16px",
-                                                objectFit: "contain",
-                                                marginRight: "4px"
+                                                backgroundColor: colors.tertiary,
+                                                color: "white",
+                                                padding: "6px 12px",
+                                                borderRadius: "16px",
+                                                fontSize: "12px",
+                                                fontWeight: "600",
+                                                whiteSpace: "nowrap",
+                                                boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
+                                                transition: "all 0.2s ease"
                                             }}
-                                        />
-                                        Fullscreen
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                            onMouseEnter={(e) => {
+                                                e.target.style.transform = "translateY(-1px)";
+                                                e.target.style.boxShadow = "0 4px 12px rgba(124, 58, 237, 0.4)";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.target.style.transform = "translateY(0)";
+                                                e.target.style.boxShadow = "0 2px 8px rgba(124, 58, 237, 0.3)";
+                                            }}
+                                        >
+                                            {trimmedTag}
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
-                </div>
-            )}
+
+                    <div style={{
+                        backgroundColor: "#f9f9f9",
+                        padding: "20px",
+                        borderRadius: "8px",
+                        marginBottom: "30px"
+                    }}>
+                        <div style={{ lineHeight: "1.6", color: "#333", whiteSpace: "pre-wrap" }}>{renderMathContent(problem.description)}</div>
+                    </div>
+
+                    {/* Problem Images */}
+                    {problemImages && problemImages.length > 0 && (
+                        <div style={{
+                            backgroundColor: "#f9f9f9",
+                            padding: "20px",
+                            borderRadius: "8px",
+                            marginBottom: "30px"
+                        }}>
+                            <h3 style={{ marginBottom: "15px", color: "#333" }}>Problem Images</h3>
+                            <div style={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(auto-fit, minmax(150px, max-content))",
+                                gap: "15px",
+                                justifyContent: "start"
+                            }}>
+                                {problemImages.map((image, index) => {
+                                    const isHovered = hoveredImageIndex === index;
+
+                                    return (
+                                        <div key={index} style={{
+                                            border: "1px solid #ddd",
+                                            borderRadius: "8px",
+                                            overflow: "hidden",
+                                            backgroundColor: "white",
+                                            maxWidth: "200px",
+                                            cursor: "pointer",
+                                            position: "relative",
+                                            transition: "transform 0.2s ease",
+                                            transform: isHovered ? "scale(1.02)" : "scale(1)"
+                                        }}
+                                            onMouseEnter={() => setHoveredImageIndex(index)}
+                                            onMouseLeave={() => setHoveredImageIndex(null)}
+                                            onClick={() => openImageModal(index, problemImages, 'problem')}
+                                        >
+                                            <img
+                                                src={image}
+                                                alt={`Problem image ${index + 1}`}
+                                                style={{
+                                                    width: "100%",
+                                                    height: "auto",
+                                                    objectFit: "contain",
+                                                    display: "block"
+                                                }}
+                                            />
+                                            <div
+                                                style={{
+                                                    position: "absolute",
+                                                    top: "8px",
+                                                    right: "8px",
+                                                    backgroundColor: "rgba(0, 0, 0, 0.7)",
+                                                    color: "white",
+                                                    border: "none",
+                                                    borderRadius: "4px",
+                                                    padding: "6px 8px",
+                                                    cursor: "pointer",
+                                                    fontSize: "12px",
+                                                    opacity: isHovered ? "1" : "0",
+                                                    transition: "opacity 0.2s ease",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "4px"
+                                                }}
+                                            >
+                                                <img
+                                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795126/Search_Icon_White_wj1ka1.svg"
+                                                    alt="Fullscreen"
+                                                    style={{
+                                                        height: "16px",
+                                                        width: "16px",
+                                                        objectFit: "contain",
+                                                        marginRight: "4px"
+                                                    }}
+                                                />
+                                                Fullscreen
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -2126,11 +2190,11 @@ const openMathEditor = (target) => {
                                 gap: "5px"
                             }}
                         >
-                            <img 
-                                src={voteStatus.user_vote === "like" 
+                            <img
+                                src={voteStatus.user_vote === "like"
                                     ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797464/Like_Icon_white_i64jbg.svg"
                                     : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg"
-                                } 
+                                }
                                 alt="Like"
                                 style={{
                                     height: "16px",
@@ -2138,7 +2202,7 @@ const openMathEditor = (target) => {
                                     objectFit: "contain"
                                 }}
                             />
-                             {voteStatus.like_count}
+                            {voteStatus.like_count}
                         </button>
                         <button
                             onClick={() => handleVote("dislike")}
@@ -2154,11 +2218,11 @@ const openMathEditor = (target) => {
                                 gap: "5px"
                             }}
                         >
-                            <img 
-                                src={voteStatus.user_vote === "dislike" 
+                            <img
+                                src={voteStatus.user_vote === "dislike"
                                     ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797471/Dislike_icon_white_c7yjjg.svg"
                                     : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg"
-                                } 
+                                }
                                 alt="Dislike"
                                 style={{
                                     height: "16px",
@@ -2166,7 +2230,7 @@ const openMathEditor = (target) => {
                                     objectFit: "contain"
                                 }}
                             />
-                             {voteStatus.dislike_count}
+                            {voteStatus.dislike_count}
                         </button>
                     </div>
                 </div>
@@ -2189,14 +2253,14 @@ const openMathEditor = (target) => {
                             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
                             transition: "all 0.3s ease"
                         }}
-                        onMouseEnter={(e) => {
-                            e.target.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.12)";
-                            e.target.style.borderColor = "rgb(26, 77, 58)";
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.08)";
-                            e.target.style.borderColor = "#e9ecef";
-                        }}>
+                            onMouseEnter={(e) => {
+                                e.target.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.12)";
+                                e.target.style.borderColor = "rgb(26, 77, 58)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.08)";
+                                e.target.style.borderColor = "#e9ecef";
+                            }}>
                             {/* Section 1 - Profile Picture and Buttons (styled) */}
                             <div style={{
                                 width: isMobile ? "100%" : "18%",
@@ -2211,7 +2275,7 @@ const openMathEditor = (target) => {
                                 borderBottom: isMobile ? "1px solid #e9ecef" : "none"
                             }}>
                                 {/* Clickable User Card */}
-                                <div 
+                                <div
                                     style={{
                                         display: "flex",
                                         alignItems: "center",
@@ -2255,8 +2319,8 @@ const openMathEditor = (target) => {
                                         color: "white",
                                         fontWeight: "bold",
                                         fontSize: isMobile ? "10px" : "14px",
-                                        backgroundImage: currentUser?.profile_picture ? 
-                                            `url(${currentUser.profile_picture})` : 
+                                        backgroundImage: currentUser?.profile_picture ?
+                                            `url(${currentUser.profile_picture})` :
                                             'none',
                                         backgroundSize: "cover",
                                         backgroundPosition: "center",
@@ -2265,7 +2329,7 @@ const openMathEditor = (target) => {
                                     }}>
                                         {!currentUser?.profile_picture && (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : "U")}
                                     </div>
-                                    
+
                                     {/* Username */}
                                     <div style={{
                                         fontSize: isMobile ? "10px" : "14px",
@@ -2280,12 +2344,12 @@ const openMathEditor = (target) => {
                                         {currentUser?.username || "User"}
                                     </div>
                                 </div>
-                                
+
                                 {/* Buttons Row - Small and Left-aligned */}
-                                <div style={{ 
-                                    display: "flex", 
-                                    alignItems: "center", 
-                                    gap: isMobile ? "4px" : "6px", 
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: isMobile ? "4px" : "6px",
                                     marginLeft: isMobile ? "0" : "-8px",
                                     flex: isMobile ? "none" : "none",
                                     flexWrap: isMobile ? "wrap" : "nowrap"
@@ -2325,11 +2389,11 @@ const openMathEditor = (target) => {
                                     >
                                         Symbols
                                     </span>
-                                    
+
                                     {/* Add Image Button - Small */}
-                                    <div style={{ 
-                                        height: isMobile ? "28px" : "20px", 
-                                        display: "flex", 
+                                    <div style={{
+                                        height: isMobile ? "28px" : "20px",
+                                        display: "flex",
                                         alignItems: "center",
                                         transform: isMobile ? "scale(0.8)" : "scale(1)"
                                     }}>
@@ -2343,10 +2407,10 @@ const openMathEditor = (target) => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {/* Section 2 - Main Textarea with inline images */}
-                            <div style={{ 
-                                width: isMobile ? "100%" : "70%", 
+                            <div style={{
+                                width: isMobile ? "100%" : "70%",
                                 position: "relative",
                                 backgroundColor: "white"
                             }}>
@@ -2355,8 +2419,8 @@ const openMathEditor = (target) => {
                                     value={newComment}
                                     onChange={(e) => setNewComment(e.target.value)}
                                     placeholder="Write your comment here..."
-                                    style={{ 
-                                        width: "100%", 
+                                    style={{
+                                        width: "100%",
                                         border: "none",
                                         outline: "none",
                                         resize: "none",
@@ -2364,10 +2428,10 @@ const openMathEditor = (target) => {
                                         fontFamily: "inherit",
                                         fontSize: isMobile ? "16px" : "15px",
                                         padding: isMobile ? "15px" : "20px",
-                                        paddingBottom: commentImages.length > 0 
-                                            ? (isMobile ? "60px" : "50px") 
+                                        paddingBottom: commentImages.length > 0
+                                            ? (isMobile ? "60px" : "50px")
                                             : (isMobile ? "15px" : "20px"),
-        
+
                                         /* 🔥 FIX: Prevent text from reaching under Send button */
                                         paddingRight: isMobile ? "70px" : "90px",
 
@@ -2378,7 +2442,7 @@ const openMathEditor = (target) => {
                                         cursor: "text",
                                         lineHeight: "1.5",
                                         minHeight: isMobile ? "80px" : "auto"
-    }}
+                                    }}
                                     onFocus={() => {
                                         setIsTextareaFocused(true);
                                     }}
@@ -2386,7 +2450,7 @@ const openMathEditor = (target) => {
                                         setIsTextareaFocused(false);
                                     }}
                                 />
-                                
+
                                 {/* Inline Image Thumbnails */}
                                 {commentImages.length > 0 && (
                                     <div style={{
@@ -2399,8 +2463,8 @@ const openMathEditor = (target) => {
                                         flexWrap: "wrap"
                                     }}>
                                         {commentImages.map((image, index) => (
-                                            <div 
-                                                key={image.id} 
+                                            <div
+                                                key={image.id}
                                                 style={{
                                                     position: "relative",
                                                     width: "56px",
@@ -2476,11 +2540,11 @@ const openMathEditor = (target) => {
                                     </div>
                                 )}
                             </div>
-                            
+
                             {/* Section 3 - Send Button (styled) */}
-                            <div 
-                                style={{ 
-                                    width: isMobile ? "100%" : "15%", 
+                            <div
+                                style={{
+                                    width: isMobile ? "100%" : "15%",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
@@ -2530,7 +2594,7 @@ const openMathEditor = (target) => {
                                 </div>
                             </div>
                         </div>
-                        
+
                     </form>
                 </div>
 
@@ -2543,7 +2607,7 @@ const openMathEditor = (target) => {
                         onEditComment={handleEditComment}
                         onDeleteComment={handleDeleteComment}
                         onMarkAsSolution={handleMarkAsSolution}
-                        onReply={() => {}}
+                        onReply={() => { }}
                         replyingTo={replyingTo}
                         setReplyingTo={setReplyingTo}
                         replyText={replyText}
@@ -2555,10 +2619,16 @@ const openMathEditor = (target) => {
                         setCurrentImageIndex={setCurrentImageIndex}
                         setModalImages={setModalImages}
                         setShowImageModal={setShowImageModal}
+
+                        editingCommentId={editingComment}
+                        editText={editText}
+                        setEditText={setEditText}
+                        onSaveEdit={handleSaveEdit}
+                        onCancelEdit={handleCancelEdit}
                     />
-    ))}
+                ))}
             </div>
-            
+
             {/* Math Editor Modal */}
             <MathEditor
                 isOpen={showMathEditor}
@@ -2590,7 +2660,7 @@ const openMathEditor = (target) => {
                     zIndex: 9999,
                     cursor: "pointer"
                 }}
-                onClick={closeImageModal}
+                    onClick={closeImageModal}
                 >
                     {/* Close button */}
                     <button
@@ -2689,7 +2759,7 @@ const openMathEditor = (target) => {
                             zIndex: 10000
                         }}>
                             {currentImageIndex + 1} / {modalImages.length}
-        </div>
+                        </div>
                     )}
 
                     {/* Fullscreen image */}
