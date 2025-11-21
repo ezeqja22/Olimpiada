@@ -626,9 +626,8 @@ function ProblemDetail() {
         dislike_count: 0
     });
     //to insert math at cursor position
-    const titleRef = useRef(null);
-    const descriptionRef = useRef(null);
-    const commentRef = useRef(null);
+    const teditTitleRef = useRef(null);
+    const editDescriptionRef = useRef(null);
     const editCommentRef = useRef(null);
     const [cursorIndex, setCursorIndex] = useState(null);
     const [formData, setFormData] = useState({
@@ -670,7 +669,7 @@ function ProblemDetail() {
     const [showReportModal, setShowReportModal] = useState(false);
     const [reportTarget, setReportTarget] = useState(null);
 
-    const openMathEditor = (target) => {
+const openMathEditor = (target) => {
   let ref = null;
 
   if (target === "title") ref = titleRef.current;
@@ -742,6 +741,22 @@ function ProblemDetail() {
     const closeCommentMathEditor = () => {
         setShowCommentMathEditor(false);
     };
+
+    const insertSymbolAtCursor = (ref, setter, symbol) => {
+    if (!ref.current) return;
+
+    const el = ref.current;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+
+    setter(prev => prev.slice(0, start) + symbol + prev.slice(end));
+
+    setTimeout(() => {
+        el.focus();
+        el.selectionStart = el.selectionEnd = start + symbol.length;
+    }, 0);
+};
+
 
     // Mobile detection
     useEffect(() => {
@@ -1297,7 +1312,7 @@ function ProblemDetail() {
                 <div>
                     <div style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
                         <input
-                            ref={titleRef}
+                            ref={editTitleRef}
                             type="text"
                             value={editProblemData.title}
                             onChange={(e) => setEditProblemData({...editProblemData, title: e.target.value})}
@@ -1477,7 +1492,7 @@ function ProblemDetail() {
                     </div>
                     <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
                         <textarea
-                            ref={descriptionRef}
+                            ref={editDescriptionRef}
                             value={editProblemData.description}
                             onChange={(e) => setEditProblemData({...editProblemData, description: e.target.value})}
                             placeholder="Problem description"
@@ -2545,8 +2560,14 @@ function ProblemDetail() {
             <MathEditor
                 isOpen={showMathEditor}
                 onClose={closeMathEditor}
-                onInsert={handleMathInsert}
-                initialValue=""
+                onInsert={(symbol) => {
+                    if (mathEditorType === "edit_description") {
+                        insertSymbolAtCursor(editDescriptionRef, setEditProblemDescription, symbol);
+                    }
+                    if (mathEditorType === "edit_title") {
+                        insertSymbolAtCursor(editTitleRef, setEditProblemTitle, symbol);
+                    }
+                }}
             />
 
             {/* Comment Math Editor Modal */}
