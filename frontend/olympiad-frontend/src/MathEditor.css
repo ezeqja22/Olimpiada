@@ -50,8 +50,10 @@
   transition: background-color 0.2s;
 }
 
-.close-btn:hover {
-  background-color: #e0e0e0;
+@media (hover: hover) {
+  .close-btn:hover {
+    background-color: #e0e0e0;
+  }
 }
 
 .math-toolbar {
@@ -78,9 +80,11 @@
   transition: all 0.2s;
 }
 
-.toolbar-tabs button:hover {
-  background: #f0f0f0;
-  border-color: #999;
+@media (hover: hover) {
+  .toolbar-tabs button:hover {
+    background: #f0f0f0;
+    border-color: #999;
+  }
 }
 
 .toolbar-tabs button.active {
@@ -114,11 +118,13 @@
   min-height: 45px;
 }
 
-.symbol-btn:hover {
-  background: #f0f8ff;
-  border-color: #007bff;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+@media (hover: hover) {
+  .symbol-btn:hover {
+    background: #f0f8ff;
+    border-color: #007bff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+  }
 }
 
 .symbol-btn:active {
@@ -212,9 +218,11 @@
   color: white;
 }
 
-.cancel-btn:hover {
-  background: #5a6268;
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .cancel-btn:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+  }
 }
 
 .insert-btn {
@@ -222,9 +230,11 @@
   color: white;
 }
 
-.insert-btn:hover {
-  background: #218838;
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .insert-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
+  }
 }
 
 /* Responsive Design */
