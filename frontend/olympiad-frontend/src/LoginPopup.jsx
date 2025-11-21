@@ -33,7 +33,7 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
             navigate("/homepage");
         } catch (err) {
             const errorMessage = err.response?.data?.detail || err.message;
-            
+
             // Check if it's a maintenance mode error
             if (err.response?.status === 503) {
                 setError("Site is currently under maintenance. Please try again later.");
@@ -41,7 +41,7 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
             // Check if it's an email verification error
             else if (err.response?.status === 403 && errorMessage.includes("Email not verified")) {
                 setError("Please verify your email before logging in. Check your email for verification code.");
-            } 
+            }
             // Check if it's a network error
             else if (err.code === 'ERR_NETWORK' || err.message.includes('Network Error')) {
                 setError("Unable to connect to the server. Please check your internet connection and try again.");
@@ -56,9 +56,8 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
 
     const handleSignupClick = () => {
         localStorage.removeItem("token"); // clear any old invalid token
-        onClose(); // this already closes the popup
         navigate("/signup", { replace: true });
-};
+    };
 
 
     if (!isOpen) return null;
@@ -163,13 +162,13 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
                                 placeholder="Enter your password"
                             />
                             {/* Add custom eye icon */}
-                            <span 
+                            <span
                                 onClick={() => setShowPassword(!showPassword)}
-                                style={{ 
-                                    cursor: 'pointer', 
-                                    position: 'absolute', 
-                                    right: '12px', 
-                                    top: '50%', 
+                                style={{
+                                    cursor: 'pointer',
+                                    position: 'absolute',
+                                    right: '12px',
+                                    top: '50%',
                                     transform: 'translateY(-50%)',
                                     color: '#666',
                                     padding: '8px',
@@ -178,8 +177,8 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
                                 }}
                             >
                                 <img
-                                    src={showPassword ? 
-                                        "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_MBYLL_cioicv.svg" : 
+                                    src={showPassword ?
+                                        "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_MBYLL_cioicv.svg" :
                                         "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_HAP_yencim.svg"}
                                     alt={showPassword ? "Hide password" : "Show password"}
                                     style={{
@@ -225,27 +224,27 @@ function LoginPopup({ isOpen, onClose, redirectTo }) {
                         {loading ? "Signing In..." : "Sign In"}
                     </button>
                 </form>
-<button
-  onClick={() => {
-    console.log("Closing modal and redirecting...");
-    onClose();
-    // Force navigation after a tiny delay to ensure modal is closed
-    setTimeout(() => {
-      window.location.href = "/forgot-password";
-    }, 10);
-  }}
-  style={{
-    backgroundColor: "transparent",
-    border: "none",
-    color: "#1a4d3a",
-    textDecoration: "underline",
-    cursor: "pointer",
-    fontSize: "inherit",
-    padding: 0
-  }}
->
-  Forgot Password?
-</button>
+                <button
+                    onClick={() => {
+                        console.log("Closing modal and redirecting...");
+                        onClose();
+                        // Force navigation after a tiny delay to ensure modal is closed
+                        setTimeout(() => {
+                            window.location.href = "/forgot-password";
+                        }, 10);
+                    }}
+                    style={{
+                        backgroundColor: "transparent",
+                        border: "none",
+                        color: "#1a4d3a",
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                        fontSize: "inherit",
+                        padding: 0
+                    }}
+                >
+                    Forgot Password?
+                </button>
 
                 {/* Signup Link */}
                 <div style={{

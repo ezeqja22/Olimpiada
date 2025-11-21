@@ -12,7 +12,7 @@ function AuthGuard({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Get site settings for maintenance mode check
   const { siteSettings } = useSiteSettings();
 
@@ -26,7 +26,7 @@ function AuthGuard({ children }) {
       // Allow admin access to admin routes
       const isAdminRoute = location.pathname.startsWith('/admin');
       const isAdmin = currentUser && currentUser.role === 'admin';
-      
+
       if (!isAdminRoute && !isAdmin) {
         // Show maintenance message
         return;
@@ -37,25 +37,26 @@ function AuthGuard({ children }) {
   const validateSession = async () => {
     const token = localStorage.getItem("token");
     // Allow homepage, login, and signup to be accessible without authentication
-    if (location.pathname === "/" || 
-        location.pathname === "/homepage" || 
-        location.pathname === "/login" || 
-        location.pathname === "/signup" ||
-        location.pathname === "/forgot-password" ||
-        location.pathname === "/verify-email") {
+    if (location.pathname === "/" ||
+      location.pathname === "/homepage" ||
+      location.pathname === "/login" ||
+      location.pathname === "/signup" ||
+      location.pathname === "/forgot-password" ||
+      location.pathname === "/verify-email") {
       setIsAuthenticated(false);
       setIsValidating(false);
+      setShowLoginPopup(false);
       return;
     }
-    
+
     // During maintenance mode, allow login/signup pages even if not authenticated
-    if (siteSettings.maintenance_mode && 
-        (location.pathname === "/login" || location.pathname === "/signup")) {
+    if (siteSettings.maintenance_mode &&
+      (location.pathname === "/login" || location.pathname === "/signup")) {
       setIsAuthenticated(false);
       setIsValidating(false);
       return;
     }
-    
+
     // If no token and trying to access protected route, show login popup
     if (!token && isProtectedRoute(location.pathname)) {
       setShowLoginPopup(true);
@@ -72,7 +73,7 @@ function AuthGuard({ children }) {
             Authorization: `Bearer ${token}`
           }
         });
-        
+
         if (response.data) {
           // Token is valid
           setCurrentUser(response.data);
@@ -96,7 +97,7 @@ function AuthGuard({ children }) {
           navigate("/login");
           return;
         }
-        
+
         // Check if user is deactivated
         if (error.response?.status === 403 && error.response?.data?.detail?.includes("Account has been deactivated")) {
           // Show deactivation message and redirect to login
@@ -105,7 +106,7 @@ function AuthGuard({ children }) {
           navigate("/login");
           return;
         }
-        
+
         // Token is invalid or expired
         localStorage.removeItem("token");
         if (isProtectedRoute(location.pathname)) {
@@ -122,13 +123,13 @@ function AuthGuard({ children }) {
 
   const isProtectedRoute = (pathname) => {
     const protectedRoutes = [
-      "/feed", 
-      "/create-problem", 
-      "/profile", 
-      "/user/", 
-      "/problem/", 
-      "/search", 
-      "/forums", 
+      "/feed",
+      "/create-problem",
+      "/profile",
+      "/user/",
+      "/problem/",
+      "/search",
+      "/forums",
       "/subject/"
     ];
     return protectedRoutes.some(route => pathname.startsWith(route));
@@ -152,7 +153,7 @@ function AuthGuard({ children }) {
   // Don't show children if popup is open and user is not authenticated
   if (showLoginPopup && !isAuthenticated) {
     return (
-      <LoginPopup 
+      <LoginPopup
         isOpen={showLoginPopup}
         onClose={handleClosePopup}
         redirectTo={location.pathname}
@@ -162,9 +163,9 @@ function AuthGuard({ children }) {
 
   if (isValidating) {
     return (
-      <AnimatedLoader 
-        type="verify" 
-        message="Validating session..." 
+      <AnimatedLoader
+        type="verify"
+        message="Validating session..."
         size="large"
       />
     );
