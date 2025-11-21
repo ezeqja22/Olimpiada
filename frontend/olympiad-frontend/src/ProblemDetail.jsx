@@ -694,6 +694,27 @@ const openMathEditor = (target) => {
         setMathEditorTarget(null);
     };
 
+    const handleMathInsert = (mathContent) => {
+        if (mathEditorTarget && cursorIndex) {
+          const text = editProblemData[mathEditorTarget];
+      
+          const newText =
+            text.slice(0, cursorIndex.start) +
+            mathContent +
+            text.slice(cursorIndex.end);
+      
+            setEditProblemData({
+            ...editProblemData,
+            [mathEditorTarget]: newText
+          });
+        }
+      
+        setShowMathEditor(false);
+        setMathEditorTarget(null);
+        setCursorIndex(null);
+      };
+      
+
     const openCommentMathEditor = () => {
         setShowCommentMathEditor(true);
     };
@@ -2542,14 +2563,7 @@ const openMathEditor = (target) => {
             <MathEditor
                 isOpen={showMathEditor}
                 onClose={closeMathEditor}
-                onInsert={(symbol) => {
-                    if (mathEditorType === "edit_description") {
-                        insertSymbolAtCursor(editDescriptionRef, setEditProblemDescription, symbol);
-                    }
-                    if (mathEditorType === "edit_title") {
-                        insertSymbolAtCursor(editTitleRef, setEditProblemTitle, symbol);
-                    }
-                }}
+                onInsert={handleMathInsert}
             />
 
             {/* Comment Math Editor Modal */}
