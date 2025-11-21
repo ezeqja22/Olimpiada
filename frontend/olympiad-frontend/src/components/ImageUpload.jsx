@@ -70,7 +70,7 @@ const ImageUpload = ({ onImagesChange, maxImages = 5, disabled = false, resetTri
     };
 
     const openFileDialog = () => {
-        if (!disabled && images.length < maxImages) {
+        if (!disabled && currentImages.length < maxImages) {
             fileInputRef.current?.click();
         }
     };
