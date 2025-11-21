@@ -16,41 +16,41 @@ import { useProfileVisibility } from './hooks/useProfileVisibility';
 
 // Helper function to render math content
 const renderMathContent = (text) => {
-  if (!text) return '';
+    if (!text) return '';
 
-  // Split text into math and non-math segments
-  const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
+    // Split text into math and non-math segments
+    const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
 
-  return parts.map((part, index) => {
-    if (part.startsWith('$$') && part.endsWith('$$')) {
-      // Block math mode
-      const content = part.slice(2, -2);
-      return (
-        <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
-          <BlockMath math={content} />
-        </div>
-      );
-    } else if (part.startsWith('$') && part.endsWith('$')) {
-      // Inline math mode
-      const content = part.slice(1, -1);
-      return <InlineMath key={index} math={content} />;
-    } else {
-      // Regular text — keep it as-is
-      return <span key={index}>{part}</span>;
-    }
-  });
+    return parts.map((part, index) => {
+        if (part.startsWith('$$') && part.endsWith('$$')) {
+            // Block math mode
+            const content = part.slice(2, -2);
+            return (
+                <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
+                    <BlockMath math={content} />
+                </div>
+            );
+        } else if (part.startsWith('$') && part.endsWith('$')) {
+            // Inline math mode
+            const content = part.slice(1, -1);
+            return <InlineMath key={index} math={content} />;
+        } else {
+            // Regular text — keep it as-is
+            return <span key={index}>{part}</span>;
+        }
+    });
 };
 
 const PublicUserProfile = () => {
     const { username } = useParams();
     const navigate = useNavigate();
-    
+
     // Feature settings
     const { checkFeatureEnabled, showFeatureDisabledAlert } = useFeatureSettings();
-    
+
     // Profile visibility settings
     const { canViewProfile, canViewProblems, loading: visibilityLoading } = useProfileVisibility();
-    
+
     const [userProfile, setUserProfile] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -60,6 +60,19 @@ const PublicUserProfile = () => {
     const [voteData, setVoteData] = useState({});
     const [bookmarkData, setBookmarkData] = useState({});
     const [showReportModal, setShowReportModal] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Mobile detection
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     useEffect(() => {
         fetchUserProfile();
@@ -89,7 +102,7 @@ const PublicUserProfile = () => {
             });
             setUserProfile(response.data);
             setFollowing(response.data.is_following);
-            
+
             // Fetch vote data for user's problems
             if (response.data.problems && response.data.problems.length > 0) {
                 await fetchVoteData(response.data.problems);
@@ -105,17 +118,17 @@ const PublicUserProfile = () => {
 
     const handleFollow = async () => {
         if (!userProfile) return;
-        
+
         // Check if following is enabled
         if (!checkFeatureEnabled('following_enabled')) {
             showFeatureDisabledAlert('Following');
             return;
         }
-        
+
         try {
             setFollowLoading(true);
             const token = localStorage.getItem('token');
-            
+
             if (following) {
                 // Unfollow
                 await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/${userProfile.user.id}`, {
@@ -159,7 +172,7 @@ const PublicUserProfile = () => {
                 console.log("📊 Set default vote data:", voteDataMap);
                 return;
             }
-            
+
             // Get current user info
             let currentUserId = null;
             try {
@@ -171,7 +184,7 @@ const PublicUserProfile = () => {
             } catch (userError) {
                 console.error("❌ Error fetching current user:", userError);
             }
-            
+
             const votePromises = problemsList.map(async (problem) => {
                 const problemId = problem.id;
                 try {
@@ -184,12 +197,12 @@ const PublicUserProfile = () => {
                         }
                     );
                     console.log(`📊 Vote data for problem ${problemId}:`, response.data);
-                    
+
                     // Process the vote data - backend returns array of votes, we need aggregated data
                     let likeCount = 0;
                     let dislikeCount = 0;
                     let userVote = null;
-                    
+
                     if (Array.isArray(response.data)) {
                         response.data.forEach(vote => {
                             if (vote.vote_type === 'like') {
@@ -205,13 +218,13 @@ const PublicUserProfile = () => {
                             }
                         });
                     }
-                    
+
                     const processedVoteData = {
                         like_count: likeCount,
                         dislike_count: dislikeCount,
                         user_vote: userVote
                     };
-                    
+
                     console.log(`📊 Processed vote data for problem ${problemId}:`, processedVoteData);
                     return { problemId, voteData: processedVoteData };
                 } catch (error) {
@@ -219,7 +232,7 @@ const PublicUserProfile = () => {
                     return { problemId, voteData: { like_count: 0, dislike_count: 0, user_vote: null } };
                 }
             });
-            
+
             const voteResults = await Promise.all(votePromises);
             const voteDataMap = {};
             voteResults.forEach(({ problemId, voteData }) => {
@@ -249,7 +262,7 @@ const PublicUserProfile = () => {
                     }
                 }
             );
-            
+
             // Update vote data for this specific problem
             setVoteData(prev => ({
                 ...prev,
@@ -276,7 +289,7 @@ const PublicUserProfile = () => {
                 console.log("📊 Set default bookmark data:", bookmarkDataMap);
                 return;
             }
-            
+
             const problemIds = problemsList.map(problem => problem.id);
             console.log("📤 Sending bookmark request with problem IDs:", problemIds);
             // Try different request formats
@@ -307,7 +320,7 @@ const PublicUserProfile = () => {
                     }
                 );
             }
-            
+
             // Convert backend format to frontend format
             const convertedData = {};
             Object.keys(response.data).forEach(problemId => {
@@ -331,7 +344,7 @@ const PublicUserProfile = () => {
             }
 
             const isCurrentlyBookmarked = bookmarkData[problemId];
-            
+
             if (isCurrentlyBookmarked) {
                 // Remove bookmark
                 await axios.delete(
@@ -376,9 +389,9 @@ const PublicUserProfile = () => {
     if (loading) {
         return (
             <Layout showHomeButton={true}>
-                <AnimatedLoader 
-                    type="profile" 
-                    message="Loading user profile..." 
+                <AnimatedLoader
+                    type="profile"
+                    message="Loading user profile..."
                     size="large"
                 />
             </Layout>
@@ -400,7 +413,7 @@ const PublicUserProfile = () => {
             <div style={{ marginBottom: spacing.md }}>
                 <BackButton fallbackPath="/feed" />
             </div>
-            
+
             <div style={{ marginBottom: spacing.xl }}>
                 <h1 style={{
                     fontSize: typography.fontSize["3xl"],
@@ -414,20 +427,22 @@ const PublicUserProfile = () => {
             </div>
 
             {/* User Info */}
-            <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
+            <div style={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                alignItems: 'center',
                 marginBottom: '30px',
                 padding: '24px',
                 backgroundColor: '#f8f9fa',
                 borderRadius: '12px',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                border: '1px solid #e9ecef'
+                border: '1px solid #e9ecef',
+                textAlign: isMobile ? 'center' : 'left'
             }}>
-                <div style={{ 
-                    width: '80px', 
-                    height: '80px', 
-                    borderRadius: '50%', 
+                <div style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
                     backgroundColor: '#007bff',
                     display: 'flex',
                     alignItems: 'center',
@@ -435,14 +450,15 @@ const PublicUserProfile = () => {
                     color: 'white',
                     fontSize: '24px',
                     fontWeight: 'bold',
-                    marginRight: '20px',
-                    backgroundImage: userProfile.user.profile_picture ? 
-                        `url(${userProfile.user.profile_picture})` : 
+                    marginRight: isMobile ? '0' : '20px',
+                    marginBottom: isMobile ? '15px' : '0',
+                    backgroundImage: userProfile.user.profile_picture ?
+                        `url(${userProfile.user.profile_picture})` :
                         'none',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }}>
-                    {!userProfile.user.profile_picture && 
+                    {!userProfile.user.profile_picture &&
                         (userProfile.user.username ? userProfile.user.username[0].toUpperCase() : '?')
                     }
                 </div>
@@ -455,9 +471,16 @@ const PublicUserProfile = () => {
                             {userProfile.user.bio}
                         </p>
                     )}
-                    <div style={{ display: 'flex', gap: '20px', color: '#666' }}>
-                        <span 
-                            style={{ 
+                    <div style={{
+                        display: 'flex',
+                        gap: '20px',
+                        color: '#666',
+                        justifyContent: isMobile ? 'center' : 'flex-start',
+                        flexWrap: 'wrap',
+                        marginBottom: isMobile ? '15px' : '0'
+                    }}>
+                        <span
+                            style={{
                                 cursor: 'pointer',
                                 padding: '4px 8px',
                                 borderRadius: '6px',
@@ -475,8 +498,8 @@ const PublicUserProfile = () => {
                         >
                             <strong>{userProfile.follower_count}</strong> followers
                         </span>
-                        <span 
-                            style={{ 
+                        <span
+                            style={{
                                 cursor: 'pointer',
                                 padding: '4px 8px',
                                 borderRadius: '6px',
@@ -497,7 +520,13 @@ const PublicUserProfile = () => {
                         <span><strong>{canViewProblems(userProfile.user, currentUser, following, userProfile.is_followed_by_profile_owner) ? userProfile.problems.length : '?'}</strong> problems</span>
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    alignItems: 'center',
+                    justifyContent: isMobile ? 'center' : 'flex-start',
+                    width: isMobile ? '100%' : 'auto'
+                }}>
                     <FollowButton
                         isFollowing={following}
                         onFollow={handleFollow}
@@ -530,9 +559,9 @@ const PublicUserProfile = () => {
                     Problems by {userProfile.user.username}
                 </h3>
                 {!canViewProblems(userProfile.user, currentUser, following, userProfile.is_followed_by_profile_owner) ? (
-                    <div style={{ 
-                        textAlign: 'center', 
-                        color: '#666', 
+                    <div style={{
+                        textAlign: 'center',
+                        color: '#666',
                         padding: '40px',
                         background: '#f8f9fa',
                         borderRadius: '12px',
@@ -556,22 +585,22 @@ const PublicUserProfile = () => {
                             <div key={problem.id} style={{
                                 border: '1px solid #e9ecef',
                                 borderRadius: '12px',
-                                padding: '24px',
+                                padding: isMobile ? '15px' : '24px',
                                 backgroundColor: 'white',
                                 boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                                 transition: 'all 0.2s ease',
                                 cursor: 'pointer'
                             }}
-                            onClick={() => navigate(`/problem/${problem.id}?from=user&username=${encodeURIComponent(username)}`)}
-                            onMouseEnter={(e) => {
-                                e.target.style.transform = 'translateY(-2px)';
-                                e.target.style.boxShadow = '0 8px 20px rgba(0,0,0,0.12)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.transform = 'translateY(0)';
-                                e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
-                            }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                                onClick={() => navigate(`/problem/${problem.id}?from=user&username=${encodeURIComponent(username)}`)}
+                                onMouseEnter={(e) => {
+                                    e.target.style.transform = 'translateY(-2px)';
+                                    e.target.style.boxShadow = '0 8px 20px rgba(0,0,0,0.12)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.transform = 'translateY(0)';
+                                    e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+                                }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isMobile ? '10px' : '15px' }}>
                                     <h4 style={{ margin: 0, color: '#333' }}>{renderMathContent(problem.title)}</h4>
                                     <span style={{ color: '#666', fontSize: '14px' }}>
                                         {new Date(problem.created_at).toLocaleDateString()}
@@ -592,14 +621,14 @@ const PublicUserProfile = () => {
                                             boxShadow: '0 2px 8px rgba(124, 58, 237, 0.3)',
                                             transition: 'all 0.2s ease'
                                         }}
-                                        onMouseEnter={(e) => {
-                                            e.target.style.transform = 'translateY(-1px)';
-                                            e.target.style.boxShadow = '0 4px 12px rgba(124, 58, 237, 0.4)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.target.style.transform = 'translateY(0)';
-                                            e.target.style.boxShadow = '0 2px 8px rgba(124, 58, 237, 0.3)';
-                                        }}>
+                                            onMouseEnter={(e) => {
+                                                e.target.style.transform = 'translateY(-1px)';
+                                                e.target.style.boxShadow = '0 4px 12px rgba(124, 58, 237, 0.4)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.target.style.transform = 'translateY(0)';
+                                                e.target.style.boxShadow = '0 2px 8px rgba(124, 58, 237, 0.3)';
+                                            }}>
                                             {tag.trim()}
                                         </span>
                                     ))}
@@ -638,8 +667,8 @@ const PublicUserProfile = () => {
                                                 }
                                             }}
                                         >
-                                            <img 
-                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg" 
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg"
                                                 alt="Like"
                                                 style={{
                                                     height: "14px",
@@ -681,8 +710,8 @@ const PublicUserProfile = () => {
                                                 }
                                             }}
                                         >
-                                            <img 
-                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg" 
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg"
                                                 alt="Dislike"
                                                 style={{
                                                     height: "14px",
@@ -692,16 +721,16 @@ const PublicUserProfile = () => {
                                             />
                                             {voteData[problem.id]?.dislike_count || 0}
                                         </button>
-                                        <span style={{ 
-                                            fontSize: "12px", 
-                                            color: "#666", 
+                                        <span style={{
+                                            fontSize: "12px",
+                                            color: "#666",
                                             pointerEvents: "none",
                                             display: "flex",
                                             alignItems: "center",
                                             gap: "4px"
                                         }}>
-                                            <img 
-                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg"
                                                 alt="Comments"
                                                 style={{
                                                     height: "14px",
@@ -727,8 +756,8 @@ const PublicUserProfile = () => {
                                                 justifyContent: "center"
                                             }}
                                         >
-                                            <img 
-                                                src={bookmarkData[problem.id] 
+                                            <img
+                                                src={bookmarkData[problem.id]
                                                     ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
                                                     : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
                                                 }
@@ -745,20 +774,23 @@ const PublicUserProfile = () => {
                             </div>
                         ))}
                     </div>
-                )}
-            </div>
+                )
+                }
+            </div >
 
             {/* Report Modal */}
-            {showReportModal && userProfile && (
-                <ReportModal
-                    isOpen={showReportModal}
-                    onClose={() => setShowReportModal(false)}
-                    reportType="user"
-                    targetId={userProfile.user.id}
-                    targetUser={userProfile.user}
-                />
-            )}
-        </Layout>
+            {
+                showReportModal && userProfile && (
+                    <ReportModal
+                        isOpen={showReportModal}
+                        onClose={() => setShowReportModal(false)}
+                        reportType="user"
+                        targetId={userProfile.user.id}
+                        targetUser={userProfile.user}
+                    />
+                )
+            }
+        </Layout >
     );
 };
 
