@@ -1,4 +1,4 @@
-import React, { useRef,useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "./components/Layout";
@@ -13,29 +13,29 @@ import 'katex/dist/katex.min.css';
 
 // Helper function to render math content
 const renderMathContent = (text) => {
-  if (!text) return '';
+    if (!text) return '';
 
-  // Split text into math and non-math segments
-  const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
+    // Split text into math and non-math segments
+    const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
 
-  return parts.map((part, index) => {
-    if (part.startsWith('$$') && part.endsWith('$$')) {
-      // Block math mode
-      const content = part.slice(2, -2);
-      return (
-        <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
-          <BlockMath math={content} />
-        </div>
-      );
-    } else if (part.startsWith('$') && part.endsWith('$')) {
-      // Inline math mode
-      const content = part.slice(1, -1);
-      return <InlineMath key={index} math={content} />;
-    } else {
-      // Regular text — keep it as-is
-      return <span key={index}>{part}</span>;
-    }
-  });
+    return parts.map((part, index) => {
+        if (part.startsWith('$$') && part.endsWith('$$')) {
+            // Block math mode
+            const content = part.slice(2, -2);
+            return (
+                <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
+                    <BlockMath math={content} />
+                </div>
+            );
+        } else if (part.startsWith('$') && part.endsWith('$')) {
+            // Inline math mode
+            const content = part.slice(1, -1);
+            return <InlineMath key={index} math={content} />;
+        } else {
+            // Regular text — keep it as-is
+            return <span key={index}>{part}</span>;
+        }
+    });
 };
 
 function UserProfile() {
@@ -56,6 +56,19 @@ function UserProfile() {
         bio: ""
     });
 
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     useEffect(() => {
         // Only fetch data if user is authenticated
         const token = localStorage.getItem("token");
@@ -73,19 +86,19 @@ function UserProfile() {
                 setLoading(false);
                 return;
             }
-            
+
             const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/user/profile`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
             setProfileData(response.data);
-            
+
             // Fetch vote data for user's problems
             if (response.data.problems && response.data.problems.length > 0) {
                 await fetchVoteData(response.data.problems);
             }
-            
+
             // Fetch vote data and bookmark data for bookmarked problems
             if (response.data.bookmarks && response.data.bookmarks.length > 0) {
                 const bookmarkedProblems = response.data.bookmarks.map(bookmark => bookmark.problem);
@@ -108,9 +121,9 @@ function UserProfile() {
                 console.log("No token found, skipping vote data fetch");
                 return;
             }
-            
+
             console.log("Fetching vote data for problems:", problemsList.map(p => p.id));
-            
+
             const votePromises = problemsList.map(async (problem) => {
                 const problemId = problem.id;
                 try {
@@ -129,7 +142,7 @@ function UserProfile() {
                     return { problemId, voteData: { like_count: 0, dislike_count: 0, user_vote: null } };
                 }
             });
-            
+
             const voteResults = await Promise.all(votePromises);
             const voteDataMap = {};
             voteResults.forEach(({ problemId, voteData }) => {
@@ -172,7 +185,7 @@ function UserProfile() {
         try {
             const token = localStorage.getItem("token");
             if (!token) return;
-            
+
             const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/drafts`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -193,7 +206,7 @@ function UserProfile() {
                     }
                 }
             );
-            
+
             // Update vote data for this specific problem
             setVoteData(prev => ({
                 ...prev,
@@ -220,7 +233,7 @@ function UserProfile() {
                     Authorization: `Bearer ${token}`
                 }
             });
-            
+
             // Update the profile data with the new information
             setProfileData(prev => ({
                 ...prev,
@@ -229,7 +242,7 @@ function UserProfile() {
                     bio: editFormData.bio
                 }
             }));
-            
+
             setIsEditingProfile(false);
             alert("Profile updated successfully!");
         } catch (error) {
@@ -250,7 +263,7 @@ function UserProfile() {
         try {
             const token = localStorage.getItem("token");
             const isCurrentlyBookmarked = bookmarkData[problemId];
-            
+
             if (isCurrentlyBookmarked) {
                 // Try to remove bookmark
                 try {
@@ -259,13 +272,13 @@ function UserProfile() {
                             Authorization: `Bearer ${token}`
                         }
                     });
-                    
+
                     // Update state to unbookmarked
                     setBookmarkData(prev => ({
                         ...prev,
                         [problemId]: false
                     }));
-                    
+
                     // Refresh profile data to remove from bookmarks list
                     fetchUserProfile();
                 } catch (deleteError) {
@@ -279,7 +292,7 @@ function UserProfile() {
                             Authorization: `Bearer ${token}`
                         }
                     });
-                    
+
                     // Update state to bookmarked
                     setBookmarkData(prev => ({
                         ...prev,
@@ -299,7 +312,7 @@ function UserProfile() {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            
+
             const token = localStorage.getItem("token");
             const response = await axios.post(
                 `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/user/profile-picture`,
@@ -311,7 +324,7 @@ function UserProfile() {
                     }
                 }
             );
-            
+
             // Update profile data with new picture
             setProfileData(prev => ({
                 ...prev,
@@ -320,7 +333,7 @@ function UserProfile() {
                     profile_picture: response.data.file_path
                 }
             }));
-            
+
             alert("Profile picture updated successfully!");
         } catch (error) {
             console.error("Error uploading file:", error);
@@ -329,7 +342,7 @@ function UserProfile() {
             setUploading(false);
         }
     };
-    
+
     const handleFileSelect = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -359,7 +372,7 @@ function UserProfile() {
                     }
                 }
             );
-            
+
             // Update profile data to remove picture
             setProfileData(prev => ({
                 ...prev,
@@ -368,7 +381,7 @@ function UserProfile() {
                     profile_picture: null
                 }
             }));
-            
+
             alert("Profile picture removed successfully!");
         } catch (error) {
             console.error("Error removing profile picture:", error);
@@ -417,14 +430,14 @@ function UserProfile() {
     const handleLogout = () => {
         // Clear all user data
         localStorage.removeItem("token");
-        
+
         // Clear any cached data
         setProfileData(null);
         setActiveTab("problems");
         setIsEditingProfile(false);
         setEditFormData({ bio: "", profile_picture: "" });
         setSelectedFile(null);
-        
+
         // Replace current history entry to prevent back navigation
         navigate("/homepage", { replace: true });
     };
@@ -432,9 +445,9 @@ function UserProfile() {
     if (loading) {
         return (
             <Layout showHomeButton={true}>
-                <AnimatedLoader 
-                    type="profile" 
-                    message="Loading profile..." 
+                <AnimatedLoader
+                    type="profile"
+                    message="Loading profile..."
                     size="large"
                 />
             </Layout>
@@ -450,7 +463,7 @@ function UserProfile() {
     }
 
     const { user, problems, comments, bookmarks } = profileData;
-    
+
     // Sort comments with solutions first, then by creation date
     const sortedComments = comments ? comments.sort((a, b) => {
         if (a.is_solution && !b.is_solution) return -1;
@@ -464,7 +477,7 @@ function UserProfile() {
             <div style={{ marginBottom: spacing.md }}>
                 <BackButton fallbackPath="/feed" />
             </div>
-            
+
             <div style={{ marginBottom: spacing.xl }}>
                 <h1 style={{
                     fontSize: typography.fontSize["3xl"],
@@ -476,7 +489,7 @@ function UserProfile() {
                     My Profile
                 </h1>
             </div>
-            
+
             {/* Hidden file input */}
             <input
                 type="file"
@@ -486,7 +499,7 @@ function UserProfile() {
                 ref={fileInputRef}
                 style={{ display: 'none' }}
             />
-            
+
             {/* User Header */}
             <div style={{
                 backgroundColor: "#f8f9fa",
@@ -497,7 +510,7 @@ function UserProfile() {
             }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
                     {/* Clickable Profile Picture */}
-                    <div 
+                    <div
                         onClick={handleProfilePictureClick}
                         style={{
                             width: "80px",
@@ -528,9 +541,9 @@ function UserProfile() {
                         }}
                     >
                         {!user.profile_picture && getUserInitial(user.username)}
-                        
+
                         {/* Camera overlay - semi-circle at bottom */}
-                        <div 
+                        <div
                             onClick={handleCameraOverlayClick}
                             style={{
                                 position: "absolute",
@@ -558,18 +571,18 @@ function UserProfile() {
                                 e.target.style.transform = "translateY(0)";
                             }}
                         >
-                            <img 
-                      src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Camera_Icon_My_Profile_cmmlrm.svg" 
-                      style={{
-                        height: "14px",
-                        width: "14px",
-                        objectFit: "contain"
-                      }}
-                    />
+                            <img
+                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Camera_Icon_My_Profile_cmmlrm.svg"
+                                style={{
+                                    height: "14px",
+                                    width: "14px",
+                                    objectFit: "contain"
+                                }}
+                            />
                         </div>
                     </div>
-                    
-                    
+
+
                     <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                             <h1 style={{ margin: "0 0 10px 0", color: "#333" }}>{user.username}</h1>
@@ -600,12 +613,12 @@ function UserProfile() {
                             </button>
                         </div>
                         <p style={{ margin: "0 0 10px 0", color: "#666", fontSize: "14px" }}>{user.email}</p>
-                        
+
                         {/* Follower/Following Counts */}
                         <div style={{ display: "flex", gap: "20px", margin: "10px 0" }}>
-                            <div 
-                                style={{ 
-                                    textAlign: "center", 
+                            <div
+                                style={{
+                                    textAlign: "center",
                                     cursor: "pointer",
                                     padding: "8px 12px",
                                     borderRadius: "8px",
@@ -624,9 +637,9 @@ function UserProfile() {
                                 </div>
                                 <div style={{ fontSize: "12px", color: "#666" }}>Followers</div>
                             </div>
-                            <div 
-                                style={{ 
-                                    textAlign: "center", 
+                            <div
+                                style={{
+                                    textAlign: "center",
                                     cursor: "pointer",
                                     padding: "8px 12px",
                                     borderRadius: "8px",
@@ -646,7 +659,7 @@ function UserProfile() {
                                 <div style={{ fontSize: "12px", color: "#666" }}>Following</div>
                             </div>
                         </div>
-                        
+
                         {user.bio && (
                             <p style={{ margin: "0", color: "#555", fontSize: "16px" }}>{user.bio}</p>
                         )}
@@ -672,7 +685,7 @@ function UserProfile() {
                             </label>
                             <textarea
                                 value={editFormData.bio}
-                                onChange={(e) => setEditFormData({...editFormData, bio: e.target.value})}
+                                onChange={(e) => setEditFormData({ ...editFormData, bio: e.target.value })}
                                 placeholder="Tell us about yourself..."
                                 style={{
                                     width: "100%",
@@ -694,7 +707,7 @@ function UserProfile() {
                                 }}
                             />
                         </div>
-                        
+
                         {/* Remove Profile Picture Button */}
                         {user && (
                             <div>
@@ -731,7 +744,7 @@ function UserProfile() {
                                 </button>
                             </div>
                         )}
-                        
+
                         <div style={{ display: "flex", gap: "12px" }}>
                             <button
                                 onClick={handleSaveProfile}
@@ -788,22 +801,43 @@ function UserProfile() {
                 </div>
             )}
 
-            {/* Stats */}
+            {/* Stats Cards */}
             <div style={{
                 display: "flex",
-                gap: "20px",
+                gap: "15px",
                 marginBottom: "30px",
-                justifyContent: "center"
+                flexWrap: isMobile ? "wrap" : "nowrap"
             }}>
-                <div style={{ textAlign: "center", padding: "15px", backgroundColor: "#e3f2fd", borderRadius: "8px", minWidth: "100px" }}>
-                    <div style={{ fontSize: "24px", fontWeight: "bold", color: "#1976d2" }}>{problems.length}</div>
+                <div style={{
+                    textAlign: "center",
+                    padding: "15px",
+                    backgroundColor: "#e8f5e9",
+                    borderRadius: "8px",
+                    minWidth: isMobile ? "calc(50% - 8px)" : "100px",
+                    flex: isMobile ? "1" : "none"
+                }}>
+                    <div style={{ fontSize: "24px", fontWeight: "bold", color: "#2e7d32" }}>{problems.length}</div>
                     <div style={{ fontSize: "14px", color: "#666" }}>Problems</div>
                 </div>
-                <div style={{ textAlign: "center", padding: "15px", backgroundColor: "#f3e5f5", borderRadius: "8px", minWidth: "100px" }}>
+                <div style={{
+                    textAlign: "center",
+                    padding: "15px",
+                    backgroundColor: "#f3e5f5",
+                    borderRadius: "8px",
+                    minWidth: isMobile ? "calc(50% - 8px)" : "100px",
+                    flex: isMobile ? "1" : "none"
+                }}>
                     <div style={{ fontSize: "24px", fontWeight: "bold", color: "#7b1fa2" }}>{comments.length}</div>
                     <div style={{ fontSize: "14px", color: "#666" }}>Comments</div>
                 </div>
-                <div style={{ textAlign: "center", padding: "15px", backgroundColor: "#fff3e0", borderRadius: "8px", minWidth: "100px" }}>
+                <div style={{
+                    textAlign: "center",
+                    padding: "15px",
+                    backgroundColor: "#fff3e0",
+                    borderRadius: "8px",
+                    minWidth: isMobile ? "calc(50% - 8px)" : "100px",
+                    flex: isMobile ? "1" : "none"
+                }}>
                     <div style={{ fontSize: "24px", fontWeight: "bold", color: "#f57c00" }}>{bookmarks.length}</div>
                     <div style={{ fontSize: "14px", color: "#666" }}>Bookmarks</div>
                 </div>
@@ -817,21 +851,31 @@ function UserProfile() {
                 backgroundColor: "#f8f9fa",
                 padding: "6px",
                 borderRadius: "12px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                overflowX: "auto",
+                whiteSpace: "nowrap",
+                scrollbarWidth: "none", // Firefox
+                msOverflowStyle: "none" // IE/Edge
             }}>
+                <style>{`
+                    div::-webkit-scrollbar {
+                        display: none;
+                    }
+                `}</style>
                 <button
                     onClick={() => setActiveTab("problems")}
                     style={{
-                        padding: "12px 24px",
+                        padding: isMobile ? "10px 16px" : "12px 24px",
                         backgroundColor: activeTab === "problems" ? colors.primary : "transparent",
                         color: activeTab === "problems" ? "white" : colors.gray[600],
                         border: "none",
                         borderRadius: "8px",
                         cursor: "pointer",
-                        fontSize: "16px",
+                        fontSize: isMobile ? "14px" : "16px",
                         fontWeight: "600",
                         transition: "all 0.2s ease",
-                        boxShadow: activeTab === "problems" ? "0 2px 8px rgba(26, 77, 58, 0.3)" : "none"
+                        boxShadow: activeTab === "problems" ? "0 2px 8px rgba(26, 77, 58, 0.3)" : "none",
+                        flexShrink: 0
                     }}
                     onMouseEnter={(e) => {
                         if (activeTab !== "problems") {
@@ -851,16 +895,17 @@ function UserProfile() {
                 <button
                     onClick={() => setActiveTab("comments")}
                     style={{
-                        padding: "12px 24px",
+                        padding: isMobile ? "10px 16px" : "12px 24px",
                         backgroundColor: activeTab === "comments" ? colors.primary : "transparent",
                         color: activeTab === "comments" ? "white" : colors.gray[600],
                         border: "none",
                         borderRadius: "8px",
                         cursor: "pointer",
-                        fontSize: "16px",
+                        fontSize: isMobile ? "14px" : "16px",
                         fontWeight: "600",
                         transition: "all 0.2s ease",
-                        boxShadow: activeTab === "comments" ? "0 2px 8px rgba(26, 77, 58, 0.3)" : "none"
+                        boxShadow: activeTab === "comments" ? "0 2px 8px rgba(26, 77, 58, 0.3)" : "none",
+                        flexShrink: 0
                     }}
                     onMouseEnter={(e) => {
                         if (activeTab !== "comments") {
@@ -880,16 +925,17 @@ function UserProfile() {
                 <button
                     onClick={() => setActiveTab("bookmarks")}
                     style={{
-                        padding: "12px 24px",
+                        padding: isMobile ? "10px 16px" : "12px 24px",
                         backgroundColor: activeTab === "bookmarks" ? colors.primary : "transparent",
                         color: activeTab === "bookmarks" ? "white" : colors.gray[600],
                         border: "none",
                         borderRadius: "8px",
                         cursor: "pointer",
-                        fontSize: "16px",
+                        fontSize: isMobile ? "14px" : "16px",
                         fontWeight: "600",
                         transition: "all 0.2s ease",
-                        boxShadow: activeTab === "bookmarks" ? "0 2px 8px rgba(26, 77, 58, 0.3)" : "none"
+                        boxShadow: activeTab === "bookmarks" ? "0 2px 8px rgba(26, 77, 58, 0.3)" : "none",
+                        flexShrink: 0
                     }}
                     onMouseEnter={(e) => {
                         if (activeTab !== "bookmarks") {
@@ -912,16 +958,17 @@ function UserProfile() {
                         fetchDrafts();
                     }}
                     style={{
-                        padding: "12px 24px",
+                        padding: isMobile ? "10px 16px" : "12px 24px",
                         backgroundColor: activeTab === "drafts" ? colors.primary : "transparent",
                         color: activeTab === "drafts" ? "white" : colors.gray[600],
                         border: "none",
                         borderRadius: "8px",
                         cursor: "pointer",
-                        fontSize: "16px",
+                        fontSize: isMobile ? "14px" : "16px",
                         fontWeight: "600",
                         transition: "all 0.2s ease",
-                        boxShadow: activeTab === "drafts" ? "0 2px 8px rgba(26, 77, 58, 0.3)" : "none"
+                        boxShadow: activeTab === "drafts" ? "0 2px 8px rgba(26, 77, 58, 0.3)" : "none",
+                        flexShrink: 0
                     }}
                     onMouseEnter={(e) => {
                         if (activeTab !== "drafts") {
@@ -961,14 +1008,14 @@ function UserProfile() {
                                         boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)",
                                         transition: "all 0.2s ease"
                                     }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.transform = "translateY(-1px)";
-                                        e.target.style.boxShadow = "0 4px 12px rgba(26, 77, 58, 0.4)";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.transform = "translateY(0)";
-                                        e.target.style.boxShadow = "0 2px 8px rgba(26, 77, 58, 0.3)";
-                                    }}>
+                                        onMouseEnter={(e) => {
+                                            e.target.style.transform = "translateY(-1px)";
+                                            e.target.style.boxShadow = "0 4px 12px rgba(26, 77, 58, 0.4)";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.transform = "translateY(0)";
+                                            e.target.style.boxShadow = "0 2px 8px rgba(26, 77, 58, 0.3)";
+                                        }}>
                                         Create Your First Problem
                                     </button>
                                 </Link>
@@ -985,14 +1032,14 @@ function UserProfile() {
                                         boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                                         transition: "all 0.2s ease"
                                     }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.transform = "translateY(-2px)";
-                                        e.target.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.transform = "translateY(0)";
-                                        e.target.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
-                                    }}>
+                                        onMouseEnter={(e) => {
+                                            e.target.style.transform = "translateY(-2px)";
+                                            e.target.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.transform = "translateY(0)";
+                                            e.target.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                                        }}>
                                         <Link to={`/problem/${problem.id}?from=/profile`} style={{ textDecoration: "none", pointerEvents: "none" }}>
                                             <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>{renderMathContent(problem.title)}</h4>
                                         </Link>
@@ -1072,7 +1119,7 @@ function UserProfile() {
                                                     }
                                                 }}
                                             >
-                                                 {voteData[problem.id]?.like_count || 0}
+                                                {voteData[problem.id]?.like_count || 0}
                                             </button>
                                             <button
                                                 onClick={(e) => {
@@ -1106,7 +1153,7 @@ function UserProfile() {
                                                     }
                                                 }}
                                             >
-                                                 {voteData[problem.id]?.dislike_count || 0}
+                                                {voteData[problem.id]?.dislike_count || 0}
                                             </button>
                                             <span style={{ fontSize: "12px", color: "#666" }}>
                                                 {new Date(problem.created_at).toLocaleDateString()}
@@ -1210,7 +1257,7 @@ function UserProfile() {
                                                     fontSize: "11px",
                                                     fontWeight: "bold"
                                                 }}>
-                                                     SOLUTION
+                                                    SOLUTION
                                                 </div>
                                             )}
                                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
@@ -1254,7 +1301,7 @@ function UserProfile() {
                                                 fontSize: "11px",
                                                 fontWeight: "bold"
                                             }}>
-                                                 SOLUTION
+                                                SOLUTION
                                             </div>
                                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
                                                 <Link to={`/problem/${comment.problem.id}?from=/profile`} style={{ textDecoration: "none" }}>
@@ -1336,14 +1383,14 @@ function UserProfile() {
                                                         boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
                                                         transition: "all 0.2s ease"
                                                     }}
-                                                    onMouseEnter={(e) => {
-                                                        e.target.style.transform = "translateY(-1px)";
-                                                        e.target.style.boxShadow = "0 4px 12px rgba(124, 58, 237, 0.4)";
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        e.target.style.transform = "translateY(0)";
-                                                        e.target.style.boxShadow = "0 2px 8px rgba(124, 58, 237, 0.3)";
-                                                    }}>
+                                                        onMouseEnter={(e) => {
+                                                            e.target.style.transform = "translateY(-1px)";
+                                                            e.target.style.boxShadow = "0 4px 12px rgba(124, 58, 237, 0.4)";
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.target.style.transform = "translateY(0)";
+                                                            e.target.style.boxShadow = "0 2px 8px rgba(124, 58, 237, 0.3)";
+                                                        }}>
                                                         {tag.trim()}
                                                     </span>
                                                 ))
@@ -1381,8 +1428,8 @@ function UserProfile() {
                                                         }
                                                     }}
                                                 >
-                                                    <img 
-                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg" 
+                                                    <img
+                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg"
                                                         alt="Like"
                                                         style={{
                                                             height: "14px",
@@ -1424,8 +1471,8 @@ function UserProfile() {
                                                         }
                                                     }}
                                                 >
-                                                    <img 
-                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg" 
+                                                    <img
+                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg"
                                                         alt="Dislike"
                                                         style={{
                                                             height: "14px",
@@ -1435,16 +1482,16 @@ function UserProfile() {
                                                     />
                                                     {voteData[bookmark.problem.id]?.dislike_count || 0}
                                                 </button>
-                                                <span style={{ 
-                                                    fontSize: "12px", 
-                                                    color: "#666", 
+                                                <span style={{
+                                                    fontSize: "12px",
+                                                    color: "#666",
                                                     pointerEvents: "none",
                                                     display: "flex",
                                                     alignItems: "center",
                                                     gap: "4px"
                                                 }}>
-                                                    <img 
-                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
+                                                    <img
+                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg"
                                                         alt="Comments"
                                                         style={{
                                                             height: "14px",
@@ -1469,7 +1516,7 @@ function UserProfile() {
                                                         gap: "4px"
                                                     }}
                                                 >
-                                                    <img 
+                                                    <img
                                                         src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
                                                         alt="Bookmark"
                                                         style={{
@@ -1611,9 +1658,9 @@ function UserProfile() {
                                                 ))}
                                             </div>
                                         )}
-                                        <div style={{ 
-                                            fontSize: "12px", 
-                                            color: "#666", 
+                                        <div style={{
+                                            fontSize: "12px",
+                                            color: "#666",
                                             marginTop: "10px",
                                             display: "flex",
                                             justifyContent: "space-between",
@@ -1629,7 +1676,7 @@ function UserProfile() {
                     </div>
                 )}
             </div>
-            
+
             {/* Profile Picture Zoom Modal */}
             {showImageModal && user.profile_picture && (
                 <div style={{
@@ -1644,14 +1691,14 @@ function UserProfile() {
                     justifyContent: "center",
                     zIndex: 1000
                 }}
-                onClick={() => setShowImageModal(false)}
+                    onClick={() => setShowImageModal(false)}
                 >
                     <div style={{
                         position: "relative",
                         maxWidth: "90vw",
                         maxHeight: "90vh"
                     }}
-                    onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <button
                             onClick={() => setShowImageModal(false)}

@@ -15,29 +15,29 @@ import 'katex/dist/katex.min.css';
 
 // Helper function to render math content
 const renderMathContent = (text) => {
-  if (!text) return '';
+    if (!text) return '';
 
-  // Split text into math and non-math segments
-  const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
+    // Split text into math and non-math segments
+    const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
 
-  return parts.map((part, index) => {
-    if (part.startsWith('$$') && part.endsWith('$$')) {
-      // Block math mode
-      const content = part.slice(2, -2);
-      return (
-        <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
-          <BlockMath math={content} />
-        </div>
-      );
-    } else if (part.startsWith('$') && part.endsWith('$')) {
-      // Inline math mode
-      const content = part.slice(1, -1);
-      return <InlineMath key={index} math={content} />;
-    } else {
-      // Regular text — keep it as-is
-      return <span key={index}>{part}</span>;
-    }
-  });
+    return parts.map((part, index) => {
+        if (part.startsWith('$$') && part.endsWith('$$')) {
+            // Block math mode
+            const content = part.slice(2, -2);
+            return (
+                <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
+                    <BlockMath math={content} />
+                </div>
+            );
+        } else if (part.startsWith('$') && part.endsWith('$')) {
+            // Inline math mode
+            const content = part.slice(1, -1);
+            return <InlineMath key={index} math={content} />;
+        } else {
+            // Regular text — keep it as-is
+            return <span key={index}>{part}</span>;
+        }
+    });
 };
 
 function SubjectPage() {
@@ -54,12 +54,12 @@ function SubjectPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isMobile, setIsMobile] = useState(false);
     const navigate = useNavigate();
-    
+
     // Feature settings
     const { checkFeatureEnabled, showFeatureDisabledAlert } = useFeatureSettings();
 
     // Convert URL parameter back to proper case
-    const subjectName = subject.split('-').map(word => 
+    const subjectName = subject.split('-').map(word =>
         word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
 
@@ -76,10 +76,10 @@ function SubjectPage() {
         const checkMobile = () => {
             setIsMobile(window.innerWidth <= 768);
         };
-        
+
         checkMobile();
         window.addEventListener('resize', checkMobile);
-        
+
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
@@ -93,14 +93,14 @@ function SubjectPage() {
         console.log("🚀 fetchProblems called for subject:", subjectName);
         setLoading(true);
         try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${subjectName}`);
-        console.log("📋 Problems fetched:", response.data.length);
-        
-        setAllProblems(response.data); // Store all problems (backend already filters out forum problems)
-        setProblems(response.data); // Initially show all problems
+            const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${subjectName}`);
+            console.log("📋 Problems fetched:", response.data.length);
+
+            setAllProblems(response.data); // Store all problems (backend already filters out forum problems)
+            setProblems(response.data); // Initially show all problems
             // For now, we'll implement simple pagination on frontend
             setTotalPages(Math.ceil(response.data.length / 20));
-            
+
             // Fetch vote data for all problems
             console.log("🔄 Starting to fetch vote data...");
             await fetchVoteData(response.data);
@@ -132,7 +132,7 @@ function SubjectPage() {
                 console.log("📊 Set default vote data:", voteDataMap);
                 return;
             }
-            
+
             // Get current user info
             let currentUserId = null;
             try {
@@ -144,7 +144,7 @@ function SubjectPage() {
             } catch (userError) {
                 console.error("❌ Error fetching current user:", userError);
             }
-            
+
             const votePromises = problemsList.map(async (problem) => {
                 const problemId = problem.id;
                 try {
@@ -157,12 +157,12 @@ function SubjectPage() {
                         }
                     );
                     console.log(`📊 Vote data for problem ${problemId}:`, response.data);
-                    
+
                     // Process the vote data - backend returns array of votes, we need aggregated data
                     let likeCount = 0;
                     let dislikeCount = 0;
                     let userVote = null;
-                    
+
                     if (Array.isArray(response.data)) {
                         response.data.forEach(vote => {
                             if (vote.vote_type === 'like') {
@@ -178,13 +178,13 @@ function SubjectPage() {
                             }
                         });
                     }
-                    
+
                     const processedVoteData = {
                         like_count: likeCount,
                         dislike_count: dislikeCount,
                         user_vote: userVote
                     };
-                    
+
                     console.log(`📊 Processed vote data for problem ${problemId}:`, processedVoteData);
                     return { problemId, voteData: processedVoteData };
                 } catch (error) {
@@ -192,7 +192,7 @@ function SubjectPage() {
                     return { problemId, voteData: { like_count: 0, dislike_count: 0, user_vote: null } };
                 }
             });
-            
+
             const voteResults = await Promise.all(votePromises);
             const voteDataMap = {};
             voteResults.forEach(({ problemId, voteData }) => {
@@ -220,7 +220,7 @@ function SubjectPage() {
                 console.log("📊 Set default bookmark data:", bookmarkDataMap);
                 return;
             }
-            
+
             const problemIds = problemsList.map(problem => problem.id);
             console.log("📤 Sending bookmark request with problem IDs:", problemIds);
             // Try different request formats
@@ -276,7 +276,7 @@ function SubjectPage() {
                     }
                 }
             );
-            
+
             // Update vote data for this specific problem
             setVoteData(prev => ({
                 ...prev,
@@ -298,7 +298,7 @@ function SubjectPage() {
         try {
             const token = localStorage.getItem("token");
             const isCurrentlyBookmarked = bookmarkData[problemId];
-            
+
             if (isCurrentlyBookmarked) {
                 // Try to remove bookmark
                 try {
@@ -307,7 +307,7 @@ function SubjectPage() {
                             Authorization: `Bearer ${token}`
                         }
                     });
-                    
+
                     // Update state to unbookmarked
                     setBookmarkData(prev => ({
                         ...prev,
@@ -321,7 +321,7 @@ function SubjectPage() {
                                 Authorization: `Bearer ${token}`
                             }
                         });
-                        
+
                         // Update state to bookmarked
                         setBookmarkData(prev => ({
                             ...prev,
@@ -339,7 +339,7 @@ function SubjectPage() {
                             Authorization: `Bearer ${token}`
                         }
                     });
-                    
+
                     // Update state to bookmarked
                     setBookmarkData(prev => ({
                         ...prev,
@@ -353,7 +353,7 @@ function SubjectPage() {
                                 Authorization: `Bearer ${token}`
                             }
                         });
-                        
+
                         // Update state to unbookmarked
                         setBookmarkData(prev => ({
                             ...prev,
@@ -364,7 +364,7 @@ function SubjectPage() {
                     }
                 }
             }
-            
+
         } catch (error) {
             console.error("Error toggling bookmark:", error);
             console.error("Error details:", error.response?.data);
@@ -390,7 +390,7 @@ function SubjectPage() {
         try {
             const token = localStorage.getItem("token");
             if (!token) return;
-            
+
             const followPromises = problems.map(async (problem) => {
                 if (!problem.author) return { authorId: null, isFollowing: false };
                 try {
@@ -402,7 +402,7 @@ function SubjectPage() {
                     return { authorId: problem.author.id, isFollowing: false };
                 }
             });
-            
+
             const results = await Promise.all(followPromises);
             const followStatusMap = {};
             results.forEach(result => {
@@ -509,7 +509,7 @@ function SubjectPage() {
         // Text search
         if (filters.query && filters.query.trim()) {
             const searchTerm = filters.query.toLowerCase();
-            filtered = filtered.filter(problem => 
+            filtered = filtered.filter(problem =>
                 problem.title.toLowerCase().includes(searchTerm) ||
                 problem.description.toLowerCase().includes(searchTerm) ||
                 (problem.tags && problem.tags.toLowerCase().includes(searchTerm))
@@ -518,21 +518,21 @@ function SubjectPage() {
 
         // Subject filter (should already be locked to current subject)
         if (filters.subjects && filters.subjects.length > 0) {
-            filtered = filtered.filter(problem => 
+            filtered = filtered.filter(problem =>
                 filters.subjects.includes(problem.subject)
             );
         }
 
         // Level filter
         if (filters.level && filters.level.trim()) {
-            filtered = filtered.filter(problem => 
+            filtered = filtered.filter(problem =>
                 problem.level && problem.level.toLowerCase().includes(filters.level.toLowerCase())
             );
         }
 
         // Year filter
         if (filters.year && filters.year.trim()) {
-            filtered = filtered.filter(problem => 
+            filtered = filtered.filter(problem =>
                 problem.year && problem.year.toString().includes(filters.year)
             );
         }
@@ -540,8 +540,8 @@ function SubjectPage() {
         // Tags filter
         if (filters.tags && filters.tags.trim()) {
             const tagTerms = filters.tags.toLowerCase().split(',').map(tag => tag.trim());
-            filtered = filtered.filter(problem => 
-                problem.tags && tagTerms.some(term => 
+            filtered = filtered.filter(problem =>
+                problem.tags && tagTerms.some(term =>
                     problem.tags.toLowerCase().includes(term)
                 )
             );
@@ -560,9 +560,9 @@ function SubjectPage() {
 
     if (loading) {
         return (
-            <AnimatedLoader 
-                type="subject" 
-                message={`Loading ${subjectName} problems...`} 
+            <AnimatedLoader
+                type="subject"
+                message={`Loading ${subjectName} problems...`}
                 size="large"
             />
         );
@@ -570,149 +570,149 @@ function SubjectPage() {
 
     return (
         <Layout showHomeButton={true}>
-                <div style={{ marginBottom: "2rem" }}>
-                    {/* Back Button */}
-                    <div style={{ marginBottom: "1rem" }}>
-                        <BackButton 
-                            fallbackPath="/homepage"
-                            style={{
-                                backgroundColor: colors.light,
-                                color: colors.gray[600],
-                                border: `1px solid ${colors.gray[300]}`,
-                                borderRadius: "8px",
-                                padding: "8px 16px"
-                            }}
-                            hoverStyle={{
-                                backgroundColor: colors.primary,
-                                color: colors.white,
-                                borderColor: colors.primary,
-                                transform: "translateY(-1px)"
-                            }}
-                        />
-                    </div>
-                    
-                    <h1 style={{ 
-                        fontSize: isMobile ? "1.5rem" : "2.5rem", 
-                        fontWeight: "700", 
-                        color: "#1a4d3a",
-                        marginBottom: "0.5rem"
-                    }}>
-                        {subjectName} Problems
-                    </h1>
-                    <p style={{ 
-                        fontSize: isMobile ? "0.9rem" : "1.1rem", 
-                        color: "#666",
-                        marginBottom: "1rem"
-                    }}>
-                        {problems.length} problems found in {subjectName}
-                        {searchQuery && ` (filtered by "${searchQuery}")`}
-                    </p>
-
-                    {/* Search Bar */}
-                    <div style={{ 
-                        marginBottom: "2rem",
-                        display: "flex",
-                        justifyContent: "center"
-                    }}>
-                        <div style={{ 
-                            width: "100%",
-                            maxWidth: "600px"
-                        }}>
-                            <SearchBar 
-                                placeholder={`Search within ${subjectName} problems...`}
-                                searchMode="subject"
-                                lockedSubject={subjectName}
-                                onLocalSearch={handleLocalSearch}
-                                onAdvancedSearch={handleLocalAdvancedSearch}
-                            />
-                        </div>
-                    </div>
+            <div style={{ marginBottom: "2rem" }}>
+                {/* Back Button */}
+                <div style={{ marginBottom: "1rem" }}>
+                    <BackButton
+                        fallbackPath="/homepage"
+                        style={{
+                            backgroundColor: colors.light,
+                            color: colors.gray[600],
+                            border: `1px solid ${colors.gray[300]}`,
+                            borderRadius: "8px",
+                            padding: "8px 16px"
+                        }}
+                        hoverStyle={{
+                            backgroundColor: colors.primary,
+                            color: colors.white,
+                            borderColor: colors.primary,
+                            transform: "translateY(-1px)"
+                        }}
+                    />
                 </div>
 
-                {problems.length === 0 ? (
-                    <div style={{ 
-                        textAlign: "center", 
-                        padding: "4rem 2rem",
-                        backgroundColor: "white",
-                        borderRadius: "12px",
-                        border: "1px solid #e9ecef"
+                <h1 style={{
+                    fontSize: isMobile ? "1.5rem" : "2.5rem",
+                    fontWeight: "700",
+                    color: "#1a4d3a",
+                    marginBottom: "0.5rem"
+                }}>
+                    {subjectName} Problems
+                </h1>
+                <p style={{
+                    fontSize: isMobile ? "0.9rem" : "1.1rem",
+                    color: "#666",
+                    marginBottom: "1rem"
+                }}>
+                    {problems.length} problems found in {subjectName}
+                    {searchQuery && ` (filtered by "${searchQuery}")`}
+                </p>
+
+                {/* Search Bar */}
+                <div style={{
+                    marginBottom: "2rem",
+                    display: "flex",
+                    justifyContent: "center"
+                }}>
+                    <div style={{
+                        width: "100%",
+                        maxWidth: "600px"
                     }}>
-                        <h3 style={{ color: "#1a4d3a", marginBottom: "1rem" }}>
-                            No {subjectName} problems yet!
-                        </h3>
-                        <p style={{ color: "#666", marginBottom: "2rem" }}>
-                            Be the first to create a {subjectName.toLowerCase()} problem.
-                        </p>
-                        <Link to={`/create-problem?from=/subject/${encodeURIComponent(subjectName)}`}>
-                            <button style={{
-                                backgroundColor: "#1a4d3a",
-                                color: "white",
-                                border: "none",
-                                padding: "12px 24px",
-                                borderRadius: "8px",
-                                fontSize: "16px",
-                                fontWeight: "600",
-                                cursor: "pointer"
-                            }}>
-                                Create Problem
-                            </button>
-                        </Link>
+                        <SearchBar
+                            placeholder={`Search within ${subjectName} problems...`}
+                            searchMode="subject"
+                            lockedSubject={subjectName}
+                            onLocalSearch={handleLocalSearch}
+                            onAdvancedSearch={handleLocalAdvancedSearch}
+                        />
                     </div>
-                ) : (
-                    <>
-                        {/* Responsive Grid Layout */}
-                        <div style={{ 
-                            display: "grid", 
-                            gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(400px, 1fr))", 
-                            gap: isMobile ? "0.75rem" : "1rem",
-                            marginBottom: "3rem"
+                </div>
+            </div>
+
+            {problems.length === 0 ? (
+                <div style={{
+                    textAlign: "center",
+                    padding: "4rem 2rem",
+                    backgroundColor: "white",
+                    borderRadius: "12px",
+                    border: "1px solid #e9ecef"
+                }}>
+                    <h3 style={{ color: "#1a4d3a", marginBottom: "1rem" }}>
+                        No {subjectName} problems yet!
+                    </h3>
+                    <p style={{ color: "#666", marginBottom: "2rem" }}>
+                        Be the first to create a {subjectName.toLowerCase()} problem.
+                    </p>
+                    <Link to={`/create-problem?from=/subject/${encodeURIComponent(subjectName)}`}>
+                        <button style={{
+                            backgroundColor: "#1a4d3a",
+                            color: "white",
+                            border: "none",
+                            padding: "12px 24px",
+                            borderRadius: "8px",
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            cursor: "pointer"
                         }}>
-                            {paginatedProblems.map((problem) => (
-                                <Card 
-                                    key={problem.id} 
-                                    hover={true}
-                                    style={{
-                                        marginBottom: spacing.lg,
-                                        cursor: "pointer"
-                                    }}
-                                    onClick={() => navigate(`/problem/${problem.id}?from=subject&subject=${encodeURIComponent(subject)}`)}
-                                >
-                                    {/* Author Info */}
-                                    {problem.author && (
-                                        <div style={{ 
-                                            display: "flex", 
-                                            alignItems: "center", 
-                                            marginBottom: isMobile ? "0.5rem" : "0.75rem", 
-                                            gap: isMobile ? "6px" : "8px"
+                            Create Problem
+                        </button>
+                    </Link>
+                </div>
+            ) : (
+                <>
+                    {/* Responsive Grid Layout */}
+                    <div style={{
+                        display: "grid",
+                        gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(400px, 1fr))",
+                        gap: isMobile ? "0.75rem" : "1rem",
+                        marginBottom: "3rem"
+                    }}>
+                        {paginatedProblems.map((problem) => (
+                            <Card
+                                key={problem.id}
+                                hover={true}
+                                style={{
+                                    marginBottom: spacing.lg,
+                                    cursor: "pointer"
+                                }}
+                                onClick={() => navigate(`/problem/${problem.id}?from=subject&subject=${encodeURIComponent(subject)}`)}
+                            >
+                                {/* Author Info */}
+                                {problem.author && (
+                                    <div style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        marginBottom: isMobile ? "0.5rem" : "0.75rem",
+                                        gap: isMobile ? "6px" : "8px"
+                                    }}>
+                                        <div style={{
+                                            width: isMobile ? "28px" : "32px",
+                                            height: isMobile ? "28px" : "32px",
+                                            borderRadius: "50%",
+                                            backgroundColor: "#1a4d3a",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            color: "white",
+                                            fontSize: isMobile ? "10px" : "12px",
+                                            fontWeight: "bold",
+                                            backgroundImage: problem.author.profile_picture ?
+                                                `url(${problem.author.profile_picture})` : "none",
+                                            backgroundSize: "cover",
+                                            backgroundPosition: "center",
+                                            pointerEvents: "none"
                                         }}>
+                                            {!problem.author.profile_picture && getUserInitial(problem.author.username)}
+                                        </div>
+                                        <div style={{ flex: 1 }}>
                                             <div style={{
-                                                width: isMobile ? "28px" : "32px",
-                                                height: isMobile ? "28px" : "32px",
-                                                borderRadius: "50%",
-                                                backgroundColor: "#1a4d3a",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                color: "white",
-                                                fontSize: isMobile ? "10px" : "12px",
-                                                fontWeight: "bold",
-                                                backgroundImage: problem.author.profile_picture ? 
-                                                    `url(${problem.author.profile_picture})` : "none",
-                                                backgroundSize: "cover",
-                                                backgroundPosition: "center",
-                                                pointerEvents: "none"
-                                            }}>
-                                                {!problem.author.profile_picture && getUserInitial(problem.author.username)}
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ 
-                                                    fontWeight: "600", 
-                                                    fontSize: isMobile ? "12px" : "14px", 
-                                                    color: "#1a4d3a",
-                                                    cursor: "pointer",
-                                                    textDecoration: "underline",
-                                                    pointerEvents: "auto"
-                                                }}
+                                                fontWeight: "600",
+                                                fontSize: isMobile ? "12px" : "14px",
+                                                color: "#1a4d3a",
+                                                cursor: "pointer",
+                                                textDecoration: "underline",
+                                                pointerEvents: "auto"
+                                            }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     if (currentUser && problem.author.id === currentUser.id) {
@@ -721,100 +721,100 @@ function SubjectPage() {
                                                         navigate(`/user/${problem.author.username}`);
                                                     }
                                                 }}>
-                                                    {getDisplayName(problem.author.username)}
-                                                </div>
-                                                <div style={{ fontSize: isMobile ? "10px" : "12px", color: "#666", pointerEvents: "none" }}>
-                                                    {new Date(problem.created_at).toLocaleDateString()}
-                                                </div>
+                                                {getDisplayName(problem.author.username)}
                                             </div>
-                                            
-                                            {/* Follow Button - Hide for own posts */}
-                                            {currentUser && problem.author.id !== currentUser.id && (
-                                                <FollowButton
-                                                    isFollowing={followStatus[problem.author.id]}
-                                                    onFollow={() => handleFollowUser(problem.author.id)}
-                                                    onUnfollow={() => handleUnfollowUser(problem.author.id)}
-                                                    size="sm"
-                                                    style={{ marginLeft: "auto" }}
-                                                    isDeletedUser={problem.author.username.startsWith('__deleted_user_')}
-                                                />
-                                            )}
+                                            <div style={{ fontSize: isMobile ? "10px" : "12px", color: "#666", pointerEvents: "none" }}>
+                                                {new Date(problem.created_at).toLocaleDateString()}
+                                            </div>
                                         </div>
-                                    )}
 
-                                    <h3 style={{ 
-                                        margin: "0 0 0.75rem 0", 
-                                        color: "#333",
-                                        fontSize: isMobile ? "0.9rem" : "1.1rem",
-                                        fontWeight: "600",
-                                        lineHeight: "1.4",
-                                        pointerEvents: "none"
-                                    }}>
-                                        {renderMathContent(problem.title)}
-                                    </h3>
-                                    
-                                    <div style={{ 
-                                        color: "#666", 
-                                        lineHeight: "1.5",
-                                        marginBottom: "0.75rem",
-                                        fontSize: isMobile ? "0.8rem" : "0.9rem",
-                                        whiteSpace: "pre-wrap",
-                                        pointerEvents: "none"
-                                    }}>
-                                        {renderMathContent(problem.description.length > 150 ? 
-                                            problem.description.substring(0, 150) + "..." : 
-                                            problem.description
+                                        {/* Follow Button - Hide for own posts */}
+                                        {currentUser && problem.author.id !== currentUser.id && (
+                                            <FollowButton
+                                                isFollowing={followStatus[problem.author.id]}
+                                                onFollow={() => handleFollowUser(problem.author.id)}
+                                                onUnfollow={() => handleUnfollowUser(problem.author.id)}
+                                                size="sm"
+                                                style={{ marginLeft: "auto" }}
+                                                isDeletedUser={problem.author.username.startsWith('__deleted_user_')}
+                                            />
                                         )}
                                     </div>
+                                )}
 
-                                    <div style={{ 
-                                        display: "flex", 
-                                        gap: isMobile ? "3px" : "6px", 
-                                        marginBottom: "0.75rem", 
-                                        alignItems: "center",
-                                        flexWrap: "wrap",
-                                        pointerEvents: "none"
+                                <h3 style={{
+                                    margin: "0 0 0.75rem 0",
+                                    color: "#333",
+                                    fontSize: isMobile ? "0.9rem" : "1.1rem",
+                                    fontWeight: "600",
+                                    lineHeight: "1.4",
+                                    pointerEvents: "none"
+                                }}>
+                                    {renderMathContent(problem.title)}
+                                </h3>
+
+                                <div style={{
+                                    color: "#666",
+                                    lineHeight: "1.5",
+                                    marginBottom: "0.75rem",
+                                    fontSize: isMobile ? "0.8rem" : "0.9rem",
+                                    whiteSpace: "pre-wrap",
+                                    pointerEvents: "none"
+                                }}>
+                                    {renderMathContent(problem.description.length > 150 ?
+                                        problem.description.substring(0, 150) + "..." :
+                                        problem.description
+                                    )}
+                                </div>
+
+                                <div style={{
+                                    display: "flex",
+                                    gap: isMobile ? "3px" : "6px",
+                                    marginBottom: "0.75rem",
+                                    alignItems: "center",
+                                    flexWrap: "wrap",
+                                    pointerEvents: "none"
+                                }}>
+                                    <span style={{
+                                        backgroundColor: "#e0e7ff",
+                                        color: "#3730a3",
+                                        padding: isMobile ? "3px 6px" : "6px 12px",
+                                        borderRadius: "16px",
+                                        fontSize: isMobile ? "9px" : "12px",
+                                        fontWeight: "600",
+                                        marginRight: "8px",
+                                        boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
+                                        transition: "all 0.2s ease"
                                     }}>
+                                        {problem.subject}
+                                    </span>
+                                    {problem.level && problem.level.trim() && (
                                         <span style={{
-                                            backgroundColor: "#e0e7ff",
-                                            color: "#3730a3",
+                                            backgroundColor: "#fef3c7",
+                                            color: "#92400e",
                                             padding: isMobile ? "3px 6px" : "6px 12px",
                                             borderRadius: "16px",
                                             fontSize: isMobile ? "9px" : "12px",
                                             fontWeight: "600",
                                             marginRight: "8px",
-                                            boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
+                                            boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
                                             transition: "all 0.2s ease"
                                         }}>
-                                            {problem.subject}
+                                            {problem.level}
                                         </span>
-                                        {problem.level && problem.level.trim() && (
-                                            <span style={{
-                                                backgroundColor: "#fef3c7",
-                                                color: "#92400e",
+                                    )}
+                                    {problem.tags && problem.tags.trim() && (
+                                        problem.tags.split(',').map((tag, index) => (
+                                            <span key={index} style={{
+                                                backgroundColor: colors.tertiary,
+                                                color: "white",
                                                 padding: isMobile ? "3px 6px" : "6px 12px",
                                                 borderRadius: "16px",
                                                 fontSize: isMobile ? "9px" : "12px",
                                                 fontWeight: "600",
-                                                marginRight: "8px",
-                                                boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
+                                                boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
                                                 transition: "all 0.2s ease"
-                                            }}>
-                                                {problem.level}
-                                            </span>
-                                        )}
-                                        {problem.tags && problem.tags.trim() && (
-                                            problem.tags.split(',').map((tag, index) => (
-                                                <span key={index} style={{
-                                                    backgroundColor: colors.tertiary,
-                                                    color: "white",
-                                                    padding: isMobile ? "3px 6px" : "6px 12px",
-                                                    borderRadius: "16px",
-                                                    fontSize: isMobile ? "9px" : "12px",
-                                                    fontWeight: "600",
-                                                    boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
-                                                    transition: "all 0.2s ease"
-                                                }}
+                                            }}
                                                 onMouseEnter={(e) => {
                                                     e.target.style.transform = "translateY(-1px)";
                                                     e.target.style.boxShadow = "0 4px 12px rgba(124, 58, 237, 0.4)";
@@ -823,319 +823,262 @@ function SubjectPage() {
                                                     e.target.style.transform = "translateY(0)";
                                                     e.target.style.boxShadow = "0 2px 8px rgba(124, 58, 237, 0.3)";
                                                 }}>
-                                                    {tag.trim()}
-                                                </span>
-                                            ))
-                                        )}
-                                        {problem.year && (
-                                            <span style={{ 
-                                                backgroundColor: "#dcfce7", 
-                                                color: "#166534",
-                                                padding: isMobile ? "3px 6px" : "6px 12px",
-                                                borderRadius: "16px",
-                                                fontSize: isMobile ? "9px" : "12px",
-                                                fontWeight: "600",
-                                                marginRight: "8px",
-                                                boxShadow: "0 2px 6px rgba(26, 77, 58, 0.2)",
-                                                transition: "all 0.2s ease"
-                                            }}>
-                                                Year: {problem.year}
+                                                {tag.trim()}
                                             </span>
-                                        )}
-                                    </div>
-
-                                    <div style={{ 
-                                        display: "flex", 
-                                        justifyContent: "space-between", 
-                                        alignItems: "center",
-                                        fontSize: isMobile ? "10px" : "12px",
-                                        color: "#666",
-                                        pointerEvents: "none",
-                                        borderTop: "1px solid #e9ecef",
-                                        paddingTop: "10px"
-                                    }}>
-                                        {/* Like, Dislike, Comment - Left Side */}
-                                        <div style={{ 
-                                            display: "flex", 
-                                            gap: isMobile ? "8px" : "12px", 
-                                            alignItems: "center"
+                                        ))
+                                    )}
+                                    {problem.year && (
+                                        <span style={{
+                                            backgroundColor: "#dcfce7",
+                                            color: "#166534",
+                                            padding: isMobile ? "3px 6px" : "6px 12px",
+                                            borderRadius: "16px",
+                                            fontSize: isMobile ? "9px" : "12px",
+                                            fontWeight: "600",
+                                            marginRight: "8px",
+                                            boxShadow: "0 2px 6px rgba(26, 77, 58, 0.2)",
+                                            transition: "all 0.2s ease"
                                         }}>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleVote(problem.id, "like");
-                                                }}
-                                                style={{
-                                                    backgroundColor: voteData[problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
-                                                    border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
-                                                    cursor: "pointer",
-                                                    fontSize: isMobile ? "12px" : "14px",
-                                                    color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
-                                                    fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
-                                                    padding: isMobile ? "8px 12px" : "10px 16px",
-                                                    borderRadius: "8px",
-                                                    transition: "all 0.2s ease",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    gap: isMobile ? "6px" : "8px",
-                                                    pointerEvents: "auto"
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    if (voteData[problem.id]?.user_vote !== "like") {
-                                                        e.target.style.backgroundColor = "#e9ecef";
-                                                        e.target.style.borderColor = "#adb5bd";
-                                                    }
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    if (voteData[problem.id]?.user_vote !== "like") {
-                                                        e.target.style.backgroundColor = "#f8f9fa";
-                                                        e.target.style.borderColor = "#dee2e6";
-                                                    }
-                                                }}
-                                            >
-                                                <img 
-                                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg" 
-                                                    alt="Like"
-                                                    style={{
-                                                        height: isMobile ? "14px" : "18px",
-                                                        width: isMobile ? "14px" : "18px",
-                                                        objectFit: "contain"
-                                                    }}
-                                                />
-                                                {voteData[problem.id]?.like_count || 0}
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleVote(problem.id, "dislike");
-                                                }}
-                                                style={{
-                                                    backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
-                                                    border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
-                                                    cursor: "pointer",
-                                                    fontSize: isMobile ? "12px" : "14px",
-                                                    color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
-                                                    fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
-                                                    padding: isMobile ? "8px 12px" : "10px 16px",
-                                                    borderRadius: "8px",
-                                                    transition: "all 0.2s ease",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    gap: isMobile ? "6px" : "8px",
-                                                    pointerEvents: "auto"
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    if (voteData[problem.id]?.user_vote !== "dislike") {
-                                                        e.target.style.backgroundColor = "#e9ecef";
-                                                        e.target.style.borderColor = "#adb5bd";
-                                                    }
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    if (voteData[problem.id]?.user_vote !== "dislike") {
-                                                        e.target.style.backgroundColor = "#f8f9fa";
-                                                        e.target.style.borderColor = "#dee2e6";
-                                                    }
-                                                }}
-                                            >
-                                                <img 
-                                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg" 
-                                                    alt="Dislike"
-                                                    style={{
-                                                        height: isMobile ? "14px" : "18px",
-                                                        width: isMobile ? "14px" : "18px",
-                                                        objectFit: "contain"
-                                                    }}
-                                                />
-                                                {voteData[problem.id]?.dislike_count || 0}
-                                            </button>
-                                            <div style={{ 
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: isMobile ? "6px" : "8px",
-                                                padding: isMobile ? "8px 12px" : "10px 16px",
-                                                backgroundColor: "#f8f9fa",
-                                                borderRadius: "8px",
-                                                border: "1px solid #dee2e6"
-                                            }}>
-                                                <img 
-                                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg" 
-                                                    alt="Comments"
-                                                    style={{
-                                                        height: isMobile ? "14px" : "18px",
-                                                        width: isMobile ? "14px" : "18px",
-                                                        objectFit: "contain"
-                                                    }}
-                                                />
-                                                <span style={{ 
-                                                    fontSize: isMobile ? "12px" : "14px", 
-                                                    color: "#666",
-                                                    fontWeight: "500"
-                                                }}>
-                                                    {problem.comment_count || 0}
-                                                </span>
-                                            </div>
-                                        </div>
+                                            Year: {problem.year}
+                                        </span>
+                                    )}
+                                </div>
 
-                                        {/* Bookmark - Right Side */}
+                                <div style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    fontSize: isMobile ? "10px" : "12px",
+                                    color: "#666",
+                                    pointerEvents: "none",
+                                    borderTop: "1px solid #e9ecef",
+                                    paddingTop: "10px"
+                                }}>
+                                    {/* Like, Dislike, Comment - Left Side */}
+                                    <div style={{
+                                        display: "flex",
+                                        gap: isMobile ? "8px" : "12px",
+                                        alignItems: "center"
+                                    }}>
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleBookmark(problem.id);
+                                                handleVote(problem.id, "like");
                                             }}
                                             style={{
-                                                padding: isMobile ? "8px 12px" : "10px 16px",
-                                                backgroundColor: "transparent",
-                                                border: "none",
+                                                backgroundColor: voteData[problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
+                                                border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
                                                 cursor: "pointer",
+                                                fontSize: isMobile ? "12px" : "14px",
+                                                color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
+                                                fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
+                                                padding: isMobile ? "8px 12px" : "10px 16px",
+                                                borderRadius: "8px",
+                                                transition: "all 0.2s ease",
                                                 display: "flex",
                                                 alignItems: "center",
                                                 gap: isMobile ? "6px" : "8px",
-                                                borderRadius: "8px",
-                                                transition: "all 0.2s ease",
                                                 pointerEvents: "auto"
                                             }}
                                             onMouseEnter={(e) => {
-                                                e.target.style.backgroundColor = "#f8f9fa";
+                                                if (voteData[problem.id]?.user_vote !== "like") {
+                                                    e.target.style.backgroundColor = "#e9ecef";
+                                                    e.target.style.borderColor = "#adb5bd";
+                                                }
                                             }}
                                             onMouseLeave={(e) => {
-                                                e.target.style.backgroundColor = "transparent";
+                                                if (voteData[problem.id]?.user_vote !== "like") {
+                                                    e.target.style.backgroundColor = "#f8f9fa";
+                                                    e.target.style.borderColor = "#dee2e6";
+                                                }
                                             }}
                                         >
-                                            <img 
-                                                src={bookmarkData[problem.id] 
-                                                    ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
-                                                    : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
-                                                } 
-                                                alt="Bookmark"
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg"
+                                                alt="Like"
                                                 style={{
-                                                    height: isMobile ? "16px" : "20px",
-                                                    width: isMobile ? "16px" : "20px",
+                                                    height: isMobile ? "14px" : "18px",
+                                                    width: isMobile ? "14px" : "18px",
                                                     objectFit: "contain"
                                                 }}
                                             />
-                                            <span style={{ 
+                                            {voteData[problem.id]?.like_count || 0}
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleVote(problem.id, "dislike");
+                                            }}
+                                            style={{
+                                                backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
+                                                border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
+                                                cursor: "pointer",
                                                 fontSize: isMobile ? "12px" : "14px",
-                                                color: bookmarkData[problem.id] ? "rgb(26, 77, 58)" : "#666",
+                                                color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
+                                                fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
+                                                padding: isMobile ? "8px 12px" : "10px 16px",
+                                                borderRadius: "8px",
+                                                transition: "all 0.2s ease",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: isMobile ? "6px" : "8px",
+                                                pointerEvents: "auto"
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (voteData[problem.id]?.user_vote !== "dislike") {
+                                                    e.target.style.backgroundColor = "#e9ecef";
+                                                    e.target.style.borderColor = "#adb5bd";
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (voteData[problem.id]?.user_vote !== "dislike") {
+                                                    e.target.style.backgroundColor = "#f8f9fa";
+                                                    e.target.style.borderColor = "#dee2e6";
+                                                }
+                                            }}
+                                        >
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg"
+                                                alt="Dislike"
+                                                style={{
+                                                    height: isMobile ? "14px" : "18px",
+                                                    width: isMobile ? "14px" : "18px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            {voteData[problem.id]?.dislike_count || 0}
+                                        </button>
+                                        <div style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: isMobile ? "6px" : "8px",
+                                            padding: isMobile ? "8px 12px" : "10px 16px",
+                                            backgroundColor: "#f8f9fa",
+                                            borderRadius: "8px",
+                                            border: "1px solid #dee2e6"
+                                        }}>
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg"
+                                                alt="Comments"
+                                                style={{
+                                                    height: isMobile ? "14px" : "18px",
+                                                    width: isMobile ? "14px" : "18px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            <span style={{
+                                                fontSize: isMobile ? "12px" : "14px",
+                                                color: "#666",
                                                 fontWeight: "500"
                                             }}>
-                                                {bookmarkData[problem.id] ? "Saved" : "Save"}
+                                                {problem.comment_count || 0}
                                             </span>
-                                        </button>
+                                        </div>
                                     </div>
-                                </Card>
-                            ))}
-                        </div>
 
-                        {/* Pagination */}
-                        {totalPages > 1 && (
-                            <div style={{ 
-                                display: "flex", 
-                                justifyContent: "center", 
-                                alignItems: "center", 
-                                gap: isMobile ? "0.5rem" : "1rem",
-                                marginTop: "3rem",
-                                flexWrap: "wrap"
-                            }}>
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                    disabled={currentPage === 1}
-                                    style={{
-                                        padding: isMobile ? "8px 16px" : "10px 20px",
-                                        backgroundColor: currentPage === 1 ? "#ccc" : "#1a4d3a",
-                                        color: "white",
-                                        border: "none",
-                                        borderRadius: "8px",
-                                        cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                                        fontSize: isMobile ? "12px" : "14px",
-                                        fontWeight: "500"
-                                    }}
-                                >
-                                    Previous
-                                </button>
-                                
-                                <span style={{ 
-                                    padding: isMobile ? "0 10px" : "0 20px", 
-                                    color: "#666",
-                                    fontSize: isMobile ? "12px" : "14px"
-                                }}>
-                                    Page {currentPage} of {totalPages}
-                                </span>
-                                
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                    disabled={currentPage === totalPages}
-                                    style={{
-                                        padding: isMobile ? "8px 16px" : "10px 20px",
-                                        backgroundColor: currentPage === totalPages ? "#ccc" : "#1a4d3a",
-                                        color: "white",
-                                        border: "none",
-                                        borderRadius: "8px",
-                                        cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-                                        fontSize: isMobile ? "12px" : "14px",
-                                        fontWeight: "500"
-                                    }}
-                                >
-                                    Next
-                                </button>
-                            </div>
-                        )}
-                    </>
-                )}
+                                    {/* Bookmark - Right Side */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleBookmark(problem.id);
+                                        }}
+                                        style={{
+                                            padding: isMobile ? "8px 12px" : "10px 16px",
+                                            backgroundColor: "transparent",
+                                            border: "none",
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: isMobile ? "6px" : "8px",
+                                            borderRadius: "8px",
+                                            transition: "all 0.2s ease",
+                                            pointerEvents: "auto"
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.backgroundColor = "#f8f9fa";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.backgroundColor = "transparent";
+                                        }}
+                                    >
+                                        <img
+                                            src={bookmarkData[problem.id]
+                                                ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
+                                                : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
+                                            }
+                                            alt="Bookmark"
+                                            style={{
+                                                height: isMobile ? "16px" : "20px",
+                                                width: isMobile ? "16px" : "20px",
+                                                objectFit: "contain"
+                                            }}
+                                        />
+                                        <span style={{
+                                            fontSize: isMobile ? "12px" : "14px",
+                                            color: bookmarkData[problem.id] ? "rgb(26, 77, 58)" : "#666",
+                                            fontWeight: "500"
+                                        }}>
+                                            {bookmarkData[problem.id] ? "Saved" : "Save"}
+                                        </span>
+                                    </button>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
 
-                {/* Enhanced Floating Create Problem Button with Subject Pre-fill */}
-                <div style={{
-                    position: "fixed",
-                    bottom: isMobile ? spacing.md : spacing.xl,
-                    right: isMobile ? spacing.md : spacing.xl,
-                    zIndex: 1000
-                }}>
-                    <Link to={`/create-problem?subject=${encodeURIComponent(subjectName)}&from=/subject/${encodeURIComponent(subjectName)}`} style={{ textDecoration: "none" }}>
+                    {/* Pagination */}
+                    {totalPages > 1 && (
                         <div style={{
-                            width: isMobile ? "50px" : "60px",
-                            height: isMobile ? "50px" : "60px",
-                            backgroundColor: colors.primary,
-                            borderRadius: "50%",
                             display: "flex",
-                            alignItems: "center",
                             justifyContent: "center",
-                            cursor: "pointer",
-                            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                            transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                            fontSize: isMobile ? "20px" : "24px",
-                            color: colors.white,
-                            fontWeight: typography.fontWeight.bold,
-                            overflow: "hidden",
-                            whiteSpace: "nowrap",
-                            position: "relative"
-                        }}
-                        onMouseEnter={(e) => {
-                            if (!isMobile) {
-                                e.target.style.width = "220px";
-                                e.target.style.borderRadius = "30px";
-                                e.target.style.justifyContent = "flex-start";
-                                e.target.style.paddingLeft = "20px";
-                                e.target.style.backgroundColor = colors.secondary;
-                                e.target.style.boxShadow = "0 6px 25px rgba(0,0,0,0.2)";
-                                e.target.innerHTML = '<span style="font-size: 16px;">Create New Problem</span><span style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 24px;">+</span>';
-                            }
-                        }}
-                        onMouseLeave={(e) => {
-                            if (!isMobile) {
-                                e.target.style.width = isMobile ? "50px" : "60px";
-                                e.target.style.borderRadius = "50%";
-                                e.target.style.justifyContent = "center";
-                                e.target.style.paddingLeft = "0px";
-                                e.target.style.backgroundColor = colors.primary;
-                                e.target.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
-                                e.target.innerHTML = '+';
-                            }
-                        }}
-                        title={`Create New ${subjectName} Problem`}
-                        >
-                            +
-                        </div>
-                    </Link>
-                </div>
+                            alignItems: "center",
+                        < Link to={`/create-problem?subject=${encodeURIComponent(subjectName)}&from=/subject/${encodeURIComponent(subjectName)}`} style={{ textDecoration: "none" }}>
+                            <div style={{
+                                width: isMobile ? "50px" : "60px",
+                                height: isMobile ? "50px" : "60px",
+                                backgroundColor: colors.primary,
+                                borderRadius: "50%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: "pointer",
+                                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                                transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                                fontSize: isMobile ? "20px" : "24px",
+                                color: colors.white,
+                                fontWeight: typography.fontWeight.bold,
+                                overflow: "hidden",
+                                whiteSpace: "nowrap",
+                                position: "relative"
+                            }}
+                                onMouseEnter={(e) => {
+                                    if (!isMobile) {
+                                        e.target.style.width = "220px";
+                                        e.target.style.borderRadius = "30px";
+                                        e.target.style.justifyContent = "flex-start";
+                                        e.target.style.paddingLeft = "20px";
+                                        e.target.style.backgroundColor = colors.secondary;
+                                        e.target.style.boxShadow = "0 6px 25px rgba(0,0,0,0.2)";
+                                        e.target.innerHTML = '<span style="font-size: 16px;">Create New Problem</span><span style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 24px;">+</span>';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isMobile) {
+                                        e.target.style.width = isMobile ? "50px" : "60px";
+                                        e.target.style.borderRadius = "50%";
+                                        e.target.style.justifyContent = "center";
+                                        e.target.style.paddingLeft = "0px";
+                                        e.target.style.backgroundColor = colors.primary;
+                                        e.target.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
+                                        e.target.innerHTML = '+';
+                                    }
+                                }}
+                                title={`Create New ${subjectName} Problem`}
+                            >
+                                +
+                            </div>
+                        </Link>
+                    </div>
         </Layout>
     );
 }
