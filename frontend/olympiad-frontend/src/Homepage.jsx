@@ -20,23 +20,23 @@ function Homepage() {
         return saved ? JSON.parse(saved) : [];
     });
     const navigate = useNavigate();
-    
+
     // Site settings
     const { siteSettings, loading: settingsLoading, error: settingsError } = useSiteSettings();
-    
+
     // Feature settings
     const { checkFeatureEnabled, showFeatureDisabledAlert } = useFeatureSettings();
-    
-    
+
+
     // Mobile detection
     useEffect(() => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth <= 768);
         };
-        
+
         checkMobile();
         window.addEventListener('resize', checkMobile);
-        
+
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
@@ -45,7 +45,7 @@ function Homepage() {
         if (siteSettings.site_name) {
             document.title = siteSettings.site_name;
         }
-        
+
         if (siteSettings.site_favicon) {
             // Update favicon
             const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
@@ -54,7 +54,7 @@ function Homepage() {
             link.href = siteSettings.site_favicon;
             document.getElementsByTagName('head')[0].appendChild(link);
         }
-        
+
         // Apply theme
         if (siteSettings.site_theme) {
             document.documentElement.setAttribute('data-theme', siteSettings.site_theme);
@@ -111,10 +111,10 @@ function Homepage() {
         const handleResize = () => {
             setIsMobile(window.innerWidth <= 768);
         };
-        
+
         handleResize(); // Set initial value
         window.addEventListener('resize', handleResize);
-        
+
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
@@ -144,7 +144,7 @@ function Homepage() {
 
     const fetchMyForums = async () => {
         if (!currentUser) return;
-        
+
         setLoadingForums(true);
         try {
             const token = localStorage.getItem("token");
@@ -164,7 +164,7 @@ function Homepage() {
         const newPinnedForums = pinnedForums.includes(forumId)
             ? pinnedForums.filter(id => id !== forumId)
             : [...pinnedForums, forumId];
-        
+
         setPinnedForums(newPinnedForums);
         localStorage.setItem('pinnedForums', JSON.stringify(newPinnedForums));
     };
@@ -201,8 +201,8 @@ function Homepage() {
     };
 
     return (
-        <div style={{ 
-            minHeight: "100vh", 
+        <div style={{
+            minHeight: "100vh",
             backgroundColor: "#f8f9fa",
             fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
         }}>
@@ -250,38 +250,38 @@ function Homepage() {
                         </button>
                     )}
                     <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: isMobile ? "4px" : spacing.sm,
+                            marginLeft: isMobile ? "4px" : spacing.lg
+                        }}
+                    >
+
+                        <img
+                            src={
+                                siteSettings.site_logo && siteSettings.site_logo.trim() !== ""
+                                    ? siteSettings.site_logo
+                                    : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png"
+                            }
+                            alt={siteSettings.site_name}
                             style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: isMobile ? "4px" : spacing.sm,
-                                marginLeft: isMobile ? "4px" : spacing.lg
+                                height: isMobile ? "20px" : "32px",
+                                width: "auto",
+                                maxWidth: isMobile ? "80px" : "200px",
+                                objectFit: "contain"
                             }}
-                        >
-                    
-                            <img
-                                src={
-                                    siteSettings.site_logo && siteSettings.site_logo.trim() !== ""
-                                        ? siteSettings.site_logo
-                                        : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png"
-                                }
-                                alt={siteSettings.site_name}
-                                style={{
-                                    height: isMobile ? "20px" : "32px",
-                                    width: "auto",
-                                    maxWidth: isMobile ? "80px" : "200px",
-                                    objectFit: "contain"
-                                }}
-                                onError={(e) => {
-                                    console.error("Failed to load site logo:", siteSettings.site_logo);
-                                    e.target.src =
-                                        "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png";
-                                }}
-                            />
-                        
+                            onError={(e) => {
+                                console.error("Failed to load site logo:", siteSettings.site_logo);
+                                e.target.src =
+                                    "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png";
+                            }}
+                        />
+
                         {/* Site Name */}
-                        <h1 style={{ 
-                            margin: 0, 
-                            fontSize: isMobile ? "16px" : "24px", 
+                        <h1 style={{
+                            margin: 0,
+                            fontSize: isMobile ? "16px" : "24px",
                             fontWeight: "600",
                             display: "block"
                         }}>
@@ -291,14 +291,14 @@ function Homepage() {
                 </div>
 
                 {/* Navigation */}
-                <nav style={{ 
-                    display: isMobile ? "none" : "flex", 
-                    alignItems: "center", 
-                    gap: "2rem" 
+                <nav style={{
+                    display: isMobile ? "none" : "flex",
+                    alignItems: "center",
+                    gap: "2rem"
                 }}>
-                    <Link to="/feed" style={{ 
-                        color: "white", 
-                        textDecoration: "none", 
+                    <Link to="/feed" style={{
+                        color: "white",
+                        textDecoration: "none",
                         fontWeight: "500",
                         padding: "8px 16px",
                         borderRadius: "6px",
@@ -306,8 +306,8 @@ function Homepage() {
                         display: "flex",
                         alignItems: "center"
                     }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                     >
                         Feed
                     </Link>
@@ -335,7 +335,7 @@ function Homepage() {
                             Subject
                             <span style={{ fontSize: "12px" }}>▼</span>
                         </span>
-                        
+
                         {showSubjectDropdown && (
                             <div style={{
                                 position: "absolute",
@@ -400,9 +400,9 @@ function Homepage() {
                         )}
                     </div>
 
-                    <Link to="/forums" style={{ 
-                        color: "white", 
-                        textDecoration: "none", 
+                    <Link to="/forums" style={{
+                        color: "white",
+                        textDecoration: "none",
                         fontWeight: "500",
                         padding: "8px 16px",
                         borderRadius: "6px",
@@ -410,8 +410,8 @@ function Homepage() {
                         display: "flex",
                         alignItems: "center"
                     }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                     >
                         Forums
                     </Link>
@@ -419,20 +419,20 @@ function Homepage() {
                     {/* Authentication Buttons */}
                     {!currentUser ? (
                         <div style={{ display: "flex", gap: "0.5rem" }}>
-                            <Link to="/login" style={{ 
-                                color: "white", 
-                                textDecoration: "none", 
+                            <Link to="/login" style={{
+                                color: "white",
+                                textDecoration: "none",
                                 fontWeight: "500",
                                 padding: "8px 16px",
                                 borderRadius: "6px",
                                 transition: "background-color 0.2s"
                             }}
-                            onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
+                                onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                             >
                                 Login
                             </Link>
-                            <span 
+                            <span
                                 onClick={() => {
                                     if (checkFeatureEnabled('registration_enabled')) {
                                         navigate('/signup');
@@ -440,10 +440,10 @@ function Homepage() {
                                         showFeatureDisabledAlert('Registration');
                                     }
                                 }}
-                                style={{ 
+                                style={{
                                     backgroundColor: "#28a745",
-                                    color: "white", 
-                                    textDecoration: "none", 
+                                    color: "white",
+                                    textDecoration: "none",
                                     fontWeight: "500",
                                     padding: "8px 16px",
                                     borderRadius: "6px",
@@ -461,190 +461,190 @@ function Homepage() {
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                             {/* Notification Bell */}
                             <NotificationBell />
-                            
+
                             {/* User Dropdown */}
                             <div style={{ position: "relative" }}>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    console.log('Homepage user dropdown clicked');
-                                    setShowUserDropdown(!showUserDropdown);
-                                }}
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                    backgroundColor: "transparent",
-                                    border: "none",
-                                    color: "white",
-                                    cursor: "pointer",
-                                    padding: "8px 12px",
-                                    borderRadius: "6px",
-                                    transition: "background-color 0.2s"
-                                }}
-                                onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
-                                onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
-                            >
-                                {currentUser.profile_picture ? (
-                                    <img
-                                        src={currentUser.profile_picture}
-                                        alt="Profile"
-                                        style={{
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        console.log('Homepage user dropdown clicked');
+                                        setShowUserDropdown(!showUserDropdown);
+                                    }}
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        backgroundColor: "transparent",
+                                        border: "none",
+                                        color: "white",
+                                        cursor: "pointer",
+                                        padding: "8px 12px",
+                                        borderRadius: "6px",
+                                        transition: "background-color 0.2s"
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.backgroundColor = "#2d7a5f"}
+                                    onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                >
+                                    {currentUser.profile_picture ? (
+                                        <img
+                                            src={currentUser.profile_picture}
+                                            alt="Profile"
+                                            style={{
+                                                width: "32px",
+                                                height: "32px",
+                                                borderRadius: "50%",
+                                                objectFit: "cover"
+                                            }}
+                                        />
+                                    ) : (
+                                        <div style={{
                                             width: "32px",
                                             height: "32px",
                                             borderRadius: "50%",
-                                            objectFit: "cover"
-                                        }}
-                                    />
-                                ) : (
-                                    <div style={{
-                                        width: "32px",
-                                        height: "32px",
-                                        borderRadius: "50%",
-                                        backgroundColor: colors.secondary,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        color: "white",
-                                        fontSize: "14px",
-                                        fontWeight: "bold"
-                                    }}>
-                                        {getUserInitial(currentUser.username)}
-                                    </div>
-                                )}
-                                <span style={{ fontSize: "14px", fontWeight: "500" }}>
-                                    {currentUser.username}
-                                </span>
-                                <span style={{ fontSize: "12px" }}>▼</span>
-                            </button>
+                                            backgroundColor: colors.secondary,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            color: "white",
+                                            fontSize: "14px",
+                                            fontWeight: "bold"
+                                        }}>
+                                            {getUserInitial(currentUser.username)}
+                                        </div>
+                                    )}
+                                    <span style={{ fontSize: "14px", fontWeight: "500" }}>
+                                        {currentUser.username}
+                                    </span>
+                                    <span style={{ fontSize: "12px" }}>▼</span>
+                                </button>
 
-                            {showUserDropdown && (
-                                <div style={{
-                                    position: "absolute",
-                                    top: "100%",
-                                    right: "0",
-                                    backgroundColor: "white",
-                                    border: "1px solid #e9ecef",
-                                    borderRadius: "8px",
-                                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                                    zIndex: 1001,
-                                    minWidth: "160px",
-                                    marginTop: "5px"
-                                }}>
-                                    <Link to="/profile" style={{ textDecoration: "none" }}>
-                                        <button style={{
-                                            width: "100%",
-                                            padding: "12px 16px",
-                                            border: "none",
-                                            backgroundColor: "transparent",
-                                            color: "#333",
-                                            textAlign: "left",
-                                            cursor: "pointer",
-                                            fontSize: "14px",
-                                            transition: "background-color 0.2s",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "8px"
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
-                                        >
-                                            <img
-                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Profile_Icon_Green_t3zoz5.svg"
-                                                alt="Profile"
-                                                style={{
-                                                    width: "16px",
-                                                    height: "16px",
-                                                    objectFit: "contain"
-                                                }}
-                                            />
-                                            My Profile
-                                        </button>
-                                    </Link>
-                                    <Link to="/settings" style={{ textDecoration: "none" }}>
-                                        <button style={{
-                                            width: "100%",
-                                            padding: "12px 16px",
-                                            border: "none",
-                                            backgroundColor: "transparent",
-                                            color: "#333",
-                                            textAlign: "left",
-                                            cursor: "pointer",
-                                            fontSize: "14px",
-                                            transition: "background-color 0.2s",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "8px"
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
-                                        >
-                                            <img
-                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
-                                                alt="Settings"
-                                                style={{
-                                                    width: "16px",
-                                                    height: "16px",
-                                                    objectFit: "contain"
-                                                }}
-                                            />
-                                             Settings
-                                        </button>
-                                    </Link>
-                                    {/* Admin Panel Link - Only show for admins and moderators */}
-                                    {currentUser && ['admin', 'moderator'].includes(currentUser.role) && (
-                                        <Link to="/admin" style={{ textDecoration: "none" }}>
+                                {showUserDropdown && (
+                                    <div style={{
+                                        position: "absolute",
+                                        top: "100%",
+                                        right: "0",
+                                        backgroundColor: "white",
+                                        border: "1px solid #e9ecef",
+                                        borderRadius: "8px",
+                                        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                                        zIndex: 1001,
+                                        minWidth: "160px",
+                                        marginTop: "5px"
+                                    }}>
+                                        <Link to="/profile" style={{ textDecoration: "none" }}>
                                             <button style={{
                                                 width: "100%",
                                                 padding: "12px 16px",
                                                 border: "none",
                                                 backgroundColor: "transparent",
-                                                color: "#667eea",
+                                                color: "#333",
                                                 textAlign: "left",
                                                 cursor: "pointer",
                                                 fontSize: "14px",
-                                                fontWeight: "500",
-                                                transition: "background-color 0.2s"
+                                                transition: "background-color 0.2s",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "8px"
+                                            }}
+                                                onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
+                                                onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                            >
+                                                <img
+                                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Profile_Icon_Green_t3zoz5.svg"
+                                                    alt="Profile"
+                                                    style={{
+                                                        width: "16px",
+                                                        height: "16px",
+                                                        objectFit: "contain"
+                                                    }}
+                                                />
+                                                My Profile
+                                            </button>
+                                        </Link>
+                                        <Link to="/settings" style={{ textDecoration: "none" }}>
+                                            <button style={{
+                                                width: "100%",
+                                                padding: "12px 16px",
+                                                border: "none",
+                                                backgroundColor: "transparent",
+                                                color: "#333",
+                                                textAlign: "left",
+                                                cursor: "pointer",
+                                                fontSize: "14px",
+                                                transition: "background-color 0.2s",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "8px"
+                                            }}
+                                                onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
+                                                onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                            >
+                                                <img
+                                                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
+                                                    alt="Settings"
+                                                    style={{
+                                                        width: "16px",
+                                                        height: "16px",
+                                                        objectFit: "contain"
+                                                    }}
+                                                />
+                                                Settings
+                                            </button>
+                                        </Link>
+                                        {/* Admin Panel Link - Only show for admins and moderators */}
+                                        {currentUser && ['admin', 'moderator'].includes(currentUser.role) && (
+                                            <Link to="/admin" style={{ textDecoration: "none" }}>
+                                                <button style={{
+                                                    width: "100%",
+                                                    padding: "12px 16px",
+                                                    border: "none",
+                                                    backgroundColor: "transparent",
+                                                    color: "#667eea",
+                                                    textAlign: "left",
+                                                    cursor: "pointer",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    transition: "background-color 0.2s"
+                                                }}
+                                                    onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
+                                                    onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                                >
+                                                    Admin Panel
+                                                </button>
+                                            </Link>
+                                        )}
+                                        <button
+                                            onClick={handleLogout}
+                                            style={{
+                                                width: "100%",
+                                                padding: "12px 16px",
+                                                border: "none",
+                                                backgroundColor: "transparent",
+                                                color: "#dc3545",
+                                                textAlign: "left",
+                                                cursor: "pointer",
+                                                fontSize: "14px",
+                                                transition: "background-color 0.2s",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "8px"
                                             }}
                                             onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
                                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
-                                            >
-                                                 Admin Panel
-                                            </button>
-                                        </Link>
-                                    )}
-                                    <button
-                                        onClick={handleLogout}
-                                        style={{
-                                            width: "100%",
-                                            padding: "12px 16px",
-                                            border: "none",
-                                            backgroundColor: "transparent",
-                                            color: "#dc3545",
-                                            textAlign: "left",
-                                            cursor: "pointer",
-                                            fontSize: "14px",
-                                            transition: "background-color 0.2s",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "8px"
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
-                                    >
-                                        <img
-                                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760802149/LOG_OUT_RED_d1wwc3.svg"
-                                            alt="Logout"
-                                            style={{
-                                                height: "16px",
-                                                width: "16px",
-                                                objectFit: "contain"
-                                            }}
-                                        />
-                                        Logout
-                                    </button>
-                                </div>
-                            )}
+                                        >
+                                            <img
+                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760802149/LOG_OUT_RED_d1wwc3.svg"
+                                                alt="Logout"
+                                                style={{
+                                                    height: "16px",
+                                                    width: "16px",
+                                                    objectFit: "contain"
+                                                }}
+                                            />
+                                            Logout
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
@@ -652,11 +652,11 @@ function Homepage() {
 
                 {/* Mobile Menu Button */}
                 {isMobile && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "3px", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "3px", flexWrap: "wrap" }}>
                         {/* Mobile Navigation Links - Slightly Bigger */}
-                        <Link to="/feed" style={{ 
-                            color: "white", 
-                            textDecoration: "none", 
+                        <Link to="/feed" style={{
+                            color: "white",
+                            textDecoration: "none",
                             fontSize: "10px",
                             fontWeight: "500",
                             padding: "3px 6px",
@@ -665,9 +665,9 @@ function Homepage() {
                         }}>
                             Feed
                         </Link>
-                        <Link to="/forums" style={{ 
-                            color: "white", 
-                            textDecoration: "none", 
+                        <Link to="/forums" style={{
+                            color: "white",
+                            textDecoration: "none",
                             fontSize: "10px",
                             fontWeight: "500",
                             padding: "3px 6px",
@@ -679,9 +679,9 @@ function Homepage() {
                         <div style={{ position: "relative" }}>
                             <button
                                 onClick={() => setShowSubjectDropdown(!showSubjectDropdown)}
-                                style={{ 
-                                    color: "white", 
-                                    textDecoration: "none", 
+                                style={{
+                                    color: "white",
+                                    textDecoration: "none",
                                     fontSize: "10px",
                                     fontWeight: "500",
                                     padding: "3px 6px",
@@ -697,7 +697,7 @@ function Homepage() {
                                 Subject
                                 <span style={{ fontSize: "9px" }}>▼</span>
                             </button>
-                            
+
                             {showSubjectDropdown && (
                                 <div style={{
                                     position: "absolute",
@@ -755,7 +755,7 @@ function Homepage() {
                                 <div style={{ transform: "scale(0.8)" }}>
                                     <NotificationBell />
                                 </div>
-                                
+
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -801,7 +801,7 @@ function Homepage() {
                                         </div>
                                     )}
                                 </button>
-                                
+
                                 {showUserDropdown && (
                                     <div style={{
                                         position: "absolute",
@@ -826,8 +826,8 @@ function Homepage() {
                                                 alignItems: "center",
                                                 gap: "6px"
                                             }}
-                                            onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
-                                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                                onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+                                                onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                             >
                                                 <img
                                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Profile_Icon_Green_t3zoz5.svg"
@@ -852,8 +852,8 @@ function Homepage() {
                                                 alignItems: "center",
                                                 gap: "6px"
                                             }}
-                                            onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
-                                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                                onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+                                                onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                             >
                                                 <img
                                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
@@ -881,8 +881,8 @@ function Homepage() {
                                                     gap: "6px",
                                                     fontWeight: "500"
                                                 }}
-                                                onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
-                                                onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                                                    onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+                                                    onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                                 >
                                                     <img
                                                         src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
@@ -897,7 +897,7 @@ function Homepage() {
                                                 </div>
                                             </Link>
                                         )}
-                                        <div 
+                                        <div
                                             onClick={handleLogout}
                                             style={{
                                                 padding: "8px 12px",
@@ -926,9 +926,9 @@ function Homepage() {
                                 )}
                             </div>
                         ) : (
-                            <Link to="/login" style={{ 
-                                color: "white", 
-                                textDecoration: "none", 
+                            <Link to="/login" style={{
+                                color: "white",
+                                textDecoration: "none",
                                 fontSize: "10px",
                                 fontWeight: "500",
                                 padding: "3px 6px",
@@ -953,26 +953,26 @@ function Homepage() {
                     background: "linear-gradient(135deg, #1a4d3a 0%, #2d7a5f 100%)"
                 }}>
                     <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-                        <h1 style={{ 
-                            fontSize: isMobile ? "2rem" : "3rem", 
-                            fontWeight: "700", 
+                        <h1 style={{
+                            fontSize: isMobile ? "2rem" : "3rem",
+                            fontWeight: "700",
                             marginBottom: isMobile ? "1rem" : "1.5rem",
                             lineHeight: "1.2"
                         }}>
                             Welcome to {siteSettings.site_name || 'Olimpiada'}
                         </h1>
-                        <p style={{ 
-                            fontSize: isMobile ? "1rem" : "1.25rem", 
-                            marginBottom: isMobile ? "1.5rem" : "2rem", 
+                        <p style={{
+                            fontSize: isMobile ? "1rem" : "1.25rem",
+                            marginBottom: isMobile ? "1.5rem" : "2rem",
                             opacity: "0.9",
                             lineHeight: "1.6"
                         }}>
                             {siteSettings.site_description || "Master the art of problem-solving through challenging olympiad problems. Join a community of passionate learners and sharpen your analytical skills."}
                         </p>
-                        <div style={{ 
-                            display: "flex", 
-                            gap: isMobile ? "0.75rem" : "1rem", 
-                            justifyContent: "center", 
+                        <div style={{
+                            display: "flex",
+                            gap: isMobile ? "0.75rem" : "1rem",
+                            justifyContent: "center",
                             flexWrap: "wrap",
                             flexDirection: isMobile ? "column" : "row"
                         }}>
@@ -991,14 +991,14 @@ function Homepage() {
                                     height: isMobile ? "44px" : "48px",
                                     width: isMobile ? "100%" : "auto"
                                 }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.backgroundColor = "rgba(118, 75, 162)";
-                                    e.target.style.transform = "translateY(-2px)";
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.backgroundColor = "rgba(118, 75, 162)";
-                                    e.target.style.transform = "translateY(0)";
-                                }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.backgroundColor = "rgba(118, 75, 162)";
+                                        e.target.style.transform = "translateY(-2px)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.backgroundColor = "rgba(118, 75, 162)";
+                                        e.target.style.transform = "translateY(0)";
+                                    }}
                                 >
                                     Explore Problems
                                 </button>
@@ -1018,12 +1018,12 @@ function Homepage() {
                                     height: isMobile ? "44px" : "48px",
                                     width: isMobile ? "100%" : "auto"
                                 }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.transform = "translateY(-2px)";
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.transform = "translateY(0)";
-                                }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.transform = "translateY(-2px)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.transform = "translateY(0)";
+                                    }}
                                 >
                                     Create Problem
                                 </button>
@@ -1033,28 +1033,28 @@ function Homepage() {
                 </section>
 
                 {/* Features Section */}
-                <section style={{ 
-                    padding: "4rem 2rem", 
+                <section style={{
+                    padding: "4rem 2rem",
                     backgroundColor: "white",
                     maxWidth: "1200px",
                     margin: "0 auto"
                 }}>
-                    <h2 style={{ 
-                        textAlign: "center", 
-                        fontSize: "2.5rem", 
-                        fontWeight: "600", 
+                    <h2 style={{
+                        textAlign: "center",
+                        fontSize: "2.5rem",
+                        fontWeight: "600",
                         marginBottom: "3rem",
                         color: "#1a4d3a"
                     }}>
                         Why Choose {siteSettings.site_name || 'Olimpiada'}?
                     </h2>
-                    <div style={{ 
-                        display: "grid", 
-                        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", 
-                        gap: "2rem" 
+                    <div style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                        gap: "2rem"
                     }}>
-                        <div style={{ 
-                            textAlign: "center", 
+                        <div style={{
+                            textAlign: "center",
                             padding: "2rem",
                             backgroundColor: "#f8f9fa",
                             borderRadius: "12px",
@@ -1067,7 +1067,7 @@ function Homepage() {
                                 alignItems: "center",
                                 justifyContent: "center"
                             }}>
-                                <img 
+                                <img
                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811441/numratore_xpudpv.svg"
                                     style={{
                                         height: "3rem",
@@ -1076,26 +1076,26 @@ function Homepage() {
                                     }}
                                 />
                             </div>
-                            <h3 style={{ 
-                                fontSize: "1.5rem", 
-                                fontWeight: "600", 
+                            <h3 style={{
+                                fontSize: "1.5rem",
+                                fontWeight: "600",
                                 marginBottom: "1rem",
                                 color: "#1a4d3a"
                             }}>
                                 Mathematical Excellence
                             </h3>
-                            <p style={{ 
-                                color: "#666", 
+                            <p style={{
+                                color: "#666",
                                 lineHeight: "1.6",
                                 fontSize: "1rem"
                             }}>
-                                Solve complex mathematical problems with our advanced LaTeX rendering 
+                                Solve complex mathematical problems with our advanced LaTeX rendering
                                 and visual math editor tools.
                             </p>
                         </div>
-                        
-                        <div style={{ 
-                            textAlign: "center", 
+
+                        <div style={{
+                            textAlign: "center",
                             padding: "2rem",
                             backgroundColor: "#f8f9fa",
                             borderRadius: "12px",
@@ -1108,7 +1108,7 @@ function Homepage() {
                                 alignItems: "center",
                                 justifyContent: "center"
                             }}>
-                                <img 
+                                <img
                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760812222/Comunity_lejla_1_kpxiv0.svg"
                                     style={{
                                         height: "3rem",
@@ -1117,26 +1117,26 @@ function Homepage() {
                                     }}
                                 />
                             </div>
-                            <h3 style={{ 
-                                fontSize: "1.5rem", 
-                                fontWeight: "600", 
+                            <h3 style={{
+                                fontSize: "1.5rem",
+                                fontWeight: "600",
                                 marginBottom: "1rem",
                                 color: "#1a4d3a"
                             }}>
                                 Community Learning
                             </h3>
-                            <p style={{ 
-                                color: "#666", 
+                            <p style={{
+                                color: "#666",
                                 lineHeight: "1.6",
                                 fontSize: "1rem"
                             }}>
-                                Connect with fellow problem-solvers, share solutions, and learn 
+                                Connect with fellow problem-solvers, share solutions, and learn
                                 from the community's collective knowledge.
                             </p>
                         </div>
-                        
-                        <div style={{ 
-                            textAlign: "center", 
+
+                        <div style={{
+                            textAlign: "center",
                             padding: "2rem",
                             backgroundColor: "#f8f9fa",
                             borderRadius: "12px",
@@ -1149,7 +1149,7 @@ function Homepage() {
                                 alignItems: "center",
                                 justifyContent: "center"
                             }}>
-                                <img 
+                                <img
                                     src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811741/trofeu_px38ap.svg"
                                     style={{
                                         height: "3rem",
@@ -1158,20 +1158,20 @@ function Homepage() {
                                     }}
                                 />
                             </div>
-                            <h3 style={{ 
-                                fontSize: "1.5rem", 
-                                fontWeight: "600", 
+                            <h3 style={{
+                                fontSize: "1.5rem",
+                                fontWeight: "600",
                                 marginBottom: "1rem",
                                 color: "#1a4d3a"
                             }}>
                                 Olympiad Focus
                             </h3>
-                            <p style={{ 
-                                color: "#666", 
+                            <p style={{
+                                color: "#666",
                                 lineHeight: "1.6",
                                 fontSize: "1rem"
                             }}>
-                                Practice with olympiad-style problems across multiple subjects 
+                                Practice with olympiad-style problems across multiple subjects
                                 and difficulty levels to prepare for competitions.
                             </p>
                         </div>
@@ -1181,7 +1181,7 @@ function Homepage() {
 
             {/* Click outside to close dropdowns */}
             {(showSubjectDropdown || showUserDropdown) && (
-                <div 
+                <div
                     style={{
                         position: "fixed",
                         top: 0,
@@ -1199,7 +1199,7 @@ function Homepage() {
 
             {/* Click outside to close user dropdown */}
             {showUserDropdown && (
-                <div 
+                <div
                     onClick={handleUserDropdownClose}
                     style={{
                         position: "fixed",
@@ -1211,7 +1211,7 @@ function Homepage() {
                     }}
                 />
             )}
-            
+
             {/* Hamburger Menu Overlay */}
             {showHamburgerMenu && (
                 <div
@@ -1227,7 +1227,7 @@ function Homepage() {
                     }}
                 />
             )}
-            
+
             {/* Sliding Menu */}
             <div style={{
                 position: "fixed",
@@ -1257,44 +1257,40 @@ function Homepage() {
                         borderRadius: "12px 12px 0 0",
                         position: "relative"
                     }}>
-                    <button
-                        onClick={handleMenuClose}
-                        style={{
-                            backgroundColor: "transparent",
-                            border: "none",
-                            color: "white",
-                            cursor: "pointer",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "3px",
-                            transition: "background-color 0.2s",
-                            position: "absolute",
-                            left: "1.5rem"
-                        }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = "rgba(255, 255, 255, 0.1)"}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
-                    >
-                        <img
-                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
-                            alt="Close Menu"
+                        <button
+                            onClick={handleMenuClose}
                             style={{
-                                width: "16px",
-                                height: "16px",
-                                objectFit: "contain"
+                                backgroundColor: "transparent",
+                                border: "none",
+                                color: "white",
+                                cursor: "pointer",
+                                padding: "4px 8px",
+                                borderRadius: "4px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                transition: "background-color 0.2s",
+                                position: "absolute",
+                                left: "1.5rem",
+                                fontSize: "28px",
+                                lineHeight: "1",
+                                fontWeight: "300"
                             }}
-                        />
-                    </button>
-                    <h3 style={{
-                        margin: 0,
-                        fontSize: "1.125rem",
-                        fontWeight: "bold",
-                        color: "white"
-                    }}>
-                        My Forums
-                    </h3>
-                </div>
+                            onMouseEnter={(e) => e.target.style.backgroundColor = "rgba(255, 255, 255, 0.1)"}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                            aria-label="Close Menu"
+                        >
+                            ×
+                        </button>
+                        <h3 style={{
+                            margin: 0,
+                            fontSize: "1.125rem",
+                            fontWeight: "bold",
+                            color: "white"
+                        }}>
+                            My Forums
+                        </h3>
+                    </div>
                 ) : (
                     <div style={{
                         display: "flex",
@@ -1316,36 +1312,23 @@ function Homepage() {
                                 border: "none",
                                 color: "white",
                                 cursor: "pointer",
-                                padding: "8px",
+                                padding: "4px 8px",
                                 borderRadius: "4px",
                                 display: "flex",
-                                flexDirection: "column",
-                                gap: "3px",
+                                alignItems: "center",
+                                justifyContent: "center",
                                 transition: "background-color 0.2s",
                                 position: "absolute",
-                                left: "1.5rem"
+                                left: "1.5rem",
+                                fontSize: "28px",
+                                lineHeight: "1",
+                                fontWeight: "300"
                             }}
                             onMouseEnter={(e) => e.target.style.backgroundColor = "rgba(255, 255, 255, 0.1)"}
                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                            aria-label="Close Menu"
                         >
-                            <div style={{
-                                width: "16px",
-                                height: "2px",
-                                backgroundColor: "white",
-                                transition: "all 0.3s ease"
-                            }} />
-                            <div style={{
-                                width: "16px",
-                                height: "2px",
-                                backgroundColor: "white",
-                                transition: "all 0.3s ease"
-                            }} />
-                            <div style={{
-                                width: "16px",
-                                height: "2px",
-                                backgroundColor: "white",
-                                transition: "all 0.3s ease"
-                            }} />
+                            ×
                         </button>
                         <h3 style={{
                             margin: 0,
@@ -1357,193 +1340,193 @@ function Homepage() {
                         </h3>
                     </div>
                 )}
-                
+
                 {checkFeatureEnabled('forums_enabled') && (
                     <>
                         {loadingForums ? (
-                    <div style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        padding: "2rem",
-                        color: "#6b7280"
-                    }}>
-                        Loading forums...
-                    </div>
-                ) : myForums.length === 0 ? (
-                    <div style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        padding: "2rem",
-                        color: "#6b7280",
-                        textAlign: "center"
-                    }}>
-                        No forums found.<br />
-                        Join or create a forum to see it here.
-                    </div>
-                ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                        {getSortedForums().map((forum) => {
-                            // Get icon based on subject
-                            const getForumIcon = (subject) => {
-                                const subjectLower = subject?.toLowerCase() || '';
-                                if (subjectLower.includes('biology')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/Biology_subject_pcxmoa.svg';
-                                if (subjectLower.includes('chemistry')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/chemistry_subject_r4n7jq.svg';
-                                if (subjectLower.includes('mathematics') || subjectLower.includes('math')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/math_subject_iqigfx.svg';
-                                if (subjectLower.includes('physics')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/physics_subject_m90gto.svg';
-                                if (subjectLower.includes('computer')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/computer_engineerin_subject_u2m2ze.svg';
-                                if (subjectLower.includes('education') || subjectLower.includes('academic')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
-                                return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
-                            };
+                            <div style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                padding: "2rem",
+                                color: "#6b7280"
+                            }}>
+                                Loading forums...
+                            </div>
+                        ) : myForums.length === 0 ? (
+                            <div style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                padding: "2rem",
+                                color: "#6b7280",
+                                textAlign: "center"
+                            }}>
+                                No forums found.<br />
+                                Join or create a forum to see it here.
+                            </div>
+                        ) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                {getSortedForums().map((forum) => {
+                                    // Get icon based on subject
+                                    const getForumIcon = (subject) => {
+                                        const subjectLower = subject?.toLowerCase() || '';
+                                        if (subjectLower.includes('biology')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/Biology_subject_pcxmoa.svg';
+                                        if (subjectLower.includes('chemistry')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/chemistry_subject_r4n7jq.svg';
+                                        if (subjectLower.includes('mathematics') || subjectLower.includes('math')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/math_subject_iqigfx.svg';
+                                        if (subjectLower.includes('physics')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/physics_subject_m90gto.svg';
+                                        if (subjectLower.includes('computer')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/computer_engineerin_subject_u2m2ze.svg';
+                                        if (subjectLower.includes('education') || subjectLower.includes('academic')) return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
+                                        return 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg';
+                                    };
 
-                            return (
-                                <button
-                                    key={forum.id}
-                                    onClick={() => handleForumClick(forum.id)}
-                                    style={{
-                                        width: "100%",
-                                        padding: "16px",
-                                        backgroundColor: "transparent",
-                                        border: "none",
-                                        borderRadius: "12px",
-                                        cursor: "pointer",
-                                        textAlign: "left",
-                                        fontSize: "14px",
-                                        color: "#1f2937",
-                                        transition: "all 0.2s ease",
-                                        borderBottom: "1px solid #f3f4f6",
-                                        display: "flex",
-                                        alignItems: "flex-start",
-                                        gap: "12px",
-                                        position: "relative",
-                                        overflow: "hidden"
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.backgroundColor = "#e8f5e8";
-                                        e.target.style.transform = "scale(1.02)";
-                                        e.target.style.boxShadow = "0 4px 12px rgba(26, 77, 58, 0.15)";
-                                        e.target.style.borderColor = "#1a4d3a";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.backgroundColor = "transparent";
-                                        e.target.style.transform = "scale(1)";
-                                        e.target.style.boxShadow = "none";
-                                        e.target.style.borderColor = "#f3f4f6";
-                                    }}
-                                >
-                                    {/* Forum Icon */}
-                                    <div style={{
-                                        marginTop: "2px",
-                                        flexShrink: 0,
-                                        pointerEvents: "none",
-                                        display: "flex",
-                                        alignItems: "center"
-                                    }}>
-                                        <img 
-                                            src={getForumIcon(forum.subject)}
-                                            alt={forum.subject}
+                                    return (
+                                        <button
+                                            key={forum.id}
+                                            onClick={() => handleForumClick(forum.id)}
                                             style={{
-                                                width: "20px",
-                                                height: "20px",
-                                                objectFit: "contain"
+                                                width: "100%",
+                                                padding: "16px",
+                                                backgroundColor: "transparent",
+                                                border: "none",
+                                                borderRadius: "12px",
+                                                cursor: "pointer",
+                                                textAlign: "left",
+                                                fontSize: "14px",
+                                                color: "#1f2937",
+                                                transition: "all 0.2s ease",
+                                                borderBottom: "1px solid #f3f4f6",
+                                                display: "flex",
+                                                alignItems: "flex-start",
+                                                gap: "12px",
+                                                position: "relative",
+                                                overflow: "hidden"
                                             }}
-                                        />
-                                    </div>
-                                    
-                                    {/* Forum Content */}
-                                    <div style={{ 
-                                        flex: 1, 
-                                        minWidth: 0,
-                                        pointerEvents: "none"
-                                    }}>
-                                        <div style={{
-                                            fontWeight: "600",
-                                            marginBottom: "4px",
-                                            fontSize: "14px",
-                                            color: "#1f2937",
-                                            lineHeight: 1.3
-                                        }}>
-                                            {forum.title}
-                                        </div>
-                                        {forum.description && (
+                                            onMouseEnter={(e) => {
+                                                e.target.style.backgroundColor = "#e8f5e8";
+                                                e.target.style.transform = "scale(1.02)";
+                                                e.target.style.boxShadow = "0 4px 12px rgba(26, 77, 58, 0.15)";
+                                                e.target.style.borderColor = "#1a4d3a";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.target.style.backgroundColor = "transparent";
+                                                e.target.style.transform = "scale(1)";
+                                                e.target.style.boxShadow = "none";
+                                                e.target.style.borderColor = "#f3f4f6";
+                                            }}
+                                        >
+                                            {/* Forum Icon */}
                                             <div style={{
-                                                fontSize: "12px",
-                                                color: "#6b7280",
-                                                lineHeight: 1.4,
-                                                marginBottom: "8px"
+                                                marginTop: "2px",
+                                                flexShrink: 0,
+                                                pointerEvents: "none",
+                                                display: "flex",
+                                                alignItems: "center"
                                             }}>
-                                                {forum.description.length > 50 
-                                                    ? `${forum.description.substring(0, 50)}...` 
-                                                    : forum.description
-                                                }
+                                                <img
+                                                    src={getForumIcon(forum.subject)}
+                                                    alt={forum.subject}
+                                                    style={{
+                                                        width: "20px",
+                                                        height: "20px",
+                                                        objectFit: "contain"
+                                                    }}
+                                                />
                                             </div>
-                                        )}
-                                        
-                                        {/* Subject Badge */}
-                                        {forum.subject && (
+
+                                            {/* Forum Content */}
                                             <div style={{
-                                                display: "inline-block",
-                                                backgroundColor: "#1a4d3a20",
-                                                color: "#1a4d3a",
-                                                padding: "4px 8px",
-                                                borderRadius: "6px",
-                                                fontSize: "11px",
-                                                fontWeight: "500",
-                                                marginTop: "4px"
+                                                flex: 1,
+                                                minWidth: 0,
+                                                pointerEvents: "none"
                                             }}>
-                                                {forum.subject}
+                                                <div style={{
+                                                    fontWeight: "600",
+                                                    marginBottom: "4px",
+                                                    fontSize: "14px",
+                                                    color: "#1f2937",
+                                                    lineHeight: 1.3
+                                                }}>
+                                                    {forum.title}
+                                                </div>
+                                                {forum.description && (
+                                                    <div style={{
+                                                        fontSize: "12px",
+                                                        color: "#6b7280",
+                                                        lineHeight: 1.4,
+                                                        marginBottom: "8px"
+                                                    }}>
+                                                        {forum.description.length > 50
+                                                            ? `${forum.description.substring(0, 50)}...`
+                                                            : forum.description
+                                                        }
+                                                    </div>
+                                                )}
+
+                                                {/* Subject Badge */}
+                                                {forum.subject && (
+                                                    <div style={{
+                                                        display: "inline-block",
+                                                        backgroundColor: "#1a4d3a20",
+                                                        color: "#1a4d3a",
+                                                        padding: "4px 8px",
+                                                        borderRadius: "6px",
+                                                        fontSize: "11px",
+                                                        fontWeight: "500",
+                                                        marginTop: "4px"
+                                                    }}>
+                                                        {forum.subject}
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
-                                    
-                                    {/* Pin Button */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            togglePin(forum.id);
-                                        }}
-                                        style={{
-                                            position: "absolute",
-                                            right: "12px",
-                                            top: "50%",
-                                            transform: "translateY(-50%)",
-                                            background: "none",
-                                            border: "none",
-                                            cursor: "pointer",
-                                            padding: "4px",
-                                            borderRadius: "4px",
-                                            transition: "all 0.2s ease",
-                                            fontSize: "14px",
-                                            color: pinnedForums.includes(forum.id) ? "#1a4d3a" : "#9ca3af",
-                                            pointerEvents: "auto"
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.target.style.backgroundColor = "#f3f4f6";
-                                            e.target.style.color = "#1a4d3a";
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.target.style.backgroundColor = "transparent";
-                                            e.target.style.color = pinnedForums.includes(forum.id) ? "#1a4d3a" : "#9ca3af";
-                                        }}
-                                    >
-                                        {pinnedForums.includes(forum.id) ? (
-                                            <img 
-                                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811441/Pin_Icon_Green_ly3fxo.svg" 
-                                                alt="Pin"
-                                                style={{
-                                                    height: "14px",
-                                                    width: "14px",
-                                                    objectFit: "contain"
+
+                                            {/* Pin Button */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    togglePin(forum.id);
                                                 }}
-                                            />
-                                        ) : "Pin"}
-                                    </button>
-                                </button>
-                            );
-                        })}
-                    </div>
-                )}
+                                                style={{
+                                                    position: "absolute",
+                                                    right: "12px",
+                                                    top: "50%",
+                                                    transform: "translateY(-50%)",
+                                                    background: "none",
+                                                    border: "none",
+                                                    cursor: "pointer",
+                                                    padding: "4px",
+                                                    borderRadius: "4px",
+                                                    transition: "all 0.2s ease",
+                                                    fontSize: "14px",
+                                                    color: pinnedForums.includes(forum.id) ? "#1a4d3a" : "#9ca3af",
+                                                    pointerEvents: "auto"
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.target.style.backgroundColor = "#f3f4f6";
+                                                    e.target.style.color = "#1a4d3a";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.target.style.backgroundColor = "transparent";
+                                                    e.target.style.color = pinnedForums.includes(forum.id) ? "#1a4d3a" : "#9ca3af";
+                                                }}
+                                            >
+                                                {pinnedForums.includes(forum.id) ? (
+                                                    <img
+                                                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811441/Pin_Icon_Green_ly3fxo.svg"
+                                                        alt="Pin"
+                                                        style={{
+                                                            height: "14px",
+                                                            width: "14px",
+                                                            objectFit: "contain"
+                                                        }}
+                                                    />
+                                                ) : "Pin"}
+                                            </button>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </>
                 )}
             </div>

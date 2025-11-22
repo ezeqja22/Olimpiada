@@ -15,7 +15,7 @@ const Forums = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
-    
+
     // Feature settings
     const { checkFeatureEnabled, showFeatureDisabledAlert } = useFeatureSettings();
     const [showCreateForm, setShowCreateForm] = useState(false);
@@ -34,8 +34,20 @@ const Forums = () => {
     const [allForums, setAllForums] = useState([]); // Store all forums for filtering
     const [searchQuery, setSearchQuery] = useState("");
     const [forumOnlineCounts, setForumOnlineCounts] = useState({});
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 20;
+    const [isMobile, setIsMobile] = useState(false);
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Check if forums are enabled
     useEffect(() => {
@@ -50,12 +62,12 @@ const Forums = () => {
     const handleTagChange = (index, value) => {
         const newTags = [...newForum.tags];
         newTags[index] = value;
-        setNewForum({...newForum, tags: newTags});
+        setNewForum({ ...newForum, tags: newTags });
     };
 
     const addTag = () => {
         if (newForum.tags.length < 5) {
-            setNewForum({...newForum, tags: [...newForum.tags, ""]});
+            setNewForum({ ...newForum, tags: [...newForum.tags, ""] });
         } else {
             alert("Maximum 5 tags allowed");
         }
@@ -64,7 +76,7 @@ const Forums = () => {
     const removeTag = (index) => {
         if (newForum.tags.length > 1) {
             const newTags = newForum.tags.filter((_, i) => i !== index);
-            setNewForum({...newForum, tags: newTags});
+            setNewForum({ ...newForum, tags: newTags });
         }
     };
 
@@ -77,7 +89,7 @@ const Forums = () => {
         try {
             const token = localStorage.getItem("token");
             if (!token) return;
-            
+
             const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -99,10 +111,10 @@ const Forums = () => {
             const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/forums`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            
+
             setForums(response.data);
             setAllForums(response.data); // Store all forums for filtering
-            
+
             // Fetch online counts for all forums
             fetchAllOnlineCounts(response.data);
         } catch (error) {
@@ -138,7 +150,7 @@ const Forums = () => {
             results.forEach(({ forumId, onlineCount }) => {
                 onlineCountsMap[forumId] = onlineCount;
             });
-            
+
             setForumOnlineCounts(onlineCountsMap);
         } catch (error) {
             console.error("Error fetching online counts:", error);
@@ -260,12 +272,14 @@ const Forums = () => {
     // Local search filtering
     const handleLocalSearch = (query) => {
         setSearchQuery(query);
+        setCurrentPage(1);
         filterForums(query);
     };
 
     // Local advanced search filtering
     const handleLocalAdvancedSearch = (advancedData) => {
         setSearchQuery(advancedData.query || "");
+        setCurrentPage(1);
         filterForumsAdvanced(advancedData);
     };
 
@@ -297,7 +311,7 @@ const Forums = () => {
         // Text search
         if (filters.query && filters.query.trim()) {
             const searchTerm = filters.query.toLowerCase();
-            filtered = filtered.filter(forum => 
+            filtered = filtered.filter(forum =>
                 forum.title.toLowerCase().includes(searchTerm) ||
                 forum.description.toLowerCase().includes(searchTerm) ||
                 (forum.tags && forum.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
@@ -306,14 +320,14 @@ const Forums = () => {
 
         // Subject filter
         if (filters.subjects && filters.subjects.length > 0) {
-            filtered = filtered.filter(forum => 
+            filtered = filtered.filter(forum =>
                 filters.subjects.includes(forum.subject)
             );
         }
 
         // Level filter
         if (filters.level && filters.level.trim()) {
-            filtered = filtered.filter(forum => 
+            filtered = filtered.filter(forum =>
                 forum.level && forum.level.toLowerCase().includes(filters.level.toLowerCase())
             );
         }
@@ -321,8 +335,8 @@ const Forums = () => {
         // Tags filter
         if (filters.tags && filters.tags.trim()) {
             const tagTerms = filters.tags.toLowerCase().split(',').map(tag => tag.trim());
-            filtered = filtered.filter(forum => 
-                forum.tags && tagTerms.some(term => 
+            filtered = filtered.filter(forum =>
+                forum.tags && tagTerms.some(term =>
                     forum.tags.some(forumTag => forumTag.toLowerCase().includes(term))
                 )
             );
@@ -336,11 +350,22 @@ const Forums = () => {
         // Tab filtering
         if (activeTab === 'public' && forum.is_private) return false;
         if (activeTab === 'private' && !forum.is_private) return false;
-        
+
         // No local filtering needed - search is now handled by SearchBar component
-        
+
         return true;
     });
+
+    // Pagination logic
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentForums = filteredForums.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredForums.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     if (loading) {
         return (
@@ -367,15 +392,15 @@ const Forums = () => {
         <Layout showHomeButton={true}>
             <div style={{ maxWidth: "1200px", margin: "0 auto", padding: spacing.lg }}>
                 {/* Header */}
-                <div style={{ 
-                    display: "flex", 
-                    justifyContent: "space-between", 
+                <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
                     alignItems: "center",
-                    marginBottom: spacing.xl 
+                    marginBottom: spacing.xl
                 }}>
-                    <h1 style={{ 
-                        fontSize: "2.5rem", 
-                        fontWeight: "700", 
+                    <h1 style={{
+                        fontSize: "2.5rem",
+                        fontWeight: "700",
                         color: colors.primary,
                         margin: 0
                     }}>
@@ -387,7 +412,7 @@ const Forums = () => {
                         right: spacing.xl,
                         zIndex: 1000
                     }}>
-                        <div 
+                        <div
                             onClick={() => {
                                 setShowCreateForm(true);
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -437,12 +462,12 @@ const Forums = () => {
 
                 {/* Search Bar */}
                 <div style={{ marginBottom: spacing.lg }}>
-                            <SearchBar 
-                                placeholder="Search forums, users, tags..." 
-                                searchMode="forums"
-                                onLocalSearch={handleLocalSearch}
-                                onAdvancedSearch={handleLocalAdvancedSearch}
-                            />
+                    <SearchBar
+                        placeholder="Search forums, users, tags..."
+                        searchMode="forums"
+                        onLocalSearch={handleLocalSearch}
+                        onAdvancedSearch={handleLocalAdvancedSearch}
+                    />
                 </div>
 
                 {/* Tabs */}
@@ -458,14 +483,16 @@ const Forums = () => {
                     ].map((tab) => (
                         <button
                             key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
+                            onClick={() => {
+                                setActiveTab(tab.id);
+                                setCurrentPage(1);
+                            }}
                             style={{
                                 padding: `${spacing.md} ${spacing.lg}`,
                                 border: 'none',
                                 background: 'none',
-                                borderBottom: `2px solid ${
-                                    activeTab === tab.id ? colors.primary : 'transparent'
-                                }`,
+                                borderBottom: `2px solid ${activeTab === tab.id ? colors.primary : 'transparent'
+                                    }`,
                                 color: activeTab === tab.id ? colors.primary : colors.gray[600],
                                 cursor: 'pointer',
                                 fontSize: typography.sm,
@@ -490,7 +517,7 @@ const Forums = () => {
                                 <input
                                     type="text"
                                     value={newForum.title}
-                                    onChange={(e) => setNewForum({...newForum, title: e.target.value})}
+                                    onChange={(e) => setNewForum({ ...newForum, title: e.target.value })}
                                     required
                                     style={{
                                         width: "100%",
@@ -507,7 +534,7 @@ const Forums = () => {
                                 </label>
                                 <textarea
                                     value={newForum.description}
-                                    onChange={(e) => setNewForum({...newForum, description: e.target.value})}
+                                    onChange={(e) => setNewForum({ ...newForum, description: e.target.value })}
                                     rows={3}
                                     style={{
                                         width: "100%",
@@ -519,7 +546,7 @@ const Forums = () => {
                                     }}
                                 />
                             </div>
-                            
+
                             {/* Badge Fields */}
                             <div style={{ marginBottom: spacing.md }}>
                                 <label style={{ display: "block", marginBottom: spacing.xs, fontWeight: "600" }}>
@@ -527,7 +554,7 @@ const Forums = () => {
                                 </label>
                                 <select
                                     value={newForum.subject}
-                                    onChange={(e) => setNewForum({...newForum, subject: e.target.value})}
+                                    onChange={(e) => setNewForum({ ...newForum, subject: e.target.value })}
                                     style={{
                                         width: "100%",
                                         padding: spacing.sm,
@@ -545,7 +572,7 @@ const Forums = () => {
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
-                            
+
                             <div style={{ marginBottom: spacing.md }}>
                                 <label style={{ display: "block", marginBottom: spacing.xs, fontWeight: "600" }}>
                                     Level
@@ -553,7 +580,7 @@ const Forums = () => {
                                 <input
                                     type="text"
                                     value={newForum.level}
-                                    onChange={(e) => setNewForum({...newForum, level: e.target.value})}
+                                    onChange={(e) => setNewForum({ ...newForum, level: e.target.value })}
                                     placeholder="e.g., National Albanian Olympiad 5th Class Phase 1, EGMO Phase 2, IMO, etc."
                                     style={{
                                         width: "100%",
@@ -564,7 +591,7 @@ const Forums = () => {
                                     }}
                                 />
                             </div>
-                            
+
                             <div style={{ marginBottom: spacing.md }}>
                                 <label style={{ display: "block", marginBottom: spacing.xs, fontWeight: "600" }}>
                                     Tags (Optional) - {newForum.tags.length}/5
@@ -617,20 +644,20 @@ const Forums = () => {
                                             fontSize: "14px"
                                         }}
                                     >
-                                    + Add New Tag
+                                        + Add New Tag
                                     </button>
                                 )}
                                 <small style={{ color: "#666", fontSize: "12px", display: "block", marginTop: "5px" }}>
                                     Add up to 5 tags to help categorize your forum
                                 </small>
                             </div>
-                            
+
                             <div style={{ marginBottom: spacing.md }}>
                                 <label style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
                                     <input
                                         type="checkbox"
                                         checked={newForum.is_private}
-                                        onChange={(e) => setNewForum({...newForum, is_private: e.target.checked})}
+                                        onChange={(e) => setNewForum({ ...newForum, is_private: e.target.checked })}
                                     />
                                     <span>Private Forum (requires approval to join)</span>
                                 </label>
@@ -695,12 +722,12 @@ const Forums = () => {
 
                 {/* Forum Count */}
                 {filteredForums.length > 0 && (
-                    <div style={{ 
+                    <div style={{
                         marginBottom: spacing.md,
                         textAlign: "center"
                     }}>
-                        <p style={{ 
-                            fontSize: "1.1rem", 
+                        <p style={{
+                            fontSize: "1.1rem",
                             color: colors.gray[600],
                             margin: 0
                         }}>
@@ -711,13 +738,13 @@ const Forums = () => {
                 )}
 
                 {/* Forums Grid */}
-                <div style={{ 
-                    display: "grid", 
-                    gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", 
-                    gap: spacing.lg 
+                <div style={{
+                    display: "grid",
+                    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                    gap: spacing.lg
                 }}>
-                    {filteredForums.map((forum) => (
-                        <Card 
+                    {currentForums.map((forum) => (
+                        <Card
                             key={forum.id}
                             hover={true}
                             style={{
@@ -727,26 +754,26 @@ const Forums = () => {
                             onClick={() => handleForumClick(forum)}
                         >
                             <div style={{ marginBottom: spacing.md, pointerEvents: "none" }}>
-                                <h3 style={{ 
-                                    margin: "0 0 8px 0", 
+                                <h3 style={{
+                                    margin: "0 0 8px 0",
                                     color: colors.primary,
                                     fontSize: "1.25rem"
                                 }}>
                                     {forum.title}
                                 </h3>
-                                <p style={{ 
-                                    margin: "0 0 12px 0", 
+                                <p style={{
+                                    margin: "0 0 12px 0",
                                     color: colors.gray[600],
                                     fontSize: "0.9rem"
                                 }}>
                                     {forum.description}
                                 </p>
-                                
+
                                 {/* Forum Badges */}
-                                <div style={{ 
-                                    display: "flex", 
-                                    flexWrap: "wrap", 
-                                    gap: "6px", 
+                                <div style={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: "6px",
                                     marginBottom: "12px",
                                     pointerEvents: "none"
                                 }}>
@@ -787,18 +814,18 @@ const Forums = () => {
                                         </span>
                                     ))}
                                 </div>
-                                
-                                
-                                <div style={{ 
-                                    display: "flex", 
-                                    justifyContent: "space-between", 
+
+
+                                <div style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
                                     alignItems: "center",
                                     marginBottom: spacing.sm
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span style={{ 
-                                            color: colors.gray[500], 
-                                            fontSize: "0.85rem" 
+                                        <span style={{
+                                            color: colors.gray[500],
+                                            fontSize: "0.85rem"
                                         }}>
                                             {forum.member_count}/{forum.max_members} members
                                         </span>
@@ -809,8 +836,8 @@ const Forums = () => {
                                                 borderRadius: '50%',
                                                 backgroundColor: (forumOnlineCounts[forum.id] || 0) > 0 ? '#10b981' : '#ef4444'
                                             }}></div>
-                                            <span style={{ 
-                                                color: colors.gray[600], 
+                                            <span style={{
+                                                color: colors.gray[600],
                                                 fontSize: "0.8rem",
                                                 fontWeight: "500"
                                             }}>
@@ -818,7 +845,7 @@ const Forums = () => {
                                             </span>
                                         </div>
                                     </div>
-                                    <span style={{ 
+                                    <span style={{
                                         color: colors.gray[700], // Changed from colors.warning to black
                                         fontSize: "0.85rem",
                                         fontWeight: "600"
@@ -827,9 +854,9 @@ const Forums = () => {
                                     </span>
                                 </div>
                             </div>
-                            
-                            <div style={{ 
-                                display: "flex", 
+
+                            <div style={{
+                                display: "flex",
                                 gap: spacing.sm,
                                 justifyContent: "flex-end",
                                 pointerEvents: "none"
@@ -844,7 +871,7 @@ const Forums = () => {
                                         Invite Users
                                     </Button>
                                 )}
-                                
+
                                 {/* Show appropriate button for non-creators who are not members */}
                                 {currentUser && forum.creator_id !== currentUser.id && !forum.is_member && (
                                     forum.is_private ? (
@@ -855,7 +882,7 @@ const Forums = () => {
                                                     e.stopPropagation();
                                                     handleRetractRequest(forum.id);
                                                 }}
-                                                style={{ 
+                                                style={{
                                                     backgroundColor: colors.gray[500],
                                                     cursor: 'pointer',
                                                     border: 'none',
@@ -898,24 +925,96 @@ const Forums = () => {
                                         </Button>
                                     )
                                 )}
-                                
+
                             </div>
                         </Card>
                     ))}
                 </div>
 
+                {/* Pagination Controls */}
+                {filteredForums.length > itemsPerPage && (
+                    <div style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: spacing.md,
+                        marginTop: spacing.xl,
+                        flexWrap: "wrap"
+                    }}>
+                        <Button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            variant="secondary"
+                            style={{
+                                opacity: currentPage === 1 ? 0.5 : 1,
+                                cursor: currentPage === 1 ? "not-allowed" : "pointer"
+                            }}
+                        >
+                            Previous
+                        </Button>
+
+                        <div style={{ display: "flex", gap: spacing.xs }}>
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                // Logic to show pages around current page
+                                let pageNum;
+                                if (totalPages <= 5) {
+                                    pageNum = i + 1;
+                                } else if (currentPage <= 3) {
+                                    pageNum = i + 1;
+                                } else if (currentPage >= totalPages - 2) {
+                                    pageNum = totalPages - 4 + i;
+                                } else {
+                                    pageNum = currentPage - 2 + i;
+                                }
+
+                                return (
+                                    <button
+                                        key={pageNum}
+                                        onClick={() => handlePageChange(pageNum)}
+                                        style={{
+                                            width: "36px",
+                                            height: "36px",
+                                            borderRadius: borderRadius.md,
+                                            border: `1px solid ${currentPage === pageNum ? colors.primary : colors.gray[300]}`,
+                                            backgroundColor: currentPage === pageNum ? colors.primary : "white",
+                                            color: currentPage === pageNum ? "white" : colors.gray[700],
+                                            cursor: "pointer",
+                                            fontWeight: "600",
+                                            transition: "all 0.2s ease"
+                                        }}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <Button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            variant="secondary"
+                            style={{
+                                opacity: currentPage === totalPages ? 0.5 : 1,
+                                cursor: currentPage === totalPages ? "not-allowed" : "pointer"
+                            }}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                )}
+
                 {filteredForums.length === 0 && (
-                    <div style={{ 
-                        textAlign: "center", 
+                    <div style={{
+                        textAlign: "center",
                         padding: spacing.xl,
                         color: colors.gray[500]
                     }}>
                         <h3>No forums found</h3>
                         <p>
                             {searchQuery ? `No forums found matching "${searchQuery}"` :
-                             activeTab === 'public' ? 'No public forums available' :
-                             activeTab === 'private' ? 'No private forums available' :
-                             'Be the first to create a forum!'}
+                                activeTab === 'public' ? 'No public forums available' :
+                                    activeTab === 'private' ? 'No private forums available' :
+                                        'Be the first to create a forum!'}
                         </p>
                     </div>
                 )}

@@ -1,12 +1,12 @@
 import React from "react";
 import { colors, spacing, borderRadius, shadows } from "../designSystem";
 
-function Card({ 
-    children, 
-    padding = "lg", 
+function Card({
+    children,
+    padding = "lg",
     style = {},
     hover = false,
-    ...props 
+    ...props
 }) {
     const getPadding = () => {
         switch (padding) {
@@ -23,28 +23,14 @@ function Card({
         borderRadius: borderRadius.lg,
         boxShadow: shadows.md,
         padding: getPadding(),
-        transition: hover ? "all 0.2s ease" : "none",
+        transition: "all 0.2s ease",
         ...style
     };
 
-    const hoverStyles = hover ? {
-        "&:hover": {
-            boxShadow: shadows.lg,
-            transform: "translateY(-2px)"
-        }
-    } : {};
-
     return (
         <div
+            className={hover ? "card-hover" : ""}
             style={cardStyles}
-            onMouseEnter={hover ? (e) => {
-                e.target.style.boxShadow = shadows.lg;
-                e.target.style.transform = "translateY(-2px)";
-            } : undefined}
-            onMouseLeave={hover ? (e) => {
-                e.target.style.boxShadow = shadows.md;
-                e.target.style.transform = "translateY(0)";
-            } : undefined}
             {...props}
         >
             {children}
