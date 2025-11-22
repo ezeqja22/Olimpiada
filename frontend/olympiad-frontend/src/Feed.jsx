@@ -736,7 +736,7 @@ function Feed() {
                       width: "40px",
                       height: "40px",
                       borderRadius: "50%",
-                      backgroundColor: "#007bff",
+                      backgroundColor: "#1a4d3a",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -758,7 +758,7 @@ function Feed() {
                           style={{
                             fontWeight: "bold",
                             fontSize: "14px",
-                            color: "#007bff",
+                            color: "#1a4d3a",
                             cursor: "pointer",
                             textDecoration: "underline",
                             pointerEvents: "auto"

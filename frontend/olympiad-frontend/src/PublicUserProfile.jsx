@@ -443,7 +443,7 @@ const PublicUserProfile = () => {
                     width: '80px',
                     height: '80px',
                     borderRadius: '50%',
-                    backgroundColor: '#007bff',
+                    backgroundColor: '#1a4d3a',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
