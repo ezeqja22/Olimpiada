@@ -86,6 +86,11 @@ function Feed() {
     }
   }, []);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   useEffect(() => {
     // Fetch data when tab changes
     let loadingTimeout;
@@ -1078,7 +1083,7 @@ function Feed() {
               alignItems: "center",
               gap: spacing.md,
               marginTop: spacing.xl,
-              padding: spacing.lg
+              paddingBottom: isMobile ? "100px" : "40px" // Added padding to prevent FAB overlap
             }}>
               <Button
                 onClick={() => {

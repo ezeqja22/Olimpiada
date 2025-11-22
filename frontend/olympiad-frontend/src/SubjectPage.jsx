@@ -67,9 +67,10 @@ function SubjectPage() {
         fetchProblems();
     }, [subject, currentPage]);
 
+    // Scroll to top when page changes
     useEffect(() => {
-        fetchCurrentUser();
-    }, []);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [currentPage]);
 
     // Mobile detection
     useEffect(() => {
@@ -1026,7 +1027,6 @@ function SubjectPage() {
                         ))}
                     </div>
 
-                    {/* Pagination */}
                     {totalPages > 1 && (
                         <div style={{
                             display: "flex",
@@ -1034,7 +1034,8 @@ function SubjectPage() {
                             alignItems: "center",
                             gap: isMobile ? "10px" : "20px",
                             marginTop: "2rem",
-                            padding: "1rem"
+                            padding: "1rem",
+                            paddingBottom: isMobile ? "100px" : "1rem" // Added padding to prevent FAB overlap
                         }}>
                             <button
                                 onClick={() => {

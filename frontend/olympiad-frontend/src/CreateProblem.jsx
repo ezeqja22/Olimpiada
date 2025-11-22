@@ -1,5 +1,5 @@
 // src/CreateProblem.jsx
-import React, { useState, useEffect , useRef} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import MathEditor from "./MathEditor";
@@ -25,14 +25,14 @@ function CreateProblem() {
     const urlParams = new URLSearchParams(location.search);
     const subjectParam = urlParams.get('subject');
     const draftId = urlParams.get('draft');
-    
+
     if (subjectParam) {
       setFormData(prev => ({
         ...prev,
         subject: subjectParam
       }));
     }
-    
+
     // Load draft if draft ID is provided
     if (draftId) {
       loadDraft(draftId);
@@ -87,18 +87,18 @@ function CreateProblem() {
   const getRedirectPath = () => {
     const searchParams = new URLSearchParams(location.search);
     const from = searchParams.get('from');
-    
+
     // If there's a specific 'from' parameter, use it
     if (from) {
       return from;
     }
-    
+
     // Check if we came from a specific subject page
     const subject = searchParams.get('subject');
     if (subject) {
       return `/subject/${encodeURIComponent(subject)}`;
     }
-    
+
     // Default to feed if no specific referrer
     return '/feed';
   };
@@ -111,42 +111,42 @@ function CreateProblem() {
   };
 
   const openMathEditor = (target) => {
-  let ref = null;
+    let ref = null;
 
-  if (target === "title") ref = titleRef.current;
-  if (target === "description") ref = descriptionRef.current;
+    if (target === "title") ref = titleRef.current;
+    if (target === "description") ref = descriptionRef.current;
 
-  if (ref) {
-    setCursorIndex({
-      start: ref.selectionStart,
-      end: ref.selectionEnd
-    });
-  }
+    if (ref) {
+      setCursorIndex({
+        start: ref.selectionStart,
+        end: ref.selectionEnd
+      });
+    }
 
-  setMathEditorTarget(target);
-  setShowMathEditor(true);
-};
+    setMathEditorTarget(target);
+    setShowMathEditor(true);
+  };
 
 
   const handleMathInsert = (mathContent) => {
-  if (mathEditorTarget && cursorIndex) {
-    const text = formData[mathEditorTarget];
+    if (mathEditorTarget && cursorIndex) {
+      const text = formData[mathEditorTarget];
 
-    const newText =
-      text.slice(0, cursorIndex.start) +
-      mathContent +
-      text.slice(cursorIndex.end);
+      const newText =
+        text.slice(0, cursorIndex.start) +
+        mathContent +
+        text.slice(cursorIndex.end);
 
-    setFormData({
-      ...formData,
-      [mathEditorTarget]: newText
-    });
-  }
+      setFormData({
+        ...formData,
+        [mathEditorTarget]: newText
+      });
+    }
 
-  setShowMathEditor(false);
-  setMathEditorTarget(null);
-  setCursorIndex(null);
-};
+    setShowMathEditor(false);
+    setMathEditorTarget(null);
+    setCursorIndex(null);
+  };
 
 
   const closeMathEditor = () => {
@@ -178,13 +178,13 @@ function CreateProblem() {
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
-    
+
     // Check if adding these files would exceed the limit
     if (images.length + files.length > 10) {
       alert("Maximum 10 images allowed. Please select fewer images.");
       return;
     }
-    
+
     // Validate files
     const validFiles = files.filter(file => {
       if (!file.type.startsWith('image/')) {
@@ -193,7 +193,7 @@ function CreateProblem() {
       }
       return true;
     });
-    
+
     // Store files for later upload
     setImages([...images, ...validFiles]);
   };
@@ -251,21 +251,21 @@ function CreateProblem() {
         setLoading(false);
         return;
       }
-      
+
       // Process tags: filter out empty tags and join with commas
       const processedTags = validTags.join(", ");
-      
+
       const token = localStorage.getItem("token");
-      
+
       // Ensure year is a number or null
       const requestData = {
         ...formData,
         tags: processedTags,
         year: formData.year ? parseInt(formData.year) : null
       };
-      
-      
-      
+
+
+
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/`,
         requestData,
@@ -283,9 +283,9 @@ function CreateProblem() {
           for (const file of images) {
             const formData = new FormData();
             formData.append('file', file);
-            
+
             const uploadUrl = `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${response.data.id}/images`;
-            
+
             const uploadResponse = await axios.post(
               uploadUrl,
               formData,
@@ -308,7 +308,7 @@ function CreateProblem() {
       }
 
       alert("Problem created successfully!");
-      
+
       // If this was created from a draft, delete the draft
       const urlParams = new URLSearchParams(location.search);
       const draftId = urlParams.get('draft');
@@ -322,7 +322,7 @@ function CreateProblem() {
           // Don't show error to user as the problem was created successfully
         }
       }
-      
+
       navigate(getRedirectPath());
     } catch (error) {
       console.error("Error creating problem:", error);
@@ -353,21 +353,22 @@ function CreateProblem() {
             onClick={handleSaveDraft}
             disabled={savingDraft}
             style={{
-              position: "fixed",
-              bottom: "34px",
-              right: "20px",
+              position: isMobile ? "static" : "fixed",
+              bottom: isMobile ? "auto" : "34px",
+              right: isMobile ? "auto" : "20px",
               zIndex: 1000,
-              padding: "16px 32px",
+              padding: isMobile ? "8px 16px" : "16px 32px",
               backgroundColor: colors.secondary,
               color: "white",
               border: "none",
               borderRadius: "8px",
-              fontSize: "16px",
+              fontSize: isMobile ? "14px" : "16px",
               fontWeight: "600",
               cursor: savingDraft ? "not-allowed" : "pointer",
               boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
               transition: "all 0.2s ease",
-              opacity: savingDraft ? 0.7 : 1
+              opacity: savingDraft ? 0.7 : 1,
+              marginBottom: isMobile ? "10px" : "0"
             }}
             onMouseEnter={(e) => {
               if (!savingDraft) {
@@ -389,24 +390,24 @@ function CreateProblem() {
 
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
         <div>
-          <label style={{ 
-            display: "block", 
-            marginBottom: "8px", 
-            fontWeight: "600", 
+          <label style={{
+            display: "block",
+            marginBottom: "8px",
+            fontWeight: "600",
             color: colors.dark,
             fontSize: "16px"
           }}>
             Title *
           </label>
           <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-          <input
-            ref={titleRef}
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            style={{
+            <input
+              ref={titleRef}
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              style={{
                 flex: 1,
                 padding: "12px 16px",
                 border: "2px solid #e9ecef",
@@ -421,9 +422,9 @@ function CreateProblem() {
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = "#e9ecef";
-            }}
-            placeholder="Enter a descriptive title for your problem"
-          />
+              }}
+              placeholder="Enter a descriptive title for your problem"
+            />
             <button
               type="button"
               onClick={() => openMathEditor('title')}
@@ -449,44 +450,44 @@ function CreateProblem() {
                 e.target.style.boxShadow = "0 2px 8px rgba(30, 64, 175, 0.3)";
               }}
             >
-               Symbols
+              Symbols
             </button>
           </div>
         </div>
 
         <div>
-          <label style={{ 
-            display: "block", 
-            marginBottom: "8px", 
-            fontWeight: "600", 
+          <label style={{
+            display: "block",
+            marginBottom: "8px",
+            fontWeight: "600",
             color: colors.dark,
             fontSize: "16px"
           }}>
-            Description * 
-            <span style={{ 
-    fontWeight: "400", 
-    color: "#666", 
-    fontSize: "13px" 
-  }}>
-    (For math symbols to be displayed nicely on the Feed, wrap them in $...$)
-  </span>
+            Description *
+            <span style={{
+              fontWeight: "400",
+              color: "#666",
+              fontSize: "13px"
+            }}>
+              (For math symbols to be displayed nicely on the Feed, wrap them in $...$)
+            </span>
           </label>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
-          <textarea
-            ref={descriptionRef}
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            rows="6"
-            style={{
+              <textarea
+                ref={descriptionRef}
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                required
+                rows="6"
+                style={{
                   flex: 1,
                   padding: "12px 16px",
                   whiteSpace: "pre-wrap",
                   border: "2px solid #e9ecef",
                   borderRadius: "8px",
-              fontSize: "16px",
+                  fontSize: "16px",
                   resize: "vertical",
                   outline: "none",
                   transition: "border-color 0.2s ease",
@@ -497,9 +498,9 @@ function CreateProblem() {
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = "#e9ecef";
-            }}
-            placeholder="Describe the problem in detail. Include any relevant information, constraints, or context."
-          />
+                }}
+                placeholder="Describe the problem in detail. Include any relevant information, constraints, or context."
+              />
               <button
                 type="button"
                 onClick={() => openMathEditor('description')}
@@ -526,17 +527,17 @@ function CreateProblem() {
                   e.target.style.boxShadow = "0 2px 8px rgba(30, 64, 175, 0.3)";
                 }}
               >
-                 Symbols
+                Symbols
               </button>
             </div>
           </div>
         </div>
 
         <div>
-          <label style={{ 
-            display: "block", 
-            marginBottom: "8px", 
-            fontWeight: "600", 
+          <label style={{
+            display: "block",
+            marginBottom: "8px",
+            fontWeight: "600",
             color: colors.dark,
             fontSize: "16px"
           }}>
@@ -576,10 +577,10 @@ function CreateProblem() {
         </div>
 
         <div>
-          <label style={{ 
-            display: "block", 
-            marginBottom: "8px", 
-            fontWeight: "600", 
+          <label style={{
+            display: "block",
+            marginBottom: "8px",
+            fontWeight: "600",
             color: colors.dark,
             fontSize: "16px"
           }}>
@@ -614,10 +615,10 @@ function CreateProblem() {
         </div>
 
         <div>
-          <label style={{ 
-            display: "block", 
-            marginBottom: "8px", 
-            fontWeight: "600", 
+          <label style={{
+            display: "block",
+            marginBottom: "8px",
+            fontWeight: "600",
             color: colors.dark,
             fontSize: "16px"
           }}>
@@ -665,11 +666,11 @@ function CreateProblem() {
                 onChange={(e) => handleTagChange(index, e.target.value)}
                 style={{
                   flex: 1,
-              padding: "10px",
-              border: "1px solid #ddd",
-              borderRadius: "4px",
-              fontSize: "16px"
-            }}
+                  padding: "10px",
+                  border: "1px solid #ddd",
+                  borderRadius: "4px",
+                  fontSize: "16px"
+                }}
                 placeholder={`Tag ${index + 1}`}
               />
               {tags.length > 1 && (
@@ -717,16 +718,16 @@ function CreateProblem() {
         </div>
 
         <div>
-          <label style={{ 
-            display: "block", 
-            marginBottom: "8px", 
-            fontWeight: "600", 
+          <label style={{
+            display: "block",
+            marginBottom: "8px",
+            fontWeight: "600",
             color: colors.dark,
             fontSize: "16px"
           }}>
             Images (Optional) - {images.length}/10
           </label>
-          
+
           {/* Hidden file input */}
           <input
             type="file"
@@ -736,27 +737,27 @@ function CreateProblem() {
             style={{ display: "none" }}
             id="image-upload-input"
           />
-          
+
           {/* Image previews and upload area */}
-          <div style={{ 
-            display: "flex", 
-            flexWrap: "wrap", 
+          <div style={{
+            display: "flex",
+            flexWrap: "wrap",
             gap: "16px",
             alignItems: "flex-start"
           }}>
             {/* Existing images */}
             {images.map((file, index) => (
-              <div key={index} style={{ 
+              <div key={index} style={{
                 position: "relative",
-                border: "1px solid #ddd", 
-                borderRadius: "8px", 
+                border: "1px solid #ddd",
+                borderRadius: "8px",
                 overflow: "hidden",
                 backgroundColor: "white",
                 width: "150px",
                 height: "100px"
               }}>
-                <img 
-                  src={URL.createObjectURL(file)} 
+                <img
+                  src={URL.createObjectURL(file)}
                   alt={`Preview ${index + 1}`}
                   style={{
                     width: "100%",
@@ -785,7 +786,7 @@ function CreateProblem() {
                 </button>
               </div>
             ))}
-            
+
             {/* Upload box - only show if under max limit */}
             {images.length < 10 && (
               <div
@@ -835,11 +836,11 @@ function CreateProblem() {
               </div>
             )}
           </div>
-          
+
           {images.length >= 10 && (
-            <div style={{ 
-              padding: "10px", 
-              backgroundColor: "#f8f9fa", 
+            <div style={{
+              padding: "10px",
+              backgroundColor: "#f8f9fa",
               borderRadius: "4px",
               color: "#666",
               fontSize: "12px",
@@ -913,7 +914,7 @@ function CreateProblem() {
           </button>
         </div>
       </form>
-      
+
       {/* Math Editor Modal */}
       <MathEditor
         isOpen={showMathEditor}
