@@ -1032,7 +1032,68 @@ function SubjectPage() {
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "center",
-                        < Link to={`/create-problem?subject=${encodeURIComponent(subjectName)}&from=/subject/${encodeURIComponent(subjectName)}`} style={{ textDecoration: "none" }}>
+                            gap: isMobile ? "10px" : "20px",
+                            marginTop: "2rem",
+                            padding: "1rem"
+                        }}>
+                            <button
+                                onClick={() => {
+                                    setCurrentPage(prev => Math.max(1, prev - 1));
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                disabled={currentPage === 1}
+                                style={{
+                                    padding: isMobile ? "8px 16px" : "10px 20px",
+                                    backgroundColor: currentPage === 1 ? "#e9ecef" : colors.primary,
+                                    color: currentPage === 1 ? "#6c757d" : "white",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                                    fontSize: isMobile ? "14px" : "16px",
+                                    fontWeight: "600"
+                                }}
+                            >
+                                ← Previous
+                            </button>
+
+                            <span style={{
+                                fontSize: isMobile ? "14px" : "16px",
+                                color: "#666",
+                                fontWeight: "500"
+                            }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+
+                            <button
+                                onClick={() => {
+                                    setCurrentPage(prev => Math.min(totalPages, prev + 1));
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                disabled={currentPage === totalPages}
+                                style={{
+                                    padding: isMobile ? "8px 16px" : "10px 20px",
+                                    backgroundColor: currentPage === totalPages ? "#e9ecef" : colors.primary,
+                                    color: currentPage === totalPages ? "#6c757d" : "white",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                                    fontSize: isMobile ? "14px" : "16px",
+                                    fontWeight: "600"
+                                }}
+                            >
+                                Next →
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Floating Create Problem Button */}
+                    <div style={{
+                        position: "fixed",
+                        bottom: "20px",
+                        right: "20px",
+                        zIndex: 1000
+                    }}>
+                        <Link to={`/create-problem?subject=${encodeURIComponent(subjectName)}&from=/subject/${encodeURIComponent(subjectName)}`} style={{ textDecoration: "none" }}>
                             <div style={{
                                 width: isMobile ? "50px" : "60px",
                                 height: isMobile ? "50px" : "60px",
@@ -1079,6 +1140,8 @@ function SubjectPage() {
                             </div>
                         </Link>
                     </div>
+                </>
+            )}
         </Layout>
     );
 }

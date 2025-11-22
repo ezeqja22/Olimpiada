@@ -891,272 +891,287 @@ function Feed() {
                         Year: {problem.year}
                       </span>
                     )}
-                    cursor: "pointer",
-                    fontSize: isMobile ? "12px" : "14px",
-                    color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
-                    fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
-                    padding: isMobile ? "8px 12px" : "10px 16px",
-                    borderRadius: "8px",
-                    transition: "all 0.2s ease",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: isMobile ? "6px" : "8px"
-                    gap: isMobile ? "6px" : "8px"
-                  }}
-                    onMouseEnter={(e) => {
-                      if (voteData[problem.id]?.user_vote !== "like") {
-                        e.target.style.backgroundColor = "#e9ecef";
-                        e.target.style.borderColor = "#adb5bd";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (voteData[problem.id]?.user_vote !== "like") {
-                        e.target.style.backgroundColor = "#f8f9fa";
-                        e.target.style.borderColor = "#dee2e6";
-                      }
-                    }}
-                    >
-                    <img
-                      src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg"
-                      alt="Like"
-                      style={{
-                        height: isMobile ? "14px" : "18px",
-                        width: isMobile ? "14px" : "18px",
-                        objectFit: "contain"
-                      }}
-                    />
-                    {voteData[problem.id]?.like_count || 0}
-                  </button>
+                  </div>
 
-                  {/* Dislike Button */}
+                  {/* Like, Dislike, Comment - Left Side */}
+                  <div style={{
+                    display: "flex",
+                    gap: isMobile ? "8px" : "12px",
+                    alignItems: "center"
+                  }}>
+                    {/* Like Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleVote(problem.id, "like");
+                      }}
+                      style={{
+                        backgroundColor: voteData[problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
+                        border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
+                        cursor: "pointer",
+                        fontSize: isMobile ? "12px" : "14px",
+                        color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
+                        fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
+                        padding: isMobile ? "8px 12px" : "10px 16px",
+                        borderRadius: "8px",
+                        transition: "all 0.2s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: isMobile ? "6px" : "8px"
+                      }}
+                      onMouseEnter={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "like") {
+                          e.target.style.backgroundColor = "#e9ecef";
+                          e.target.style.borderColor = "#adb5bd";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "like") {
+                          e.target.style.backgroundColor = "#f8f9fa";
+                          e.target.style.borderColor = "#dee2e6";
+                        }
+                      }}
+                    >
+                      <img
+                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg"
+                        alt="Like"
+                        style={{
+                          height: isMobile ? "14px" : "18px",
+                          width: isMobile ? "14px" : "18px",
+                          objectFit: "contain"
+                        }}
+                      />
+                      {voteData[problem.id]?.like_count || 0}
+                    </button>
+
+                    {/* Dislike Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleVote(problem.id, "dislike");
+                      }}
+                      style={{
+                        backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
+                        border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
+                        cursor: "pointer",
+                        fontSize: isMobile ? "12px" : "14px",
+                        color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
+                        fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
+                        padding: isMobile ? "8px 12px" : "10px 16px",
+                        borderRadius: "8px",
+                        transition: "all 0.2s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: isMobile ? "6px" : "8px"
+                      }}
+                      onMouseEnter={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "dislike") {
+                          e.target.style.backgroundColor = "#e9ecef";
+                          e.target.style.borderColor = "#adb5bd";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "dislike") {
+                          e.target.style.backgroundColor = "#f8f9fa";
+                          e.target.style.borderColor = "#dee2e6";
+                        }
+                      }}
+                    >
+                      <img
+                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg"
+                        alt="Dislike"
+                        style={{
+                          height: isMobile ? "14px" : "18px",
+                          width: isMobile ? "14px" : "18px",
+                          objectFit: "contain"
+                        }}
+                      />
+                      {voteData[problem.id]?.dislike_count || 0}
+                    </button>
+
+                    {/* Comment Count */}
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: isMobile ? "6px" : "8px",
+                      padding: isMobile ? "8px 12px" : "10px 16px",
+                      backgroundColor: "#f8f9fa",
+                      borderRadius: "8px",
+                      border: "1px solid #dee2e6"
+                    }}>
+                      <img
+                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg"
+                        alt="Comments"
+                        style={{
+                          height: isMobile ? "14px" : "18px",
+                          width: isMobile ? "14px" : "18px",
+                          objectFit: "contain"
+                        }}
+                      />
+                      <span style={{
+                        fontSize: isMobile ? "12px" : "14px",
+                        color: "#666",
+                        fontWeight: "500"
+                      }}>
+                        {problem.comment_count || 0}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bookmark - Right Side */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleVote(problem.id, "dislike");
+                      handleBookmark(problem.id);
                     }}
                     style={{
-                      backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
-                      border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
-                      cursor: "pointer",
-                      fontSize: isMobile ? "12px" : "14px",
-                      color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
-                      fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
                       padding: isMobile ? "8px 12px" : "10px 16px",
-                      borderRadius: "8px",
-                      transition: "all 0.2s ease",
+                      backgroundColor: "transparent",
+                      border: "none",
+                      cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
-                      gap: isMobile ? "6px" : "8px"
+                      gap: isMobile ? "6px" : "8px",
+                      borderRadius: "8px",
+                      transition: "all 0.2s ease"
                     }}
                     onMouseEnter={(e) => {
-                      if (voteData[problem.id]?.user_vote !== "dislike") {
-                        e.target.style.backgroundColor = "#e9ecef";
-                        e.target.style.borderColor = "#adb5bd";
-                      }
+                      e.target.style.backgroundColor = "#f8f9fa";
                     }}
                     onMouseLeave={(e) => {
-                      if (voteData[problem.id]?.user_vote !== "dislike") {
-                        e.target.style.backgroundColor = "#f8f9fa";
-                        e.target.style.borderColor = "#dee2e6";
-                      }
+                      e.target.style.backgroundColor = "transparent";
                     }}
                   >
                     <img
-                      src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg"
-                      alt="Dislike"
+                      src={bookmarkData[problem.id]?.isBookmarked
+                        ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
+                        : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
+                      }
+                      alt="Bookmark"
                       style={{
-                        height: isMobile ? "14px" : "18px",
-                        width: isMobile ? "14px" : "18px",
-                        objectFit: "contain"
-                      }}
-                    />
-                    {voteData[problem.id]?.dislike_count || 0}
-                  </button>
-
-                  {/* Comment Count */}
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: isMobile ? "6px" : "8px",
-                    padding: isMobile ? "8px 12px" : "10px 16px",
-                    backgroundColor: "#f8f9fa",
-                    borderRadius: "8px",
-                    border: "1px solid #dee2e6"
-                  }}>
-                    <img
-                      src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg"
-                      alt="Comments"
-                      style={{
-                        height: isMobile ? "14px" : "18px",
-                        width: isMobile ? "14px" : "18px",
+                        height: isMobile ? "16px" : "20px",
+                        width: isMobile ? "16px" : "20px",
                         objectFit: "contain"
                       }}
                     />
                     <span style={{
                       fontSize: isMobile ? "12px" : "14px",
-                      color: "#666",
+                      color: bookmarkData[problem.id]?.isBookmarked ? "rgb(26, 77, 58)" : "#666",
                       fontWeight: "500"
                     }}>
-                      {problem.comment_count || 0}
+                      {bookmarkData[problem.id]?.isBookmarked ? "Saved" : "Save"}
                     </span>
-                  </div>
+                  </button>
                 </div>
+              </Card>
+            ))}
+          </div>
+        )
+        }
 
-                {/* Bookmark - Right Side */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleBookmark(problem.id);
-                  }}
-                  style={{
-                    padding: isMobile ? "8px 12px" : "10px 16px",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: isMobile ? "6px" : "8px",
-                    borderRadius: "8px",
-                    transition: "all 0.2s ease"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = "#f8f9fa";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = "transparent";
-                  }}
-                >
-                  <img
-                    src={bookmarkData[problem.id]?.isBookmarked
-                      ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
-                      : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
-                    }
-                    alt="Bookmark"
-                    style={{
-                      height: isMobile ? "16px" : "20px",
-                      width: isMobile ? "16px" : "20px",
-                      objectFit: "contain"
-                    }}
-                  />
-                  <span style={{
-                    fontSize: isMobile ? "12px" : "14px",
-                    color: bookmarkData[problem.id]?.isBookmarked ? "rgb(26, 77, 58)" : "#666",
-                    fontWeight: "500"
-                  }}>
-                    {bookmarkData[problem.id]?.isBookmarked ? "Saved" : "Save"}
-                  </span>
-                </button>
-              </div>
-              </div>
-          </Card>
-          ))}
-    </div>
-  )
-}
+        {/* Pagination */}
+        {
+          (activeTab === "all" || activeTab === "trending") && totalPages > 1 && (
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: spacing.md,
+              marginTop: spacing.xl,
+              padding: spacing.lg
+            }}>
+              <Button
+                onClick={() => {
+                  if (activeTab === "trending") {
+                    fetchTrendingProblems(currentPage - 1);
+                  } else {
+                    fetchProblems(currentPage - 1);
+                  }
+                }}
+                disabled={currentPage === 1}
+                variant={currentPage === 1 ? "ghost" : "primary"}
+                size="md"
+              >
+                ← Previous
+              </Button>
 
-{/* Pagination */ }
-{
-  (activeTab === "all" || activeTab === "trending") && totalPages > 1 && (
-    <div style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      gap: spacing.md,
-      marginTop: spacing.xl,
-      padding: spacing.lg
-    }}>
-      <Button
-        onClick={() => {
-          if (activeTab === "trending") {
-            fetchTrendingProblems(currentPage - 1);
-          } else {
-            fetchProblems(currentPage - 1);
-          }
-        }}
-        disabled={currentPage === 1}
-        variant={currentPage === 1 ? "ghost" : "primary"}
-        size="md"
-      >
-        ← Previous
-      </Button>
+              <span style={{
+                padding: `0 ${spacing.lg}`,
+                fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
+                color: colors.gray[600],
+                fontWeight: typography.fontWeight.medium
+              }}>
+                Page {currentPage} of {totalPages} ({totalProblems} total problems)
+              </span>
 
-      <span style={{
-        padding: `0 ${spacing.lg}`,
-        fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
-        color: colors.gray[600],
-        fontWeight: typography.fontWeight.medium
-      }}>
-        Page {currentPage} of {totalPages} ({totalProblems} total problems)
-      </span>
+              <Button
+                onClick={() => {
+                  if (activeTab === "trending") {
+                    fetchTrendingProblems(currentPage + 1);
+                  } else {
+                    fetchProblems(currentPage + 1);
+                  }
+                }}
+                disabled={currentPage === totalPages}
+                variant={currentPage === totalPages ? "ghost" : "primary"}
+                size="md"
+              >
+                Next →
+              </Button>
+            </div>
+          )
+        }
 
-      <Button
-        onClick={() => {
-          if (activeTab === "trending") {
-            fetchTrendingProblems(currentPage + 1);
-          } else {
-            fetchProblems(currentPage + 1);
-          }
-        }}
-        disabled={currentPage === totalPages}
-        variant={currentPage === totalPages ? "ghost" : "primary"}
-        size="md"
-      >
-        Next →
-      </Button>
-    </div>
-  )
-}
-
-{/* Enhanced Floating Create Problem Button */ }
-<div style={{
-  position: "fixed",
-  bottom: spacing.xl,
-  right: spacing.xl,
-  zIndex: 1000
-}}>
-  <Link to="/create-problem?from=/feed" style={{ textDecoration: "none" }}>
-    <div style={{
-      width: "60px",
-      height: "60px",
-      backgroundColor: colors.primary,
-      borderRadius: "50%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      cursor: "pointer",
-      boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-      transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-      fontSize: "24px",
-      color: colors.white,
-      fontWeight: typography.fontWeight.bold,
-      overflow: "hidden",
-      whiteSpace: "nowrap",
-      position: "relative"
-    }}
-      onMouseEnter={(e) => {
-        e.target.style.width = "220px";
-        e.target.style.borderRadius = "30px";
-        e.target.style.justifyContent = "flex-start";
-        e.target.style.paddingLeft = "20px";
-        e.target.style.backgroundColor = colors.secondary;
-        e.target.style.boxShadow = "0 6px 25px rgba(0,0,0,0.2)";
-        e.target.innerHTML = '<span style="font-size: 16px;">Create New Problem</span><span style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 24px;">+</span>';
-      }}
-      onMouseLeave={(e) => {
-        e.target.style.width = "60px";
-        e.target.style.borderRadius = "50%";
-        e.target.style.justifyContent = "center";
-        e.target.style.paddingLeft = "0px";
-        e.target.style.backgroundColor = colors.primary;
-        e.target.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
-        e.target.innerHTML = '+';
-      }}
-      title="Create New Problem"
-    >
-      +
-    </div>
-  </Link>
-</div>
+        {/* Enhanced Floating Create Problem Button */}
+        <div style={{
+          position: "fixed",
+          bottom: spacing.xl,
+          right: spacing.xl,
+          zIndex: 1000
+        }}>
+          <Link to="/create-problem?from=/feed" style={{ textDecoration: "none" }}>
+            <div style={{
+              width: "60px",
+              height: "60px",
+              backgroundColor: colors.primary,
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+              fontSize: "24px",
+              color: colors.white,
+              fontWeight: typography.fontWeight.bold,
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              position: "relative"
+            }}
+              onMouseEnter={(e) => {
+                e.target.style.width = "220px";
+                e.target.style.borderRadius = "30px";
+                e.target.style.justifyContent = "flex-start";
+                e.target.style.paddingLeft = "20px";
+                e.target.style.backgroundColor = colors.secondary;
+                e.target.style.boxShadow = "0 6px 25px rgba(0,0,0,0.2)";
+                e.target.innerHTML = '<span style="font-size: 16px;">Create New Problem</span><span style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 24px;">+</span>';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.width = "60px";
+                e.target.style.borderRadius = "50%";
+                e.target.style.justifyContent = "center";
+                e.target.style.paddingLeft = "0px";
+                e.target.style.backgroundColor = colors.primary;
+                e.target.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
+                e.target.innerHTML = '+';
+              }}
+              title="Create New Problem"
+            >
+              +
+            </div>
+          </Link>
+        </div>
 
       </div >
     </Layout >
