@@ -551,7 +551,7 @@ function UserProfile() {
                                 left: "0",
                                 right: "0",
                                 height: "30%",
-                                backgroundColor: "rgba(0, 123, 255, 0.9)",
+                                backgroundColor: "rgba(26, 77, 58, 0.9)",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
@@ -563,11 +563,11 @@ function UserProfile() {
                                 cursor: "pointer"
                             }}
                             onMouseEnter={(e) => {
-                                e.target.style.backgroundColor = "rgba(0, 123, 255, 1)";
+                                e.target.style.backgroundColor = "rgba(26, 77, 58, 1)";
                                 e.target.style.transform = "translateY(-2px)";
                             }}
                             onMouseLeave={(e) => {
-                                e.target.style.backgroundColor = "rgba(0, 123, 255, 0.9)";
+                                e.target.style.backgroundColor = "rgba(26, 77, 58, 0.9)";
                                 e.target.style.transform = "translateY(0)";
                             }}
                         >

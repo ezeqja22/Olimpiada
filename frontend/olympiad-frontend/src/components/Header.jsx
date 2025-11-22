@@ -1038,7 +1038,7 @@ function Header({ showHomeButton = false }) {
                                 gap: "3px",
                                 transition: "background-color 0.2s",
                                 position: "absolute",
-                                left: spacing.lg
+                                left: spacing.sm
                             }}
                             onMouseEnter={(e) => e.target.style.backgroundColor = "rgba(255, 255, 255, 0.1)"}
                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
@@ -1090,7 +1090,7 @@ function Header({ showHomeButton = false }) {
                                 gap: "3px",
                                 transition: "background-color 0.2s",
                                 position: "absolute",
-                                left: spacing.lg
+                                left: spacing.sm
                             }}
                             onMouseEnter={(e) => e.target.style.backgroundColor = "rgba(255, 255, 255, 0.1)"}
                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
