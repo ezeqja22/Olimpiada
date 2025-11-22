@@ -80,6 +80,19 @@ function CreateProblem() {
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
   const [cursorIndex, setCursorIndex] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const navigate = useNavigate();
 
