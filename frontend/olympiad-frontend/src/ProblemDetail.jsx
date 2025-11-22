@@ -1353,6 +1353,16 @@ function ProblemDetail() {
         return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }, []);
 
+    // Mobile detection
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     if (loading) {
         return (
             <Layout showHomeButton={true}>
@@ -1858,13 +1868,14 @@ function ProblemDetail() {
                             {problem.author && (
                                 <div style={{
                                     display: "flex",
-                                    alignItems: "center",
                                     gap: "10px",
                                     marginBottom: "15px",
                                     padding: "10px",
                                     backgroundColor: "#f8f9fa",
                                     borderRadius: "8px",
-                                    border: "1px solid #e9ecef"
+                                    border: "1px solid #e9ecef",
+                                    flexDirection: isMobile ? "column" : "row",
+                                    alignItems: isMobile ? "flex-start" : "center"
                                 }}>
                                     <div style={{
                                         width: "40px",
@@ -1928,7 +1939,12 @@ function ProblemDetail() {
                             <h1 style={{ color: "#333", marginBottom: "20px", marginTop: "20px" }}>{renderMathContent(problem.title)}</h1>
                         </div>
                         {currentUser && (currentUser.id === problem.author_id || currentUser.role === 'admin' || currentUser.role === 'moderator') && (
-                            <div style={{ display: "flex", gap: "12px" }}>
+                            <div style={{
+                                display: "flex",
+                                gap: "12px",
+                                flexDirection: isMobile ? "column" : "row",
+                                width: isMobile ? "100%" : "auto"
+                            }}>
                                 <button
                                     onClick={handleEditProblem}
                                     style={{

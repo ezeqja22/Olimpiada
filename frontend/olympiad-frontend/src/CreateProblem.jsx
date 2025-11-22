@@ -837,36 +837,11 @@ function CreateProblem() {
       </div>
 
       {/* Math Editor Modal */}
-      {showMathEditor && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.5)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 2000
-        }}>
-          <div style={{
-            backgroundColor: "white",
-            padding: "20px",
-            borderRadius: "8px",
-            width: "90%",
-            maxWidth: "600px",
-            maxHeight: "90vh",
-            overflowY: "auto"
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-              <h3 style={{ margin: 0 }}>Insert Math Symbol</h3>
-              <button onClick={closeMathEditor} style={{ border: "none", background: "none", fontSize: "20px", cursor: "pointer" }}>×</button>
-            </div>
-            <MathEditor onInsert={handleMathInsert} />
-          </div>
-        </div>
-      )}
+      <MathEditor
+        isOpen={showMathEditor}
+        onClose={closeMathEditor}
+        onInsert={handleMathInsert}
+      />
     </Layout>
   );
 }

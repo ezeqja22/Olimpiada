@@ -1280,7 +1280,15 @@ function Homepage() {
                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                             aria-label="Close Menu"
                         >
-                            ×
+                            <img
+                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
+                                alt="Close Menu"
+                                style={{
+                                    width: "20px",
+                                    height: "20px",
+                                    objectFit: "contain"
+                                }}
+                            />
                         </button>
                         <h3 style={{
                             margin: 0,
@@ -1328,7 +1336,15 @@ function Homepage() {
                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                             aria-label="Close Menu"
                         >
-                            ×
+                            <img
+                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
+                                alt="Close Menu"
+                                style={{
+                                    width: "20px",
+                                    height: "20px",
+                                    objectFit: "contain"
+                                }}
+                            />
                         </button>
                         <h3 style={{
                             margin: 0,
