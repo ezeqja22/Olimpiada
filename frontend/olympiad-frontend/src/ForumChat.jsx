@@ -11,17 +11,28 @@ import ForumProblemCard from './ForumProblemCard';
 // Helper function to render math content
 const renderMathContent = (text) => {
     if (!text) return '';
-    
-    const latexPattern = /\\[a-zA-Z]+|\\[^a-zA-Z]|\$\$|\\\(|\\\)|\\\[|\\\]|\^|\_|\{|\}|\[|\]|∫|∑|∏|√|α|β|γ|δ|ε|ζ|η|θ|ι|κ|λ|μ|ν|ξ|ο|π|ρ|σ|τ|υ|φ|χ|ψ|ω|∞|±|∓|×|÷|≤|≥|≠|≈|≡|∈|∉|⊂|⊃|∪|∩|∅|∇|∂|∆|Ω|Φ|Ψ|Λ|Σ|Π|Θ|Ξ|Γ|Δ/;
-    if (!latexPattern.test(text)) {
-        return text;
-    }
-    
-    try {
-        return <InlineMath math={text} />;
-    } catch (error) {
-        return text;
-    }
+
+    // Split text into math and non-math segments
+    const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
+
+    return parts.map((part, index) => {
+        if (part.startsWith('$$') && part.endsWith('$$')) {
+            // Block math mode
+            const content = part.slice(2, -2);
+            return (
+                <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
+                    <BlockMath math={content} />
+                </div>
+            );
+        } else if (part.startsWith('$') && part.endsWith('$')) {
+            // Inline math mode
+            const content = part.slice(1, -1);
+            return <InlineMath key={index} math={content} />;
+        } else {
+            // Regular text — keep it as-is
+            return <span key={index}>{part}</span>;
+        }
+    });
 };
 
 const ForumChat = () => {
@@ -59,25 +70,25 @@ const ForumChat = () => {
                 setLoading(false);
             }
         };
-        
+
         loadInitialData();
-        
+
         // Mark user as online when entering chat
         markUserOnline();
-        
+
         // Set up polling for new messages (simple approach, can be upgraded to WebSocket later)
         // Increased to 10 seconds to reduce server load
         pollingIntervalRef.current = setInterval(fetchMessages, 2000);
-        
+
         // Set up heartbeat to keep user online
         heartbeatIntervalRef.current = setInterval(markUserOnline, 30000); // Every 30 seconds
-        
+
         // Fetch initial online count
         fetchOnlineCount();
-        
+
         // Poll for online count updates
         const onlineCountInterval = setInterval(fetchOnlineCount, 10000); // Every 10 seconds
-        
+
         return () => {
             if (pollingIntervalRef.current) {
                 clearInterval(pollingIntervalRef.current);
@@ -99,7 +110,7 @@ const ForumChat = () => {
         try {
             const token = localStorage.getItem("token");
             if (!token) return;
-            
+
             const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -150,14 +161,14 @@ const ForumChat = () => {
                 .map(msg => msg.problem_id);
 
             if (problemIds.length > 0) {
-                const problemPromises = problemIds.map(id => 
+                const problemPromises = problemIds.map(id =>
                     axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${id}`, {
                         headers: { Authorization: `Bearer ${token}` }
                     }).then(res => ({ id, data: res.data }))
-                    .catch(err => {
-                        console.error(`Error fetching problem ${id}:`, err);
-                        return { id, data: null };
-                    })
+                        .catch(err => {
+                            console.error(`Error fetching problem ${id}:`, err);
+                            return { id, data: null };
+                        })
                 );
 
                 const problemResults = await Promise.all(problemPromises);
@@ -173,7 +184,7 @@ const ForumChat = () => {
             console.error("Error fetching messages:", error);
             console.error("Error response:", error.response);
             console.error("Error status:", error.response?.status);
-            
+
             if (error.response?.status === 403) {
                 setError("You must be a member of this forum to view messages");
                 // Stop polling on error
@@ -259,7 +270,7 @@ const ForumChat = () => {
 
     const handleTyping = (e) => {
         setNewMessage(e.target.value);
-        
+
         // Handle typing indicators
         if (!isTyping) {
             setIsTyping(true);
@@ -347,7 +358,7 @@ const ForumChat = () => {
             }}>
                 <div style={{ textAlign: "center" }}>
                     <h2 style={{ color: colors.error, marginBottom: spacing.md }}>{error}</h2>
-                    <button 
+                    <button
                         onClick={() => navigate('/forums')}
                         style={{
                             backgroundColor: colors.primary,
@@ -399,11 +410,11 @@ const ForumChat = () => {
                         ←
                     </button>
                     <div>
-                        <h1 
+                        <h1
                             onClick={handleForumTitleClick}
-                            style={{ 
-                                margin: 0, 
-                                fontSize: "18px", 
+                            style={{
+                                margin: 0,
+                                fontSize: "18px",
                                 cursor: "pointer",
                                 textDecoration: "underline"
                             }}
@@ -435,7 +446,7 @@ const ForumChat = () => {
             }}>
                 {messages.map((message) => {
                     const isOwnMessage = currentUser && message.author_id === currentUser.id;
-                    
+
                     return (
                         <div
                             key={message.id}
@@ -464,7 +475,7 @@ const ForumChat = () => {
                                         {getDisplayName(message.author?.username || 'Unknown')}
                                     </div>
                                 )}
-                                
+
                                 {message.message_type === 'text' ? (
                                     <div style={{ whiteSpace: "pre-wrap" }}>
                                         {renderMathContent(message.content)}
@@ -472,8 +483,8 @@ const ForumChat = () => {
                                 ) : message.message_type === 'problem' ? (
                                     <div style={{ marginTop: spacing.sm }}>
                                         {problemData[message.problem_id] ? (
-                                            <ForumProblemCard 
-                                                problem={problemData[message.problem_id]} 
+                                            <ForumProblemCard
+                                                problem={problemData[message.problem_id]}
                                                 author={message.author}
                                             />
                                         ) : (
@@ -494,7 +505,7 @@ const ForumChat = () => {
                                         {message.content}
                                     </div>
                                 )}
-                                
+
                                 <div style={{
                                     fontSize: "10px",
                                     opacity: 0.7,
@@ -547,7 +558,7 @@ const ForumChat = () => {
                     >
                         +
                     </button>
-                    
+
                     <input
                         type="text"
                         value={newMessage}
@@ -578,7 +589,7 @@ const ForumChat = () => {
                         Send
                     </button>
                 </form>
-                
+
                 {/* Attachment Menu */}
                 {showAttachmentMenu && (
                     <div style={{
@@ -628,7 +639,7 @@ const ForumChat = () => {
                                     fontSize: "24px",
                                     marginBottom: spacing.xs
                                 }}>
-                                    
+
                                 </div>
                                 <span style={{
                                     fontSize: typography.fontSize.sm,
