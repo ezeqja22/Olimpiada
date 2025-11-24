@@ -69,13 +69,19 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
 )
 
+# Health check endpoint (before middleware)
+@app.get("/health")
+async def health_check():
+    """Simple health check endpoint"""
+    return {"status": "healthy", "service": "sciencepioneers-backend"}
+
 # Settings middleware
 @app.middleware("http")
 async def settings_middleware(request: Request, call_next):
     """Apply settings-based restrictions"""
     try:
-        # Skip middleware for site-info endpoint to avoid auth issues
-        if request.url.path == "/admin/settings/site-info":
+        # Skip middleware for health check and site-info
+        if request.url.path in ["/health", "/admin/settings/site-info"]:
             response = await call_next(request)
             return response
             
@@ -100,6 +106,9 @@ async def settings_middleware(request: Request, call_next):
         return response
         
     except Exception as e:
+        print(f"ERROR in settings_middleware: {e}")
+        import traceback
+        traceback.print_exc()
         response = await call_next(request)
         return response
     finally:
@@ -200,13 +209,25 @@ async def cleanup_expired_users():
 @app.on_event("startup")
 async def startup_event():
     """Start background cleanup task"""
-    asyncio.create_task(periodic_cleanup())
+    try:
+        print("Starting background cleanup task...")
+        asyncio.create_task(periodic_cleanup())
+        print("Background cleanup task started successfully")
+    except Exception as e:
+        print(f"ERROR starting background task: {e}")
+        import traceback
+        traceback.print_exc()
 
 async def periodic_cleanup():
     """Run cleanup every 5 minutes"""
     while True:
-        await asyncio.sleep(300)  # 5 minutes
-        await cleanup_expired_users()
+        try:
+            await asyncio.sleep(300)  # 5 minutes
+            await cleanup_expired_users()
+        except Exception as e:
+            print(f"ERROR in periodic_cleanup: {e}")
+            import traceback
+            traceback.print_exc()
 
 @app.get("/")
 def read_root():
