@@ -200,9 +200,15 @@ class ForumMessage(Base):
     id = Column(Integer, primary_key=True, index=True)
     forum_id = Column(Integer, ForeignKey("forums.id"), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    message_type = Column(String, default="text")  # 'text', 'problem', 'system'
+    message_type = Column(String, default="text")  # 'text', 'problem', 'system', 'file'
     content = Column(String, nullable=False)  # For text messages
     problem_id = Column(Integer, ForeignKey("problems.id"), nullable=True)  # For problem messages
+    
+    # File attachment fields
+    attachment_url = Column(String, nullable=True)  # Cloudinary URL for uploaded files
+    attachment_type = Column(String, nullable=True)  # 'pdf', 'docx', 'xlsx', 'image'
+    attachment_name = Column(String, nullable=True)  # Original filename for display
+    
     created_at = Column(DateTime, default=datetime.utcnow)
     is_edited = Column(Boolean, default=False)
     edited_at = Column(DateTime, nullable=True)

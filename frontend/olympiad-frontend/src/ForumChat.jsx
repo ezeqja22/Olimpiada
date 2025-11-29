@@ -51,6 +51,7 @@ const ForumChat = () => {
     const [problemData, setProblemData] = useState({});
     const [onlineCount, setOnlineCount] = useState(0);
     const messagesEndRef = useRef(null);
+    const fileInputRef = useRef(null);
     const typingTimeoutRef = useRef(null);
     const pollingIntervalRef = useRef(null);
     const heartbeatIntervalRef = useRef(null);
@@ -241,6 +242,60 @@ const ForumChat = () => {
             setOnlineCount(response.data.online_count);
         } catch (error) {
             console.error("Error fetching online count:", error);
+        }
+    };
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Check file size (25MB limit)
+        if (file.size > 25 * 1024 * 1024) {
+            alert("File size exceeds 25MB limit");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            // 1. Upload file
+            const uploadResponse = await axios.post(
+                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/forums/${forumId}/upload-file`,
+                formData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+
+            const { url, resource_type, original_filename } = uploadResponse.data;
+
+            // 2. Send message with attachment
+            await axios.post(
+                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/forums/${forumId}/messages`,
+                {
+                    content: `Sent a file: ${original_filename}`,
+                    message_type: "file",
+                    attachment_url: url,
+                    attachment_type: resource_type,
+                    attachment_name: original_filename
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+
+            fetchMessages();
+            setShowAttachmentMenu(false);
+        } catch (error) {
+            console.error("Error uploading file:", error);
+            alert("Failed to upload file");
         }
     };
 
@@ -500,6 +555,57 @@ const ForumChat = () => {
                                             </div>
                                         )}
                                     </div>
+                                ) : message.message_type === 'file' ? (
+                                    <div style={{ marginTop: spacing.sm }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: spacing.sm,
+                                            backgroundColor: isOwnMessage ? "rgba(255,255,255,0.1)" : colors.light,
+                                            padding: spacing.sm,
+                                            borderRadius: borderRadius.md,
+                                            border: `1px solid ${isOwnMessage ? "rgba(255,255,255,0.2)" : colors.gray[200]}`
+                                        }}>
+                                            <div style={{ fontSize: '24px' }}>
+                                                {message.attachment_type === 'image' ? '🖼️' : '📄'}
+                                            </div>
+                                            <div style={{ flex: 1, overflow: 'hidden' }}>
+                                                <div style={{
+                                                    fontWeight: 'bold',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis'
+                                                }}>
+                                                    {message.attachment_name || 'Attachment'}
+                                                </div>
+                                                <a
+                                                    href={message.attachment_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        color: isOwnMessage ? colors.white : colors.primary,
+                                                        fontSize: '12px',
+                                                        textDecoration: 'underline'
+                                                    }}
+                                                >
+                                                    Download
+                                                </a>
+                                            </div>
+                                        </div>
+                                        {(message.attachment_type === 'image' || (message.attachment_name && /\.(jpg|jpeg|png|gif|webp)$/i.test(message.attachment_name))) && (
+                                            <div style={{ marginTop: spacing.sm }}>
+                                                <img
+                                                    src={message.attachment_url}
+                                                    alt={message.attachment_name}
+                                                    style={{
+                                                        maxWidth: '100%',
+                                                        maxHeight: '300px',
+                                                        borderRadius: borderRadius.md
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 ) : (
                                     <div style={{ fontStyle: "italic", opacity: 0.8 }}>
                                         {message.content}
@@ -527,7 +633,8 @@ const ForumChat = () => {
                 backgroundColor: colors.white,
                 padding: spacing.md,
                 borderTop: `1px solid ${colors.gray[200]}`,
-                boxShadow: shadows.sm
+                boxShadow: shadows.sm,
+                position: 'relative'
             }}>
                 <form onSubmit={sendMessage} style={{ display: "flex", gap: spacing.sm, alignItems: "flex-end" }}>
                     {/* Attachment Button */}
@@ -558,6 +665,14 @@ const ForumChat = () => {
                     >
                         +
                     </button>
+
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileUpload}
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.webp"
+                    />
 
                     <input
                         type="text"
@@ -639,7 +754,7 @@ const ForumChat = () => {
                                     fontSize: "24px",
                                     marginBottom: spacing.xs
                                 }}>
-
+                                    📝
                                 </div>
                                 <span style={{
                                     fontSize: typography.fontSize.sm,
@@ -650,9 +765,9 @@ const ForumChat = () => {
                                 </span>
                             </button>
 
-                            {/* Upload Image */}
+                            {/* Upload File */}
                             <button
-                                onClick={handleUploadImage}
+                                onClick={() => fileInputRef.current.click()}
                                 style={{
                                     display: "flex",
                                     flexDirection: "column",
@@ -677,14 +792,14 @@ const ForumChat = () => {
                                     fontSize: "24px",
                                     marginBottom: spacing.xs
                                 }}>
-                                    🖼️
+                                    📎
                                 </div>
                                 <span style={{
                                     fontSize: typography.fontSize.sm,
                                     color: colors.gray[700],
                                     fontWeight: typography.fontWeight.medium
                                 }}>
-                                    Image
+                                    File
                                 </span>
                             </button>
 

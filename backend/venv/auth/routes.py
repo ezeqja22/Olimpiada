@@ -14,18 +14,6 @@ from auth.schemas import ProblemCreate, ProblemResponse, CommentCreate, CommentR
 from auth.schemas import NotificationPreferencesCreate, NotificationPreferencesResponse, NotificationResponse, NotificationCreate
 from auth.schemas import ForumCreate, ForumUpdate, Forum as ForumSchema, ForumMembershipCreate, ForumMembership as ForumMembershipSchema, ForumMessageCreate, ForumMessage as ForumMessageSchema, ForumInvitationCreate, ForumInvitation as ForumInvitationSchema, ForumJoinRequestCreate, ForumJoinRequest as ForumJoinRequestSchema, DraftCreate, DraftUpdate, DraftResponse, UserOnlineStatusResponse, ForumReplyCreate, ForumReply as ForumReplySchema
 from sqlalchemy import text
-import uuid
-from email_service import email_service
-# Import notification service with error handling
-try:
-    from notification_service import NotificationService
-except ImportError:
-    NotificationService = None
-from typing import List
-from datetime import datetime, timedelta
-from fastapi import Body
-
-def check_forum_permission(db: Session, forum_id: int, user_id: int, required_permission: str):
     """Check if user has required permission in forum"""
     # First check if user is a site admin/moderator
     user = db.query(User).filter(User.id == user_id).first()
@@ -2968,31 +2956,6 @@ def send_message(
     message: ForumMessageCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
-):
-    """Send a message to a forum"""
-    
-    # Check if user is a member (or admin/moderator)
-    if current_user.role not in ['admin', 'moderator']:
-        membership = db.query(ForumMembership).filter(
-            ForumMembership.forum_id == forum_id,
-            ForumMembership.user_id == current_user.id,
-            ForumMembership.is_active == True
-        ).first()
-        
-        if not membership:
-            raise HTTPException(status_code=403, detail="Must be a member to send messages")
-    
-    db_message = ForumMessage(
-        forum_id=forum_id,
-        author_id=current_user.id,
-        content=message.content,
-        message_type=message.message_type,
-        problem_id=message.problem_id
-    )
-    db.add(db_message)
-    db.commit()
-    db.refresh(db_message)
-    
     # Update forum last activity
     forum = db.query(Forum).filter(Forum.id == forum_id).first()
     forum.last_activity = datetime.utcnow()

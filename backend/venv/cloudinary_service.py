@@ -122,6 +122,81 @@ class CloudinaryService:
         
         return self.upload_image(file, f"forum_images/forum_{forum_id}", transformations)
     
+    def upload_document(self, file: UploadFile, folder: str = "documents") -> Optional[Dict[str, str]]:
+        """
+        Upload a document (PDF, Word, Excel) to Cloudinary
+        
+        Args:
+            file: FastAPI UploadFile object
+            folder: Cloudinary folder to store the document
+            
+        Returns:
+            Dictionary with 'url' and 'file_type' or None if upload fails
+        """
+        try:
+            # Validate file size (25MB limit)
+            MAX_FILE_SIZE = 25 * 1024 * 1024  # 25MB in bytes
+            file.file.seek(0, 2)  # Seek to end
+            file_size = file.file.tell()
+            file.file.seek(0)  # Reset to beginning
+            
+            if file_size > MAX_FILE_SIZE:
+                print(f"ERROR: File size ({file_size} bytes) exceeds 25MB limit")
+                return None
+            
+            # Determine file type
+            file_extension = file.filename.split('.')[-1].lower() if '.' in file.filename else ''
+            
+            # Validate file type
+            allowed_extensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'gif', 'webp']
+            if file_extension not in allowed_extensions:
+                print(f"ERROR: File type '{file_extension}' not allowed")
+                return None
+            
+            # Map file extension to type
+            file_type_map = {
+                'pdf': 'pdf',
+                'doc': 'docx',
+                'docx': 'docx',
+                'xls': 'xlsx',
+                'xlsx': 'xlsx',
+                'png': 'image',
+                'jpg': 'image',
+                'jpeg': 'image',
+                'gif': 'image',
+                'webp': 'image'
+            }
+            file_type = file_type_map.get(file_extension, 'pdf')
+            
+            # Generate unique filename
+            unique_filename = f"{uuid.uuid4()}.{file_extension}"
+            
+            # Upload options - use 'raw' for non-image files
+            resource_type = "image" if file_type == "image" else "raw"
+            upload_options = {
+                "folder": folder,
+                "public_id": unique_filename,
+                "resource_type": resource_type,
+                "overwrite": True
+            }
+            
+            # Upload to Cloudinary
+            result = cloudinary.uploader.upload(
+                file.file,
+                **upload_options
+            )
+            
+            print(f"DEBUG: Document uploaded to Cloudinary: {result['public_id']}")
+            return {
+                'url': result['secure_url'],
+                'file_type': file_type,
+                'original_name': file.filename
+            }
+            
+        except Exception as e:
+            print(f"ERROR: Cloudinary document upload failed: {e}")
+            return None
+    
     def delete_image(self, public_url: str) -> bool:
         """
         Delete an image from Cloudinary

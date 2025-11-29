@@ -239,6 +239,10 @@ class ForumMessageBase(BaseModel):
     content: str
     message_type: str = "text"
     problem_id: Optional[int] = None
+    # Attachment fields
+    attachment_url: Optional[str] = None
+    attachment_type: Optional[str] = None
+    attachment_name: Optional[str] = None
 
 class ForumMessageCreate(ForumMessageBase):
     pass
