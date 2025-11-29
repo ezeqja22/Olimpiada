@@ -1,48 +1,78 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
-import os
-import hashlib
-import time
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form, Body
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session, joinedload, selectinload
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, text
 from database import get_db
-from models import User, Problem, Comment, Vote, Bookmark, Follow, ProblemImage, Notification, NotificationPreferences, Forum, ForumMembership, ForumMessage, ForumInvitation, ForumJoinRequest, Draft, UserOnlineStatus, ForumReply, SiteReport, PasswordResetToken
+from models import (
+    User, Problem, Comment, Vote, Bookmark, Follow, ProblemImage,
+    Notification, NotificationPreferences, Forum, ForumMembership,
+    ForumMessage, ForumInvitation, ForumJoinRequest, Draft,
+    UserOnlineStatus, ForumReply, SiteReport, PasswordResetToken
+)
 from auth.utils import hash_password, verify_password, create_jwt
 from auth.dependencies import get_current_user, get_verified_user
-from auth.schemas import RegisterRequest, LoginRequest, TokenResponse, UserOut, UserUpdate, PasswordVerifyRequest, PasswordChangeRequest, ForgotPasswordRequest, ResetPasswordRequest
-from auth.schemas import ProblemCreate, ProblemResponse, CommentCreate, CommentResponse, ThreadedCommentResponse, VoteCreate, VoteResponse, VoteStatusResponse, BookmarkResponse
-from auth.schemas import NotificationPreferencesCreate, NotificationPreferencesResponse, NotificationResponse, NotificationCreate
-from auth.schemas import ForumCreate, ForumUpdate, Forum as ForumSchema, ForumMembershipCreate, ForumMembership as ForumMembershipSchema, ForumMessageCreate, ForumMessage as ForumMessageSchema, ForumInvitationCreate, ForumInvitation as ForumInvitationSchema, ForumJoinRequestCreate, ForumJoinRequest as ForumJoinRequestSchema, DraftCreate, DraftUpdate, DraftResponse, UserOnlineStatusResponse, ForumReplyCreate, ForumReply as ForumReplySchema
-from sqlalchemy import text
+from auth.schemas import (
+    RegisterRequest, LoginRequest, TokenResponse, UserOut, UserUpdate,
+    PasswordVerifyRequest, PasswordChangeRequest, ForgotPasswordRequest,
+    ResetPasswordRequest, ProblemCreate, ProblemResponse, CommentCreate,
+    CommentResponse, ThreadedCommentResponse, VoteCreate, VoteResponse,
+    VoteStatusResponse, BookmarkResponse, NotificationPreferencesCreate,
+    NotificationPreferencesResponse, NotificationResponse, NotificationCreate,
+    ForumCreate, ForumUpdate, Forum as ForumSchema, ForumMembershipCreate,
+    ForumMembership as ForumMembershipSchema, ForumMessageCreate,
+    ForumMessage as ForumMessageSchema, ForumInvitationCreate,
+    ForumInvitation as ForumInvitationSchema, ForumJoinRequestCreate,
+    ForumJoinRequest as ForumJoinRequestSchema, DraftCreate, DraftUpdate,
+    DraftResponse, UserOnlineStatusResponse, ForumReplyCreate,
+    ForumReply as ForumReplySchema
+)
+from email_service import email_service
+from typing import List
+from datetime import datetime, timedelta
+from PIL import Image
+import hashlib
+import uuid
+import os
+import time
+
+# Import notification service with fallback
+try:
+    from notification_service import NotificationService
+except ImportError:
+    NotificationService = None
+
+
+# ------------------------------
+# Forum Permission Check Function
+# ------------------------------
+def check_forum_permission(db: Session, forum_id: int, user_id: int, required_permission: str):
     """Check if user has required permission in forum"""
-    # First check if user is a site admin/moderator
+
+    # Check if user is a site admin/moderator
     user = db.query(User).filter(User.id == user_id).first()
     if user and user.role in ['admin', 'moderator']:
-        return True  # Site admins/moderators have full access to all forums
-    
-    # Then check forum membership
+        return True
+
+    # Check forum membership
     membership = db.query(ForumMembership).filter(
         ForumMembership.forum_id == forum_id,
         ForumMembership.user_id == user_id,
         ForumMembership.is_active == True
     ).first()
-    
+
     if not membership:
         return False
-    
-    # Permission hierarchy: creator > moderator > helper > member
+
+    # Permission hierarchy
     if membership.role == 'creator':
         return True
     elif membership.role == 'moderator':
         return required_permission in ['moderate', 'pin', 'kick']
     elif membership.role == 'helper':
         return required_permission in ['pin']
-    else:  # member
+    else:
         return False
-from fastapi import UploadFile, File, Form
-import os
-import uuid
-from PIL import Image
+
 
 router = APIRouter()
 
@@ -2956,6 +2986,31 @@ def send_message(
     message: ForumMessageCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
+):
+    """Send a message to a forum"""
+    
+    # Check if user is a member (or admin/moderator)
+    if current_user.role not in ['admin', 'moderator']:
+        membership = db.query(ForumMembership).filter(
+            ForumMembership.forum_id == forum_id,
+            ForumMembership.user_id == current_user.id,
+            ForumMembership.is_active == True
+        ).first()
+        
+        if not membership:
+            raise HTTPException(status_code=403, detail="Must be a member to send messages")
+    
+    db_message = ForumMessage(
+        forum_id=forum_id,
+        author_id=current_user.id,
+        content=message.content,
+        message_type=message.message_type,
+        problem_id=message.problem_id
+    )
+    db.add(db_message)
+    db.commit()
+    db.refresh(db_message)
+    
     # Update forum last activity
     forum = db.query(Forum).filter(Forum.id == forum_id).first()
     forum.last_activity = datetime.utcnow()
