@@ -272,21 +272,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     verification_code = email_service.generate_verification_code()
     verification_expires = email_service.get_verification_expiry()
     
-    
-    # Try to send email BEFORE creating user
-    # Try to send email BEFORE creating user
-    success = email_service.send_verification_email(
-        req.email, req.username, verification_code
-    )
-    
-    if not success:
-        # For testing: create user even if email fails, but log the code
-        pass  # Continue to create user for testing purposes
-    
-    # Create user (for testing, even if email failed)
-    print(f"DEBUG: Password type: {type(req.password)}")
-    print(f"DEBUG: Password length: {len(req.password)}")
-    print(f"DEBUG: Password value: {repr(req.password)}")
+    # Create user
     hashed = hash_password(req.password)
     user = User(
         username=req.username, 
@@ -314,6 +300,11 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     )
     db.add(notification_preferences)
     db.commit()
+    
+    # Try to send email AFTER creating user and committing to avoid holding DB connection
+    success = email_service.send_verification_email(
+        req.email, req.username, verification_code
+    )
     
     # Generate JWT token for automatic login
     from auth.utils import create_jwt

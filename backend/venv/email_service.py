@@ -20,6 +20,8 @@ class EmailService:
         self.smtp_use_tls = os.getenv('SMTP_USE_TLS', 'true').lower() == 'true'
         self.email_from_name = os.getenv('EMAIL_FROM_NAME', 'Olimpiada')
         self.email_from_address = os.getenv('EMAIL_FROM_ADDRESS', 'albyte.dev@gmail.com')
+        self.resend_api_key = os.getenv('RESEND_API_KEY')
+        self.resend_from_email = os.getenv('RESEND_FROM_EMAIL', 'onboarding@resend.dev')
     
     def is_configured(self):
         """Check if email service is properly configured"""
@@ -171,20 +173,20 @@ class EmailService:
             # Create HTML content
             html_content = self.create_verification_email(username, verification_code)
             
-            # Try SendGrid API first (more reliable)
-            print("DEBUG: Trying SendGrid REST API...")
-            success = self.send_email_via_sendgrid_api(
+            # Use Resend API (preferred provider)
+            print("DEBUG: Trying Resend API...")
+            success = self.send_email_via_resend_api(
                 to_email=to_email,
                 subject="Olimpiada - Email Verification",
                 html_content=html_content
             )
             
             if success:
-                print(f"SUCCESS: Verification email sent via SendGrid API to {to_email}")
+                print(f"SUCCESS: Verification email sent via Resend API to {to_email}")
                 return True
-            
-            # Fallback to SMTP if API fails
-            print("DEBUG: SendGrid API failed, trying SMTP fallback...")
+
+            # Fallback to SMTP
+            print("DEBUG: Resend failed or not configured, trying SMTP fallback...")
             return self._send_verification_email_smtp(to_email, username, verification_code, html_content)
             
         except Exception as e:
@@ -281,62 +283,35 @@ class EmailService:
     
     # Removed refresh_settings method - using environment variables now
     
-    def send_email_via_sendgrid_api(self, to_email: str, subject: str, html_content: str) -> bool:
-        """Send email using SendGrid REST API (more reliable than SMTP)"""
+    # Resend API implementation
+    def send_email_via_resend_api(self, to_email: str, subject: str, html_content: str) -> bool:
+        """Send email using Resend REST API"""
         try:
-            # Get SendGrid API key from environment
-            api_key = os.getenv('SENDGRID_API_KEY', self.sender_password)
-            if not api_key:
-                print("ERROR: SendGrid API key not found")
+            if not self.resend_api_key:
+                print("DEBUG: Resend API key not configured")
                 return False
             
-            # SendGrid API endpoint
-            url = "https://api.sendgrid.com/v3/mail/send"
-            
-            # Headers
+            url = "https://api.resend.com/emails"
             headers = {
-                'Authorization': f'Bearer {api_key}',
-                'Content-Type': 'application/json'
+                "Authorization": f"Bearer {self.resend_api_key}",
+                "Content-Type": "application/json"
             }
-            
-            # Email data
             data = {
-                "personalizations": [
-                    {
-                        "to": [{"email": to_email}],
-                        "subject": subject
-                    }
-                ],
-                "from": {
-                    "email": self.email_from_address or "albyte.dev@gmail.com",
-                    "name": self.email_from_name or "Olimpiada"
-                },
-                "content": [
-                    {
-                        "type": "text/html",
-                        "value": html_content
-                    }
-                ]
+                "from": self.email_from_name + " <" + self.resend_from_email + ">",
+                "to": [to_email],
+                "subject": subject,
+                "html": html_content
             }
-            # Send request
-            response = requests.post(url, headers=headers, json=data, timeout=30)
             
-            if response.status_code == 202:
-                print(f"SUCCESS: Email sent via SendGrid API to {to_email}")
+            response = requests.post(url, headers=headers, json=data, timeout=30)
+            if response.status_code in [200, 201, 202]:
                 return True
             else:
-                print(f"ERROR: SendGrid API failed with status {response.status_code}")
+                print(f"ERROR: Resend API failed with status {response.status_code}")
                 print(f"ERROR: Response: {response.text}")
                 return False
-                
-        except requests.exceptions.Timeout:
-            print("ERROR: SendGrid API request timed out")
-            return False
-        except requests.exceptions.RequestException as e:
-            print(f"ERROR: SendGrid API request failed: {e}")
-            return False
         except Exception as e:
-            print(f"ERROR: SendGrid API error: {e}")
+            print(f"ERROR: Resend API error: {e}")
             return False
     
     def send_notification_email(self, to_email: str, subject: str, body: str) -> bool:
@@ -364,8 +339,8 @@ class EmailService:
             </html>
             """
             
-            # Try SendGrid API first (more reliable)
-            success = self.send_email_via_sendgrid_api(
+            # Use Resend API
+            success = self.send_email_via_resend_api(
                 to_email=to_email,
                 subject=subject,
                 html_content=html_content
@@ -373,8 +348,8 @@ class EmailService:
             
             if success:
                 return True
-            
-            # Fallback to SMTP if API fails
+
+            # Fallback to SMTP
             return self._send_notification_email_smtp(to_email, subject, html_content)
             
         except Exception as e:
