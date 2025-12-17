@@ -8,14 +8,9 @@
       "type": "image/x-icon"
     },
     {
-      "src": "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760960586/LOGO_SIPER_ge2sdy.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
     }
   ],
   "start_url": ".",

@@ -219,7 +219,7 @@ async def get_trending_problems(
     }
 
 @router.post("/register")
-async def register(req: RegisterRequest, db: Session = Depends(get_db)):
+def register(req: RegisterRequest, db: Session = Depends(get_db)):
     # Validate password requirements from settings
     from models import SystemSettings
     
@@ -274,7 +274,8 @@ async def register(req: RegisterRequest, db: Session = Depends(get_db)):
     
     
     # Try to send email BEFORE creating user
-    success = await email_service.send_verification_email(
+    # Try to send email BEFORE creating user
+    success = email_service.send_verification_email(
         req.email, req.username, verification_code
     )
     

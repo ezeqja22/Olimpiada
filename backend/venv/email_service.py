@@ -165,7 +165,7 @@ class EmailService:
         """
         return html_content
     
-    async def send_verification_email(self, to_email: str, username: str, verification_code: str) -> bool:
+    def send_verification_email(self, to_email: str, username: str, verification_code: str) -> bool:
         """Send verification email to user"""
         try:
             # Create HTML content
@@ -173,7 +173,7 @@ class EmailService:
             
             # Try SendGrid API first (more reliable)
             print("DEBUG: Trying SendGrid REST API...")
-            success = await self.send_email_via_sendgrid_api(
+            success = self.send_email_via_sendgrid_api(
                 to_email=to_email,
                 subject="Olimpiada - Email Verification",
                 html_content=html_content
@@ -185,13 +185,13 @@ class EmailService:
             
             # Fallback to SMTP if API fails
             print("DEBUG: SendGrid API failed, trying SMTP fallback...")
-            return await self._send_verification_email_smtp(to_email, username, verification_code, html_content)
+            return self._send_verification_email_smtp(to_email, username, verification_code, html_content)
             
         except Exception as e:
             print(f"ERROR: Email sending failed: {e}")
             return False
     
-    async def _send_verification_email_smtp(self, to_email: str, username: str, verification_code: str, html_content: str) -> bool:
+    def _send_verification_email_smtp(self, to_email: str, username: str, verification_code: str, html_content: str) -> bool:
         """Fallback SMTP method for sending verification email"""
         try:
             # Validate SMTP settings before attempting connection
@@ -235,7 +235,7 @@ class EmailService:
             print(f"SMTP Email sending failed: {e}")
             return False
     
-    async def send_account_deletion_email(self, to_email: str, username: str, verification_code: str) -> bool:
+    def send_account_deletion_email(self, to_email: str, username: str, verification_code: str) -> bool:
         """Send account deletion verification email to user"""
         try:
             # Validate SMTP settings before attempting connection
@@ -281,7 +281,7 @@ class EmailService:
     
     # Removed refresh_settings method - using environment variables now
     
-    async def send_email_via_sendgrid_api(self, to_email: str, subject: str, html_content: str) -> bool:
+    def send_email_via_sendgrid_api(self, to_email: str, subject: str, html_content: str) -> bool:
         """Send email using SendGrid REST API (more reliable than SMTP)"""
         try:
             # Get SendGrid API key from environment
@@ -339,7 +339,7 @@ class EmailService:
             print(f"ERROR: SendGrid API error: {e}")
             return False
     
-    async def send_notification_email(self, to_email: str, subject: str, body: str) -> bool:
+    def send_notification_email(self, to_email: str, subject: str, body: str) -> bool:
         """Send notification email to user"""
         try:
             print(f"DEBUG: Attempting to send notification email to {to_email}")
@@ -365,7 +365,7 @@ class EmailService:
             """
             
             # Try SendGrid API first (more reliable)
-            success = await self.send_email_via_sendgrid_api(
+            success = self.send_email_via_sendgrid_api(
                 to_email=to_email,
                 subject=subject,
                 html_content=html_content
