@@ -4831,7 +4831,7 @@ async def forgot_password(email: str, db: Session = Depends(get_db)):
     Best regards,
     Olimpiada Team
     """
-    success = await email_service.send_notification_email(user.email, subject, body)
+    success = email_service.send_notification_email(user.email, subject, body)
 
     if not success:
         raise HTTPException(status_code=500, detail="Failed to send email.")

@@ -4,13 +4,13 @@ import axios from "axios";
 import Layout from "./components/Layout";
 import Card from "./components/Card";
 import Button from "./components/Button";
-import { colors, spacing, typography, borderRadius } from "./designSystem";
+import { colors, spacing, typography, borderRadius, shadows } from "./designSystem";
 
 function ResetPassword() {
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
     const navigate = useNavigate();
-    
+
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -25,37 +25,37 @@ function ResetPassword() {
 
     const handleResetPassword = async (e) => {
         e.preventDefault();
-        
+
         if (!newPassword || !confirmPassword) {
             setError("All fields are required");
             return;
         }
-        
+
         if (newPassword !== confirmPassword) {
             setError("Passwords don't match");
             return;
         }
-        
+
         if (newPassword.length < 6) {
             setError("Password must be at least 6 characters long");
             return;
         }
-        
+
         setLoading(true);
         setError("");
-        
+
         try {
             await axios.post(
-            `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/reset-password?token=${encodeURIComponent(token)}&new_password=${encodeURIComponent(newPassword)}`
-             );
-            
+                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/reset-password?token=${encodeURIComponent(token)}&new_password=${encodeURIComponent(newPassword)}`
+            );
+
             setSuccess(true);
-            
+
             // Redirect to login after 3 seconds
             setTimeout(() => {
                 navigate("/login");
             }, 3000);
-            
+
         } catch (error) {
             console.error("Error resetting password:", error);
             setError(error.response?.data?.detail || "Failed to reset password");
@@ -64,50 +64,106 @@ function ResetPassword() {
         }
     };
 
+    const containerStyle = {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "80vh",
+        padding: spacing.xl,
+        background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+        borderRadius: borderRadius.lg,
+        margin: `${spacing.xl} 0`
+    };
+
+    const cardStyle = {
+        maxWidth: "450px",
+        width: "100%",
+        padding: spacing.xxl,
+        backgroundColor: colors.white,
+        borderRadius: borderRadius.xl,
+        boxShadow: shadows.xl,
+        textAlign: "center"
+    };
+
+    const inputGroupStyle = {
+        marginBottom: spacing.lg,
+        textAlign: "left"
+    };
+
+    const labelStyle = {
+        display: "block",
+        marginBottom: spacing.sm,
+        fontWeight: typography.fontWeight.semibold,
+        color: colors.gray[800],
+        fontSize: typography.fontSize.sm,
+        textTransform: "uppercase",
+        letterSpacing: "0.5px"
+    };
+
+    const inputStyle = {
+        width: "100%",
+        padding: spacing.md,
+        paddingLeft: spacing.lg,
+        border: `2px solid ${colors.gray[200]}`,
+        borderRadius: borderRadius.lg,
+        fontSize: typography.fontSize.base,
+        outline: "none",
+        transition: "all 0.3s ease",
+        color: colors.gray[900],
+        boxSizing: "border-box"
+    };
+
     if (success) {
         return (
             <Layout>
-                <div style={{ 
-                    display: "flex", 
-                    justifyContent: "center", 
-                    alignItems: "center", 
-                    minHeight: "60vh",
-                    padding: spacing.lg
-                }}>
-                    <Card style={{ maxWidth: "500px", textAlign: "center" }}>
-                        <div style={{ fontSize: "64px", marginBottom: "20px" }}></div>
-                        <h1 style={{ 
-                            color: colors.success, 
-                            marginBottom: "20px",
-                            fontSize: typography.fontSize.xxl,
+                <div style={containerStyle}>
+                    <div style={cardStyle}>
+                        <div style={{
+                            width: "80px",
+                            height: "80px",
+                            backgroundColor: "#e6f4ea",
+                            borderRadius: "50%",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            margin: "0 auto 24px"
+                        }}>
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={colors.accent} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <h1 style={{
+                            color: colors.primary,
+                            marginBottom: spacing.md,
+                            fontSize: typography.fontSize["3xl"],
                             fontWeight: typography.fontWeight.bold
                         }}>
-                            Password Reset Successful!
+                            Success!
                         </h1>
-                        <p style={{ 
-                            color: colors.gray[600], 
-                            marginBottom: "30px",
+                        <p style={{
+                            color: colors.gray[600],
+                            marginBottom: spacing.xl,
                             fontSize: typography.fontSize.lg,
                             lineHeight: 1.6
                         }}>
-                            Your password has been successfully reset. You will be redirected to the login page shortly.
+                            Your password has been successfully reset. Redirecting you to login...
                         </p>
                         <Button
                             onClick={() => navigate("/login")}
                             style={{
+                                width: "100%",
                                 backgroundColor: colors.primary,
                                 color: colors.white,
-                                border: `1px solid ${colors.primary}`,
                                 padding: `${spacing.md} ${spacing.lg}`,
-                                borderRadius: borderRadius.md,
+                                borderRadius: borderRadius.lg,
                                 fontSize: typography.fontSize.base,
-                                fontWeight: typography.fontWeight.medium,
-                                cursor: "pointer"
+                                fontWeight: typography.fontWeight.semibold,
+                                border: "none"
                             }}
                         >
-                            Go to Login
+                            Back to Login
                         </Button>
-                    </Card>
+                    </div>
                 </div>
             </Layout>
         );
@@ -115,122 +171,102 @@ function ResetPassword() {
 
     return (
         <Layout>
-            <div style={{ 
-                display: "flex", 
-                justifyContent: "center", 
-                alignItems: "center", 
-                minHeight: "60vh",
-                padding: spacing.lg
-            }}>
-                <Card style={{ maxWidth: "500px" }}>
-                    <div style={{ textAlign: "center" }}>
-                        <div style={{ fontSize: "48px", marginBottom: "20px" }}></div>
-                        <h1 style={{ 
-                            color: colors.primary, 
-                            marginBottom: "20px",
-                            fontSize: typography.fontSize.xxl,
+            <div style={containerStyle}>
+                <div style={cardStyle}>
+                    <div style={{ marginBottom: spacing.xl }}>
+                        <h1 style={{
+                            color: colors.primary,
+                            marginBottom: spacing.sm,
+                            fontSize: typography.fontSize["3xl"],
                             fontWeight: typography.fontWeight.bold
                         }}>
-                            Reset Password
+                            Set New Password
                         </h1>
-                        <p style={{ 
-                            color: colors.gray[600], 
-                            marginBottom: "30px",
+                        <p style={{
+                            color: colors.gray[500],
                             fontSize: typography.fontSize.base,
-                            lineHeight: 1.6
+                            lineHeight: 1.5
                         }}>
-                            Enter your new password below.
+                            Create a strong password to protect your account.
                         </p>
-                        
-                        <form onSubmit={handleResetPassword}>
-                            <div style={{ marginBottom: spacing.lg, textAlign: "left" }}>
-                                <label style={{ 
-                                    display: "block", 
-                                    marginBottom: spacing.sm,
-                                    fontWeight: typography.fontWeight.medium,
-                                    color: colors.gray[700]
-                                }}>
-                                    New Password
-                                </label>
-                                <input
-                                    type="password"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    placeholder="Enter your new password"
-                                    style={{
-                                        width: "100%",
-                                        padding: spacing.md,
-                                        border: `1px solid ${colors.gray[300]}`,
-                                        borderRadius: borderRadius.md,
-                                        fontSize: typography.fontSize.base,
-                                        outline: "none",
-                                        transition: "border-color 0.2s ease"
-                                    }}
-                                    onFocus={(e) => e.target.style.borderColor = colors.primary}
-                                    onBlur={(e) => e.target.style.borderColor = colors.gray[300]}
-                                />
-                            </div>
-                            
-                            <div style={{ marginBottom: spacing.lg, textAlign: "left" }}>
-                                <label style={{ 
-                                    display: "block", 
-                                    marginBottom: spacing.sm,
-                                    fontWeight: typography.fontWeight.medium,
-                                    color: colors.gray[700]
-                                }}>
-                                    Confirm New Password
-                                </label>
-                                <input
-                                    type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    placeholder="Confirm your new password"
-                                    style={{
-                                        width: "100%",
-                                        padding: spacing.md,
-                                        border: `1px solid ${colors.gray[300]}`,
-                                        borderRadius: borderRadius.md,
-                                        fontSize: typography.fontSize.base,
-                                        outline: "none",
-                                        transition: "border-color 0.2s ease"
-                                    }}
-                                    onFocus={(e) => e.target.style.borderColor = colors.primary}
-                                    onBlur={(e) => e.target.style.borderColor = colors.gray[300]}
-                                />
-                            </div>
-                            
-                            {error && (
-                                <div style={{ 
-                                    color: colors.danger, 
-                                    marginBottom: spacing.md,
-                                    fontSize: typography.fontSize.sm,
-                                    textAlign: "center"
-                                }}>
-                                    {error}
-                                </div>
-                            )}
-                            
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                style={{
-                                    width: "100%",
-                                    backgroundColor: colors.primary,
-                                    color: colors.white,
-                                    border: `1px solid ${colors.primary}`,
-                                    padding: `${spacing.md} ${spacing.lg}`,
-                                    borderRadius: borderRadius.md,
-                                    fontSize: typography.fontSize.base,
-                                    fontWeight: typography.fontWeight.medium,
-                                    cursor: loading ? "not-allowed" : "pointer",
-                                    opacity: loading ? 0.6 : 1
-                                }}
-                            >
-                                {loading ? "Resetting..." : "Reset Password"}
-                            </Button>
-                        </form>
                     </div>
-                </Card>
+
+                    <form onSubmit={handleResetPassword}>
+                        <div style={inputGroupStyle}>
+                            <label style={labelStyle}>New Password</label>
+                            <input
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="Min. 6 characters"
+                                style={inputStyle}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = colors.secondary;
+                                    e.target.style.boxShadow = `0 0 0 4px ${colors.secondary}20`;
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = colors.gray[200];
+                                    e.target.style.boxShadow = "none";
+                                }}
+                            />
+                        </div>
+
+                        <div style={inputGroupStyle}>
+                            <label style={labelStyle}>Confirm New Password</label>
+                            <input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Repeat your new password"
+                                style={inputStyle}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = colors.secondary;
+                                    e.target.style.boxShadow = `0 0 0 4px ${colors.secondary}20`;
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = colors.gray[200];
+                                    e.target.style.boxShadow = "none";
+                                }}
+                            />
+                        </div>
+
+                        {error && (
+                            <div style={{
+                                backgroundColor: "#fff5f5",
+                                color: colors.danger,
+                                padding: spacing.md,
+                                borderRadius: borderRadius.md,
+                                marginBottom: spacing.lg,
+                                fontSize: typography.fontSize.sm,
+                                borderLeft: `4px solid ${colors.danger}`,
+                                textAlign: "left"
+                            }}>
+                                <strong>Error:</strong> {error}
+                            </div>
+                        )}
+
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            style={{
+                                width: "100%",
+                                backgroundColor: colors.primary,
+                                color: colors.white,
+                                padding: `${spacing.md} ${spacing.lg}`,
+                                borderRadius: borderRadius.lg,
+                                fontSize: typography.fontSize.base,
+                                fontWeight: typography.fontWeight.bold,
+                                cursor: loading ? "not-allowed" : "pointer",
+                                opacity: loading ? 0.7 : 1,
+                                transition: "all 0.3s ease",
+                                border: "none",
+                                boxShadow: shadows.md
+                            }}
+                        >
+                            {loading ? "Updating..." : "Update Password"}
+                        </Button>
+                    </form>
+                </div>
             </div>
         </Layout>
     );
