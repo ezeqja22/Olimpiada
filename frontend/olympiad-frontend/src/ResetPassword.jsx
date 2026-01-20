@@ -115,8 +115,11 @@ function ResetPassword() {
 
     if (success) {
         return (
-            <Layout>
-                <div style={containerStyle}>
+            <Layout
+                background={`linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`}
+                isFullWidth={true}
+            >
+                <div style={{ ...containerStyle, background: "transparent", margin: 0, width: "100%" }}>
                     <div style={cardStyle}>
                         <div style={{
                             width: "80px",
@@ -170,8 +173,11 @@ function ResetPassword() {
     }
 
     return (
-        <Layout>
-            <div style={containerStyle}>
+        <Layout
+            background={`linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`}
+            isFullWidth={true}
+        >
+            <div style={{ ...containerStyle, background: "transparent", margin: 0, width: "100%" }}>
                 <div style={cardStyle}>
                     <div style={{ marginBottom: spacing.xl }}>
                         <h1 style={{

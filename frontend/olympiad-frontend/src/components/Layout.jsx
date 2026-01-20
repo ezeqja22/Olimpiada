@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "./Header";
 import { colors, spacing } from "../designSystem";
 
-function Layout({ children, showHomeButton = false, maxWidth = "1200px" }) {
+function Layout({ children, showHomeButton = false, maxWidth = "1200px", background = colors.gray[50], isFullWidth = false }) {
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
@@ -19,18 +19,20 @@ function Layout({ children, showHomeButton = false, maxWidth = "1200px" }) {
     return (
         <div style={{
             minHeight: "100vh",
-            backgroundColor: colors.gray[50],
+            background: background,
             display: "flex",
             flexDirection: "column"
         }}>
             <Header showHomeButton={showHomeButton} />
             <main style={{
                 flex: 1,
-                padding: isMobile ? "4px" : spacing.xl,
-                maxWidth: maxWidth,
-                margin: "0 auto",
+                padding: isFullWidth ? "0" : (isMobile ? "4px" : spacing.xl),
+                maxWidth: isFullWidth ? "none" : maxWidth,
+                margin: isFullWidth ? "0" : "0 auto",
                 width: "100%",
-                boxSizing: "border-box"
+                boxSizing: "border-box",
+                display: isFullWidth ? "flex" : "block",
+                flexDirection: isFullWidth ? "column" : "initial"
             }}>
                 {children}
             </main>
