@@ -217,7 +217,7 @@ function Header({ showHomeButton = false }) {
             {/* Logo and Hamburger Menu */}
             <div style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
                 {/* Hamburger Menu Button */}
-                {currentUser && (
+                {currentUser && !showHamburgerMenu && (
                     <button
                         onClick={handleHamburgerClick}
                         style={{
