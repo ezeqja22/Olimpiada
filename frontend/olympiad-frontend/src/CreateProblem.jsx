@@ -448,25 +448,39 @@ function CreateProblem() {
                   placeholder="Enter a descriptive title..."
                 />
                 <button
-                  type="button"
-                  onClick={() => openMathEditor('title')}
-                  style={{
-                    padding: `0 ${spacing.md}`,
-                    backgroundColor: colors.gray[100],
-                    color: colors.dark,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    cursor: "pointer",
-                    fontWeight: "600",
-                    fontSize: "18px",
-                    transition: "all 0.2s ease"
-                  }}
-                  title="Insert Math Symbol"
-                  onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[200]}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = colors.gray[100]}
-                >
-                  ∑
-                </button>
+  type="button"
+  onClick={() => openMathEditor('title')}
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: `0 ${spacing.md}`,
+    background: `linear-gradient(135deg, ${colors.primary}15, ${colors.secondary}20)`,
+    color: colors.primary,
+    border: `1px solid ${colors.primary}`,
+    borderRadius: "999px",
+    cursor: "pointer",
+    fontWeight: "700",
+    fontSize: "14px",
+    whiteSpace: "nowrap",
+    boxShadow: `0 4px 12px ${colors.primary}25`,
+    transition: "all 0.2s ease"
+  }}
+  title="Insert LaTeX formula"
+  onMouseEnter={(e) => {
+    e.currentTarget.style.background = colors.primary;
+    e.currentTarget.style.color = "white";
+    e.currentTarget.style.transform = "translateY(-1px)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.background = `linear-gradient(135deg, ${colors.primary}15, ${colors.secondary}20)`;
+    e.currentTarget.style.color = colors.primary;
+    e.currentTarget.style.transform = "translateY(0)";
+  }}
+>
+  <span style={{ fontSize: "17px", fontWeight: "800" }}>∑</span>
+  <span>LaTeX</span>
+</button>
               </div>
             </div>
 
@@ -515,29 +529,52 @@ function CreateProblem() {
                   placeholder="Describe the problem in detail..."
                 />
                 <button
-                  type="button"
-                  onClick={() => openMathEditor('description')}
-                  style={{
-                    position: "absolute",
-                    top: spacing.sm,
-                    right: spacing.sm,
-                    padding: "4px 8px",
-                    backgroundColor: "white",
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.sm,
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    boxShadow: shadows.sm
-                  }}
-                  title="Insert Math Symbol"
-                >
-                  ∑ Math
-                </button>
+  type="button"
+  onClick={() => openMathEditor('description')}
+  style={{
+    position: "absolute",
+    top: spacing.sm,
+    right: spacing.sm,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "8px 13px",
+    background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+    color: "white",
+    border: "none",
+    borderRadius: "999px",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: "700",
+    boxShadow: `0 6px 16px ${colors.primary}35`,
+    transition: "all 0.2s ease"
+  }}
+  title="Insert LaTeX formula"
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = "translateY(-1px)";
+    e.currentTarget.style.boxShadow = `0 8px 20px ${colors.primary}45`;
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = `0 6px 16px ${colors.primary}35`;
+  }}
+>
+  <span style={{ fontSize: "16px", fontWeight: "800" }}>∑</span>
+  <span>Add formula</span>
+</button>
               </div>
-              <p style={{ fontSize: "13px", color: colors.gray[500], marginTop: "6px" }}>
-                Tip: Wrap math expressions in $...$ for inline math.
-              </p>
+              <p style={{ fontSize: "13px", color: colors.gray[500], marginTop: "8px" }}>
+  Tip: use <strong>$...$</strong> for inline math, for example{" "}
+  <code style={{
+    backgroundColor: colors.gray[100],
+    padding: "2px 6px",
+    borderRadius: borderRadius.sm,
+    color: colors.primary,
+    fontWeight: "600"
+  }}>
+    $x^2 + y^2 = z^2$
+  </code>
+</p>
             </div>
 
             {/* Grid for Subject, Level, Year */}

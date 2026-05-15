@@ -286,28 +286,37 @@ const ForumProblemModal = ({ isOpen, onClose, forumId, onProblemCreated }) => {
                                     }}
                                 />
                                 <button
-                                    type="button"
-                                    onClick={() => openMathEditor('title')}
-                                    style={{
-                                        padding: "12px 16px",
-                                        backgroundColor: colors.secondary,
-                                        color: "white",
-                                        border: "none",
-                                        borderRadius: borderRadius.md,
-                                        cursor: "pointer",
-                                        fontSize: "14px",
-                                        fontWeight: "600",
-                                        whiteSpace: "nowrap"
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.backgroundColor = colors.primary;
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.backgroundColor = colors.secondary;
-                                    }}
-                                >
-                                    Math
-                                </button>
+  type="button"
+  onClick={() => openMathEditor('title')}
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "12px 16px",
+    background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+    color: "white",
+    border: "none",
+    borderRadius: "999px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "700",
+    whiteSpace: "nowrap",
+    boxShadow: `0 6px 16px ${colors.primary}35`,
+    transition: "all 0.2s ease"
+  }}
+  title="Insert LaTeX formula"
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = "translateY(-1px)";
+    e.currentTarget.style.boxShadow = `0 8px 20px ${colors.primary}45`;
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = `0 6px 16px ${colors.primary}35`;
+  }}
+>
+  <span style={{ fontSize: "17px", fontWeight: "800" }}>∑</span>
+  <span>LaTeX</span>
+</button>
                             </div>
                         </div>
 
@@ -460,29 +469,38 @@ const ForumProblemModal = ({ isOpen, onClose, forumId, onProblemCreated }) => {
                                     }}
                                 />
                                 <button
-                                    type="button"
-                                    onClick={() => openMathEditor('description')}
-                                    style={{
-                                        padding: "12px 16px",
-                                        backgroundColor: colors.secondary,
-                                        color: "white",
-                                        border: "none",
-                                        borderRadius: borderRadius.md,
-                                        cursor: "pointer",
-                                        fontSize: "14px",
-                                        fontWeight: "600",
-                                        whiteSpace: "nowrap",
-                                        alignSelf: "flex-start"
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.backgroundColor = colors.primary;
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.backgroundColor = colors.secondary;
-                                    }}
-                                >
-                                    Math
-                                </button>
+  type="button"
+  onClick={() => openMathEditor('description')}
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "12px 16px",
+    background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+    color: "white",
+    border: "none",
+    borderRadius: "999px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "700",
+    whiteSpace: "nowrap",
+    alignSelf: "flex-start",
+    boxShadow: `0 6px 16px ${colors.primary}35`,
+    transition: "all 0.2s ease"
+  }}
+  title="Insert LaTeX formula"
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = "translateY(-1px)";
+    e.currentTarget.style.boxShadow = `0 8px 20px ${colors.primary}45`;
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = `0 6px 16px ${colors.primary}35`;
+  }}
+>
+  <span style={{ fontSize: "17px", fontWeight: "800" }}>∑</span>
+  <span>Add formula</span>
+</button>
                             </div>
                         </div>
 
