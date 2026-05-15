@@ -1,8 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { colors, spacing, typography, borderRadius, shadows } from './designSystem';
-import { InlineMath, BlockMath } from 'react-katex';
-import 'katex/dist/katex.min.css';
+import MathRenderer from './MathRenderer';
 
 const ForumProblemCard = ({ problem, author, forumId }) => {
     const navigate = useNavigate();
@@ -57,22 +56,6 @@ const ForumProblemCard = ({ problem, author, forumId }) => {
         return colors_map[subject?.toLowerCase()] || colors.gray[500];
     };
 
-    const renderMathContent = (text) => {
-        if (!text) return '';
-        
-        const latexPattern = /\\[a-zA-Z]+|\\[^a-zA-Z]|\$\$|\\\(|\\\)|\\\[|\\\]|\^|\_|\{|\}|\[|\]|∫|∑|∏|√|α|β|γ|δ|ε|ζ|η|θ|ι|κ|λ|μ|ν|ξ|ο|π|ρ|σ|τ|υ|φ|χ|ψ|ω|∞|±|∓|×|÷|≤|≥|≠|≈|≡|∈|∉|⊂|⊃|∪|∩|∅|∇|∂|∆|Ω|Φ|Ψ|Λ|Σ|Π|Θ|Ξ|Γ|Δ/;
-        if (!latexPattern.test(text)) {
-            return text;
-        }
-        
-        try {
-            return <InlineMath math={text} />;
-        } catch (error) {
-            console.error('Math rendering error:', error);
-            return text;
-        }
-    };
-
     return (
         <div
             onClick={handleClick}
@@ -111,7 +94,7 @@ const ForumProblemCard = ({ problem, author, forumId }) => {
                     flex: 1,
                     lineHeight: 1.3
                 }}>
-                    {renderMathContent(problem.title)}
+                    <MathRenderer text={problem.title} />
                 </h3>
             </div>
 
@@ -127,7 +110,7 @@ const ForumProblemCard = ({ problem, author, forumId }) => {
                 overflow: 'hidden',
                 pointerEvents: 'none'
             }}>
-                {renderMathContent(problem.description)}
+                <MathRenderer text={problem.description} />
             </p>
 
             {/* Tags and Badges */}
