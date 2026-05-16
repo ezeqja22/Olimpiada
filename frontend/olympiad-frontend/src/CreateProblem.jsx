@@ -6,34 +6,60 @@ import MathEditor from "./MathEditor";
 import "./MathEditor.css";
 import Layout from "./components/Layout";
 import Card from "./components/Card";
-import Button from "./components/Button";
 import { colors, spacing, typography, borderRadius, shadows } from "./designSystem";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+const secondaryColor = colors.secondary || colors.primary;
 
 function CreateProblem() {
   const location = useLocation();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     subject: "",
     level: "",
-    year: ""
+    year: "",
   });
-  const [tags, setTags] = useState([""]); // Array of tag strings
 
-  // Pre-fill subject from URL parameter if coming from SubjectPage
+  const [tags, setTags] = useState([""]);
+  const [images, setImages] = useState([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showMathEditor, setShowMathEditor] = useState(false);
+  const [mathEditorTarget, setMathEditorTarget] = useState(null);
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [cursorIndex, setCursorIndex] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  const titleRef = useRef(null);
+  const descriptionRef = useRef(null);
+  const imageInputRef = useRef(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const subjectParam = urlParams.get('subject');
-    const draftId = urlParams.get('draft');
+    const subjectParam = urlParams.get("subject");
+    const draftId = urlParams.get("draft");
 
     if (subjectParam) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        subject: subjectParam
+        subject: subjectParam,
       }));
     }
 
-    // Load draft if draft ID is provided
     if (draftId) {
       loadDraft(draftId);
     }
@@ -42,27 +68,33 @@ function CreateProblem() {
   const loadDraft = async (draftId) => {
     try {
       const token = localStorage.getItem("token");
+
       if (!token) {
         alert("Please log in to load draft");
         return;
       }
 
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/drafts/${draftId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.get(`${API_URL}/auth/drafts/${draftId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const draft = response.data;
+
       setFormData({
-        title: draft.title,
-        description: draft.description,
-        subject: draft.subject,
-        level: draft.level,
-        year: draft.year ? draft.year.toString() : ""
+        title: draft.title || "",
+        description: draft.description || "",
+        subject: draft.subject || "",
+        level: draft.level || "",
+        year: draft.year ? draft.year.toString() : "",
       });
 
-      // Set tags from draft
       if (draft.tags) {
-        setTags(draft.tags.split(',').map(tag => tag.trim()).filter(tag => tag));
+        const draftTags = draft.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag);
+
+        setTags(draftTags.length > 0 ? draftTags : [""]);
       }
 
       alert("Draft loaded successfully! You can now finish and publish your problem.");
@@ -71,55 +103,40 @@ function CreateProblem() {
       alert(error.response?.data?.detail || "Failed to load draft");
     }
   };
-  const [images, setImages] = useState([]); // Array of uploaded image filenames
-  const [uploadingImages, setUploadingImages] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [showMathEditor, setShowMathEditor] = useState(false);
-  const [mathEditorTarget, setMathEditorTarget] = useState(null); // 'title' or 'description'
-  const [savingDraft, setSavingDraft] = useState(false);
-  const titleRef = useRef(null);
-  const descriptionRef = useRef(null);
-  const [cursorIndex, setCursorIndex] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
 
-  // Mobile detection
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const navigate = useNavigate();
-
-  // Function to determine where to redirect after successful creation
   const getRedirectPath = () => {
     const searchParams = new URLSearchParams(location.search);
-    const from = searchParams.get('from');
+    const from = searchParams.get("from");
 
-    // If there's a specific 'from' parameter, use it
     if (from) {
       return from;
     }
 
-    // Check if we came from a specific subject page
-    const subject = searchParams.get('subject');
+    const subject = searchParams.get("subject");
+
     if (subject) {
       return `/subject/${encodeURIComponent(subject)}`;
     }
 
-    // Default to feed if no specific referrer
-    return '/feed';
+    return "/feed";
+  };
+
+  const handleInputFocus = (e) => {
+    e.currentTarget.style.borderColor = colors.primary;
+    e.currentTarget.style.backgroundColor = "white";
+    e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.primary}20`;
+  };
+
+  const handleInputBlur = (e) => {
+    e.currentTarget.style.borderColor = colors.gray[300];
+    e.currentTarget.style.backgroundColor = colors.gray[50];
+    e.currentTarget.style.boxShadow = "none";
   };
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -132,14 +149,13 @@ function CreateProblem() {
     if (ref) {
       setCursorIndex({
         start: ref.selectionStart,
-        end: ref.selectionEnd
+        end: ref.selectionEnd,
       });
     }
 
     setMathEditorTarget(target);
     setShowMathEditor(true);
   };
-
 
   const handleMathInsert = (mathContent) => {
     if (mathEditorTarget && cursorIndex) {
@@ -152,19 +168,17 @@ function CreateProblem() {
 
       setFormData({
         ...formData,
-        [mathEditorTarget]: newText
+        [mathEditorTarget]: newText,
       });
     }
 
-    setShowMathEditor(false);
-    setMathEditorTarget(null);
-    setCursorIndex(null);
+    closeMathEditor();
   };
-
 
   const closeMathEditor = () => {
     setShowMathEditor(false);
     setMathEditorTarget(null);
+    setCursorIndex(null);
   };
 
   const handleTagChange = (index, value) => {
@@ -183,37 +197,38 @@ function CreateProblem() {
 
   const removeTag = (index) => {
     if (tags.length > 1) {
-      const newTags = tags.filter((_, i) => i !== index);
-      setTags(newTags);
+      setTags(tags.filter((_, i) => i !== index));
     }
   };
 
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
+
     if (files.length === 0) return;
 
-    // Check if adding these files would exceed the limit
     if (images.length + files.length > 10) {
       alert("Maximum 10 images allowed. Please select fewer images.");
       return;
     }
 
-    // Validate files
-    const validFiles = files.filter(file => {
-      if (!file.type.startsWith('image/')) {
+    const validFiles = files.filter((file) => {
+      if (!file.type.startsWith("image/")) {
         alert(`${file.name} is not an image file`);
         return false;
       }
+
       return true;
     });
 
-    // Store files for later upload
     setImages([...images, ...validFiles]);
+
+    if (event.target) {
+      event.target.value = "";
+    }
   };
 
   const removeImage = (index) => {
-    const newImages = images.filter((_, i) => i !== index);
-    setImages(newImages);
+    setImages(images.filter((_, i) => i !== index));
   };
 
   const handleSaveDraft = async () => {
@@ -223,8 +238,10 @@ function CreateProblem() {
     }
 
     setSavingDraft(true);
+
     try {
       const token = localStorage.getItem("token");
+
       if (!token) {
         alert("Please log in to save a draft");
         return;
@@ -236,11 +253,11 @@ function CreateProblem() {
         subject: formData.subject,
         level: formData.level || "Any Level",
         year: formData.year ? parseInt(formData.year) : null,
-        tags: tags.filter(tag => tag.trim()).join(", ")
+        tags: tags.filter((tag) => tag.trim()).join(", "),
       };
 
-      await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/drafts`, draftData, {
-        headers: { Authorization: `Bearer ${token}` }
+      await axios.post(`${API_URL}/auth/drafts`, draftData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       alert("Draft saved successfully!");
@@ -257,56 +274,53 @@ function CreateProblem() {
     setLoading(true);
 
     try {
-      // Validate tags
-      const validTags = tags.filter(tag => tag.trim() !== "");
+      const validTags = tags.filter((tag) => tag.trim() !== "");
+
       if (validTags.length > 5) {
         alert("Maximum 5 tags allowed");
         setLoading(false);
         return;
       }
 
-      // Process tags: filter out empty tags and join with commas
-      const processedTags = validTags.join(", ");
-
       const token = localStorage.getItem("token");
 
-      // Ensure year is a number or null
+      if (!token) {
+        alert("Please log in to create a problem");
+        setLoading(false);
+        return;
+      }
+
       const requestData = {
         ...formData,
-        tags: processedTags,
-        year: formData.year ? parseInt(formData.year) : null
+        level: formData.level || "Any Level",
+        tags: validTags.join(", "),
+        year: formData.year ? parseInt(formData.year) : null,
       };
 
+      const response = await axios.post(`${API_URL}/auth/problems/`, requestData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
+      let imageUploadFailed = false;
 
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/`,
-        requestData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      // Upload images if any
       if (images.length > 0) {
         setUploadingImages(true);
+
         try {
           for (const file of images) {
-            const formData = new FormData();
-            formData.append('file', file);
+            const imageFormData = new FormData();
+            imageFormData.append("file", file);
 
-            const uploadUrl = `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${response.data.id}/images`;
-
-            const uploadResponse = await axios.post(
-              uploadUrl,
-              formData,
+            await axios.post(
+              `${API_URL}/auth/problems/${response.data.id}/images`,
+              imageFormData,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
-                  'Content-Type': 'multipart/form-data'
-                }
+                  "Content-Type": "multipart/form-data",
+                },
               }
             );
           }
@@ -314,26 +328,31 @@ function CreateProblem() {
           console.error("Error uploading images:", error);
           console.error("Error response:", error.response?.data);
           console.error("Error status:", error.response?.status);
-          alert(`Problem created but images failed to upload: ${error.response?.data?.detail || error.message}. You can add them later by editing the problem.`);
+          imageUploadFailed = true;
         } finally {
           setUploadingImages(false);
         }
       }
 
-      alert("Problem created successfully!");
-
-      // If this was created from a draft, delete the draft
       const urlParams = new URLSearchParams(location.search);
-      const draftId = urlParams.get('draft');
+      const draftId = urlParams.get("draft");
+
       if (draftId) {
         try {
-          await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/drafts/${draftId}`, {
-            headers: { Authorization: `Bearer ${token}` }
+          await axios.delete(`${API_URL}/auth/drafts/${draftId}`, {
+            headers: { Authorization: `Bearer ${token}` },
           });
         } catch (error) {
           console.error("Error deleting draft after publishing:", error);
-          // Don't show error to user as the problem was created successfully
         }
+      }
+
+      if (imageUploadFailed) {
+        alert(
+          "Problem created successfully, but some images failed to upload. You can add them later by editing the problem."
+        );
+      } else {
+        alert("Problem created successfully!");
       }
 
       navigate(getRedirectPath());
@@ -345,59 +364,120 @@ function CreateProblem() {
       alert("Error creating problem: " + (error.response?.data?.detail || error.message));
     } finally {
       setLoading(false);
+      setUploadingImages(false);
     }
   };
 
   return (
     <Layout showHomeButton={true}>
-      <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+      <div
+        style={{
+          maxWidth: "860px",
+          margin: "0 auto",
+          padding: isMobile ? spacing.md : "0",
+        }}
+      >
         <div style={{ marginBottom: spacing.xl, textAlign: "center" }}>
-          <h1 style={{
-            fontSize: typography.fontSize["3xl"],
-            fontWeight: typography.fontWeight.bold,
-            color: colors.primary,
-            marginBottom: spacing.sm,
-          }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px 14px",
+              borderRadius: "999px",
+              backgroundColor: `${colors.primary}10`,
+              color: colors.primary,
+              fontSize: "13px",
+              fontWeight: "700",
+              marginBottom: spacing.md,
+            }}
+          >
+            <span style={{ fontSize: "16px" }}>✦</span>
+            Share with the community
+          </div>
+
+          <h1
+            style={{
+              fontSize: isMobile
+                ? typography.fontSize["2xl"]
+                : typography.fontSize["3xl"],
+              fontWeight: typography.fontWeight.bold,
+              color: colors.primary,
+              marginBottom: spacing.xs,
+            }}
+          >
             Create New Problem
           </h1>
-          <p style={{ color: colors.gray[600], fontSize: "1.1rem" }}>
-            Share a science problem with the community
+
+          <p
+            style={{
+              color: colors.gray[600],
+              fontSize: isMobile ? "0.95rem" : "1.1rem",
+              margin: 0,
+            }}
+          >
+            Add a science or olympiad problem with formulas, tags, and images.
           </p>
         </div>
 
-        <Card style={{ padding: spacing.xl, position: "relative" }}>
-          <div style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: spacing.lg
-          }}>
+        <Card
+          style={{
+            padding: isMobile ? spacing.lg : spacing.xl,
+            position: "relative",
+            borderRadius: borderRadius.lg,
+            boxShadow: shadows.md,
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "5px",
+              background: `linear-gradient(90deg, ${colors.primary}, ${secondaryColor})`,
+            }}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginBottom: spacing.lg,
+            }}
+          >
             <button
+              type="button"
               onClick={handleSaveDraft}
               disabled={savingDraft}
               style={{
-                padding: "8px 16px",
-                backgroundColor: "transparent",
+                padding: "10px 18px",
+                backgroundColor: "white",
                 color: colors.primary,
-                border: `1px solid ${colors.primary}`,
+                border: `1.5px solid ${colors.primary}`,
                 borderRadius: borderRadius.md,
                 fontSize: "14px",
-                fontWeight: "600",
+                fontWeight: "700",
                 cursor: savingDraft ? "not-allowed" : "pointer",
                 transition: "all 0.2s ease",
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
-                gap: "6px"
+                gap: "8px",
+                opacity: savingDraft ? 0.7 : 1,
               }}
               onMouseEnter={(e) => {
                 if (!savingDraft) {
-                  e.target.style.backgroundColor = colors.primary;
-                  e.target.style.color = "white";
+                  e.currentTarget.style.backgroundColor = colors.primary;
+                  e.currentTarget.style.color = "white";
+                  e.currentTarget.style.transform = "translateY(-1px)";
                 }
               }}
               onMouseLeave={(e) => {
                 if (!savingDraft) {
-                  e.target.style.backgroundColor = "transparent";
-                  e.target.style.color = colors.primary;
+                  e.currentTarget.style.backgroundColor = "white";
+                  e.currentTarget.style.color = colors.primary;
+                  e.currentTarget.style.transform = "translateY(0)";
                 }
               }}
             >
@@ -405,203 +485,153 @@ function CreateProblem() {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: spacing.xl }}>
-            {/* Title Section */}
-            <div>
-              <label style={{
-                display: "block",
-                marginBottom: spacing.xs,
-                fontWeight: "600",
-                color: colors.dark,
-                fontSize: "16px"
-              }}>
+          <form
+            onSubmit={handleSubmit}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: spacing.xl,
+            }}
+          >
+            <div style={fieldGroupStyle}>
+              <label style={labelStyle}>
                 Title <span style={{ color: colors.danger }}>*</span>
               </label>
-              <div style={{ display: "flex", gap: spacing.sm }}>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: isMobile ? "column" : "row",
+                  gap: spacing.sm,
+                }}
+              >
                 <input
                   ref={titleRef}
                   type="text"
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
                   required
-                  style={{
-                    flex: 1,
-                    padding: spacing.md,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: "16px",
-                    outline: "none",
-                    transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-                    backgroundColor: colors.gray[50]
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = colors.primary;
-                    e.target.style.backgroundColor = "white";
-                    e.target.style.boxShadow = `0 0 0 3px ${colors.primary}20`;
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = colors.gray[300];
-                    e.target.style.backgroundColor = colors.gray[50];
-                    e.target.style.boxShadow = "none";
-                  }}
                   placeholder="Enter a descriptive title..."
+                  style={inputStyle}
                 />
+
                 <button
-  type="button"
-  onClick={() => openMathEditor('title')}
-  style={{
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "8px",
-    padding: `0 ${spacing.md}`,
-    background: `linear-gradient(135deg, ${colors.primary}15, ${colors.secondary}20)`,
-    color: colors.primary,
-    border: `1px solid ${colors.primary}`,
-    borderRadius: "999px",
-    cursor: "pointer",
-    fontWeight: "700",
-    fontSize: "14px",
-    whiteSpace: "nowrap",
-    boxShadow: `0 4px 12px ${colors.primary}25`,
-    transition: "all 0.2s ease"
-  }}
-  title="Insert LaTeX formula"
-  onMouseEnter={(e) => {
-    e.currentTarget.style.background = colors.primary;
-    e.currentTarget.style.color = "white";
-    e.currentTarget.style.transform = "translateY(-1px)";
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.background = `linear-gradient(135deg, ${colors.primary}15, ${colors.secondary}20)`;
-    e.currentTarget.style.color = colors.primary;
-    e.currentTarget.style.transform = "translateY(0)";
-  }}
->
-  <span style={{ fontSize: "17px", fontWeight: "800" }}>∑</span>
-  <span>LaTeX</span>
-</button>
+                  type="button"
+                  onClick={() => openMathEditor("title")}
+                  style={{
+                    ...mathOutlineButtonStyle,
+                    width: isMobile ? "100%" : "auto",
+                  }}
+                  title="Insert LaTeX formula"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = colors.primary;
+                    e.currentTarget.style.color = "white";
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = `linear-gradient(135deg, ${colors.primary}12, ${secondaryColor}18)`;
+                    e.currentTarget.style.color = colors.primary;
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }}
+                >
+                  <span style={{ fontSize: "17px", fontWeight: "800" }}>∑</span>
+                  <span>LaTeX</span>
+                </button>
               </div>
             </div>
 
-            {/* Description Section */}
-            <div>
-              <label style={{
-                display: "block",
-                marginBottom: spacing.xs,
-                fontWeight: "600",
-                color: colors.dark,
-                fontSize: "16px"
-              }}>
+            <div style={fieldGroupStyle}>
+              <label style={labelStyle}>
                 Description <span style={{ color: colors.danger }}>*</span>
               </label>
+
               <div style={{ position: "relative" }}>
                 <textarea
                   ref={descriptionRef}
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
                   required
-                  rows="8"
-                  style={{
-                    width: "100%",
-                    padding: spacing.md,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: "16px",
-                    resize: "vertical",
-                    outline: "none",
-                    transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-                    backgroundColor: colors.gray[50],
-                    fontFamily: "inherit",
-                    lineHeight: "1.5"
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = colors.primary;
-                    e.target.style.backgroundColor = "white";
-                    e.target.style.boxShadow = `0 0 0 3px ${colors.primary}20`;
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = colors.gray[300];
-                    e.target.style.backgroundColor = colors.gray[50];
-                    e.target.style.boxShadow = "none";
-                  }}
+                  rows={isMobile ? "7" : "8"}
                   placeholder="Describe the problem in detail..."
+                  style={{
+                    ...inputStyle,
+                    width: "100%",
+                    resize: "vertical",
+                    minHeight: "170px",
+                    fontFamily: "inherit",
+                    lineHeight: "1.55",
+                    paddingRight: isMobile ? spacing.md : "145px",
+                  }}
                 />
+
                 <button
-  type="button"
-  onClick={() => openMathEditor('description')}
-  style={{
-    position: "absolute",
-    top: spacing.sm,
-    right: spacing.sm,
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "8px",
-    padding: "8px 13px",
-    background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-    color: "white",
-    border: "none",
-    borderRadius: "999px",
-    cursor: "pointer",
-    fontSize: "13px",
-    fontWeight: "700",
-    boxShadow: `0 6px 16px ${colors.primary}35`,
-    transition: "all 0.2s ease"
-  }}
-  title="Insert LaTeX formula"
-  onMouseEnter={(e) => {
-    e.currentTarget.style.transform = "translateY(-1px)";
-    e.currentTarget.style.boxShadow = `0 8px 20px ${colors.primary}45`;
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.transform = "translateY(0)";
-    e.currentTarget.style.boxShadow = `0 6px 16px ${colors.primary}35`;
-  }}
->
-  <span style={{ fontSize: "16px", fontWeight: "800" }}>∑</span>
-  <span>Add formula</span>
-</button>
+                  type="button"
+                  onClick={() => openMathEditor("description")}
+                  style={{
+                    ...floatingMathButtonStyle,
+                    position: isMobile ? "static" : "absolute",
+                    marginTop: isMobile ? spacing.sm : 0,
+                    width: isMobile ? "100%" : "auto",
+                    justifyContent: "center",
+                  }}
+                  title="Insert LaTeX formula"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                    e.currentTarget.style.boxShadow = `0 8px 20px ${colors.primary}45`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = `0 6px 16px ${colors.primary}35`;
+                  }}
+                >
+                  <span style={{ fontSize: "16px", fontWeight: "800" }}>∑</span>
+                  <span>Add formula</span>
+                </button>
               </div>
-              <p style={{ fontSize: "13px", color: colors.gray[500], marginTop: "8px" }}>
-  Tip: use <strong>$...$</strong> for inline math, for example{" "}
-  <code style={{
-    backgroundColor: colors.gray[100],
-    padding: "2px 6px",
-    borderRadius: borderRadius.sm,
-    color: colors.primary,
-    fontWeight: "600"
-  }}>
-    $x^2 + y^2 = z^2$
-  </code>
-</p>
+
+              <p
+                style={{
+                  fontSize: "13px",
+                  color: colors.gray[500],
+                  marginTop: "8px",
+                  marginBottom: 0,
+                  lineHeight: 1.5,
+                }}
+              >
+                Tip: use <strong>$...$</strong> for inline math, for example{" "}
+                <code style={codeStyle}>$x^2 + y^2 = z^2$</code>
+              </p>
             </div>
 
-            {/* Grid for Subject, Level, Year */}
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
-              gap: spacing.lg
-            }}>
-              {/* Subject */}
-              <div>
-                <label style={{ display: "block", marginBottom: spacing.xs, fontWeight: "600" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
+                gap: spacing.lg,
+              }}
+            >
+              <div style={fieldGroupStyle}>
+                <label style={labelStyle}>
                   Subject <span style={{ color: colors.danger }}>*</span>
                 </label>
+
                 <select
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
                   required
                   style={{
+                    ...inputStyle,
                     width: "100%",
-                    padding: spacing.md,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: "16px",
-                    outline: "none",
-                    backgroundColor: "white",
-                    cursor: "pointer"
+                    cursor: "pointer",
                   }}
                 >
                   <option value="">Select Subject</option>
@@ -614,212 +644,204 @@ function CreateProblem() {
                 </select>
               </div>
 
-              {/* Level */}
-              <div>
-                <label style={{ display: "block", marginBottom: spacing.xs, fontWeight: "600" }}>
-                  Level
-                </label>
+              <div style={fieldGroupStyle}>
+                <label style={labelStyle}>Level</label>
+
                 <input
                   type="text"
                   name="level"
                   value={formData.level}
                   onChange={handleChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
                   placeholder="e.g. IMO, National..."
                   style={{
+                    ...inputStyle,
                     width: "100%",
-                    padding: spacing.md,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: "16px",
-                    outline: "none"
                   }}
                 />
               </div>
 
-              {/* Year */}
-              <div>
-                <label style={{ display: "block", marginBottom: spacing.xs, fontWeight: "600" }}>
-                  Year
-                </label>
+              <div style={fieldGroupStyle}>
+                <label style={labelStyle}>Year</label>
+
                 <input
                   type="number"
                   name="year"
                   value={formData.year}
                   onChange={handleChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
                   placeholder="e.g. 2024"
                   min="1900"
                   max="2099"
                   style={{
+                    ...inputStyle,
                     width: "100%",
-                    padding: spacing.md,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: "16px",
-                    outline: "none"
                   }}
                 />
               </div>
             </div>
 
-            {/* Tags Section */}
-            <div>
-              <label style={{ display: "block", marginBottom: spacing.xs, fontWeight: "600" }}>
-                Tags (Optional)
-              </label>
-              <div style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: spacing.sm,
-                padding: spacing.sm,
-                border: `1px solid ${colors.gray[300]}`,
-                borderRadius: borderRadius.md,
-                backgroundColor: "white",
-                minHeight: "48px"
-              }}>
+            <div style={fieldGroupStyle}>
+              <label style={labelStyle}>Tags (Optional)</label>
+
+              <div style={tagContainerStyle}>
                 {tags.map((tag, index) => (
-                  <div key={index} style={{ display: "flex", alignItems: "center" }}>
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      position: "relative",
+                    }}
+                  >
                     <input
                       type="text"
                       value={tag}
                       onChange={(e) => handleTagChange(index, e.target.value)}
                       placeholder="Add tag..."
-                      style={{
-                        padding: "6px 10px",
-                        border: `1px solid ${colors.gray[300]}`,
-                        borderRadius: "20px",
-                        fontSize: "14px",
-                        width: "120px",
-                        outline: "none",
-                        backgroundColor: colors.gray[50]
-                      }}
+                      style={tagInputStyle}
                     />
+
                     {tags.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeTag(index)}
-                        style={{
-                          marginLeft: "-24px",
-                          border: "none",
-                          background: "none",
-                          color: colors.gray[500],
-                          cursor: "pointer",
-                          fontSize: "16px",
-                          fontWeight: "bold"
-                        }}
+                        style={removeTagButtonStyle}
+                        title="Remove tag"
                       >
                         ×
                       </button>
                     )}
                   </div>
                 ))}
+
                 {tags.length < 5 && (
                   <button
                     type="button"
                     onClick={addTag}
-                    style={{
-                      padding: "6px 12px",
-                      backgroundColor: colors.gray[100],
-                      border: "none",
-                      borderRadius: "20px",
-                      color: colors.dark,
-                      fontSize: "14px",
-                      cursor: "pointer",
-                      fontWeight: "500",
-                      transition: "background-color 0.2s"
+                    style={addTagButtonStyle}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = colors.gray[100];
+                      e.currentTarget.style.borderColor = colors.primary;
+                      e.currentTarget.style.color = colors.primary;
                     }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = colors.gray[200]}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = colors.gray[100]}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "white";
+                      e.currentTarget.style.borderColor = colors.gray[300];
+                      e.currentTarget.style.color = colors.dark;
+                    }}
                   >
                     + Add Tag
                   </button>
                 )}
               </div>
+
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: colors.gray[500],
+                  marginTop: "6px",
+                  marginBottom: 0,
+                }}
+              >
+                Add up to 5 tags to help others find your problem.
+              </p>
             </div>
 
-            {/* Images Section */}
-            <div>
-              <label style={{ display: "block", marginBottom: spacing.xs, fontWeight: "600" }}>
-                Images (Optional)
-              </label>
-              <div style={{
-                border: `2px dashed ${colors.gray[300]}`,
-                borderRadius: borderRadius.lg,
-                padding: spacing.lg,
-                textAlign: "center",
-                backgroundColor: colors.gray[50],
-                cursor: "pointer",
-                transition: "all 0.2s ease"
-              }}
-                onClick={() => document.getElementById('image-upload-input').click()}
+            <div style={fieldGroupStyle}>
+              <label style={labelStyle}>Images (Optional)</label>
+
+              <div
+                style={dropzoneStyle}
+                onClick={() => imageInputRef.current?.click()}
                 onMouseEnter={(e) => {
-                  e.target.style.borderColor = colors.primary;
-                  e.target.style.backgroundColor = `${colors.primary}05`;
+                  e.currentTarget.style.borderColor = colors.primary;
+                  e.currentTarget.style.backgroundColor = `${colors.primary}08`;
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.borderColor = colors.gray[300];
-                  e.target.style.backgroundColor = colors.gray[50];
+                  e.currentTarget.style.borderColor = colors.gray[300];
+                  e.currentTarget.style.backgroundColor = colors.gray[50];
                 }}
               >
                 <input
+                  ref={imageInputRef}
                   type="file"
                   multiple
                   accept="image/*"
                   onChange={handleImageUpload}
                   style={{ display: "none" }}
-                  id="image-upload-input"
                 />
-                <p style={{ margin: 0, color: colors.gray[600], fontWeight: "500" }}>
-                  Click to upload images or drag and drop
+
+                <div
+  style={{
+    width: "48px",
+    height: "48px",
+    borderRadius: "50%",
+    backgroundColor: `${colors.primary}12`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: spacing.sm,
+  }}
+>
+  <span
+    style={{
+      width: "18px",
+      height: "18px",
+      borderLeft: `3px solid ${colors.primary}`,
+      borderTop: `3px solid ${colors.primary}`,
+      transform: "rotate(45deg)",
+      marginTop: "8px",
+    }}
+  />
+</div>
+
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "14px",
+                    color: colors.gray[700],
+                    fontWeight: "700",
+                  }}
+                >
+                  Click to upload images
                 </p>
-                <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: colors.gray[500] }}>
-                  Max 10 images
+
+                <p
+                  style={{
+                    margin: "4px 0 0 0",
+                    fontSize: "12px",
+                    color: colors.gray[500],
+                  }}
+                >
+                  Max 10 images. JPG, PNG, WEBP supported.
                 </p>
               </div>
 
-              {/* Image Previews */}
               {images.length > 0 && (
-                <div style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: spacing.md,
-                  marginTop: spacing.md
-                }}>
+                <div style={previewGridStyle}>
                   {images.map((file, index) => (
-                    <div key={index} style={{
-                      position: "relative",
-                      width: "100px",
-                      height: "100px",
-                      borderRadius: borderRadius.md,
-                      overflow: "hidden",
-                      boxShadow: shadows.sm
-                    }}>
+                    <div key={`${file.name}-${index}`} style={imagePreviewStyle}>
                       <img
                         src={URL.createObjectURL(file)}
                         alt={`Preview ${index + 1}`}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
                       />
+
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           removeImage(index);
                         }}
-                        style={{
-                          position: "absolute",
-                          top: "4px",
-                          right: "4px",
-                          width: "20px",
-                          height: "20px",
-                          borderRadius: "50%",
-                          backgroundColor: "rgba(0,0,0,0.6)",
-                          color: "white",
-                          border: "none",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          fontSize: "14px"
-                        }}
+                        style={removeImageButtonStyle}
+                        title="Remove image"
                       >
                         ×
                       </button>
@@ -829,42 +851,45 @@ function CreateProblem() {
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div style={{
-              display: "flex",
-              gap: spacing.md,
-              marginTop: spacing.lg,
-              paddingTop: spacing.lg,
-              borderTop: `1px solid ${colors.gray[200]}`
-            }}>
-              <Button
+            <div style={actionContainerStyle}>
+              <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || uploadingImages}
                 style={{
-                  flex: 1,
-                  padding: spacing.md,
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  boxShadow: shadows.md
+                  ...primaryButtonStyle,
+                  cursor: loading || uploadingImages ? "not-allowed" : "pointer",
+                  opacity: loading || uploadingImages ? 0.75 : 1,
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading && !uploadingImages) {
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                    e.currentTarget.style.boxShadow = shadows.lg || shadows.md;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = shadows.md;
                 }}
               >
-                {loading ? "Creating..." : "Create Problem"}
-              </Button>
+                {uploadingImages
+                  ? "Uploading Images..."
+                  : loading
+                  ? "Creating..."
+                  : "Create Problem"}
+              </button>
+
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                style={{
-                  padding: spacing.md,
-                  backgroundColor: "transparent",
-                  color: colors.gray[600],
-                  border: "none",
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  transition: "color 0.2s"
+                style={cancelButtonStyle}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = colors.dark;
+                  e.currentTarget.style.backgroundColor = colors.gray[100];
                 }}
-                onMouseEnter={(e) => e.target.style.color = colors.dark}
-                onMouseLeave={(e) => e.target.style.color = colors.gray[600]}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = colors.gray[600];
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
               >
                 Cancel
               </button>
@@ -873,7 +898,6 @@ function CreateProblem() {
         </Card>
       </div>
 
-      {/* Math Editor Modal */}
       <MathEditor
         isOpen={showMathEditor}
         onClose={closeMathEditor}
@@ -882,5 +906,205 @@ function CreateProblem() {
     </Layout>
   );
 }
+
+const inputStyle = {
+  flex: 1,
+  padding: "12px 16px",
+  border: `1px solid ${colors.gray[300]}`,
+  borderRadius: borderRadius.md,
+  fontSize: "16px",
+  outline: "none",
+  backgroundColor: colors.gray[50],
+  transition: "all 0.2s ease",
+  boxSizing: "border-box",
+};
+
+const labelStyle = {
+  display: "block",
+  marginBottom: spacing.xs,
+  fontWeight: "700",
+  fontSize: "15px",
+  color: colors.dark,
+};
+
+const fieldGroupStyle = {
+  display: "flex",
+  flexDirection: "column",
+};
+
+const mathOutlineButtonStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "8px",
+  padding: "10px 18px",
+  background: `linear-gradient(135deg, ${colors.primary}12, ${secondaryColor}18)`,
+  color: colors.primary,
+  border: `1.5px solid ${colors.primary}`,
+  borderRadius: "999px",
+  cursor: "pointer",
+  fontWeight: "800",
+  fontSize: "14px",
+  whiteSpace: "nowrap",
+  boxShadow: `0 4px 12px ${colors.primary}22`,
+  transition: "all 0.2s ease",
+};
+
+const floatingMathButtonStyle = {
+  top: spacing.sm,
+  right: spacing.sm,
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  padding: "8px 14px",
+  background: `linear-gradient(135deg, ${colors.primary}, ${secondaryColor})`,
+  color: "white",
+  border: "none",
+  borderRadius: "999px",
+  cursor: "pointer",
+  fontSize: "13px",
+  fontWeight: "800",
+  boxShadow: `0 6px 16px ${colors.primary}35`,
+  transition: "all 0.2s ease",
+};
+
+const tagContainerStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: spacing.sm,
+  padding: spacing.md,
+  border: `1px solid ${colors.gray[300]}`,
+  borderRadius: borderRadius.md,
+  backgroundColor: colors.gray[50],
+  minHeight: "58px",
+  alignItems: "center",
+};
+
+const tagInputStyle = {
+  padding: "8px 34px 8px 12px",
+  border: `1px solid ${colors.gray[300]}`,
+  borderRadius: "999px",
+  fontSize: "14px",
+  width: "135px",
+  outline: "none",
+  backgroundColor: "white",
+  boxSizing: "border-box",
+};
+
+const removeTagButtonStyle = {
+  position: "absolute",
+  right: "8px",
+  top: "50%",
+  transform: "translateY(-50%)",
+  border: "none",
+  background: "none",
+  color: colors.gray[500],
+  cursor: "pointer",
+  fontSize: "18px",
+  fontWeight: "bold",
+  lineHeight: 1,
+};
+
+const addTagButtonStyle = {
+  padding: "8px 16px",
+  backgroundColor: "white",
+  border: `1px solid ${colors.gray[300]}`,
+  borderRadius: "999px",
+  color: colors.dark,
+  fontSize: "14px",
+  cursor: "pointer",
+  fontWeight: "700",
+  transition: "all 0.2s ease",
+};
+
+const dropzoneStyle = {
+  border: `2px dashed ${colors.gray[300]}`,
+  borderRadius: borderRadius.lg,
+  padding: "32px",
+  textAlign: "center",
+  backgroundColor: colors.gray[50],
+  cursor: "pointer",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  transition: "all 0.2s ease",
+};
+
+const previewGridStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: spacing.md,
+  marginTop: spacing.md,
+};
+
+const imagePreviewStyle = {
+  position: "relative",
+  width: "96px",
+  height: "96px",
+  borderRadius: borderRadius.md,
+  overflow: "hidden",
+  border: `1px solid ${colors.gray[200]}`,
+  boxShadow: shadows.sm,
+};
+
+const removeImageButtonStyle = {
+  position: "absolute",
+  top: "5px",
+  right: "5px",
+  width: "22px",
+  height: "22px",
+  borderRadius: "50%",
+  backgroundColor: "rgba(0,0,0,0.7)",
+  color: "white",
+  border: "none",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "15px",
+  fontWeight: "700",
+  lineHeight: 1,
+};
+
+const actionContainerStyle = {
+  display: "flex",
+  gap: spacing.md,
+  marginTop: spacing.lg,
+  borderTop: `1px solid ${colors.gray[200]}`,
+  paddingTop: spacing.xl,
+};
+
+const primaryButtonStyle = {
+  flex: 1,
+  padding: "16px",
+  background: `linear-gradient(135deg, ${colors.primary}, ${secondaryColor})`,
+  color: "white",
+  border: "none",
+  borderRadius: borderRadius.md,
+  fontSize: "16px",
+  fontWeight: "800",
+  boxShadow: shadows.md,
+  transition: "all 0.2s ease",
+};
+
+const cancelButtonStyle = {
+  padding: "16px 24px",
+  backgroundColor: "transparent",
+  color: colors.gray[600],
+  border: "none",
+  borderRadius: borderRadius.md,
+  fontSize: "16px",
+  fontWeight: "700",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+};
+
+const codeStyle = {
+  backgroundColor: colors.gray[100],
+  padding: "2px 6px",
+  borderRadius: borderRadius.sm,
+  color: colors.primary,
+  fontWeight: "700",
+};
 
 export default CreateProblem;
