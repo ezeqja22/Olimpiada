@@ -133,6 +133,18 @@ function CreateProblem() {
     e.currentTarget.style.boxShadow = "none";
   };
 
+  const handleMathButtonEnter = (e) => {
+    e.currentTarget.style.backgroundColor = `${colors.primary}10`;
+    e.currentTarget.style.borderColor = colors.primary;
+    e.currentTarget.style.color = colors.primary;
+  };
+
+  const handleMathButtonLeave = (e) => {
+    e.currentTarget.style.backgroundColor = colors.gray[50];
+    e.currentTarget.style.borderColor = colors.gray[300];
+    e.currentTarget.style.color = colors.primary;
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -522,23 +534,15 @@ function CreateProblem() {
                   type="button"
                   onClick={() => openMathEditor("title")}
                   style={{
-                    ...mathOutlineButtonStyle,
+                    ...mathButtonStyle,
                     width: isMobile ? "100%" : "auto",
                   }}
                   title="Insert LaTeX formula"
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = colors.primary;
-                    e.currentTarget.style.color = "white";
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = `linear-gradient(135deg, ${colors.primary}12, ${secondaryColor}18)`;
-                    e.currentTarget.style.color = colors.primary;
-                    e.currentTarget.style.transform = "translateY(0)";
-                  }}
+                  onMouseEnter={handleMathButtonEnter}
+                  onMouseLeave={handleMathButtonLeave}
                 >
-                  <span style={{ fontSize: "17px", fontWeight: "800" }}>∑</span>
-                  <span>LaTeX</span>
+                  <span style={{ fontSize: "16px", fontWeight: "800" }}>∑</span>
+                  <span>Formula</span>
                 </button>
               </div>
             </div>
@@ -566,7 +570,7 @@ function CreateProblem() {
                     minHeight: "170px",
                     fontFamily: "inherit",
                     lineHeight: "1.55",
-                    paddingRight: isMobile ? spacing.md : "145px",
+                    paddingRight: isMobile ? spacing.md : "130px",
                   }}
                 />
 
@@ -574,24 +578,19 @@ function CreateProblem() {
                   type="button"
                   onClick={() => openMathEditor("description")}
                   style={{
-                    ...floatingMathButtonStyle,
+                    ...mathButtonStyle,
                     position: isMobile ? "static" : "absolute",
+                    top: spacing.sm,
+                    right: spacing.sm,
                     marginTop: isMobile ? spacing.sm : 0,
                     width: isMobile ? "100%" : "auto",
-                    justifyContent: "center",
                   }}
                   title="Insert LaTeX formula"
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.boxShadow = `0 8px 20px ${colors.primary}45`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = `0 6px 16px ${colors.primary}35`;
-                  }}
+                  onMouseEnter={handleMathButtonEnter}
+                  onMouseLeave={handleMathButtonLeave}
                 >
                   <span style={{ fontSize: "16px", fontWeight: "800" }}>∑</span>
-                  <span>Add formula</span>
+                  <span>Formula</span>
                 </button>
               </div>
 
@@ -775,28 +774,28 @@ function CreateProblem() {
                 />
 
                 <div
-  style={{
-    width: "48px",
-    height: "48px",
-    borderRadius: "50%",
-    backgroundColor: `${colors.primary}12`,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: spacing.sm,
-  }}
->
-  <span
-    style={{
-      width: "18px",
-      height: "18px",
-      borderLeft: `3px solid ${colors.primary}`,
-      borderTop: `3px solid ${colors.primary}`,
-      transform: "rotate(45deg)",
-      marginTop: "8px",
-    }}
-  />
-</div>
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    backgroundColor: `${colors.primary}12`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: spacing.sm,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      borderLeft: `3px solid ${colors.primary}`,
+                      borderTop: `3px solid ${colors.primary}`,
+                      transform: "rotate(45deg)",
+                      marginTop: "8px",
+                    }}
+                  />
+                </div>
 
                 <p
                   style={{
@@ -932,40 +931,22 @@ const fieldGroupStyle = {
   flexDirection: "column",
 };
 
-const mathOutlineButtonStyle = {
+const mathButtonStyle = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  gap: "8px",
-  padding: "10px 18px",
-  background: `linear-gradient(135deg, ${colors.primary}12, ${secondaryColor}18)`,
+  gap: "7px",
+  padding: "9px 14px",
+  backgroundColor: colors.gray[50],
   color: colors.primary,
-  border: `1.5px solid ${colors.primary}`,
-  borderRadius: "999px",
+  border: `1px solid ${colors.gray[300]}`,
+  borderRadius: borderRadius.md,
   cursor: "pointer",
-  fontWeight: "800",
   fontSize: "14px",
+  fontWeight: "700",
   whiteSpace: "nowrap",
-  boxShadow: `0 4px 12px ${colors.primary}22`,
   transition: "all 0.2s ease",
-};
-
-const floatingMathButtonStyle = {
-  top: spacing.sm,
-  right: spacing.sm,
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "8px",
-  padding: "8px 14px",
-  background: `linear-gradient(135deg, ${colors.primary}, ${secondaryColor})`,
-  color: "white",
-  border: "none",
-  borderRadius: "999px",
-  cursor: "pointer",
-  fontSize: "13px",
-  fontWeight: "800",
-  boxShadow: `0 6px 16px ${colors.primary}35`,
-  transition: "all 0.2s ease",
+  boxSizing: "border-box",
 };
 
 const tagContainerStyle = {
