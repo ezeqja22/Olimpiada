@@ -8,31 +8,27 @@ import BackButton from "./components/BackButton";
 import AnimatedLoader from "./components/AnimatedLoader";
 import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { getUserInitial } from "./utils";
-import { InlineMath, BlockMath } from 'react-katex';
-import 'katex/dist/katex.min.css';
+import { InlineMath, BlockMath } from "react-katex";
+import "katex/dist/katex.min.css";
 
 // Helper function to render math content
 const renderMathContent = (text) => {
-    if (!text) return '';
+    if (!text) return "";
 
-    // Split text into math and non-math segments
     const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
 
     return parts.map((part, index) => {
-        if (part.startsWith('$$') && part.endsWith('$$')) {
-            // Block math mode
+        if (part.startsWith("$$") && part.endsWith("$$")) {
             const content = part.slice(2, -2);
             return (
-                <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
+                <div key={index} style={{ textAlign: "left", margin: "8px 0" }}>
                     <BlockMath math={content} />
                 </div>
             );
-        } else if (part.startsWith('$') && part.endsWith('$')) {
-            // Inline math mode
+        } else if (part.startsWith("$") && part.endsWith("$")) {
             const content = part.slice(1, -1);
             return <InlineMath key={index} math={content} />;
         } else {
-            // Regular text — keep it as-is
             return <span key={index}>{part}</span>;
         }
     });
@@ -42,8 +38,8 @@ function UserProfile() {
     const navigate = useNavigate();
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState("problems"); // problems, comments, bookmarks, drafts
-    const [commentsSubTab, setCommentsSubTab] = useState("all"); // all, solutions
+    const [activeTab, setActiveTab] = useState("problems");
+    const [commentsSubTab, setCommentsSubTab] = useState("all");
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -64,13 +60,12 @@ function UserProfile() {
         };
 
         checkMobile();
-        window.addEventListener('resize', checkMobile);
+        window.addEventListener("resize", checkMobile);
 
-        return () => window.removeEventListener('resize', checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
     }, []);
 
     useEffect(() => {
-        // Only fetch data if user is authenticated
         const token = localStorage.getItem("token");
         if (token) {
             fetchUserProfile();
@@ -87,19 +82,18 @@ function UserProfile() {
                 return;
             }
 
-            const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/user/profile`, {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/user/profile`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
+
             setProfileData(response.data);
 
-            // Fetch vote data for user's problems
             if (response.data.problems && response.data.problems.length > 0) {
                 await fetchVoteData(response.data.problems);
             }
 
-            // Fetch vote data and bookmark data for bookmarked problems
             if (response.data.bookmarks && response.data.bookmarks.length > 0) {
                 const bookmarkedProblems = response.data.bookmarks.map(bookmark => bookmark.problem);
                 await fetchVoteData(bookmarkedProblems);
@@ -128,7 +122,7 @@ function UserProfile() {
                 const problemId = problem.id;
                 try {
                     const response = await axios.get(
-                        `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/vote-status`,
+                        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/problems/${problemId}/vote-status`,
                         {
                             headers: {
                                 Authorization: `Bearer ${token}`
@@ -145,9 +139,11 @@ function UserProfile() {
 
             const voteResults = await Promise.all(votePromises);
             const voteDataMap = {};
+
             voteResults.forEach(({ problemId, voteData }) => {
                 voteDataMap[problemId] = voteData;
             });
+
             console.log("Final vote data map:", voteDataMap);
             setVoteData(voteDataMap);
         } catch (error) {
@@ -159,20 +155,22 @@ function UserProfile() {
         try {
             const token = localStorage.getItem("token");
             const problemIds = problemsList.map(problem => problem.id);
+
             const response = await axios.post(
-                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
+                `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/problems/bookmark-status`,
                 problemIds,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+                        "Content-Type": "application/json"
                     }
                 }
             );
+
             setBookmarkData(response.data);
         } catch (error) {
             console.error("Error fetching bookmark data:", error);
-            // Initialize with all false if fetch fails
+
             const bookmarkDataMap = {};
             problemsList.forEach(problem => {
                 bookmarkDataMap[problem.id] = false;
@@ -186,9 +184,10 @@ function UserProfile() {
             const token = localStorage.getItem("token");
             if (!token) return;
 
-            const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/drafts`, {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/drafts`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+
             setDrafts(response.data);
         } catch (error) {
             console.error("Error fetching drafts:", error);
@@ -198,7 +197,9 @@ function UserProfile() {
     const handleVote = async (problemId, voteType) => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/vote`,
+
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/problems/${problemId}/vote`,
                 { vote_type: voteType },
                 {
                     headers: {
@@ -207,7 +208,6 @@ function UserProfile() {
                 }
             );
 
-            // Update vote data for this specific problem
             setVoteData(prev => ({
                 ...prev,
                 [problemId]: response.data
@@ -228,13 +228,13 @@ function UserProfile() {
     const handleSaveProfile = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.put(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/user/profile`, editFormData, {
+
+            await axios.put(`${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/user/profile`, editFormData, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
 
-            // Update the profile data with the new information
             setProfileData(prev => ({
                 ...prev,
                 user: {
@@ -265,35 +265,30 @@ function UserProfile() {
             const isCurrentlyBookmarked = bookmarkData[problemId];
 
             if (isCurrentlyBookmarked) {
-                // Try to remove bookmark
                 try {
-                    await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {
+                    await axios.delete(`${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/problems/${problemId}/bookmark`, {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
                     });
 
-                    // Update state to unbookmarked
                     setBookmarkData(prev => ({
                         ...prev,
                         [problemId]: false
                     }));
 
-                    // Refresh profile data to remove from bookmarks list
                     fetchUserProfile();
                 } catch (deleteError) {
                     console.error("Error removing bookmark:", deleteError);
                 }
             } else {
-                // Try to add bookmark
                 try {
-                    await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {}, {
+                    await axios.post(`${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/problems/${problemId}/bookmark`, {}, {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
                     });
 
-                    // Update state to bookmarked
                     setBookmarkData(prev => ({
                         ...prev,
                         [problemId]: true
@@ -309,23 +304,24 @@ function UserProfile() {
 
     const handleFileUpload = async (file) => {
         setUploading(true);
+
         try {
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append("file", file);
 
             const token = localStorage.getItem("token");
+
             const response = await axios.post(
-                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/user/profile-picture`,
+                `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/user/profile-picture`,
                 formData,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data'
+                        "Content-Type": "multipart/form-data"
                     }
                 }
             );
 
-            // Update profile data with new picture
             setProfileData(prev => ({
                 ...prev,
                 user: {
@@ -362,10 +358,12 @@ function UserProfile() {
         }
 
         setUploading(true);
+
         try {
             const token = localStorage.getItem("token");
+
             await axios.delete(
-                `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/user/profile-picture`,
+                `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/user/profile-picture`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -373,7 +371,6 @@ function UserProfile() {
                 }
             );
 
-            // Update profile data to remove picture
             setProfileData(prev => ({
                 ...prev,
                 user: {
@@ -402,11 +399,10 @@ function UserProfile() {
                 return;
             }
 
-            await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/drafts/${draftId}`, {
+            await axios.delete(`${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/drafts/${draftId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // Remove the draft from the local state
             setDrafts(prev => prev.filter(draft => draft.id !== draftId));
 
             alert("Draft deleted successfully!");
@@ -423,22 +419,46 @@ function UserProfile() {
     };
 
     const handleCameraOverlayClick = (e) => {
-        e.stopPropagation(); // Prevent triggering profile picture click
+        e.stopPropagation();
         fileInputRef.current.click();
     };
 
+    const openProblem = (problemId) => {
+        if (!problemId) return;
+        navigate(`/problem/${problemId}?from=/profile`);
+    };
+
+    const getCommentProblemId = (comment) => {
+        return comment.problem_id || comment.problem?.id || comment.problemId || comment.problemID;
+    };
+
+    const openCommentProblem = (comment) => {
+        const problemId = getCommentProblemId(comment);
+
+        if (!problemId) {
+            alert("Could not find the problem for this comment.");
+            return;
+        }
+
+        navigate(`/problem/${problemId}?from=/profile&comment=${comment.id}#comment-${comment.id}`);
+    };
+
+    const handleClickableKeyDown = (e, callback) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            callback();
+        }
+    };
+
     const handleLogout = () => {
-        // Clear all user data
         localStorage.removeItem("token");
 
-        // Clear any cached data
         setProfileData(null);
         setActiveTab("problems");
         setIsEditingProfile(false);
         setEditFormData({ bio: "", profile_picture: "" });
         setSelectedFile(null);
 
-        // Replace current history entry to prevent back navigation
         navigate("/homepage", { replace: true });
     };
 
@@ -464,16 +484,16 @@ function UserProfile() {
 
     const { user, problems, comments, bookmarks } = profileData;
 
-    // Sort comments with solutions first, then by creation date
-    const sortedComments = comments ? comments.sort((a, b) => {
-        if (a.is_solution && !b.is_solution) return -1;
-        if (!a.is_solution && b.is_solution) return 1;
-        return new Date(b.created_at) - new Date(a.created_at);
-    }) : [];
+    const sortedComments = comments
+        ? comments.sort((a, b) => {
+            if (a.is_solution && !b.is_solution) return -1;
+            if (!a.is_solution && b.is_solution) return 1;
+            return new Date(b.created_at) - new Date(a.created_at);
+        })
+        : [];
 
     return (
         <Layout showHomeButton={true}>
-            {/* Back Button */}
             <div style={{ marginBottom: spacing.md }}>
                 <BackButton fallbackPath="/feed" />
             </div>
@@ -490,17 +510,15 @@ function UserProfile() {
                 </h1>
             </div>
 
-            {/* Hidden file input */}
             <input
                 type="file"
                 accept="image/*"
                 capture="environment"
                 onChange={handleFileSelect}
                 ref={fileInputRef}
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
             />
 
-            {/* User Header */}
             <div style={{
                 backgroundColor: "#f8f9fa",
                 padding: "30px",
@@ -509,7 +527,6 @@ function UserProfile() {
                 border: "1px solid #e9ecef"
             }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                    {/* Clickable Profile Picture */}
                     <div
                         onClick={handleProfilePictureClick}
                         style={{
@@ -532,17 +549,16 @@ function UserProfile() {
                             overflow: "hidden"
                         }}
                         onMouseEnter={(e) => {
-                            e.target.style.transform = "scale(1.05)";
-                            e.target.style.boxShadow = "0 4px 12px rgba(0, 123, 255, 0.3)";
+                            e.currentTarget.style.transform = "scale(1.05)";
+                            e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 123, 255, 0.3)";
                         }}
                         onMouseLeave={(e) => {
-                            e.target.style.transform = "scale(1)";
-                            e.target.style.boxShadow = "none";
+                            e.currentTarget.style.transform = "scale(1)";
+                            e.currentTarget.style.boxShadow = "none";
                         }}
                     >
                         {!user.profile_picture && getUserInitial(user.username)}
 
-                        {/* Camera overlay - semi-circle at bottom */}
                         <div
                             onClick={handleCameraOverlayClick}
                             style={{
@@ -563,16 +579,17 @@ function UserProfile() {
                                 cursor: "pointer"
                             }}
                             onMouseEnter={(e) => {
-                                e.target.style.backgroundColor = "rgba(26, 77, 58, 1)";
-                                e.target.style.transform = "translateY(-2px)";
+                                e.currentTarget.style.backgroundColor = "rgba(26, 77, 58, 1)";
+                                e.currentTarget.style.transform = "translateY(-2px)";
                             }}
                             onMouseLeave={(e) => {
-                                e.target.style.backgroundColor = "rgba(26, 77, 58, 0.9)";
-                                e.target.style.transform = "translateY(0)";
+                                e.currentTarget.style.backgroundColor = "rgba(26, 77, 58, 0.9)";
+                                e.currentTarget.style.transform = "translateY(0)";
                             }}
                         >
                             <img
                                 src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Camera_Icon_My_Profile_cmmlrm.svg"
+                                alt="Camera"
                                 style={{
                                     height: "14px",
                                     width: "14px",
@@ -581,7 +598,6 @@ function UserProfile() {
                             />
                         </div>
                     </div>
-
 
                     <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -601,20 +617,20 @@ function UserProfile() {
                                     transition: "all 0.2s ease"
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.target.style.transform = "translateY(-1px)";
-                                    e.target.style.boxShadow = "0 4px 12px rgba(26, 77, 58, 0.4)";
+                                    e.currentTarget.style.transform = "translateY(-1px)";
+                                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(26, 77, 58, 0.4)";
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.target.style.transform = "translateY(0)";
-                                    e.target.style.boxShadow = "0 2px 8px rgba(26, 77, 58, 0.3)";
+                                    e.currentTarget.style.transform = "translateY(0)";
+                                    e.currentTarget.style.boxShadow = "0 2px 8px rgba(26, 77, 58, 0.3)";
                                 }}
                             >
                                 Edit Profile
                             </button>
                         </div>
+
                         <p style={{ margin: "0 0 10px 0", color: "#666", fontSize: "14px" }}>{user.email}</p>
 
-                        {/* Follower/Following Counts */}
                         <div style={{ display: "flex", gap: "20px", margin: "10px 0" }}>
                             <div
                                 style={{
@@ -637,6 +653,7 @@ function UserProfile() {
                                 </div>
                                 <div style={{ fontSize: "12px", color: "#666" }}>Followers</div>
                             </div>
+
                             <div
                                 style={{
                                     textAlign: "center",
@@ -667,7 +684,6 @@ function UserProfile() {
                 </div>
             </div>
 
-            {/* Edit Profile Form */}
             {isEditingProfile && (
                 <div style={{
                     backgroundColor: "#f8f9fa",
@@ -678,11 +694,13 @@ function UserProfile() {
                     boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
                 }}>
                     <h3 style={{ margin: "0 0 24px 0", color: "#333", fontSize: "20px", fontWeight: "600" }}>Edit Profile</h3>
+
                     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                         <div>
                             <label style={{ display: "block", marginBottom: "8px", fontWeight: "600", color: "#333", fontSize: "16px" }}>
                                 Bio:
                             </label>
+
                             <textarea
                                 value={editFormData.bio}
                                 onChange={(e) => setEditFormData({ ...editFormData, bio: e.target.value })}
@@ -700,15 +718,14 @@ function UserProfile() {
                                     fontFamily: "inherit"
                                 }}
                                 onFocus={(e) => {
-                                    e.target.style.borderColor = colors.primary;
+                                    e.currentTarget.style.borderColor = colors.primary;
                                 }}
                                 onBlur={(e) => {
-                                    e.target.style.borderColor = "#e9ecef";
+                                    e.currentTarget.style.borderColor = "#e9ecef";
                                 }}
                             />
                         </div>
 
-                        {/* Remove Profile Picture Button */}
                         {user && (
                             <div>
                                 <button
@@ -729,14 +746,14 @@ function UserProfile() {
                                     }}
                                     onMouseEnter={(e) => {
                                         if (!uploading) {
-                                            e.target.style.transform = "translateY(-1px)";
-                                            e.target.style.boxShadow = "0 4px 12px rgba(220, 53, 69, 0.4)";
+                                            e.currentTarget.style.transform = "translateY(-1px)";
+                                            e.currentTarget.style.boxShadow = "0 4px 12px rgba(220, 53, 69, 0.4)";
                                         }
                                     }}
                                     onMouseLeave={(e) => {
                                         if (!uploading) {
-                                            e.target.style.transform = "translateY(0)";
-                                            e.target.style.boxShadow = "0 2px 8px rgba(220, 53, 69, 0.3)";
+                                            e.currentTarget.style.transform = "translateY(0)";
+                                            e.currentTarget.style.boxShadow = "0 2px 8px rgba(220, 53, 69, 0.3)";
                                         }
                                     }}
                                 >
@@ -761,16 +778,17 @@ function UserProfile() {
                                     transition: "all 0.2s ease"
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.target.style.transform = "translateY(-1px)";
-                                    e.target.style.boxShadow = "0 4px 12px rgba(26, 77, 58, 0.4)";
+                                    e.currentTarget.style.transform = "translateY(-1px)";
+                                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(26, 77, 58, 0.4)";
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.target.style.transform = "translateY(0)";
-                                    e.target.style.boxShadow = "0 2px 8px rgba(26, 77, 58, 0.3)";
+                                    e.currentTarget.style.transform = "translateY(0)";
+                                    e.currentTarget.style.boxShadow = "0 2px 8px rgba(26, 77, 58, 0.3)";
                                 }}
                             >
                                 Save Changes
                             </button>
+
                             <button
                                 onClick={handleCancelEdit}
                                 style={{
@@ -786,12 +804,12 @@ function UserProfile() {
                                     transition: "all 0.2s ease"
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.target.style.transform = "translateY(-1px)";
-                                    e.target.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+                                    e.currentTarget.style.transform = "translateY(-1px)";
+                                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.target.style.transform = "translateY(0)";
-                                    e.target.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
+                                    e.currentTarget.style.transform = "translateY(0)";
+                                    e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
                                 }}
                             >
                                 Cancel
@@ -801,7 +819,6 @@ function UserProfile() {
                 </div>
             )}
 
-            {/* Stats Cards */}
             <div style={{
                 display: "flex",
                 gap: "15px",
@@ -819,6 +836,7 @@ function UserProfile() {
                     <div style={{ fontSize: "24px", fontWeight: "bold", color: "#2e7d32" }}>{problems.length}</div>
                     <div style={{ fontSize: "14px", color: "#666" }}>Problems</div>
                 </div>
+
                 <div style={{
                     textAlign: "center",
                     padding: "15px",
@@ -830,6 +848,7 @@ function UserProfile() {
                     <div style={{ fontSize: "24px", fontWeight: "bold", color: "#7b1fa2" }}>{comments.length}</div>
                     <div style={{ fontSize: "14px", color: "#666" }}>Comments</div>
                 </div>
+
                 <div style={{
                     textAlign: "center",
                     padding: "15px",
@@ -843,7 +862,6 @@ function UserProfile() {
                 </div>
             </div>
 
-            {/* Tabs */}
             <div style={{
                 display: "flex",
                 gap: "8px",
@@ -854,14 +872,15 @@ function UserProfile() {
                 boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                 overflowX: "auto",
                 whiteSpace: "nowrap",
-                scrollbarWidth: "none", // Firefox
-                msOverflowStyle: "none" // IE/Edge
+                scrollbarWidth: "none",
+                msOverflowStyle: "none"
             }}>
                 <style>{`
                     div::-webkit-scrollbar {
                         display: none;
                     }
                 `}</style>
+
                 <button
                     onClick={() => setActiveTab("problems")}
                     style={{
@@ -879,19 +898,20 @@ function UserProfile() {
                     }}
                     onMouseEnter={(e) => {
                         if (activeTab !== "problems") {
-                            e.target.style.backgroundColor = colors.gray[200];
-                            e.target.style.color = colors.gray[800];
+                            e.currentTarget.style.backgroundColor = colors.gray[200];
+                            e.currentTarget.style.color = colors.gray[800];
                         }
                     }}
                     onMouseLeave={(e) => {
                         if (activeTab !== "problems") {
-                            e.target.style.backgroundColor = "transparent";
-                            e.target.style.color = colors.gray[600];
+                            e.currentTarget.style.backgroundColor = "transparent";
+                            e.currentTarget.style.color = colors.gray[600];
                         }
                     }}
                 >
                     My Problems ({problems.length})
                 </button>
+
                 <button
                     onClick={() => setActiveTab("comments")}
                     style={{
@@ -909,19 +929,20 @@ function UserProfile() {
                     }}
                     onMouseEnter={(e) => {
                         if (activeTab !== "comments") {
-                            e.target.style.backgroundColor = colors.gray[200];
-                            e.target.style.color = colors.gray[800];
+                            e.currentTarget.style.backgroundColor = colors.gray[200];
+                            e.currentTarget.style.color = colors.gray[800];
                         }
                     }}
                     onMouseLeave={(e) => {
                         if (activeTab !== "comments") {
-                            e.target.style.backgroundColor = "transparent";
-                            e.target.style.color = colors.gray[600];
+                            e.currentTarget.style.backgroundColor = "transparent";
+                            e.currentTarget.style.color = colors.gray[600];
                         }
                     }}
                 >
                     My Comments ({sortedComments.length})
                 </button>
+
                 <button
                     onClick={() => setActiveTab("bookmarks")}
                     style={{
@@ -939,19 +960,20 @@ function UserProfile() {
                     }}
                     onMouseEnter={(e) => {
                         if (activeTab !== "bookmarks") {
-                            e.target.style.backgroundColor = colors.gray[200];
-                            e.target.style.color = colors.gray[800];
+                            e.currentTarget.style.backgroundColor = colors.gray[200];
+                            e.currentTarget.style.color = colors.gray[800];
                         }
                     }}
                     onMouseLeave={(e) => {
                         if (activeTab !== "bookmarks") {
-                            e.target.style.backgroundColor = "transparent";
-                            e.target.style.color = colors.gray[600];
+                            e.currentTarget.style.backgroundColor = "transparent";
+                            e.currentTarget.style.color = colors.gray[600];
                         }
                     }}
                 >
                     My Bookmarks ({bookmarks.length})
                 </button>
+
                 <button
                     onClick={() => {
                         setActiveTab("drafts");
@@ -972,14 +994,14 @@ function UserProfile() {
                     }}
                     onMouseEnter={(e) => {
                         if (activeTab !== "drafts") {
-                            e.target.style.backgroundColor = colors.gray[200];
-                            e.target.style.color = colors.gray[800];
+                            e.currentTarget.style.backgroundColor = colors.gray[200];
+                            e.currentTarget.style.color = colors.gray[800];
                         }
                     }}
                     onMouseLeave={(e) => {
                         if (activeTab !== "drafts") {
-                            e.target.style.backgroundColor = "transparent";
-                            e.target.style.color = colors.gray[600];
+                            e.currentTarget.style.backgroundColor = "transparent";
+                            e.currentTarget.style.color = colors.gray[600];
                         }
                     }}
                 >
@@ -987,35 +1009,37 @@ function UserProfile() {
                 </button>
             </div>
 
-            {/* Content based on active tab */}
             <div>
                 {activeTab === "problems" && (
                     <div>
                         <h3 style={{ marginBottom: "20px", color: "#333" }}>My Problems</h3>
+
                         {problems.length === 0 ? (
                             <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>
                                 <p>You haven't created any problems yet.</p>
                                 <Link to="/create-problem?from=/profile">
-                                    <button style={{
-                                        padding: "12px 24px",
-                                        backgroundColor: colors.primary,
-                                        color: "white",
-                                        border: "none",
-                                        borderRadius: "8px",
-                                        cursor: "pointer",
-                                        fontSize: "16px",
-                                        fontWeight: "600",
-                                        boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)",
-                                        transition: "all 0.2s ease"
-                                    }}
+                                    <button
+                                        style={{
+                                            padding: "12px 24px",
+                                            backgroundColor: colors.primary,
+                                            color: "white",
+                                            border: "none",
+                                            borderRadius: "8px",
+                                            cursor: "pointer",
+                                            fontSize: "16px",
+                                            fontWeight: "600",
+                                            boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)",
+                                            transition: "all 0.2s ease"
+                                        }}
                                         onMouseEnter={(e) => {
-                                            e.target.style.transform = "translateY(-1px)";
-                                            e.target.style.boxShadow = "0 4px 12px rgba(26, 77, 58, 0.4)";
+                                            e.currentTarget.style.transform = "translateY(-1px)";
+                                            e.currentTarget.style.boxShadow = "0 4px 12px rgba(26, 77, 58, 0.4)";
                                         }}
                                         onMouseLeave={(e) => {
-                                            e.target.style.transform = "translateY(0)";
-                                            e.target.style.boxShadow = "0 2px 8px rgba(26, 77, 58, 0.3)";
-                                        }}>
+                                            e.currentTarget.style.transform = "translateY(0)";
+                                            e.currentTarget.style.boxShadow = "0 2px 8px rgba(26, 77, 58, 0.3)";
+                                        }}
+                                    >
                                         Create Your First Problem
                                     </button>
                                 </Link>
@@ -1023,28 +1047,40 @@ function UserProfile() {
                         ) : (
                             <div>
                                 {problems.map((problem) => (
-                                    <div key={problem.id} style={{
-                                        border: "1px solid #e9ecef",
-                                        borderRadius: "12px",
-                                        padding: "24px",
-                                        marginBottom: "20px",
-                                        backgroundColor: "white",
-                                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                                        transition: "all 0.2s ease"
-                                    }}
+                                    <div
+                                        key={problem.id}
+                                        onClick={() => openProblem(problem.id)}
+                                        role="button"
+                                        tabIndex={0}
+                                        onKeyDown={(e) => handleClickableKeyDown(e, () => openProblem(problem.id))}
+                                        style={{
+                                            border: "1px solid #e9ecef",
+                                            borderRadius: "12px",
+                                            padding: "24px",
+                                            marginBottom: "20px",
+                                            backgroundColor: "white",
+                                            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                                            transition: "all 0.2s ease",
+                                            cursor: "pointer"
+                                        }}
                                         onMouseEnter={(e) => {
-                                            e.target.style.transform = "translateY(-2px)";
-                                            e.target.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)";
+                                            e.currentTarget.style.transform = "translateY(-2px)";
+                                            e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)";
                                         }}
                                         onMouseLeave={(e) => {
-                                            e.target.style.transform = "translateY(0)";
-                                            e.target.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
-                                        }}>
-                                        <Link to={`/problem/${problem.id}?from=/profile`} style={{ textDecoration: "none", pointerEvents: "none" }}>
-                                            <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>{renderMathContent(problem.title)}</h4>
-                                        </Link>
-                                        <p style={{ color: "#666", margin: "0 0 15px 0", whiteSpace: "pre-wrap", pointerEvents: "none" }}>{renderMathContent(problem.description.substring(0, 150))}...</p>
-                                        <div style={{ display: "flex", gap: "10px", alignItems: "center", pointerEvents: "none" }}>
+                                            e.currentTarget.style.transform = "translateY(0)";
+                                            e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                                        }}
+                                    >
+                                        <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>
+                                            {renderMathContent(problem.title)}
+                                        </h4>
+
+                                        <p style={{ color: "#666", margin: "0 0 15px 0", whiteSpace: "pre-wrap" }}>
+                                            {renderMathContent(problem.description.substring(0, 150))}...
+                                        </p>
+
+                                        <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
                                             <span style={{
                                                 backgroundColor: "#e0e7ff",
                                                 color: "#3730a3",
@@ -1058,6 +1094,7 @@ function UserProfile() {
                                             }}>
                                                 {problem.subject}
                                             </span>
+
                                             <span style={{
                                                 backgroundColor: "#fef3c7",
                                                 color: "#92400e",
@@ -1071,22 +1108,27 @@ function UserProfile() {
                                             }}>
                                                 {problem.level}
                                             </span>
+
                                             {problem.tags && problem.tags.trim() && (
-                                                problem.tags.split(',').map((tag, index) => (
-                                                    <span key={index} style={{
-                                                        backgroundColor: colors.tertiary,
-                                                        color: "white",
-                                                        padding: "6px 12px",
-                                                        borderRadius: "16px",
-                                                        fontSize: "12px",
-                                                        fontWeight: "600",
-                                                        boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
-                                                        transition: "all 0.2s ease"
-                                                    }}>
+                                                problem.tags.split(",").map((tag, index) => (
+                                                    <span
+                                                        key={index}
+                                                        style={{
+                                                            backgroundColor: colors.tertiary,
+                                                            color: "white",
+                                                            padding: "6px 12px",
+                                                            borderRadius: "16px",
+                                                            fontSize: "12px",
+                                                            fontWeight: "600",
+                                                            boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
+                                                            transition: "all 0.2s ease"
+                                                        }}
+                                                    >
                                                         {tag.trim()}
                                                     </span>
                                                 ))
                                             )}
+
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -1106,21 +1148,10 @@ function UserProfile() {
                                                     alignItems: "center",
                                                     gap: "4px"
                                                 }}
-                                                onMouseEnter={(e) => {
-                                                    if (voteData[problem.id]?.user_vote !== "like") {
-                                                        e.target.style.backgroundColor = "#e9ecef";
-                                                        e.target.style.borderColor = "#adb5bd";
-                                                    }
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    if (voteData[problem.id]?.user_vote !== "like") {
-                                                        e.target.style.backgroundColor = "#f8f9fa";
-                                                        e.target.style.borderColor = "#dee2e6";
-                                                    }
-                                                }}
                                             >
                                                 {voteData[problem.id]?.like_count || 0}
                                             </button>
+
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -1140,21 +1171,10 @@ function UserProfile() {
                                                     alignItems: "center",
                                                     gap: "4px"
                                                 }}
-                                                onMouseEnter={(e) => {
-                                                    if (voteData[problem.id]?.user_vote !== "dislike") {
-                                                        e.target.style.backgroundColor = "#e9ecef";
-                                                        e.target.style.borderColor = "#adb5bd";
-                                                    }
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    if (voteData[problem.id]?.user_vote !== "dislike") {
-                                                        e.target.style.backgroundColor = "#f8f9fa";
-                                                        e.target.style.borderColor = "#dee2e6";
-                                                    }
-                                                }}
                                             >
                                                 {voteData[problem.id]?.dislike_count || 0}
                                             </button>
+
                                             <span style={{ fontSize: "12px", color: "#666" }}>
                                                 {new Date(problem.created_at).toLocaleDateString()}
                                             </span>
@@ -1170,6 +1190,7 @@ function UserProfile() {
                     <div>
                         <div style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}>
                             <h3 style={{ margin: "0", color: "#333" }}>My Comments</h3>
+
                             <div style={{ marginLeft: "20px", display: "flex", gap: "10px" }}>
                                 <button
                                     onClick={() => setCommentsSubTab("all")}
@@ -1184,21 +1205,10 @@ function UserProfile() {
                                         fontWeight: "500",
                                         transition: "all 0.2s ease"
                                     }}
-                                    onMouseEnter={(e) => {
-                                        if (commentsSubTab !== "all") {
-                                            e.target.style.backgroundColor = colors.gray[100];
-                                            e.target.style.borderColor = colors.gray[400];
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (commentsSubTab !== "all") {
-                                            e.target.style.backgroundColor = "transparent";
-                                            e.target.style.borderColor = colors.gray[300];
-                                        }
-                                    }}
                                 >
                                     All ({sortedComments.length})
                                 </button>
+
                                 <button
                                     onClick={() => setCommentsSubTab("solutions")}
                                     style={{
@@ -1212,23 +1222,12 @@ function UserProfile() {
                                         fontWeight: "500",
                                         transition: "all 0.2s ease"
                                     }}
-                                    onMouseEnter={(e) => {
-                                        if (commentsSubTab !== "solutions") {
-                                            e.target.style.backgroundColor = colors.gray[100];
-                                            e.target.style.borderColor = colors.gray[400];
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (commentsSubTab !== "solutions") {
-                                            e.target.style.backgroundColor = "transparent";
-                                            e.target.style.borderColor = colors.gray[300];
-                                        }
-                                    }}
                                 >
                                     Solutions ({sortedComments.filter(comment => comment.is_solution).length})
                                 </button>
                             </div>
                         </div>
+
                         {commentsSubTab === "all" ? (
                             sortedComments.length === 0 ? (
                                 <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>
@@ -1237,14 +1236,31 @@ function UserProfile() {
                             ) : (
                                 <div>
                                     {sortedComments.map((comment) => (
-                                        <div key={comment.id} style={{
-                                            border: comment.is_solution ? "2px solid #28a745" : "1px solid #ddd",
-                                            borderRadius: "8px",
-                                            padding: "15px",
-                                            marginBottom: "15px",
-                                            backgroundColor: comment.is_solution ? "#e8f5e8" : "#f9f9f9",
-                                            position: "relative"
-                                        }}>
+                                        <div
+                                            key={comment.id}
+                                            onClick={() => openCommentProblem(comment)}
+                                            role="button"
+                                            tabIndex={0}
+                                            onKeyDown={(e) => handleClickableKeyDown(e, () => openCommentProblem(comment))}
+                                            style={{
+                                                border: comment.is_solution ? "2px solid #28a745" : "1px solid #ddd",
+                                                borderRadius: "8px",
+                                                padding: "15px",
+                                                marginBottom: "15px",
+                                                backgroundColor: comment.is_solution ? "#e8f5e8" : "#f9f9f9",
+                                                position: "relative",
+                                                cursor: "pointer",
+                                                transition: "all 0.2s ease"
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = "translateY(-1px)";
+                                                e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = "translateY(0)";
+                                                e.currentTarget.style.boxShadow = "none";
+                                            }}
+                                        >
                                             {comment.is_solution && (
                                                 <div style={{
                                                     position: "absolute",
@@ -1260,15 +1276,20 @@ function UserProfile() {
                                                     SOLUTION
                                                 </div>
                                             )}
+
                                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
-                                                <Link to={`/problem/${comment.problem.id}?from=/profile`} style={{ textDecoration: "none" }}>
-                                                    <h5 style={{ margin: "0", color: "#007bff" }}>{renderMathContent(comment.problem.title)}</h5>
-                                                </Link>
+                                                <h5 style={{ margin: "0", color: colors.primary }}>
+                                                    {renderMathContent(comment.problem?.title || "View related problem")}
+                                                </h5>
+
                                                 <span style={{ fontSize: "12px", color: "#666" }}>
                                                     {new Date(comment.created_at).toLocaleDateString()}
                                                 </span>
                                             </div>
-                                            <p style={{ color: "#333", margin: "0" }}>{renderMathContent(comment.text)}</p>
+
+                                            <p style={{ color: "#333", margin: "0" }}>
+                                                {renderMathContent(comment.text)}
+                                            </p>
                                         </div>
                                     ))}
                                 </div>
@@ -1282,14 +1303,31 @@ function UserProfile() {
                             ) : (
                                 <div>
                                     {sortedComments.filter(comment => comment.is_solution).map((comment) => (
-                                        <div key={comment.id} style={{
-                                            border: "2px solid #28a745",
-                                            borderRadius: "8px",
-                                            padding: "15px",
-                                            marginBottom: "15px",
-                                            backgroundColor: "#e8f5e8",
-                                            position: "relative"
-                                        }}>
+                                        <div
+                                            key={comment.id}
+                                            onClick={() => openCommentProblem(comment)}
+                                            role="button"
+                                            tabIndex={0}
+                                            onKeyDown={(e) => handleClickableKeyDown(e, () => openCommentProblem(comment))}
+                                            style={{
+                                                border: "2px solid #28a745",
+                                                borderRadius: "8px",
+                                                padding: "15px",
+                                                marginBottom: "15px",
+                                                backgroundColor: "#e8f5e8",
+                                                position: "relative",
+                                                cursor: "pointer",
+                                                transition: "all 0.2s ease"
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = "translateY(-1px)";
+                                                e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = "translateY(0)";
+                                                e.currentTarget.style.boxShadow = "none";
+                                            }}
+                                        >
                                             <div style={{
                                                 position: "absolute",
                                                 top: "10px",
@@ -1303,15 +1341,20 @@ function UserProfile() {
                                             }}>
                                                 SOLUTION
                                             </div>
+
                                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
-                                                <Link to={`/problem/${comment.problem.id}?from=/profile`} style={{ textDecoration: "none" }}>
-                                                    <h5 style={{ margin: "0", color: "#007bff" }}>{renderMathContent(comment.problem.title)}</h5>
-                                                </Link>
+                                                <h5 style={{ margin: "0", color: colors.primary }}>
+                                                    {renderMathContent(comment.problem?.title || "View related problem")}
+                                                </h5>
+
                                                 <span style={{ fontSize: "12px", color: "#666" }}>
                                                     {new Date(comment.created_at).toLocaleDateString()}
                                                 </span>
                                             </div>
-                                            <p style={{ color: "#333", margin: "0" }}>{renderMathContent(comment.text)}</p>
+
+                                            <p style={{ color: "#333", margin: "0" }}>
+                                                {renderMathContent(comment.text)}
+                                            </p>
                                         </div>
                                     ))}
                                 </div>
@@ -1323,6 +1366,7 @@ function UserProfile() {
                 {activeTab === "bookmarks" && (
                     <div>
                         <h3 style={{ marginBottom: "20px", color: "#333" }}>My Bookmarks</h3>
+
                         {bookmarks.length === 0 ? (
                             <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>
                                 <p>You haven't bookmarked any problems yet.</p>
@@ -1331,19 +1375,40 @@ function UserProfile() {
                         ) : (
                             <div>
                                 {bookmarks.map((bookmark) => (
-                                    <div key={bookmark.id} style={{
-                                        border: "1px solid #ddd",
-                                        borderRadius: "8px",
-                                        padding: "20px",
-                                        marginBottom: "15px",
-                                        backgroundColor: "#f9f9f9"
-                                    }}>
+                                    <div
+                                        key={bookmark.id}
+                                        onClick={() => openProblem(bookmark.problem.id)}
+                                        role="button"
+                                        tabIndex={0}
+                                        onKeyDown={(e) => handleClickableKeyDown(e, () => openProblem(bookmark.problem.id))}
+                                        style={{
+                                            border: "1px solid #ddd",
+                                            borderRadius: "8px",
+                                            padding: "20px",
+                                            marginBottom: "15px",
+                                            backgroundColor: "#f9f9f9",
+                                            cursor: "pointer",
+                                            transition: "all 0.2s ease"
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = "translateY(-1px)";
+                                            e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = "translateY(0)";
+                                            e.currentTarget.style.boxShadow = "none";
+                                        }}
+                                    >
                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
-                                            <Link to={`/problem/${bookmark.problem.id}?from=/profile`} style={{ textDecoration: "none" }}>
-                                                <h4 style={{ margin: "0", color: "#333" }}>{renderMathContent(bookmark.problem.title)}</h4>
-                                            </Link>
+                                            <h4 style={{ margin: "0", color: "#333" }}>
+                                                {renderMathContent(bookmark.problem.title)}
+                                            </h4>
                                         </div>
-                                        <p style={{ color: "#666", margin: "0 0 15px 0", whiteSpace: "pre-wrap" }}>{renderMathContent(bookmark.problem.description.substring(0, 150))}...</p>
+
+                                        <p style={{ color: "#666", margin: "0 0 15px 0", whiteSpace: "pre-wrap" }}>
+                                            {renderMathContent(bookmark.problem.description.substring(0, 150))}...
+                                        </p>
+
                                         <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
                                             <span style={{
                                                 backgroundColor: "#e0e7ff",
@@ -1358,6 +1423,7 @@ function UserProfile() {
                                             }}>
                                                 {bookmark.problem.subject}
                                             </span>
+
                                             <span style={{
                                                 backgroundColor: "#fef3c7",
                                                 color: "#92400e",
@@ -1371,30 +1437,27 @@ function UserProfile() {
                                             }}>
                                                 {bookmark.problem.level}
                                             </span>
+
                                             {bookmark.problem.tags && bookmark.problem.tags.trim() && (
-                                                bookmark.problem.tags.split(',').map((tag, index) => (
-                                                    <span key={index} style={{
-                                                        backgroundColor: colors.tertiary,
-                                                        color: "white",
-                                                        padding: "6px 12px",
-                                                        borderRadius: "16px",
-                                                        fontSize: "12px",
-                                                        fontWeight: "600",
-                                                        boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
-                                                        transition: "all 0.2s ease"
-                                                    }}
-                                                        onMouseEnter={(e) => {
-                                                            e.target.style.transform = "translateY(-1px)";
-                                                            e.target.style.boxShadow = "0 4px 12px rgba(124, 58, 237, 0.4)";
+                                                bookmark.problem.tags.split(",").map((tag, index) => (
+                                                    <span
+                                                        key={index}
+                                                        style={{
+                                                            backgroundColor: colors.tertiary,
+                                                            color: "white",
+                                                            padding: "6px 12px",
+                                                            borderRadius: "16px",
+                                                            fontSize: "12px",
+                                                            fontWeight: "600",
+                                                            boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
+                                                            transition: "all 0.2s ease"
                                                         }}
-                                                        onMouseLeave={(e) => {
-                                                            e.target.style.transform = "translateY(0)";
-                                                            e.target.style.boxShadow = "0 2px 8px rgba(124, 58, 237, 0.3)";
-                                                        }}>
+                                                    >
                                                         {tag.trim()}
                                                     </span>
                                                 ))
                                             )}
+
                                             <div style={{ marginLeft: "auto", display: "flex", gap: "10px", alignItems: "center" }}>
                                                 <button
                                                     onClick={(e) => {
@@ -1415,18 +1478,6 @@ function UserProfile() {
                                                         alignItems: "center",
                                                         gap: "4px"
                                                     }}
-                                                    onMouseEnter={(e) => {
-                                                        if (voteData[bookmark.problem.id]?.user_vote !== "like") {
-                                                            e.target.style.backgroundColor = "#e9ecef";
-                                                            e.target.style.borderColor = "#adb5bd";
-                                                        }
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        if (voteData[bookmark.problem.id]?.user_vote !== "like") {
-                                                            e.target.style.backgroundColor = "#f8f9fa";
-                                                            e.target.style.borderColor = "#dee2e6";
-                                                        }
-                                                    }}
                                                 >
                                                     <img
                                                         src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg"
@@ -1439,6 +1490,7 @@ function UserProfile() {
                                                     />
                                                     {voteData[bookmark.problem.id]?.like_count || 0}
                                                 </button>
+
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -1458,18 +1510,6 @@ function UserProfile() {
                                                         alignItems: "center",
                                                         gap: "4px"
                                                     }}
-                                                    onMouseEnter={(e) => {
-                                                        if (voteData[bookmark.problem.id]?.user_vote !== "dislike") {
-                                                            e.target.style.backgroundColor = "#e9ecef";
-                                                            e.target.style.borderColor = "#adb5bd";
-                                                        }
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        if (voteData[bookmark.problem.id]?.user_vote !== "dislike") {
-                                                            e.target.style.backgroundColor = "#f8f9fa";
-                                                            e.target.style.borderColor = "#dee2e6";
-                                                        }
-                                                    }}
                                                 >
                                                     <img
                                                         src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg"
@@ -1482,10 +1522,10 @@ function UserProfile() {
                                                     />
                                                     {voteData[bookmark.problem.id]?.dislike_count || 0}
                                                 </button>
+
                                                 <span style={{
                                                     fontSize: "12px",
                                                     color: "#666",
-                                                    pointerEvents: "none",
                                                     display: "flex",
                                                     alignItems: "center",
                                                     gap: "4px"
@@ -1501,6 +1541,7 @@ function UserProfile() {
                                                     />
                                                     {bookmark.problem.comment_count || 0}
                                                 </span>
+
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -1534,9 +1575,11 @@ function UserProfile() {
                         )}
                     </div>
                 )}
+
                 {activeTab === "drafts" && (
                     <div>
                         <h3 style={{ marginBottom: "20px", color: "#333" }}>My Drafts</h3>
+
                         {drafts.length === 0 ? (
                             <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>
                                 <p>You don't have any drafts yet.</p>
@@ -1554,6 +1597,7 @@ function UserProfile() {
                                     }}>
                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
                                             <h4 style={{ margin: "0", color: "#333" }}>{renderMathContent(draft.title)}</h4>
+
                                             <div style={{ display: "flex", gap: "8px" }}>
                                                 <button
                                                     onClick={() => navigate(`/create-problem?draft=${draft.id}`)}
@@ -1569,6 +1613,7 @@ function UserProfile() {
                                                 >
                                                     Finish Problem
                                                 </button>
+
                                                 <button
                                                     onClick={() => handleDeleteDraft(draft.id)}
                                                     style={{
@@ -1595,7 +1640,11 @@ function UserProfile() {
                                                 </button>
                                             </div>
                                         </div>
-                                        <p style={{ color: "#666", margin: "0 0 15px 0", whiteSpace: "pre-wrap" }}>{renderMathContent(draft.description.substring(0, 150))}...</p>
+
+                                        <p style={{ color: "#666", margin: "0 0 15px 0", whiteSpace: "pre-wrap" }}>
+                                            {renderMathContent(draft.description.substring(0, 150))}...
+                                        </p>
+
                                         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                                             <span style={{
                                                 backgroundColor: "#e0e7ff",
@@ -1610,6 +1659,7 @@ function UserProfile() {
                                             }}>
                                                 {draft.subject}
                                             </span>
+
                                             <span style={{
                                                 backgroundColor: "#f0f9ff",
                                                 color: "#0369a1",
@@ -1623,6 +1673,7 @@ function UserProfile() {
                                             }}>
                                                 {draft.level}
                                             </span>
+
                                             {draft.year && (
                                                 <span style={{
                                                     backgroundColor: "#fef3c7",
@@ -1639,25 +1690,30 @@ function UserProfile() {
                                                 </span>
                                             )}
                                         </div>
+
                                         {draft.tags && draft.tags.trim() && (
                                             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
-                                                {draft.tags.split(',').map((tag, index) => (
-                                                    <span key={index} style={{
-                                                        backgroundColor: colors.tertiary,
-                                                        color: "white",
-                                                        padding: "6px 12px",
-                                                        borderRadius: "16px",
-                                                        fontSize: "12px",
-                                                        fontWeight: "600",
-                                                        whiteSpace: "nowrap",
-                                                        boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
-                                                        transition: "all 0.2s ease"
-                                                    }}>
+                                                {draft.tags.split(",").map((tag, index) => (
+                                                    <span
+                                                        key={index}
+                                                        style={{
+                                                            backgroundColor: colors.tertiary,
+                                                            color: "white",
+                                                            padding: "6px 12px",
+                                                            borderRadius: "16px",
+                                                            fontSize: "12px",
+                                                            fontWeight: "600",
+                                                            whiteSpace: "nowrap",
+                                                            boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
+                                                            transition: "all 0.2s ease"
+                                                        }}
+                                                    >
                                                         {tag.trim()}
                                                     </span>
                                                 ))}
                                             </div>
                                         )}
+
                                         <div style={{
                                             fontSize: "12px",
                                             color: "#666",
@@ -1677,27 +1733,28 @@ function UserProfile() {
                 )}
             </div>
 
-            {/* Profile Picture Zoom Modal */}
             {showImageModal && user.profile_picture && (
-                <div style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: "rgba(0, 0, 0, 0.8)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: 1000
-                }}
+                <div
+                    style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(0, 0, 0, 0.8)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 1000
+                    }}
                     onClick={() => setShowImageModal(false)}
                 >
-                    <div style={{
-                        position: "relative",
-                        maxWidth: "90vw",
-                        maxHeight: "90vh"
-                    }}
+                    <div
+                        style={{
+                            position: "relative",
+                            maxWidth: "90vw",
+                            maxHeight: "90vh"
+                        }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <button
@@ -1722,6 +1779,7 @@ function UserProfile() {
                         >
                             ×
                         </button>
+
                         <img
                             src={user.profile_picture}
                             alt="Profile Picture"
