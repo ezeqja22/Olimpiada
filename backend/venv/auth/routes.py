@@ -965,32 +965,49 @@ def mark_comment_as_solution(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Mark a comment as the solution (only problem author can do this)"""
+    """Mark/unmark a comment as the solution.
+
+    Allowed users:
+    - problem author
+    - admin
+    - moderator
+    """
     # Check if problem exists
     problem = db.query(Problem).filter(Problem.id == problem_id).first()
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
-    
-    # Check if current user is the problem author
-    if problem.author_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Only the problem author can mark comments as solutions")
-    
+
+    # Check if current user has permission
+    can_mark_solution = (
+        problem.author_id == current_user.id
+        or current_user.role in ["admin", "moderator"]
+    )
+
+    if not can_mark_solution:
+        raise HTTPException(
+            status_code=403,
+            detail="Only the problem author, admins, or moderators can mark comments as solutions"
+        )
+
     # Check if comment exists and belongs to this problem
     db_comment = db.query(Comment).filter(
         Comment.id == comment_id,
         Comment.problem_id == problem_id
     ).first()
-    
+
     if not db_comment:
         raise HTTPException(status_code=404, detail="Comment not found")
-    
+
     # Toggle the solution status
     db_comment.is_solution = not db_comment.is_solution
     db.commit()
     db.refresh(db_comment)
-    
+
     action = "marked as solution" if db_comment.is_solution else "unmarked as solution"
-    return {"message": f"Comment {action} successfully", "is_solution": db_comment.is_solution}
+    return {
+        "message": f"Comment {action} successfully",
+        "is_solution": db_comment.is_solution
+    }
 
 # Vote endpoints
 

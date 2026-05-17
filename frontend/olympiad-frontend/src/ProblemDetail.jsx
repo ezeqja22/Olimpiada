@@ -409,9 +409,13 @@ const CommentThread = ({
                                 </>
                             )}
 
-                            {currentUser && currentUser.id === problem.author_id && (
-                                <button
-                                    onClick={() => onMarkAsSolution(comment.id)}
+                            {currentUser && problem && (
+    currentUser.id === problem.author_id ||
+    currentUser.role === "admin" ||
+    currentUser.role === "moderator"
+) && (
+    <button
+        onClick={() => onMarkAsSolution(comment.id)}
                                     style={{
                                         background: comment.is_solution ? "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)" : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                                         border: "none",
