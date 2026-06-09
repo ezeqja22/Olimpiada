@@ -1256,22 +1256,6 @@ function Feed() {
       </style>
 
       <div className="feed-page">
-        {/* Hero Section */}
-        <section className="feed-hero">
-          <div className="feed-kicker">
-            <span>◆</span>
-            <span>Science Practice Hub</span>
-          </div>
-
-          <h1 className="feed-title">Science Problems Feed</h1>
-
-          <p className="feed-subtitle">
-            Explore olympiad-style science problems, follow strong problem
-            creators, save useful questions, and discuss solutions with the
-            community.
-          </p>
-        </section>
-
         {/* Search */}
         <div className="feed-search-shell">
           <SearchBar placeholder="Search problems, users, tags, levels..." />
