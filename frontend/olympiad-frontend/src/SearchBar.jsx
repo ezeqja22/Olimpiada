@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
 function SearchBar({
@@ -16,7 +17,6 @@ function SearchBar({
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
 
-  // Mobile detection
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -27,6 +27,26 @@ function SearchBar({
 
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  useEffect(() => {
+    if (!showAdvancedModal) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        setShowAdvancedModal(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [showAdvancedModal]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -219,24 +239,27 @@ function SearchBar({
           .advanced-search-overlay {
             position: fixed;
             inset: 0;
-            z-index: 99999;
-            background: rgba(15, 23, 42, 0.46);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            z-index: 2147483647;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(9px);
+            -webkit-backdrop-filter: blur(9px);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 24px;
+            isolation: isolate;
           }
 
           .advanced-search-modal {
+            position: relative;
+            z-index: 2147483647;
             width: min(720px, 100%);
             max-height: 88vh;
             overflow: hidden;
             background: #ffffff;
             border-radius: 28px;
             border: 1px solid rgba(226, 232, 240, 0.95);
-            box-shadow: 0 35px 90px rgba(15, 23, 42, 0.28);
+            box-shadow: 0 35px 90px rgba(15, 23, 42, 0.35);
             display: flex;
             flex-direction: column;
             animation: advancedModalIn 0.22s ease;
@@ -527,7 +550,7 @@ function SearchBar({
         <form onSubmit={handleSearch} className="searchbar-form">
           <div className="searchbar-input-wrap">
             <img
-              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg"
+              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795126/Search_Icon_White_wj1ka1.svg"
               alt=""
               className="searchbar-icon"
             />
@@ -572,24 +595,25 @@ function SearchBar({
           )}
         </form>
 
-        {showAdvancedModal && (
-          <AdvancedSearchModal
-            onClose={closeAdvancedSearch}
-            onSearch={onAdvancedSearch || handleAdvancedSearch}
-            initialData={{
-              query: searchQuery,
-              category: searchMode === "forums" ? "forums" : "problems",
-            }}
-            searchMode={searchMode}
-            lockedSubject={lockedSubject}
-          />
-        )}
+        {showAdvancedModal &&
+          createPortal(
+            <AdvancedSearchModal
+              onClose={closeAdvancedSearch}
+              onSearch={onAdvancedSearch || handleAdvancedSearch}
+              initialData={{
+                query: searchQuery,
+                category: searchMode === "forums" ? "forums" : "problems",
+              }}
+              searchMode={searchMode}
+              lockedSubject={lockedSubject}
+            />,
+            document.body,
+          )}
       </div>
     </>
   );
 }
 
-// Advanced Search Modal Component
 function AdvancedSearchModal({
   onClose,
   onSearch,
