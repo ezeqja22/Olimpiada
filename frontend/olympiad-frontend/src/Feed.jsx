@@ -1114,144 +1114,83 @@ function Feed() {
             text-decoration: none;
           }
 
-          .create-fab {
-            position: fixed;
-            bottom: 28px;
-            right: 28px;
-            z-index: 1000;
-            height: 62px;
-            width: 62px;
-            background: #1a4d3a;
-            color: white;
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 18px 40px rgba(26,77,58,0.30);
-            transition: width 0.45s cubic-bezier(0.34,1.56,0.64,1),
-              background 0.2s ease,
-              box-shadow 0.2s ease;
-            overflow: hidden;
-            white-space: nowrap;
-          }
+.create-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 1000;
+  height: 62px;
+  width: 62px;
+  background: #1a4d3a;
+  color: #ffffff;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 18px 40px rgba(26,77,58,0.30);
+  transition: width 0.45s cubic-bezier(0.34,1.56,0.64,1),
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+  overflow: hidden;
+  white-space: nowrap;
+}
 
-          .create-fab:hover {
-            width: 230px;
-            background: #163f31;
-            justify-content: flex-start;
-            padding-left: 22px;
-            box-shadow: 0 22px 50px rgba(26,77,58,0.36);
-          }
+.create-fab::before {
+  content: "+";
+  color: #ffffff;
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -52%);
+  transition: all 0.3s ease;
+}
 
-          .fab-plus {
-            font-size: 31px;
-            font-weight: 800;
-            line-height: 1;
-            transition: transform 0.35s ease;
-          }
+.create-fab:hover {
+  width: 230px;
+  background: #163f31;
+  justify-content: flex-start;
+  padding-left: 22px;
+  box-shadow: 0 22px 50px rgba(26,77,58,0.36);
+}
 
-          .create-fab:hover .fab-plus {
-            transform: rotate(90deg);
-          }
+.create-fab:hover::before {
+  left: 28px;
+  transform: translateY(-52%) rotate(90deg);
+}
 
-          .fab-text {
-            margin-left: 12px;
-            font-size: 14px;
-            font-weight: 900;
-            opacity: 0;
-            transform: translateX(-8px);
-            transition: all 0.22s ease 0.08s;
-          }
+.fab-plus {
+  display: none;
+}
 
-          .create-fab:hover .fab-text {
-            opacity: 1;
-            transform: translateX(0);
-          }
+.fab-text {
+  margin-left: 42px;
+  font-size: 14px;
+  font-weight: 900;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: all 0.22s ease 0.08s;
+}
 
-          @media (max-width: 768px) {
-            .feed-page {
-              padding: 0 0 110px;
-            }
+.create-fab:hover .fab-text {
+  opacity: 1;
+  transform: translateX(0);
+}
 
-            .feed-hero {
-              padding: 24px 20px;
-              border-radius: 24px;
-            }
+@media (max-width: 768px) {
+  .create-fab {
+    bottom: 22px;
+    right: 20px;
+    height: 58px;
+    width: 58px;
+  }
 
-            .feed-title {
-              font-size: 30px;
-            }
-
-            .feed-subtitle {
-              font-size: 14px;
-            }
-
-            .feed-tabs-card {
-              align-items: stretch;
-              flex-direction: column;
-            }
-
-            .feed-count {
-              padding: 2px 8px 6px;
-              text-align: center;
-            }
-
-            .feed-tab-button {
-              font-size: 11px;
-              padding: 10px 6px;
-            }
-
-            .problem-author-row {
-              align-items: flex-start;
-            }
-
-            .problem-title {
-              font-size: 18px;
-            }
-
-            .problem-footer {
-              align-items: flex-start;
-              flex-direction: column;
-            }
-
-            .problem-actions {
-              width: 100%;
-              gap: 7px;
-            }
-
-            .action-button,
-            .comment-pill,
-            .bookmark-button {
-              height: 38px;
-              padding: 0 10px;
-              font-size: 12px;
-            }
-
-            .problem-author-name {
-              max-width: 145px;
-            }
-
-            .pagination-shell {
-              padding-bottom: 96px;
-            }
-
-            .pagination-text {
-              order: -1;
-              width: 100%;
-              text-align: center;
-            }
-
-            .create-fab {
-              bottom: 22px;
-              right: 20px;
-              height: 58px;
-              width: 58px;
-            }
-
-            .create-fab:hover {
-              width: 205px;
-            }
-          }
+  .create-fab:hover {
+    width: 205px;
+  }
+}
         `}
       </style>
 
