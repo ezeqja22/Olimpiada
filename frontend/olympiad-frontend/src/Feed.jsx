@@ -1228,100 +1228,82 @@ function Feed() {
           }
 
 .create-fab {
-            position: fixed;
-            bottom: 28px;
-            right: 28px;
-            z-index: 1000;
-            height: 62px;
-            width: 62px;
-            background: #1a4d3a;
-            color: #ffffff;
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 18px 40px rgba(26,77,58,0.30);
-            transition: width 0.45s cubic-bezier(0.34,1.56,0.64,1),
-              background 0.2s ease,
-              box-shadow 0.2s ease,
-              padding-left 0.2s ease;
-            overflow: hidden;
-            white-space: nowrap;
-          }
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 1000;
+  height: 62px;
+  width: 62px;
+  background: #1a4d3a;
+  color: #ffffff;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 18px 40px rgba(26,77,58,0.30);
+  transition: width 0.45s cubic-bezier(0.34,1.56,0.64,1),
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+  overflow: hidden;
+  white-space: nowrap;
+}
 
-          .create-fab:hover {
-            width: 230px;
-            background: #163f31;
-            justify-content: flex-start;
-            padding-left: 22px;
-            box-shadow: 0 22px 50px rgba(26,77,58,0.36);
-          }
+.create-fab::before {
+  content: "+";
+  color: #ffffff;
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -52%);
+  transition: all 0.3s ease;
+}
 
-          .fab-plus {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 62px;
-            min-width: 62px;
-            height: 62px;
-            color: #ffffff;
-            font-size: 34px;
-            font-weight: 900;
-            line-height: 1;
-            transition: transform 0.35s ease;
-          }
+.create-fab:hover {
+  width: 230px;
+  background: #163f31;
+  justify-content: flex-start;
+  padding-left: 22px;
+  box-shadow: 0 22px 50px rgba(26,77,58,0.36);
+}
 
-          .create-fab:hover .fab-plus {
-            transform: rotate(90deg);
-          }
+.create-fab:hover::before {
+  left: 28px;
+  transform: translateY(-52%) rotate(90deg);
+}
 
-          .fab-text {
-            margin-left: 0;
-            padding-right: 20px;
-            color: #ffffff;
-            font-size: 14px;
-            font-weight: 900;
-            opacity: 0;
-            transform: translateX(-8px);
-            transition: all 0.22s ease 0.08s;
-          }
+.fab-plus {
+  display: none;
+}
 
-          .create-fab:hover .fab-text {
-            opacity: 1;
-            transform: translateX(0);
-          }
+.fab-text {
+  margin-left: 42px;
+  font-size: 14px;
+  font-weight: 900;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: all 0.22s ease 0.08s;
+}
 
-          @media (max-width: 768px) {
-            .feed-mini-banner {
-              flex-direction: column;
-              align-items: flex-start;
-              padding: 20px;
-              border-radius: 22px;
-            }
+.create-fab:hover .fab-text {
+  opacity: 1;
+  transform: translateX(0);
+}
 
-            .feed-mini-title {
-              font-size: 23px;
-            }
+@media (max-width: 768px) {
+  .create-fab {
+    bottom: 22px;
+    right: 20px;
+    height: 58px;
+    width: 58px;
+  }
 
-            .feed-mini-stats {
-              width: 100%;
-            }
-
-            .feed-mini-stat {
-              flex: 1;
-              min-width: 0;
-            }
-
-            .create-fab {
-              bottom: 22px;
-              right: 20px;
-              height: 58px;
-              width: 58px;
-            }
-
-            .create-fab:hover {
-              width: 205px;
-            }
+  .create-fab:hover {
+    width: 205px;
+  }
+}
 
             .fab-plus {
               width: 58px;
