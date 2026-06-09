@@ -1,621 +1,1185 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useEffect, useMemo } from "react";
+// src/Feed.jsx
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { InlineMath, BlockMath } from "react-katex";
-import "katex/dist/katex.min.css";
-import {
-  Search,
-  Plus,
-  MessageSquare,
-  Bookmark,
-  MoreHorizontal,
-  ThumbsUp,
-  ThumbsDown,
-  UserPlus,
-  UserCheck,
-  LayoutDashboard,
-  Compass,
-  Library,
-  BarChart2,
-  Settings,
-  Bell,
-  User,
-  LogOut,
-  ChevronDown,
-  Sparkles,
-  Menu,
-} from "lucide-react";
+import { Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { InlineMath, BlockMath } from 'react-katex';
+import 'katex/dist/katex.min.css';
+import SearchBar from "./SearchBar";
+import Layout from "./components/Layout";
+import Card from "./components/Card";
+import Button from "./components/Button";
+import BackButton from "./components/BackButton";
+import AnimatedLoader from "./components/AnimatedLoader";
+import FollowButton from "./components/FollowButton";
+import { colors, spacing, typography, borderRadius } from "./designSystem";
+import { getUserInitial, getDisplayName } from "./utils";
+import { useFeatureSettings } from "./hooks/useFeatureSettings";
 
-// Helper for initials
-const getUserInitial = (name) => (name ? name.charAt(0).toUpperCase() : "?");
-const getDisplayName = (name) => name || "Anonymous";
-
-// Simple Math Renderer
+// Helper function to render math content
 const renderMathContent = (text) => {
-  if (!text) return "";
+  if (!text) return '';
+
+  // Split text into math and non-math segments
   const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
 
   return parts.map((part, index) => {
-    if (part.startsWith("$$") && part.endsWith("$$")) {
+    if (part.startsWith('$$') && part.endsWith('$$')) {
+      // Block math mode
+      const content = part.slice(2, -2);
       return (
-        <div key={index} className="my-2 text-left overflow-x-auto">
-          <BlockMath math={part.slice(2, -2)} />
+        <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
+          <BlockMath math={content} />
         </div>
       );
-    } else if (part.startsWith("$") && part.endsWith("$")) {
-      return <InlineMath key={index} math={part.slice(1, -1)} />;
+    } else if (part.startsWith('$') && part.endsWith('$')) {
+      // Inline math mode
+      const content = part.slice(1, -1);
+      return <InlineMath key={index} math={content} />;
+    } else {
+      // Regular text — keep it as-is
+      return <span key={index}>{part}</span>;
     }
-
-    return <span key={index}>{part}</span>;
   });
 };
 
 function Feed() {
   const location = useLocation();
-  const navigate = useNavigate();
-
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("all");
+  const [showLoading, setShowLoading] = useState(false);
   const [voteData, setVoteData] = useState({});
   const [followStatus, setFollowStatus] = useState({});
   const [bookmarkData, setBookmarkData] = useState({});
+  const [activeTab, setActiveTab] = useState("all"); // "all", "following", "trending"
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProblems, setTotalProblems] = useState(0);
+
+  // Feature settings
+  const { checkFeatureEnabled, showFeatureDisabledAlert } = useFeatureSettings();
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Only fetch data if user is authenticated
     const token = localStorage.getItem("token");
-
     if (token) {
       fetchProblems();
       fetchCurrentUser();
-    } else {
-      // Mock data for demo purposes if no token/API
-      setProblems([
-        {
-          id: 1,
-          title:
-            "Calculation of Wave-Particle Duality in $\\text{SiO}_2$ Quantum Dots",
-          description:
-            "Given the lattice constant $a = 5.43\\text{\\AA}$ and the potential well depth $V_0$, calculate the first three energy eigenvalues...",
-          subject: "Physics",
-          level: "Advanced",
-          year: "2024",
-          author: { id: 101, username: "Dr. Julian Sorel" },
-          created_at: new Date().toISOString(),
-          comment_count: 156,
-        },
-        {
-          id: 2,
-          title: "Structural Homology of CRISPR-Cas9 Variants",
-          description:
-            "Analyze the following protein sequence alignment to determine the conserved catalytic residues in the RuvC domain...",
-          subject: "Biology",
-          level: "Intermediate",
-          year: "2023",
-          author: { id: 102, username: "Prof. Maria Lopez" },
-          created_at: new Date().toISOString(),
-          comment_count: 42,
-        },
-      ]);
-      setLoading(false);
     }
+  }, []);
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
+  useEffect(() => {
+    // Fetch data when tab changes
+    let loadingTimeout;
+
+    // Show loading after a short delay to allow animation to be visible
+    loadingTimeout = setTimeout(() => {
+      setShowLoading(true);
+    }, 300); // 300ms delay to see the sliding animation
+
+    if (activeTab === "all") {
+      fetchProblems().finally(() => {
+        clearTimeout(loadingTimeout);
+        setShowLoading(false);
+      });
+    } else if (activeTab === "following") {
+      fetchFollowingProblems().finally(() => {
+        clearTimeout(loadingTimeout);
+        setShowLoading(false);
+      });
+    } else if (activeTab === "trending") {
+      fetchTrendingProblems().finally(() => {
+        clearTimeout(loadingTimeout);
+        setShowLoading(false);
+      });
+    }
+
+    return () => {
+      clearTimeout(loadingTimeout);
+    };
   }, [activeTab]);
 
-  const fetchProblems = async () => {
-    setLoading(true);
+  // Handle URL parameters for tab navigation
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const tabParam = urlParams.get('tab');
 
+    if (tabParam && ['all', 'following', 'trending'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location]);
+
+  const handleLogout = () => {
+    // Clear all user data
+    localStorage.removeItem("token");
+
+    // Clear any cached data
+    setProblems([]);
+    setVoteData({});
+    setFollowStatus({});
+
+    // Replace current history entry to prevent back navigation
+    navigate("/homepage", { replace: true });
+  };
+
+  const fetchProblems = async (page = 1) => {
+    setLoading(true);
     try {
-      const endpoint = `${
-        process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"
-      }/auth/problems/`;
+      let endpoint = `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/?page=${page}&limit=10`;
+
+      // Use trending endpoint for trending tab
+      if (activeTab === "trending") {
+        endpoint = `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/trending?page=${page}&limit=10`;
+      }
 
       const response = await axios.get(endpoint);
-      setProblems(response.data.problems || response.data);
-    } catch (e) {
-      console.error(e);
+      const allProblems = response.data.problems || response.data;
+
+      // Filter out forum problems - only show standalone problems
+      const standaloneProblems = allProblems.filter(problem => problem.forum_id === null || problem.forum_id === undefined);
+
+      setProblems(standaloneProblems);
+      setCurrentPage(page);
+      setTotalPages(response.data.total_pages || 1);
+      setTotalProblems(response.data.total_problems || response.data.total || response.data.length);
+
+      // Fetch vote/bookmark/follow in parallel for speed
+      const problemIds = standaloneProblems.map(problem => problem.id);
+      await Promise.all([
+        fetchVoteData(problemIds),
+        fetchBookmarkData(problemIds),
+        fetchFollowStatus(standaloneProblems)
+      ]);
+    } catch (error) {
+      console.error("Error fetching problems:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchCurrentUser = async () => {
+  const fetchFollowingProblems = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/me`,
-      );
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/feed/following`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
 
-      setCurrentUser(response.data);
-    } catch (e) {
-      console.error(e);
+      // The backend returns an object with 'problems' array
+      const allProblems = Array.isArray(response.data.problems) ? response.data.problems : [];
+
+      // Filter logic: Show standalone problems OR forum problems where user is a member
+      const filteredProblems = allProblems.filter(problem => {
+        // Always show standalone problems
+        if (problem.forum_id === null || problem.forum_id === undefined) {
+          return true;
+        }
+        // For forum problems, only show if user is a member of that forum
+        // The backend should already handle this logic, but we double-check
+        return problem.user_is_forum_member === true;
+      });
+
+      setProblems(filteredProblems);
+
+      // Only fetch vote data and follow status if we have problems
+      if (filteredProblems.length > 0) {
+        const problemIds = filteredProblems.map(problem => problem.id);
+        await fetchVoteData(problemIds);
+        await fetchBookmarkData(problemIds);
+        await fetchFollowStatus(filteredProblems);
+      }
+    } catch (error) {
+      console.error("Error fetching following problems:", error);
+      // Set empty array on error to prevent map error
+      setProblems([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleVote = (id, type) => {
-    setVoteData((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        user_vote: prev[id]?.user_vote === type ? null : type,
-      },
-    }));
+  const fetchTrendingProblems = async (page = 1) => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/trending?page=${page}&limit=10`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const allProblems = response.data.problems || [];
+
+      // Filter out ALL forum problems from trending - only show standalone problems
+      const standaloneProblems = allProblems.filter(problem => problem.forum_id === null || problem.forum_id === undefined);
+      setProblems(standaloneProblems);
+      setCurrentPage(page);
+      setTotalPages(response.data.total_pages || 1);
+      setTotalProblems(standaloneProblems.length);
+
+      // Only fetch vote data and follow status if we have standalone problems
+      if (standaloneProblems && standaloneProblems.length > 0) {
+        const problemIds = standaloneProblems.map(problem => problem.id);
+        await fetchVoteData(problemIds);
+        await fetchBookmarkData(problemIds);
+        await fetchFollowStatus(standaloneProblems);
+      }
+    } catch (error) {
+      console.error("Error fetching trending problems:", error);
+      // Set empty array on error to prevent map error
+      setProblems([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleBookmark = (id) => {
-    setBookmarkData((prev) => ({
-      ...prev,
-      [id]: { isBookmarked: !prev[id]?.isBookmarked },
-    }));
+  const fetchFollowStatus = async (problems) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const followPromises = problems.map(async (problem) => {
+        if (!problem.author) return { authorId: null, isFollowing: false };
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/status/${problem.author.id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          return { authorId: problem.author.id, isFollowing: response.data.is_following };
+        } catch (error) {
+          return { authorId: problem.author.id, isFollowing: false };
+        }
+      });
+
+      const results = await Promise.all(followPromises);
+      const followStatusMap = {};
+      results.forEach(result => {
+        followStatusMap[result.authorId] = result.isFollowing;
+      });
+      setFollowStatus(followStatusMap);
+    } catch (error) {
+      console.error("Error fetching follow status:", error);
+    }
   };
 
-  const toggleFollow = (authorId) => {
-    setFollowStatus((prev) => ({
-      ...prev,
-      [authorId]: !prev[authorId],
-    }));
+  const fetchVoteData = async (problemIds) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/vote-status-bulk`,
+        problemIds,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      setVoteData(response.data || {});
+    } catch (error) {
+      console.error("Error fetching vote data:", error);
+    }
   };
 
-  const navItems = [
-    { id: "home", label: "Home", icon: LayoutDashboard, active: true },
-    { id: "discover", label: "Discover", icon: Compass },
-    { id: "library", label: "Library", icon: Library },
-    { id: "analytics", label: "Analytics", icon: BarChart2 },
-    { id: "settings", label: "Settings", icon: Settings },
-  ];
+  const fetchBookmarkData = async (problemIds) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
+        problemIds,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      setBookmarkData(response.data);
+    } catch (error) {
+      console.error("Error fetching bookmark data:", error);
+      // Initialize with all false if fetch fails
+      const bookmarkDataMap = {};
+      problemIds.forEach(problemId => {
+        bookmarkDataMap[problemId] = { isBookmarked: false };
+      });
+      setBookmarkData(bookmarkDataMap);
+    }
+  };
+
+  const handleBookmark = async (problemId) => {
+    // Check if bookmarks are enabled
+    if (!checkFeatureEnabled('bookmarks_enabled')) {
+      showFeatureDisabledAlert('Bookmarks');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const isCurrentlyBookmarked = bookmarkData[problemId]?.isBookmarked;
+
+      if (isCurrentlyBookmarked) {
+        // Try to remove bookmark
+        try {
+          await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+
+          // Update state to unbookmarked
+          setBookmarkData(prev => ({
+            ...prev,
+            [problemId]: { isBookmarked: false }
+          }));
+        } catch (deleteError) {
+          // If delete fails (404), it means it wasn't bookmarked, so try to add it
+          if (deleteError.response?.status === 404) {
+            await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {}, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+
+            // Update state to bookmarked
+            setBookmarkData(prev => ({
+              ...prev,
+              [problemId]: { isBookmarked: true }
+            }));
+          } else {
+            throw deleteError;
+          }
+        }
+      } else {
+        // Try to add bookmark
+        try {
+          await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {}, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+
+          // Update state to bookmarked
+          setBookmarkData(prev => ({
+            ...prev,
+            [problemId]: { isBookmarked: true }
+          }));
+        } catch (postError) {
+          // If post fails (400), it means it was already bookmarked, so try to remove it
+          if (postError.response?.status === 400) {
+            await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+
+            // Update state to unbookmarked
+            setBookmarkData(prev => ({
+              ...prev,
+              [problemId]: { isBookmarked: false }
+            }));
+          } else {
+            throw postError;
+          }
+        }
+      }
+
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+      console.error("Error details:", error.response?.data);
+      alert(`Error updating bookmark: ${error.response?.data?.detail || error.message}`);
+    }
+  };
+
+  const handleVote = async (problemId, voteType) => {
+    // Check if voting is enabled
+    if (!checkFeatureEnabled('voting_enabled')) {
+      showFeatureDisabledAlert('Voting');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/vote`,
+        { vote_type: voteType },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      // Update vote data for this specific problem
+      setVoteData(prev => ({
+        ...prev,
+        [problemId]: response.data
+      }));
+    } catch (error) {
+      console.error("Error voting:", error);
+      alert("Error voting on problem");
+    }
+  };
+
+  const handleFollow = async (authorId, e) => {
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
+
+    // Check if following is enabled
+    if (!checkFeatureEnabled('following_enabled')) {
+      showFeatureDisabledAlert('Following');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to follow users");
+        return;
+      }
+
+      const isFollowing = followStatus[authorId];
+
+      if (isFollowing) {
+        await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/${authorId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setFollowStatus(prev => ({ ...prev, [authorId]: false }));
+      } else {
+        await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/${authorId}`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setFollowStatus(prev => ({ ...prev, [authorId]: true }));
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+    }
+  };
+
+  const handleFollowUser = async (authorId) => {
+    // Check if following is enabled
+    if (!checkFeatureEnabled('following_enabled')) {
+      showFeatureDisabledAlert('Following');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to follow users");
+        return;
+      }
+
+      await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/${authorId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setFollowStatus(prev => ({ ...prev, [authorId]: true }));
+    } catch (error) {
+      console.error("Error following user:", error);
+    }
+  };
+
+  const handleUnfollowUser = async (authorId) => {
+    // Check if following is enabled
+    if (!checkFeatureEnabled('following_enabled')) {
+      showFeatureDisabledAlert('Following');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to follow users");
+        return;
+      }
+
+      await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/${authorId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setFollowStatus(prev => ({ ...prev, [authorId]: false }));
+    } catch (error) {
+      console.error("Error unfollowing user:", error);
+    }
+  };
+
+  const searchUsers = async (query) => {
+    if (query.length < 2) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/users/search?q=${encodeURIComponent(query)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSearchResults(response.data.users);
+      setShowSearchResults(true);
+    } catch (error) {
+      console.error("Error searching users:", error);
+      setSearchResults([]);
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    searchUsers(query);
+  };
+
+  const handleSearchSubmit = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const fetchCurrentUser = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCurrentUser(response.data);
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+    }
+  };
+
+  if (showLoading) {
+    return (
+      <Layout showHomeButton={true}>
+        <AnimatedLoader
+          type="problems"
+          message="Loading problems..."
+          size="large"
+        />
+      </Layout>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#e8f3ee_0,#f8fafc_34%,#f8fafc_100%)] font-sans text-slate-900">
-      {/* Sidebar Navigation */}
-      <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-slate-200/80 bg-white/90 shadow-[8px_0_30px_rgba(15,23,42,0.04)] backdrop-blur-xl transition-all duration-300 ${
-          isSidebarCollapsed ? "w-20" : "w-64"
-        }`}
-      >
-        <div className="flex h-16 shrink-0 items-center border-b border-slate-100 px-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#1a4d3a] text-sm font-black text-white shadow-lg shadow-[#1a4d3a]/20">
-            SF
-          </div>
+    <Layout showHomeButton={true}>
+      <div style={{
+        width: "100%",
+        maxWidth: "100%",
+        overflow: "hidden",
+        boxSizing: "border-box"
+      }}>
+        <div style={{
+          marginBottom: spacing.xl
+        }}>
+          <h1 style={{
+            fontSize: isMobile ? "1.5rem" : typography.fontSize["3xl"],
+            fontWeight: typography.fontWeight.bold,
+            color: colors.primary,
+            marginBottom: spacing.lg,
+            textAlign: "center"
+          }}>
+            Science Problems Feed
+          </h1>
 
-          {!isSidebarCollapsed && (
-            <div className="ml-3">
-              <p className="text-lg font-black tracking-tight text-[#1a4d3a]">
-                ScholarFlow
-              </p>
-              <p className="-mt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                Research Hub
-              </p>
-            </div>
-          )}
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-6">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              className={`group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm transition-all duration-200 ${
-                item.active
-                  ? "bg-[#1a4d3a] text-white shadow-lg shadow-[#1a4d3a]/20"
-                  : "text-slate-500 hover:bg-slate-100/80 hover:text-slate-900"
-              }`}
-            >
-              <item.icon
-                size={20}
-                className={`shrink-0 transition-transform duration-200 ${
-                  item.active
-                    ? "text-white"
-                    : "text-slate-400 group-hover:scale-110 group-hover:text-[#1a4d3a]"
-                }`}
-              />
+        {/* Enhanced Search Bar */}
+        <div style={{
+          marginBottom: "20px"
+        }}>
+          <SearchBar placeholder="Search problems, users, tags, levels..." />
+        </div>
+        {/* Removed old search results - now handled by SearchBar component */}
 
-              {!isSidebarCollapsed && (
-                <span className="font-bold">{item.label}</span>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        <div className="border-t border-slate-100 p-4">
-          {!isSidebarCollapsed && (
-            <div className="mb-4 rounded-3xl border border-[#1a4d3a]/10 bg-[#1a4d3a]/5 p-4">
-              <div className="mb-2 flex items-center gap-2 text-[#1a4d3a]">
-                <Sparkles size={16} />
-                <span className="text-xs font-black uppercase tracking-widest">
-                  Pro Tip
-                </span>
-              </div>
-              <p className="text-xs font-medium leading-relaxed text-slate-500">
-                Save problems to your library and build your own olympiad
-                collection.
-              </p>
-            </div>
-          )}
-
+        {/* Tab Navigation */}
+        <div style={{
+          display: "flex",
+          marginBottom: spacing.lg,
+          backgroundColor: colors.white,
+          borderRadius: borderRadius.md,
+          overflow: "hidden",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+          border: `1px solid ${colors.gray[200]}`
+        }}>
           <button
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-800"
+            onClick={() => setActiveTab("all")}
+            style={{
+              flex: 1,
+              padding: isMobile ? "10px 2px" : `${spacing.sm} ${spacing.md}`,
+              border: "none",
+              backgroundColor: activeTab === "all" ? colors.primary : "transparent",
+              color: activeTab === "all" ? colors.white : colors.gray[600],
+              cursor: "pointer",
+              fontWeight: activeTab === "all" ? typography.fontWeight.bold : typography.fontWeight.medium,
+              transition: "all 0.2s ease",
+              fontSize: isMobile ? "11px" : typography.fontSize.base
+            }}
           >
-            <MoreHorizontal size={20} />
-            {!isSidebarCollapsed && (
-              <span className="text-sm font-bold">Collapse</span>
-            )}
+            All Problems
+          </button>
+          <button
+            onClick={() => setActiveTab("following")}
+            style={{
+              flex: 1,
+              padding: isMobile ? "10px 2px" : `${spacing.sm} ${spacing.md}`,
+              border: "none",
+              backgroundColor: activeTab === "following" ? colors.primary : "transparent",
+              color: activeTab === "following" ? colors.white : colors.gray[600],
+              cursor: "pointer",
+              fontWeight: activeTab === "following" ? typography.fontWeight.bold : typography.fontWeight.medium,
+              transition: "all 0.2s ease",
+              fontSize: isMobile ? "11px" : typography.fontSize.base
+            }}
+          >
+            Following
+          </button>
+          <button
+            onClick={() => setActiveTab("trending")}
+            style={{
+              flex: 1,
+              padding: isMobile ? "10px 2px" : `${spacing.sm} ${spacing.md}`,
+              border: "none",
+              backgroundColor: activeTab === "trending" ? colors.primary : "transparent",
+              color: activeTab === "trending" ? colors.white : colors.gray[600],
+              cursor: "pointer",
+              fontWeight: activeTab === "trending" ? typography.fontWeight.bold : typography.fontWeight.medium,
+              transition: "all 0.2s ease",
+              fontSize: isMobile ? "11px" : typography.fontSize.base
+            }}
+          >
+            Trending
           </button>
         </div>
-      </aside>
 
-      {/* Main Content */}
-      <div
-        className={`min-h-screen transition-all duration-300 ${
-          isSidebarCollapsed ? "pl-20" : "pl-64"
-        }`}
-      >
-        {/* Top Header */}
-        <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/75 px-8 backdrop-blur-xl">
-          <div className="flex flex-1 items-center gap-6">
-            <button
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="rounded-2xl p-2 text-slate-400 transition-all hover:bg-slate-100 hover:text-[#1a4d3a] lg:hidden"
-            >
-              <Menu size={20} />
-            </button>
-
-            <div className="relative w-full max-w-xl">
-              <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                size={18}
-              />
-
-              <input
-                type="text"
-                placeholder="Search problems, subjects, authors..."
-                className="w-full rounded-2xl border border-slate-200 bg-slate-100/70 py-2.5 pl-11 pr-4 text-sm font-medium text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-[#1a4d3a]/30 focus:bg-white focus:ring-4 focus:ring-[#1a4d3a]/10"
-              />
-            </div>
+        {problems.length === 0 ? (
+          <div style={{ textAlign: "center", marginTop: "50px" }}>
+            {activeTab === "all" && (
+              <>
+                <h3>No problems yet!</h3>
+                <p>Be the first to create a science problem.</p>
+                <Link to="/create-problem?from=/feed">
+                  <button style={{
+                    padding: "10px 20px",
+                    backgroundColor: "#28a745",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer"
+                  }}>
+                    Create First Problem
+                  </button>
+                </Link>
+              </>
+            )}
+            {activeTab === "following" && (
+              <>
+                <h3>You're not following anyone yet!</h3>
+                <p>Follow other users to see their problems in your feed.</p>
+                <p>Switch to "All Problems" to discover users to follow.</p>
+              </>
+            )}
+            {activeTab === "trending" && (
+              <>
+                <h3>No trending problems yet!</h3>
+                <p>Problems with more comments and engagement will appear here.</p>
+                <Link to="/create-problem?from=/feed">
+                  <button style={{
+                    padding: "10px 20px",
+                    backgroundColor: "#28a745",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer"
+                  }}>
+                    Create a Problem
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
-
-          <div className="flex items-center gap-4">
-            <button className="relative rounded-2xl p-2.5 text-slate-400 transition-all hover:bg-[#1a4d3a]/5 hover:text-[#1a4d3a]">
-              <Bell size={20} />
-              <span className="absolute right-2.5 top-2.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-red-500" />
-            </button>
-
-            <div className="mx-1 hidden h-8 w-px bg-slate-200 sm:block" />
-
-            <div className="group flex cursor-pointer items-center gap-3 rounded-2xl p-1.5 transition-all hover:bg-slate-100">
-              <div className="hidden text-right sm:block">
-                <p className="text-sm font-black leading-none text-slate-800">
-                  {currentUser?.username || "Guest User"}
-                </p>
-                <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Researcher
-                </p>
-              </div>
-
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border-2 border-white bg-[#1a4d3a] text-sm font-black text-white shadow-lg shadow-[#1a4d3a]/20 ring-1 ring-slate-200">
-                {getUserInitial(currentUser?.username || "G")}
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <main className="mx-auto max-w-6xl px-8 py-8">
-          {/* Hero Section */}
-          <section className="relative mb-8 overflow-hidden rounded-[2rem] border border-slate-200 bg-white/80 p-8 shadow-sm backdrop-blur-xl">
-            <div className="relative z-10 max-w-3xl">
-              <div className="mb-4 flex w-fit items-center gap-2 rounded-full border border-[#1a4d3a]/10 bg-[#1a4d3a]/5 px-4 py-2 text-[#1a4d3a]">
-                <Sparkles size={15} />
-                <span className="text-xs font-black uppercase tracking-[0.18em]">
-                  Collaborative Science Practice
-                </span>
-              </div>
-
-              <h1 className="mb-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
-                Science Problems Feed
-              </h1>
-
-              <p className="max-w-2xl text-base font-medium leading-relaxed text-slate-500">
-                Refined scholarship through collaborative inquiry. Explore
-                rigorous problems from the world's leading academic communities.
-              </p>
-            </div>
-
-            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#1a4d3a]/10 blur-3xl" />
-            <div className="absolute -bottom-24 right-32 h-56 w-56 rounded-full bg-emerald-200/40 blur-3xl" />
-          </section>
-
-          {/* Filters & Tabs */}
-          <section className="mb-8 flex flex-col gap-4 rounded-[1.5rem] border border-slate-200 bg-white/85 p-3 shadow-sm backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex w-fit rounded-2xl bg-slate-100 p-1">
-              {["all", "following", "trending"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`rounded-xl px-5 py-2.5 text-xs font-black capitalize transition-all duration-200 ${
-                    activeTab === tab
-                      ? "bg-white text-[#1a4d3a] shadow-sm ring-1 ring-slate-200"
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  {tab} Problems
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-3 px-2">
-              <div className="flex items-center gap-2 border-r border-slate-200 pr-4 text-xs font-black uppercase tracking-widest text-slate-400">
-                <BarChart2 size={14} />
-                Sort By
-              </div>
-
-              <div className="relative">
-                <select className="appearance-none bg-transparent py-2 pl-2 pr-8 text-sm font-black text-[#1a4d3a] outline-none">
-                  <option>Most Recent</option>
-                  <option>Most Voted</option>
-                  <option>Complexity</option>
-                </select>
-
-                <ChevronDown
-                  size={14}
-                  className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-              </div>
-            </div>
-          </section>
-
-          {/* Feed List */}
-          <div className="space-y-6 pb-28">
-            {loading ? (
-              <div className="rounded-[2rem] border border-slate-200 bg-white/80 py-20 text-center shadow-sm">
-                <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-slate-100 border-t-[#1a4d3a]" />
-                <p className="mt-5 text-xs font-black uppercase tracking-[0.2em] text-slate-400">
-                  Sourcing latest problems...
-                </p>
-              </div>
-            ) : problems.length === 0 ? (
-              <div className="rounded-[2rem] border border-dashed border-slate-300 bg-white/80 p-20 text-center shadow-sm">
-                <Compass size={52} className="mx-auto mb-4 text-slate-200" />
-                <p className="text-lg font-black text-slate-600">
-                  No findings in this sector yet.
-                </p>
-                <button className="mt-5 rounded-full bg-[#1a4d3a] px-5 py-2.5 text-sm font-black text-white shadow-lg shadow-[#1a4d3a]/20 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#1a4d3a]/25">
-                  Start a New Inquiry
-                </button>
-              </div>
-            ) : (
-              problems.map((problem) => (
-                <article
-                  key={problem.id}
-                  className="group relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-[#1a4d3a]/25 hover:shadow-2xl hover:shadow-[#1a4d3a]/10"
-                >
-                  <div className="relative z-10">
-                    <div className="mb-6 flex items-start justify-between gap-4">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 text-sm font-black text-[#1a4d3a] shadow-sm">
-                          {getUserInitial(problem.author?.username)}
-                        </div>
-
-                        <div className="min-w-0">
-                          <Link
-                            to={`/user/${problem.author?.username}`}
-                            className="block truncate text-sm font-black text-slate-900 transition-colors hover:text-[#1a4d3a] hover:underline"
-                          >
-                            {getDisplayName(problem.author?.username)}
-                          </Link>
-
-                          <p className="mt-1 text-[10px] font-black uppercase tracking-wider text-slate-400">
-                            Theoretical Physics Institute • 2h ago
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          toggleFollow(problem.author?.id);
-                        }}
-                        className={`shrink-0 rounded-full px-4 py-2 text-xs font-black transition-all duration-200 ${
-                          followStatus[problem.author?.id]
-                            ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                            : "border border-slate-900 bg-white text-slate-900 hover:bg-slate-900 hover:text-white"
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          {followStatus[problem.author?.id] ? (
-                            <>
-                              <UserCheck size={14} />
-                              Following
-                            </>
-                          ) : (
-                            <>
-                              <UserPlus size={14} />
-                              Follow
-                            </>
-                          )}
-                        </span>
-                      </button>
+        ) : (
+          <div>
+            {problems.map((problem) => (
+              <Card
+                key={problem.id}
+                hover={true}
+                style={{
+                  marginBottom: spacing.lg,
+                  cursor: "pointer"
+                }}
+                onClick={() => navigate(`/problem/${problem.id}?from=feed&tab=${activeTab}`)}
+              >
+                {/* Author Info Section - Twitter Style */}
+                {problem.author ? (
+                  <div style={{ display: "flex", alignItems: "center", marginBottom: "15px", gap: "10px" }}>
+                    {/* Profile Picture */}
+                    <div style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      backgroundColor: "#1a4d3a",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white",
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      backgroundImage: problem.author.profile_picture ? `url(${problem.author.profile_picture})` : "none",
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      pointerEvents: "none"
+                    }}>
+                      {!problem.author.profile_picture && getUserInitial(problem.author.username)}
                     </div>
 
-                    <h3 className="mb-3 text-xl font-black leading-snug text-slate-950 transition-colors group-hover:text-[#1a4d3a] sm:text-2xl">
-                      {renderMathContent(problem.title)}
-                    </h3>
-
-                    <div className="mb-6 line-clamp-3 text-sm leading-relaxed text-slate-600">
-                      {renderMathContent(problem.description)}
-                    </div>
-
-                    <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-5">
-                      <div className="flex flex-wrap gap-2">
-                        <span className="rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-indigo-700">
-                          {problem.subject}
-                        </span>
-
-                        <span className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-700">
-                          {problem.level}
-                        </span>
-
-                        <span className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-700">
-                          {problem.year}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1 sm:gap-3">
-                        <div className="flex items-center gap-1 rounded-2xl bg-slate-50 p-1">
-                          <button
-                            onClick={() => handleVote(problem.id, "like")}
-                            className={`rounded-xl p-2 transition-all ${
-                              voteData[problem.id]?.user_vote === "like"
-                                ? "bg-emerald-100 text-emerald-700"
-                                : "text-slate-400 hover:bg-white hover:text-slate-700"
-                            }`}
-                          >
-                            <ThumbsUp size={18} />
-                          </button>
-
-                          <span className="pr-2 text-xs font-black text-slate-500">
-                            1.2k
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-1 rounded-2xl bg-slate-50 p-1">
-                          <button
-                            onClick={() => handleVote(problem.id, "dislike")}
-                            className={`rounded-xl p-2 transition-all ${
-                              voteData[problem.id]?.user_vote === "dislike"
-                                ? "bg-rose-100 text-rose-700"
-                                : "text-slate-400 hover:bg-white hover:text-slate-700"
-                            }`}
-                          >
-                            <ThumbsDown size={18} />
-                          </button>
-
-                          <span className="pr-2 text-xs font-black text-slate-500">
-                            24
-                          </span>
-                        </div>
-
-                        <button className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-slate-400 transition-all hover:bg-[#1a4d3a]/5 hover:text-[#1a4d3a]">
-                          <MessageSquare size={18} />
-                          <span className="text-xs font-black">
-                            {problem.comment_count}
-                          </span>
-                        </button>
-
-                        <button
-                          onClick={() => toggleBookmark(problem.id)}
-                          className={`rounded-2xl p-2.5 transition-all ${
-                            bookmarkData[problem.id]?.isBookmarked
-                              ? "bg-[#1a4d3a] text-white shadow-lg shadow-[#1a4d3a]/20"
-                              : "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-                          }`}
+                    {/* Author Name and Follow Button */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
+                      <div style={{ pointerEvents: "none" }}>
+                        <div
+                          style={{
+                            fontWeight: "bold",
+                            fontSize: "14px",
+                            color: "#1a4d3a",
+                            cursor: "pointer",
+                            textDecoration: "underline",
+                            pointerEvents: "auto"
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent bubbling to problem card
+                            // If it's the current user, go to their own profile page
+                            if (currentUser && problem.author.id === currentUser.id) {
+                              navigate('/profile');
+                            } else {
+                              navigate(`/user/${problem.author.username}`);
+                            }
+                          }}
                         >
-                          <Bookmark size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[#1a4d3a]/5 blur-2xl transition-transform duration-500 group-hover:scale-125" />
-                </article>
-              ))
-            )}
-
-            {/* Sponsored Challenge Card */}
-            {!loading && problems.length > 0 && (
-              <article className="group relative overflow-hidden rounded-[2.5rem] bg-[#1a4d3a] p-8 text-white shadow-2xl shadow-[#1a4d3a]/25">
-                <div
-                  className="absolute inset-0 opacity-10 pointer-events-none"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
-                    backgroundSize: "24px 24px",
-                  }}
-                />
-
-                <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row">
-                  <div className="flex-1 space-y-4">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/10 text-xs font-black">
-                        SF
+                          {getDisplayName(problem.author.username)}
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#666" }}>
+                          {new Date(problem.created_at).toLocaleDateString()}
+                        </div>
                       </div>
 
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">
-                        ScholarFlow Editorial
-                      </span>
-
-                      <span className="rounded-full bg-white/10 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white/80">
-                        Sponsored
-                      </span>
-                    </div>
-
-                    <h2 className="max-w-2xl text-3xl font-black leading-tight sm:text-4xl">
-                      The Riemann Hypothesis: Computational Approaches
-                    </h2>
-
-                    <p className="max-w-xl text-sm leading-relaxed text-white/70">
-                      Explore the non-trivial zeros of the zeta function{" "}
-                      <InlineMath math={"\\zeta(s)"} /> using high-performance
-                      cluster computing.
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-3 pt-2">
-                      <span className="rounded-xl border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-white">
-                        Math
-                      </span>
-
-                      <span className="rounded-xl border border-amber-500/20 bg-amber-500/20 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-200">
-                        Legendary
-                      </span>
-
-                      <button className="ml-auto flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-black uppercase tracking-widest text-[#1a4d3a] transition-all hover:-translate-y-0.5 hover:shadow-xl">
-                        Explore
-                        <Plus
-                          size={16}
-                          className="transition-transform group-hover:rotate-90"
+                      {/* Follow Button - Hide for own posts */}
+                      {currentUser && problem.author.id !== currentUser.id && (
+                        <FollowButton
+                          isFollowing={followStatus[problem.author.id]}
+                          onFollow={() => handleFollowUser(problem.author.id)}
+                          onUnfollow={() => handleUnfollowUser(problem.author.id)}
+                          size="sm"
+                          style={{ marginLeft: "auto" }}
+                          isDeletedUser={problem.author.username.startsWith('__deleted_user_')}
                         />
-                      </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", alignItems: "center", marginBottom: "15px", gap: "10px" }}>
+                    <div style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      backgroundColor: "#6c757d",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white",
+                      fontSize: "16px",
+                      fontWeight: "bold"
+                    }}>
+                      ?
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: "bold", fontSize: "14px", color: "#333" }}>
+                        Unknown Author
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#666" }}>
+                        {new Date(problem.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <h3 style={{
+                  marginTop: 0,
+                  color: "#333",
+                  pointerEvents: "none",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                  maxWidth: "100%"
+                }}>{renderMathContent(problem.title)}</h3>
+                <div style={{
+                  color: "#666",
+                  lineHeight: "1.5",
+                  whiteSpace: "pre-wrap",
+                  pointerEvents: "none",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                  maxWidth: "100%"
+                }}>{renderMathContent(problem.description)}</div>
+                <div style={{
+                  display: "flex",
+                  gap: isMobile ? "4px" : "10px",
+                  marginTop: "15px",
+                  alignItems: isMobile ? "flex-start" : "center",
+                  flexWrap: isMobile ? "wrap" : "nowrap",
+                  flexDirection: isMobile ? "column" : "row",
+                  width: "100%",
+                  boxSizing: "border-box"
+                }}>
+                  <div style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: isMobile ? "4px" : "8px",
+                    marginBottom: isMobile ? "8px" : "0"
+                  }}>
+                    <span style={{
+                      backgroundColor: "#e0e7ff",
+                      color: "#3730a3",
+                      padding: isMobile ? "3px 6px" : "6px 12px",
+                      borderRadius: "16px",
+                      fontSize: isMobile ? "9px" : "12px",
+                      fontWeight: "600",
+                      boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
+                      transition: "all 0.2s ease",
+                      pointerEvents: "none"
+                    }}>
+                      {problem.subject}
+                    </span>
+                    {problem.level && problem.level.trim() && (
+                      <span style={{
+                        backgroundColor: "#fef3c7",
+                        color: "#92400e",
+                        padding: isMobile ? "3px 6px" : "6px 12px",
+                        borderRadius: "16px",
+                        fontSize: isMobile ? "9px" : "12px",
+                        fontWeight: "600",
+                        boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
+                        transition: "all 0.2s ease",
+                        pointerEvents: "none"
+                      }}>
+                        {problem.level}
+                      </span>
+                    )}
+                    {problem.year && (
+                      <span style={{
+                        backgroundColor: "#dcfce7",
+                        color: "#166534",
+                        padding: isMobile ? "3px 6px" : "6px 12px",
+                        borderRadius: "16px",
+                        fontSize: isMobile ? "9px" : "12px",
+                        fontWeight: "600",
+                        boxShadow: "0 2px 6px rgba(26, 77, 58, 0.2)",
+                        transition: "all 0.2s ease",
+                        pointerEvents: "none"
+                      }}>
+                        Year: {problem.year}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Like, Dislike, Comment - Left Side */}
+                  <div style={{
+                    display: "flex",
+                    gap: isMobile ? "8px" : "12px",
+                    alignItems: "center"
+                  }}>
+                    {/* Like Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleVote(problem.id, "like");
+                      }}
+                      style={{
+                        backgroundColor: voteData[problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
+                        border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
+                        cursor: "pointer",
+                        fontSize: isMobile ? "12px" : "14px",
+                        color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
+                        fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
+                        padding: isMobile ? "8px 12px" : "10px 16px",
+                        borderRadius: "8px",
+                        transition: "all 0.2s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: isMobile ? "6px" : "8px"
+                      }}
+                      onMouseEnter={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "like") {
+                          e.target.style.backgroundColor = "#e9ecef";
+                          e.target.style.borderColor = "#adb5bd";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "like") {
+                          e.target.style.backgroundColor = "#f8f9fa";
+                          e.target.style.borderColor = "#dee2e6";
+                        }
+                      }}
+                    >
+                      <img
+                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg"
+                        alt="Like"
+                        style={{
+                          height: isMobile ? "14px" : "18px",
+                          width: isMobile ? "14px" : "18px",
+                          objectFit: "contain"
+                        }}
+                      />
+                      {voteData[problem.id]?.like_count || 0}
+                    </button>
+
+                    {/* Dislike Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleVote(problem.id, "dislike");
+                      }}
+                      style={{
+                        backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
+                        border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
+                        cursor: "pointer",
+                        fontSize: isMobile ? "12px" : "14px",
+                        color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
+                        fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
+                        padding: isMobile ? "8px 12px" : "10px 16px",
+                        borderRadius: "8px",
+                        transition: "all 0.2s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: isMobile ? "6px" : "8px"
+                      }}
+                      onMouseEnter={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "dislike") {
+                          e.target.style.backgroundColor = "#e9ecef";
+                          e.target.style.borderColor = "#adb5bd";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (voteData[problem.id]?.user_vote !== "dislike") {
+                          e.target.style.backgroundColor = "#f8f9fa";
+                          e.target.style.borderColor = "#dee2e6";
+                        }
+                      }}
+                    >
+                      <img
+                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg"
+                        alt="Dislike"
+                        style={{
+                          height: isMobile ? "14px" : "18px",
+                          width: isMobile ? "14px" : "18px",
+                          objectFit: "contain"
+                        }}
+                      />
+                      {voteData[problem.id]?.dislike_count || 0}
+                    </button>
+
+                    {/* Comment Count */}
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: isMobile ? "6px" : "8px",
+                      padding: isMobile ? "8px 12px" : "10px 16px",
+                      backgroundColor: "#f8f9fa",
+                      borderRadius: "8px",
+                      border: "1px solid #dee2e6"
+                    }}>
+                      <img
+                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg"
+                        alt="Comments"
+                        style={{
+                          height: isMobile ? "14px" : "18px",
+                          width: isMobile ? "14px" : "18px",
+                          objectFit: "contain"
+                        }}
+                      />
+                      <span style={{
+                        fontSize: isMobile ? "12px" : "14px",
+                        color: "#666",
+                        fontWeight: "500"
+                      }}>
+                        {problem.comment_count || 0}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex aspect-square w-full max-w-[220px] flex-col items-center justify-center gap-4 rounded-[2rem] border border-white/10 bg-white/5 transition-colors group-hover:bg-white/10">
-                    <div className="text-7xl font-black text-white/20 transition-opacity group-hover:text-white/30">
-                      Σ
-                    </div>
-
-                    <div className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
-                      Featured Challenge
-                    </div>
-                  </div>
+                  {/* Bookmark - Right Side */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBookmark(problem.id);
+                    }}
+                    style={{
+                      padding: isMobile ? "8px 12px" : "10px 16px",
+                      backgroundColor: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: isMobile ? "6px" : "8px",
+                      borderRadius: "8px",
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = "#f8f9fa";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    <img
+                      src={bookmarkData[problem.id]?.isBookmarked
+                        ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
+                        : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
+                      }
+                      alt="Bookmark"
+                      style={{
+                        height: isMobile ? "16px" : "20px",
+                        width: isMobile ? "16px" : "20px",
+                        objectFit: "contain"
+                      }}
+                    />
+                    <span style={{
+                      fontSize: isMobile ? "12px" : "14px",
+                      color: bookmarkData[problem.id]?.isBookmarked ? "rgb(26, 77, 58)" : "#666",
+                      fontWeight: "500"
+                    }}>
+                      {bookmarkData[problem.id]?.isBookmarked ? "Saved" : "Save"}
+                    </span>
+                  </button>
                 </div>
-              </article>
-            )}
-
-            {!loading && (
-              <button className="w-full rounded-[1.5rem] border-2 border-slate-200 bg-white/85 py-4 text-sm font-black uppercase tracking-widest text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#1a4d3a] hover:text-[#1a4d3a] hover:shadow-xl hover:shadow-[#1a4d3a]/5">
-                Load More Problems
-              </button>
-            )}
+              </Card>
+            ))}
           </div>
-        </main>
-      </div>
+        )
+        }
 
-      {/* Modern Floating Action Button */}
-      <div className="fixed bottom-8 right-8 z-[60] flex flex-col items-end gap-4 group">
-        <Link to="/create-problem?from=/feed" className="flex items-center">
-          <div className="flex h-14 w-14 items-center gap-3 overflow-hidden rounded-full bg-[#1a4d3a] pr-2 shadow-2xl shadow-[#1a4d3a]/30 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:w-64">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center text-white">
-              <Plus
-                size={28}
-                className="transition-transform duration-500 group-hover:rotate-90"
-              />
+        {/* Pagination */}
+        {
+          (activeTab === "all" || activeTab === "trending") && totalPages > 1 && (
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: spacing.md,
+              marginTop: spacing.xl,
+              paddingBottom: isMobile ? "100px" : "40px" // Added padding to prevent FAB overlap
+            }}>
+              <Button
+                onClick={() => {
+                  if (activeTab === "trending") {
+                    fetchTrendingProblems(currentPage - 1);
+                  } else {
+                    fetchProblems(currentPage - 1);
+                  }
+                }}
+                disabled={currentPage === 1}
+                variant={currentPage === 1 ? "ghost" : "primary"}
+                size="md"
+              >
+                ← Previous
+              </Button>
+
+              <span style={{
+                padding: `0 ${spacing.lg}`,
+                fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
+                color: colors.gray[600],
+                fontWeight: typography.fontWeight.medium
+              }}>
+                Page {currentPage} of {totalPages} ({totalProblems} total problems)
+              </span>
+
+              <Button
+                onClick={() => {
+                  if (activeTab === "trending") {
+                    fetchTrendingProblems(currentPage + 1);
+                  } else {
+                    fetchProblems(currentPage + 1);
+                  }
+                }}
+                disabled={currentPage === totalPages}
+                variant={currentPage === totalPages ? "ghost" : "primary"}
+                size="md"
+              >
+                Next →
+              </Button>
             </div>
+          )
+        }
 
-            <span className="whitespace-nowrap text-sm font-black uppercase tracking-widest text-white opacity-0 transition-opacity delay-100 duration-300 group-hover:opacity-100">
-              Create New Problem
-            </span>
-          </div>
-        </Link>
-      </div>
-    </div>
+        {/* Enhanced Floating Create Problem Button */}
+        <div style={{
+          position: "fixed",
+          bottom: spacing.xl,
+          right: spacing.xl,
+          zIndex: 1000
+        }}>
+          <Link to="/create-problem?from=/feed" style={{ textDecoration: "none" }}>
+            <div style={{
+              width: "60px",
+              height: "60px",
+              backgroundColor: colors.primary,
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+              fontSize: "24px",
+              color: colors.white,
+              fontWeight: typography.fontWeight.bold,
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              position: "relative"
+            }}
+              onMouseEnter={(e) => {
+                e.target.style.width = "220px";
+                e.target.style.borderRadius = "30px";
+                e.target.style.justifyContent = "flex-start";
+                e.target.style.paddingLeft = "20px";
+                e.target.style.backgroundColor = colors.secondary;
+                e.target.style.boxShadow = "0 6px 25px rgba(0,0,0,0.2)";
+                e.target.innerHTML = '<span style="font-size: 16px;">Create New Problem</span><span style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 24px;">+</span>';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.width = "60px";
+                e.target.style.borderRadius = "50%";
+                e.target.style.justifyContent = "center";
+                e.target.style.paddingLeft = "0px";
+                e.target.style.backgroundColor = colors.primary;
+                e.target.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
+                e.target.innerHTML = '+';
+              }}
+              title="Create New Problem"
+            >
+              +
+            </div>
+          </Link>
+        </div>
+
+      </div >
+    </Layout >
   );
 }
 
