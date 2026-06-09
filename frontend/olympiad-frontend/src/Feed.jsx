@@ -1,10 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 // src/Feed.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { useNavigate, useLocation } from "react-router-dom";
-import { InlineMath, BlockMath } from 'react-katex';
-import 'katex/dist/katex.min.css';
+import { InlineMath, BlockMath } from "react-katex";
+import "katex/dist/katex.min.css";
 import SearchBar from "./SearchBar";
 import Layout from "./components/Layout";
 import Card from "./components/Card";
@@ -18,40 +20,45 @@ import { useFeatureSettings } from "./hooks/useFeatureSettings";
 
 // Helper function to render math content
 const renderMathContent = (text) => {
-  if (!text) return '';
+  if (!text) return "";
 
-  // Split text into math and non-math segments
   const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
 
   return parts.map((part, index) => {
-    if (part.startsWith('$$') && part.endsWith('$$')) {
-      // Block math mode
+    if (part.startsWith("$$") && part.endsWith("$$")) {
       const content = part.slice(2, -2);
       return (
-        <div key={index} style={{ textAlign: 'left', margin: '8px 0' }}>
+        <div
+          key={index}
+          style={{
+            textAlign: "left",
+            margin: "10px 0",
+            overflowX: "auto",
+          }}
+        >
           <BlockMath math={content} />
         </div>
       );
-    } else if (part.startsWith('$') && part.endsWith('$')) {
-      // Inline math mode
+    } else if (part.startsWith("$") && part.endsWith("$")) {
       const content = part.slice(1, -1);
       return <InlineMath key={index} math={content} />;
-    } else {
-      // Regular text — keep it as-is
-      return <span key={index}>{part}</span>;
     }
+
+    return <span key={index}>{part}</span>;
   });
 };
 
 function Feed() {
   const location = useLocation();
+  const navigate = useNavigate();
+
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showLoading, setShowLoading] = useState(false);
   const [voteData, setVoteData] = useState({});
   const [followStatus, setFollowStatus] = useState({});
   const [bookmarkData, setBookmarkData] = useState({});
-  const [activeTab, setActiveTab] = useState("all"); // "all", "following", "trending"
+  const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -61,8 +68,10 @@ function Feed() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalProblems, setTotalProblems] = useState(0);
 
-  // Feature settings
-  const { checkFeatureEnabled, showFeatureDisabledAlert } = useFeatureSettings();
+  const { checkFeatureEnabled, showFeatureDisabledAlert } =
+    useFeatureSettings();
+
+  const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
   // Mobile detection
   useEffect(() => {
@@ -71,15 +80,14 @@ function Feed() {
     };
 
     checkMobile();
-    window.addEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
 
-    return () => window.removeEventListener('resize', checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    // Only fetch data if user is authenticated
     const token = localStorage.getItem("token");
+
     if (token) {
       fetchProblems();
       fetchCurrentUser();
@@ -88,17 +96,15 @@ function Feed() {
 
   // Scroll to top when page changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
 
   useEffect(() => {
-    // Fetch data when tab changes
     let loadingTimeout;
 
-    // Show loading after a short delay to allow animation to be visible
     loadingTimeout = setTimeout(() => {
       setShowLoading(true);
-    }, 300); // 300ms delay to see the sliding animation
+    }, 300);
 
     if (activeTab === "all") {
       fetchProblems().finally(() => {
@@ -125,53 +131,56 @@ function Feed() {
   // Handle URL parameters for tab navigation
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const tabParam = urlParams.get('tab');
+    const tabParam = urlParams.get("tab");
 
-    if (tabParam && ['all', 'following', 'trending'].includes(tabParam)) {
+    if (tabParam && ["all", "following", "trending"].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [location]);
 
   const handleLogout = () => {
-    // Clear all user data
     localStorage.removeItem("token");
 
-    // Clear any cached data
     setProblems([]);
     setVoteData({});
     setFollowStatus({});
 
-    // Replace current history entry to prevent back navigation
     navigate("/homepage", { replace: true });
   };
 
   const fetchProblems = async (page = 1) => {
     setLoading(true);
-    try {
-      let endpoint = `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/?page=${page}&limit=10`;
 
-      // Use trending endpoint for trending tab
+    try {
+      let endpoint = `${API_URL}/auth/problems/?page=${page}&limit=10`;
+
       if (activeTab === "trending") {
-        endpoint = `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/trending?page=${page}&limit=10`;
+        endpoint = `${API_URL}/auth/problems/trending?page=${page}&limit=10`;
       }
 
       const response = await axios.get(endpoint);
       const allProblems = response.data.problems || response.data;
 
-      // Filter out forum problems - only show standalone problems
-      const standaloneProblems = allProblems.filter(problem => problem.forum_id === null || problem.forum_id === undefined);
+      const standaloneProblems = allProblems.filter(
+        (problem) =>
+          problem.forum_id === null || problem.forum_id === undefined,
+      );
 
       setProblems(standaloneProblems);
       setCurrentPage(page);
       setTotalPages(response.data.total_pages || 1);
-      setTotalProblems(response.data.total_problems || response.data.total || response.data.length);
+      setTotalProblems(
+        response.data.total_problems ||
+          response.data.total ||
+          response.data.length,
+      );
 
-      // Fetch vote/bookmark/follow in parallel for speed
-      const problemIds = standaloneProblems.map(problem => problem.id);
+      const problemIds = standaloneProblems.map((problem) => problem.id);
+
       await Promise.all([
         fetchVoteData(problemIds),
         fetchBookmarkData(problemIds),
-        fetchFollowStatus(standaloneProblems)
+        fetchFollowStatus(standaloneProblems),
       ]);
     } catch (error) {
       console.error("Error fetching problems:", error);
@@ -182,40 +191,39 @@ function Feed() {
 
   const fetchFollowingProblems = async () => {
     setLoading(true);
+
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/feed/following`, {
+
+      const response = await axios.get(`${API_URL}/auth/feed/following`, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      // The backend returns an object with 'problems' array
-      const allProblems = Array.isArray(response.data.problems) ? response.data.problems : [];
+      const allProblems = Array.isArray(response.data.problems)
+        ? response.data.problems
+        : [];
 
-      // Filter logic: Show standalone problems OR forum problems where user is a member
-      const filteredProblems = allProblems.filter(problem => {
-        // Always show standalone problems
+      const filteredProblems = allProblems.filter((problem) => {
         if (problem.forum_id === null || problem.forum_id === undefined) {
           return true;
         }
-        // For forum problems, only show if user is a member of that forum
-        // The backend should already handle this logic, but we double-check
+
         return problem.user_is_forum_member === true;
       });
 
       setProblems(filteredProblems);
 
-      // Only fetch vote data and follow status if we have problems
       if (filteredProblems.length > 0) {
-        const problemIds = filteredProblems.map(problem => problem.id);
+        const problemIds = filteredProblems.map((problem) => problem.id);
+
         await fetchVoteData(problemIds);
         await fetchBookmarkData(problemIds);
         await fetchFollowStatus(filteredProblems);
       }
     } catch (error) {
       console.error("Error fetching following problems:", error);
-      // Set empty array on error to prevent map error
       setProblems([]);
     } finally {
       setLoading(false);
@@ -224,32 +232,40 @@ function Feed() {
 
   const fetchTrendingProblems = async (page = 1) => {
     setLoading(true);
+
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/trending?page=${page}&limit=10`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+
+      const response = await axios.get(
+        `${API_URL}/auth/problems/trending?page=${page}&limit=10`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
       const allProblems = response.data.problems || [];
 
-      // Filter out ALL forum problems from trending - only show standalone problems
-      const standaloneProblems = allProblems.filter(problem => problem.forum_id === null || problem.forum_id === undefined);
+      const standaloneProblems = allProblems.filter(
+        (problem) =>
+          problem.forum_id === null || problem.forum_id === undefined,
+      );
+
       setProblems(standaloneProblems);
       setCurrentPage(page);
       setTotalPages(response.data.total_pages || 1);
       setTotalProblems(standaloneProblems.length);
 
-      // Only fetch vote data and follow status if we have standalone problems
       if (standaloneProblems && standaloneProblems.length > 0) {
-        const problemIds = standaloneProblems.map(problem => problem.id);
+        const problemIds = standaloneProblems.map((problem) => problem.id);
+
         await fetchVoteData(problemIds);
         await fetchBookmarkData(problemIds);
         await fetchFollowStatus(standaloneProblems);
       }
     } catch (error) {
       console.error("Error fetching trending problems:", error);
-      // Set empty array on error to prevent map error
       setProblems([]);
     } finally {
       setLoading(false);
@@ -263,11 +279,19 @@ function Feed() {
 
       const followPromises = problems.map(async (problem) => {
         if (!problem.author) return { authorId: null, isFollowing: false };
+
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/status/${problem.author.id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          return { authorId: problem.author.id, isFollowing: response.data.is_following };
+          const response = await axios.get(
+            `${API_URL}/auth/follow/status/${problem.author.id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+
+          return {
+            authorId: problem.author.id,
+            isFollowing: response.data.is_following,
+          };
         } catch (error) {
           return { authorId: problem.author.id, isFollowing: false };
         }
@@ -275,9 +299,11 @@ function Feed() {
 
       const results = await Promise.all(followPromises);
       const followStatusMap = {};
-      results.forEach(result => {
+
+      results.forEach((result) => {
         followStatusMap[result.authorId] = result.isFollowing;
       });
+
       setFollowStatus(followStatusMap);
     } catch (error) {
       console.error("Error fetching follow status:", error);
@@ -287,16 +313,18 @@ function Feed() {
   const fetchVoteData = async (problemIds) => {
     try {
       const token = localStorage.getItem("token");
+
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/vote-status-bulk`,
+        `${API_URL}/auth/problems/vote-status-bulk`,
         problemIds,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+            "Content-Type": "application/json",
+          },
+        },
       );
+
       setVoteData(response.data || {});
     } catch (error) {
       console.error("Error fetching vote data:", error);
@@ -306,32 +334,34 @@ function Feed() {
   const fetchBookmarkData = async (problemIds) => {
     try {
       const token = localStorage.getItem("token");
+
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/bookmark-status`,
+        `${API_URL}/auth/problems/bookmark-status`,
         problemIds,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+            "Content-Type": "application/json",
+          },
+        },
       );
+
       setBookmarkData(response.data);
     } catch (error) {
       console.error("Error fetching bookmark data:", error);
-      // Initialize with all false if fetch fails
+
       const bookmarkDataMap = {};
-      problemIds.forEach(problemId => {
+      problemIds.forEach((problemId) => {
         bookmarkDataMap[problemId] = { isBookmarked: false };
       });
+
       setBookmarkData(bookmarkDataMap);
     }
   };
 
   const handleBookmark = async (problemId) => {
-    // Check if bookmarks are enabled
-    if (!checkFeatureEnabled('bookmarks_enabled')) {
-      showFeatureDisabledAlert('Bookmarks');
+    if (!checkFeatureEnabled("bookmarks_enabled")) {
+      showFeatureDisabledAlert("Bookmarks");
       return;
     }
 
@@ -340,100 +370,106 @@ function Feed() {
       const isCurrentlyBookmarked = bookmarkData[problemId]?.isBookmarked;
 
       if (isCurrentlyBookmarked) {
-        // Try to remove bookmark
         try {
-          await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {
+          await axios.delete(`${API_URL}/auth/problems/${problemId}/bookmark`, {
             headers: {
-              Authorization: `Bearer ${token}`
-            }
+              Authorization: `Bearer ${token}`,
+            },
           });
 
-          // Update state to unbookmarked
-          setBookmarkData(prev => ({
+          setBookmarkData((prev) => ({
             ...prev,
-            [problemId]: { isBookmarked: false }
+            [problemId]: { isBookmarked: false },
           }));
         } catch (deleteError) {
-          // If delete fails (404), it means it wasn't bookmarked, so try to add it
           if (deleteError.response?.status === 404) {
-            await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {}, {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            });
+            await axios.post(
+              `${API_URL}/auth/problems/${problemId}/bookmark`,
+              {},
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            );
 
-            // Update state to bookmarked
-            setBookmarkData(prev => ({
+            setBookmarkData((prev) => ({
               ...prev,
-              [problemId]: { isBookmarked: true }
+              [problemId]: { isBookmarked: true },
             }));
           } else {
             throw deleteError;
           }
         }
       } else {
-        // Try to add bookmark
         try {
-          await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {}, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
+          await axios.post(
+            `${API_URL}/auth/problems/${problemId}/bookmark`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
 
-          // Update state to bookmarked
-          setBookmarkData(prev => ({
+          setBookmarkData((prev) => ({
             ...prev,
-            [problemId]: { isBookmarked: true }
+            [problemId]: { isBookmarked: true },
           }));
         } catch (postError) {
-          // If post fails (400), it means it was already bookmarked, so try to remove it
           if (postError.response?.status === 400) {
-            await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/bookmark`, {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            });
+            await axios.delete(
+              `${API_URL}/auth/problems/${problemId}/bookmark`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            );
 
-            // Update state to unbookmarked
-            setBookmarkData(prev => ({
+            setBookmarkData((prev) => ({
               ...prev,
-              [problemId]: { isBookmarked: false }
+              [problemId]: { isBookmarked: false },
             }));
           } else {
             throw postError;
           }
         }
       }
-
     } catch (error) {
       console.error("Error toggling bookmark:", error);
       console.error("Error details:", error.response?.data);
-      alert(`Error updating bookmark: ${error.response?.data?.detail || error.message}`);
+      alert(
+        `Error updating bookmark: ${
+          error.response?.data?.detail || error.message
+        }`,
+      );
     }
   };
 
   const handleVote = async (problemId, voteType) => {
-    // Check if voting is enabled
-    if (!checkFeatureEnabled('voting_enabled')) {
-      showFeatureDisabledAlert('Voting');
+    if (!checkFeatureEnabled("voting_enabled")) {
+      showFeatureDisabledAlert("Voting");
       return;
     }
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/problems/${problemId}/vote`,
+
+      const response = await axios.post(
+        `${API_URL}/auth/problems/${problemId}/vote`,
         { vote_type: voteType },
         {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
 
-      // Update vote data for this specific problem
-      setVoteData(prev => ({
+      setVoteData((prev) => ({
         ...prev,
-        [problemId]: response.data
+        [problemId]: response.data,
       }));
     } catch (error) {
       console.error("Error voting:", error);
@@ -446,14 +482,14 @@ function Feed() {
       e.stopPropagation();
     }
 
-    // Check if following is enabled
-    if (!checkFeatureEnabled('following_enabled')) {
-      showFeatureDisabledAlert('Following');
+    if (!checkFeatureEnabled("following_enabled")) {
+      showFeatureDisabledAlert("Following");
       return;
     }
 
     try {
       const token = localStorage.getItem("token");
+
       if (!token) {
         alert("Please log in to follow users");
         return;
@@ -462,15 +498,21 @@ function Feed() {
       const isFollowing = followStatus[authorId];
 
       if (isFollowing) {
-        await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/${authorId}`, {
-          headers: { Authorization: `Bearer ${token}` }
+        await axios.delete(`${API_URL}/auth/follow/${authorId}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        setFollowStatus(prev => ({ ...prev, [authorId]: false }));
+
+        setFollowStatus((prev) => ({ ...prev, [authorId]: false }));
       } else {
-        await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/${authorId}`, {}, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setFollowStatus(prev => ({ ...prev, [authorId]: true }));
+        await axios.post(
+          `${API_URL}/auth/follow/${authorId}`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+
+        setFollowStatus((prev) => ({ ...prev, [authorId]: true }));
       }
     } catch (error) {
       console.error("Error toggling follow:", error);
@@ -478,46 +520,52 @@ function Feed() {
   };
 
   const handleFollowUser = async (authorId) => {
-    // Check if following is enabled
-    if (!checkFeatureEnabled('following_enabled')) {
-      showFeatureDisabledAlert('Following');
+    if (!checkFeatureEnabled("following_enabled")) {
+      showFeatureDisabledAlert("Following");
       return;
     }
 
     try {
       const token = localStorage.getItem("token");
+
       if (!token) {
         alert("Please log in to follow users");
         return;
       }
 
-      await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/${authorId}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setFollowStatus(prev => ({ ...prev, [authorId]: true }));
+      await axios.post(
+        `${API_URL}/auth/follow/${authorId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      setFollowStatus((prev) => ({ ...prev, [authorId]: true }));
     } catch (error) {
       console.error("Error following user:", error);
     }
   };
 
   const handleUnfollowUser = async (authorId) => {
-    // Check if following is enabled
-    if (!checkFeatureEnabled('following_enabled')) {
-      showFeatureDisabledAlert('Following');
+    if (!checkFeatureEnabled("following_enabled")) {
+      showFeatureDisabledAlert("Following");
       return;
     }
 
     try {
       const token = localStorage.getItem("token");
+
       if (!token) {
         alert("Please log in to follow users");
         return;
       }
 
-      await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/follow/${authorId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      await axios.delete(`${API_URL}/auth/follow/${authorId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setFollowStatus(prev => ({ ...prev, [authorId]: false }));
+
+      setFollowStatus((prev) => ({ ...prev, [authorId]: false }));
     } catch (error) {
       console.error("Error unfollowing user:", error);
     }
@@ -532,9 +580,14 @@ function Feed() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/users/search?q=${encodeURIComponent(query)}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+
+      const response = await axios.get(
+        `${API_URL}/auth/users/search?q=${encodeURIComponent(query)}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
       setSearchResults(response.data.users);
       setShowSearchResults(true);
     } catch (error) {
@@ -545,12 +598,13 @@ function Feed() {
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
+
     setSearchQuery(query);
     searchUsers(query);
   };
 
   const handleSearchSubmit = (e) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
+    if (e.key === "Enter" && searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
@@ -558,14 +612,44 @@ function Feed() {
   const fetchCurrentUser = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+
+      const response = await axios.get(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       setCurrentUser(response.data);
     } catch (error) {
       console.error("Error fetching current user:", error);
     }
   };
+
+  const getEmptyStateContent = () => {
+    if (activeTab === "following") {
+      return {
+        title: "You're not following anyone yet",
+        description:
+          "Follow other users to see their problems here. Switch to All Problems to discover people.",
+        buttonText: null,
+      };
+    }
+
+    if (activeTab === "trending") {
+      return {
+        title: "No trending problems yet",
+        description:
+          "Problems with more comments and engagement will appear here.",
+        buttonText: "Create a Problem",
+      };
+    }
+
+    return {
+      title: "No problems yet",
+      description: "Be the first to create a science problem.",
+      buttonText: "Create First Problem",
+    };
+  };
+
+  const emptyState = getEmptyStateContent();
 
   if (showLoading) {
     return (
@@ -581,139 +665,667 @@ function Feed() {
 
   return (
     <Layout showHomeButton={true}>
-      <div style={{
-        width: "100%",
-        maxWidth: "100%",
-        overflow: "hidden",
-        boxSizing: "border-box"
-      }}>
-        <div style={{
-          marginBottom: spacing.xl
-        }}>
-          <h1 style={{
-            fontSize: isMobile ? "1.5rem" : typography.fontSize["3xl"],
-            fontWeight: typography.fontWeight.bold,
-            color: colors.primary,
-            marginBottom: spacing.lg,
-            textAlign: "center"
-          }}>
-            Science Problems Feed
-          </h1>
+      <style>
+        {`
+          .feed-page {
+            width: 100%;
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 8px 0 120px;
+            box-sizing: border-box;
+          }
 
-        </div>
+          .feed-hero {
+            position: relative;
+            overflow: hidden;
+            background:
+              radial-gradient(circle at top right, rgba(26, 77, 58, 0.14), transparent 32%),
+              linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #eef7f2 100%);
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            border-radius: 28px;
+            padding: 34px 34px;
+            margin-bottom: 22px;
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06);
+          }
 
-        {/* Enhanced Search Bar */}
-        <div style={{
-          marginBottom: "20px"
-        }}>
+          .feed-hero::after {
+            content: "";
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border-radius: 999px;
+            right: -90px;
+            bottom: -110px;
+            background: rgba(26, 77, 58, 0.08);
+            filter: blur(6px);
+          }
+
+          .feed-kicker {
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 13px;
+            border-radius: 999px;
+            color: #1a4d3a;
+            background: rgba(26, 77, 58, 0.08);
+            border: 1px solid rgba(26, 77, 58, 0.12);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+          }
+
+          .feed-title {
+            color: #1a4d3a;
+            font-size: 42px;
+            line-height: 1.05;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            margin: 0 0 12px;
+          }
+
+          .feed-subtitle {
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.7;
+            max-width: 690px;
+            margin: 0;
+            font-weight: 500;
+          }
+
+          .feed-search-shell {
+            margin-bottom: 18px;
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(226,232,240,0.95);
+            border-radius: 22px;
+            padding: 12px;
+            box-shadow: 0 12px 30px rgba(15,23,42,0.04);
+            backdrop-filter: blur(12px);
+          }
+
+          .feed-tabs-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 22px;
+            padding: 9px;
+            background: rgba(255,255,255,0.84);
+            border: 1px solid rgba(226,232,240,0.95);
+            border-radius: 22px;
+            box-shadow: 0 14px 40px rgba(15,23,42,0.05);
+            backdrop-filter: blur(12px);
+          }
+
+          .feed-tabs {
+            display: flex;
+            flex: 1;
+            gap: 7px;
+            background: #f1f5f9;
+            border-radius: 17px;
+            padding: 5px;
+          }
+
+          .feed-tab-button {
+            flex: 1;
+            border: none;
+            border-radius: 13px;
+            padding: 11px 12px;
+            cursor: pointer;
+            background: transparent;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 800;
+            transition: all 0.22s ease;
+          }
+
+          .feed-tab-button:hover {
+            color: #1a4d3a;
+            background: rgba(255,255,255,0.7);
+          }
+
+          .feed-tab-button.active {
+            background: #1a4d3a;
+            color: white;
+            box-shadow: 0 10px 20px rgba(26,77,58,0.18);
+          }
+
+          .feed-count {
+            min-width: fit-content;
+            padding: 0 12px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 800;
+          }
+
+          .feed-count strong {
+            color: #1a4d3a;
+          }
+
+          .problem-card {
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 18px;
+            cursor: pointer;
+            border-radius: 26px !important;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+          }
+
+          .problem-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 22px 55px rgba(26,77,58,0.10) !important;
+          }
+
+          .problem-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at top right, rgba(26,77,58,0.08), transparent 28%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+          }
+
+          .problem-card:hover::before {
+            opacity: 1;
+          }
+
+          .problem-author-row {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 18px;
+          }
+
+          .problem-author-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+          }
+
+          .problem-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            background-color: #1a4d3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: 900;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 12px 25px rgba(26,77,58,0.18);
+            border: 2px solid white;
+            outline: 1px solid #e2e8f0;
+            flex-shrink: 0;
+          }
+
+          .problem-author-name {
+            font-weight: 900;
+            font-size: 14px;
+            color: #1a4d3a;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 220px;
+          }
+
+          .problem-author-name:hover {
+            text-decoration: underline;
+          }
+
+          .problem-date {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 700;
+            margin-top: 3px;
+          }
+
+          .problem-title {
+            position: relative;
+            z-index: 1;
+            margin: 0 0 12px;
+            color: #0f172a;
+            font-size: 22px;
+            line-height: 1.32;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            pointer-events: none;
+          }
+
+          .problem-card:hover .problem-title {
+            color: #1a4d3a;
+          }
+
+          .problem-description {
+            position: relative;
+            z-index: 1;
+            color: #475569;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            pointer-events: none;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            font-size: 14px;
+            margin-bottom: 18px;
+          }
+
+          .problem-footer {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            padding-top: 17px;
+            border-top: 1px solid #f1f5f9;
+          }
+
+          .problem-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+          }
+
+          .problem-tag {
+            padding: 6px 11px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            pointer-events: none;
+            border: 1px solid transparent;
+          }
+
+          .tag-subject {
+            background: #e0e7ff;
+            color: #3730a3;
+            border-color: #c7d2fe;
+          }
+
+          .tag-level {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
+          }
+
+          .tag-year {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #bbf7d0;
+          }
+
+          .problem-actions {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex-wrap: wrap;
+          }
+
+          .action-button,
+          .comment-pill,
+          .bookmark-button {
+            height: 40px;
+            border-radius: 14px;
+            padding: 0 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+
+          .action-button:hover,
+          .bookmark-button:hover {
+            background: white;
+            border-color: rgba(26,77,58,0.35);
+            color: #1a4d3a;
+            box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+            transform: translateY(-1px);
+          }
+
+          .action-button.active-like {
+            background: rgba(26,77,58,0.10);
+            border-color: rgba(26,77,58,0.35);
+            color: #1a4d3a;
+          }
+
+          .action-button.active-dislike {
+            background: rgba(118,75,162,0.10);
+            border-color: rgba(118,75,162,0.35);
+            color: rgb(118,75,162);
+          }
+
+          .action-icon {
+            height: 17px;
+            width: 17px;
+            object-fit: contain;
+            pointer-events: none;
+          }
+
+          .bookmark-button.saved {
+            background: #1a4d3a;
+            border-color: #1a4d3a;
+            color: white;
+            box-shadow: 0 12px 24px rgba(26,77,58,0.18);
+          }
+
+          .empty-state {
+            text-align: center;
+            margin-top: 28px;
+            padding: 58px 24px;
+            background:
+              radial-gradient(circle at top, rgba(26,77,58,0.08), transparent 34%),
+              white;
+            border: 1px dashed #cbd5e1;
+            border-radius: 28px;
+            box-shadow: 0 18px 45px rgba(15,23,42,0.05);
+          }
+
+          .empty-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 20px;
+            margin: 0 auto 16px;
+            background: rgba(26,77,58,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a4d3a;
+            font-size: 26px;
+            font-weight: 900;
+          }
+
+          .empty-state h3 {
+            margin: 0 0 8px;
+            color: #0f172a;
+            font-size: 22px;
+          }
+
+          .empty-state p {
+            margin: 0 auto 22px;
+            color: #64748b;
+            max-width: 480px;
+            line-height: 1.6;
+          }
+
+          .empty-create-button {
+            padding: 12px 20px;
+            background: #1a4d3a;
+            color: white;
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 900;
+            box-shadow: 0 14px 28px rgba(26,77,58,0.20);
+            transition: all 0.2s ease;
+          }
+
+          .empty-create-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 34px rgba(26,77,58,0.25);
+          }
+
+          .pagination-shell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            margin-top: 28px;
+            padding-bottom: 42px;
+            flex-wrap: wrap;
+          }
+
+          .pagination-text {
+            padding: 10px 16px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 999px;
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 800;
+            box-shadow: 0 8px 22px rgba(15,23,42,0.04);
+          }
+
+          .fab-link {
+            text-decoration: none;
+          }
+
+          .create-fab {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 1000;
+            height: 62px;
+            width: 62px;
+            background: #1a4d3a;
+            color: white;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 18px 40px rgba(26,77,58,0.30);
+            transition: width 0.45s cubic-bezier(0.34,1.56,0.64,1),
+              background 0.2s ease,
+              box-shadow 0.2s ease;
+            overflow: hidden;
+            white-space: nowrap;
+          }
+
+          .create-fab:hover {
+            width: 230px;
+            background: #163f31;
+            justify-content: flex-start;
+            padding-left: 22px;
+            box-shadow: 0 22px 50px rgba(26,77,58,0.36);
+          }
+
+          .fab-plus {
+            font-size: 31px;
+            font-weight: 800;
+            line-height: 1;
+            transition: transform 0.35s ease;
+          }
+
+          .create-fab:hover .fab-plus {
+            transform: rotate(90deg);
+          }
+
+          .fab-text {
+            margin-left: 12px;
+            font-size: 14px;
+            font-weight: 900;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: all 0.22s ease 0.08s;
+          }
+
+          .create-fab:hover .fab-text {
+            opacity: 1;
+            transform: translateX(0);
+          }
+
+          @media (max-width: 768px) {
+            .feed-page {
+              padding: 0 0 110px;
+            }
+
+            .feed-hero {
+              padding: 24px 20px;
+              border-radius: 24px;
+            }
+
+            .feed-title {
+              font-size: 30px;
+            }
+
+            .feed-subtitle {
+              font-size: 14px;
+            }
+
+            .feed-tabs-card {
+              align-items: stretch;
+              flex-direction: column;
+            }
+
+            .feed-count {
+              padding: 2px 8px 6px;
+              text-align: center;
+            }
+
+            .feed-tab-button {
+              font-size: 11px;
+              padding: 10px 6px;
+            }
+
+            .problem-author-row {
+              align-items: flex-start;
+            }
+
+            .problem-title {
+              font-size: 18px;
+            }
+
+            .problem-footer {
+              align-items: flex-start;
+              flex-direction: column;
+            }
+
+            .problem-actions {
+              width: 100%;
+              gap: 7px;
+            }
+
+            .action-button,
+            .comment-pill,
+            .bookmark-button {
+              height: 38px;
+              padding: 0 10px;
+              font-size: 12px;
+            }
+
+            .problem-author-name {
+              max-width: 145px;
+            }
+
+            .pagination-shell {
+              padding-bottom: 96px;
+            }
+
+            .pagination-text {
+              order: -1;
+              width: 100%;
+              text-align: center;
+            }
+
+            .create-fab {
+              bottom: 22px;
+              right: 20px;
+              height: 58px;
+              width: 58px;
+            }
+
+            .create-fab:hover {
+              width: 205px;
+            }
+          }
+        `}
+      </style>
+
+      <div className="feed-page">
+        {/* Hero Section */}
+        <section className="feed-hero">
+          <div className="feed-kicker">
+            <span>◆</span>
+            <span>Science Practice Hub</span>
+          </div>
+
+          <h1 className="feed-title">Science Problems Feed</h1>
+
+          <p className="feed-subtitle">
+            Explore olympiad-style science problems, follow strong problem
+            creators, save useful questions, and discuss solutions with the
+            community.
+          </p>
+        </section>
+
+        {/* Search */}
+        <div className="feed-search-shell">
           <SearchBar placeholder="Search problems, users, tags, levels..." />
         </div>
-        {/* Removed old search results - now handled by SearchBar component */}
 
-        {/* Tab Navigation */}
-        <div style={{
-          display: "flex",
-          marginBottom: spacing.lg,
-          backgroundColor: colors.white,
-          borderRadius: borderRadius.md,
-          overflow: "hidden",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-          border: `1px solid ${colors.gray[200]}`
-        }}>
-          <button
-            onClick={() => setActiveTab("all")}
-            style={{
-              flex: 1,
-              padding: isMobile ? "10px 2px" : `${spacing.sm} ${spacing.md}`,
-              border: "none",
-              backgroundColor: activeTab === "all" ? colors.primary : "transparent",
-              color: activeTab === "all" ? colors.white : colors.gray[600],
-              cursor: "pointer",
-              fontWeight: activeTab === "all" ? typography.fontWeight.bold : typography.fontWeight.medium,
-              transition: "all 0.2s ease",
-              fontSize: isMobile ? "11px" : typography.fontSize.base
-            }}
-          >
-            All Problems
-          </button>
-          <button
-            onClick={() => setActiveTab("following")}
-            style={{
-              flex: 1,
-              padding: isMobile ? "10px 2px" : `${spacing.sm} ${spacing.md}`,
-              border: "none",
-              backgroundColor: activeTab === "following" ? colors.primary : "transparent",
-              color: activeTab === "following" ? colors.white : colors.gray[600],
-              cursor: "pointer",
-              fontWeight: activeTab === "following" ? typography.fontWeight.bold : typography.fontWeight.medium,
-              transition: "all 0.2s ease",
-              fontSize: isMobile ? "11px" : typography.fontSize.base
-            }}
-          >
-            Following
-          </button>
-          <button
-            onClick={() => setActiveTab("trending")}
-            style={{
-              flex: 1,
-              padding: isMobile ? "10px 2px" : `${spacing.sm} ${spacing.md}`,
-              border: "none",
-              backgroundColor: activeTab === "trending" ? colors.primary : "transparent",
-              color: activeTab === "trending" ? colors.white : colors.gray[600],
-              cursor: "pointer",
-              fontWeight: activeTab === "trending" ? typography.fontWeight.bold : typography.fontWeight.medium,
-              transition: "all 0.2s ease",
-              fontSize: isMobile ? "11px" : typography.fontSize.base
-            }}
-          >
-            Trending
-          </button>
-        </div>
+        {/* Tabs */}
+        <section className="feed-tabs-card">
+          <div className="feed-tabs">
+            <button
+              onClick={() => setActiveTab("all")}
+              className={`feed-tab-button ${activeTab === "all" ? "active" : ""}`}
+            >
+              All Problems
+            </button>
+
+            <button
+              onClick={() => setActiveTab("following")}
+              className={`feed-tab-button ${
+                activeTab === "following" ? "active" : ""
+              }`}
+            >
+              Following
+            </button>
+
+            <button
+              onClick={() => setActiveTab("trending")}
+              className={`feed-tab-button ${
+                activeTab === "trending" ? "active" : ""
+              }`}
+            >
+              Trending
+            </button>
+          </div>
+
+          <div className="feed-count">
+            <strong>{problems.length}</strong>{" "}
+            {problems.length === 1 ? "problem" : "problems"} shown
+          </div>
+        </section>
 
         {problems.length === 0 ? (
-          <div style={{ textAlign: "center", marginTop: "50px" }}>
-            {activeTab === "all" && (
-              <>
-                <h3>No problems yet!</h3>
-                <p>Be the first to create a science problem.</p>
-                <Link to="/create-problem?from=/feed">
-                  <button style={{
-                    padding: "10px 20px",
-                    backgroundColor: "#28a745",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer"
-                  }}>
-                    Create First Problem
-                  </button>
-                </Link>
-              </>
-            )}
-            {activeTab === "following" && (
-              <>
-                <h3>You're not following anyone yet!</h3>
-                <p>Follow other users to see their problems in your feed.</p>
-                <p>Switch to "All Problems" to discover users to follow.</p>
-              </>
-            )}
-            {activeTab === "trending" && (
-              <>
-                <h3>No trending problems yet!</h3>
-                <p>Problems with more comments and engagement will appear here.</p>
-                <Link to="/create-problem?from=/feed">
-                  <button style={{
-                    padding: "10px 20px",
-                    backgroundColor: "#28a745",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer"
-                  }}>
-                    Create a Problem
-                  </button>
-                </Link>
-              </>
+          <div className="empty-state">
+            <div className="empty-icon">Σ</div>
+
+            <h3>{emptyState.title}</h3>
+
+            <p>{emptyState.description}</p>
+
+            {emptyState.buttonText && (
+              <Link to="/create-problem?from=/feed">
+                <button className="empty-create-button">
+                  {emptyState.buttonText}
+                </button>
+              </Link>
             )}
           </div>
         ) : (
@@ -722,52 +1334,44 @@ function Feed() {
               <Card
                 key={problem.id}
                 hover={true}
+                className="problem-card"
                 style={{
                   marginBottom: spacing.lg,
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  border: "1px solid rgba(226,232,240,0.95)",
+                  boxShadow: "0 14px 36px rgba(15,23,42,0.05)",
+                  background: "rgba(255,255,255,0.96)",
                 }}
-                onClick={() => navigate(`/problem/${problem.id}?from=feed&tab=${activeTab}`)}
+                onClick={() =>
+                  navigate(`/problem/${problem.id}?from=feed&tab=${activeTab}`)
+                }
               >
-                {/* Author Info Section - Twitter Style */}
                 {problem.author ? (
-                  <div style={{ display: "flex", alignItems: "center", marginBottom: "15px", gap: "10px" }}>
-                    {/* Profile Picture */}
-                    <div style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      backgroundColor: "#1a4d3a",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "white",
-                      fontSize: "16px",
-                      fontWeight: "bold",
-                      backgroundImage: problem.author.profile_picture ? `url(${problem.author.profile_picture})` : "none",
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      pointerEvents: "none"
-                    }}>
-                      {!problem.author.profile_picture && getUserInitial(problem.author.username)}
-                    </div>
+                  <div className="problem-author-row">
+                    <div className="problem-author-main">
+                      <div
+                        className="problem-avatar"
+                        style={{
+                          backgroundImage: problem.author.profile_picture
+                            ? `url(${problem.author.profile_picture})`
+                            : "none",
+                        }}
+                      >
+                        {!problem.author.profile_picture &&
+                          getUserInitial(problem.author.username)}
+                      </div>
 
-                    {/* Author Name and Follow Button */}
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
-                      <div style={{ pointerEvents: "none" }}>
+                      <div style={{ minWidth: 0 }}>
                         <div
-                          style={{
-                            fontWeight: "bold",
-                            fontSize: "14px",
-                            color: "#1a4d3a",
-                            cursor: "pointer",
-                            textDecoration: "underline",
-                            pointerEvents: "auto"
-                          }}
+                          className="problem-author-name"
                           onClick={(e) => {
-                            e.stopPropagation(); // Prevent bubbling to problem card
-                            // If it's the current user, go to their own profile page
-                            if (currentUser && problem.author.id === currentUser.id) {
-                              navigate('/profile');
+                            e.stopPropagation();
+
+                            if (
+                              currentUser &&
+                              problem.author.id === currentUser.id
+                            ) {
+                              navigate("/profile");
                             } else {
                               navigate(`/user/${problem.author.username}`);
                             }
@@ -775,316 +1379,178 @@ function Feed() {
                         >
                           {getDisplayName(problem.author.username)}
                         </div>
-                        <div style={{ fontSize: "12px", color: "#666" }}>
+
+                        <div className="problem-date">
                           {new Date(problem.created_at).toLocaleDateString()}
                         </div>
                       </div>
+                    </div>
 
-                      {/* Follow Button - Hide for own posts */}
-                      {currentUser && problem.author.id !== currentUser.id && (
+                    {currentUser && problem.author.id !== currentUser.id && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ flexShrink: 0 }}
+                      >
                         <FollowButton
                           isFollowing={followStatus[problem.author.id]}
                           onFollow={() => handleFollowUser(problem.author.id)}
-                          onUnfollow={() => handleUnfollowUser(problem.author.id)}
+                          onUnfollow={() =>
+                            handleUnfollowUser(problem.author.id)
+                          }
                           size="sm"
                           style={{ marginLeft: "auto" }}
-                          isDeletedUser={problem.author.username.startsWith('__deleted_user_')}
+                          isDeletedUser={problem.author.username.startsWith(
+                            "__deleted_user_",
+                          )}
                         />
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <div style={{ display: "flex", alignItems: "center", marginBottom: "15px", gap: "10px" }}>
-                    <div style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      backgroundColor: "#6c757d",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "white",
-                      fontSize: "16px",
-                      fontWeight: "bold"
-                    }}>
-                      ?
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: "bold", fontSize: "14px", color: "#333" }}>
-                        Unknown Author
+                  <div className="problem-author-row">
+                    <div className="problem-author-main">
+                      <div
+                        className="problem-avatar"
+                        style={{
+                          backgroundColor: "#64748b",
+                          boxShadow: "0 12px 25px rgba(100,116,139,0.18)",
+                        }}
+                      >
+                        ?
                       </div>
-                      <div style={{ fontSize: "12px", color: "#666" }}>
-                        {new Date(problem.created_at).toLocaleDateString()}
+
+                      <div>
+                        <div
+                          style={{
+                            fontWeight: 900,
+                            fontSize: "14px",
+                            color: "#334155",
+                          }}
+                        >
+                          Unknown Author
+                        </div>
+
+                        <div className="problem-date">
+                          {new Date(problem.created_at).toLocaleDateString()}
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                <h3 style={{
-                  marginTop: 0,
-                  color: "#333",
-                  pointerEvents: "none",
-                  wordWrap: "break-word",
-                  overflowWrap: "break-word",
-                  maxWidth: "100%"
-                }}>{renderMathContent(problem.title)}</h3>
-                <div style={{
-                  color: "#666",
-                  lineHeight: "1.5",
-                  whiteSpace: "pre-wrap",
-                  pointerEvents: "none",
-                  wordWrap: "break-word",
-                  overflowWrap: "break-word",
-                  maxWidth: "100%"
-                }}>{renderMathContent(problem.description)}</div>
-                <div style={{
-                  display: "flex",
-                  gap: isMobile ? "4px" : "10px",
-                  marginTop: "15px",
-                  alignItems: isMobile ? "flex-start" : "center",
-                  flexWrap: isMobile ? "wrap" : "nowrap",
-                  flexDirection: isMobile ? "column" : "row",
-                  width: "100%",
-                  boxSizing: "border-box"
-                }}>
-                  <div style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: isMobile ? "4px" : "8px",
-                    marginBottom: isMobile ? "8px" : "0"
-                  }}>
-                    <span style={{
-                      backgroundColor: "#e0e7ff",
-                      color: "#3730a3",
-                      padding: isMobile ? "3px 6px" : "6px 12px",
-                      borderRadius: "16px",
-                      fontSize: isMobile ? "9px" : "12px",
-                      fontWeight: "600",
-                      boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
-                      transition: "all 0.2s ease",
-                      pointerEvents: "none"
-                    }}>
-                      {problem.subject}
-                    </span>
+                <h3 className="problem-title">
+                  {renderMathContent(problem.title)}
+                </h3>
+
+                <div className="problem-description">
+                  {renderMathContent(problem.description)}
+                </div>
+
+                <div className="problem-footer">
+                  <div className="problem-tags">
+                    {problem.subject && (
+                      <span className="problem-tag tag-subject">
+                        {problem.subject}
+                      </span>
+                    )}
+
                     {problem.level && problem.level.trim() && (
-                      <span style={{
-                        backgroundColor: "#fef3c7",
-                        color: "#92400e",
-                        padding: isMobile ? "3px 6px" : "6px 12px",
-                        borderRadius: "16px",
-                        fontSize: isMobile ? "9px" : "12px",
-                        fontWeight: "600",
-                        boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
-                        transition: "all 0.2s ease",
-                        pointerEvents: "none"
-                      }}>
+                      <span className="problem-tag tag-level">
                         {problem.level}
                       </span>
                     )}
+
                     {problem.year && (
-                      <span style={{
-                        backgroundColor: "#dcfce7",
-                        color: "#166534",
-                        padding: isMobile ? "3px 6px" : "6px 12px",
-                        borderRadius: "16px",
-                        fontSize: isMobile ? "9px" : "12px",
-                        fontWeight: "600",
-                        boxShadow: "0 2px 6px rgba(26, 77, 58, 0.2)",
-                        transition: "all 0.2s ease",
-                        pointerEvents: "none"
-                      }}>
-                        Year: {problem.year}
+                      <span className="problem-tag tag-year">
+                        Year {problem.year}
                       </span>
                     )}
                   </div>
 
-                  {/* Like, Dislike, Comment - Left Side */}
-                  <div style={{
-                    display: "flex",
-                    gap: isMobile ? "8px" : "12px",
-                    alignItems: "center"
-                  }}>
-                    {/* Like Button */}
+                  <div className="problem-actions">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleVote(problem.id, "like");
                       }}
-                      style={{
-                        backgroundColor: voteData[problem.id]?.user_vote === "like" ? "rgba(26, 77, 58, 0.1)" : "#f8f9fa",
-                        border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
-                        cursor: "pointer",
-                        fontSize: isMobile ? "12px" : "14px",
-                        color: voteData[problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#666",
-                        fontWeight: voteData[problem.id]?.user_vote === "like" ? "bold" : "500",
-                        padding: isMobile ? "8px 12px" : "10px 16px",
-                        borderRadius: "8px",
-                        transition: "all 0.2s ease",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: isMobile ? "6px" : "8px"
-                      }}
-                      onMouseEnter={(e) => {
-                        if (voteData[problem.id]?.user_vote !== "like") {
-                          e.target.style.backgroundColor = "#e9ecef";
-                          e.target.style.borderColor = "#adb5bd";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (voteData[problem.id]?.user_vote !== "like") {
-                          e.target.style.backgroundColor = "#f8f9fa";
-                          e.target.style.borderColor = "#dee2e6";
-                        }
-                      }}
+                      className={`action-button ${
+                        voteData[problem.id]?.user_vote === "like"
+                          ? "active-like"
+                          : ""
+                      }`}
                     >
                       <img
                         src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg"
                         alt="Like"
-                        style={{
-                          height: isMobile ? "14px" : "18px",
-                          width: isMobile ? "14px" : "18px",
-                          objectFit: "contain"
-                        }}
+                        className="action-icon"
                       />
                       {voteData[problem.id]?.like_count || 0}
                     </button>
 
-                    {/* Dislike Button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleVote(problem.id, "dislike");
                       }}
-                      style={{
-                        backgroundColor: voteData[problem.id]?.user_vote === "dislike" ? "rgba(118, 75, 162, 0.1)" : "#f8f9fa",
-                        border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
-                        cursor: "pointer",
-                        fontSize: isMobile ? "12px" : "14px",
-                        color: voteData[problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#666",
-                        fontWeight: voteData[problem.id]?.user_vote === "dislike" ? "bold" : "500",
-                        padding: isMobile ? "8px 12px" : "10px 16px",
-                        borderRadius: "8px",
-                        transition: "all 0.2s ease",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: isMobile ? "6px" : "8px"
-                      }}
-                      onMouseEnter={(e) => {
-                        if (voteData[problem.id]?.user_vote !== "dislike") {
-                          e.target.style.backgroundColor = "#e9ecef";
-                          e.target.style.borderColor = "#adb5bd";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (voteData[problem.id]?.user_vote !== "dislike") {
-                          e.target.style.backgroundColor = "#f8f9fa";
-                          e.target.style.borderColor = "#dee2e6";
-                        }
-                      }}
+                      className={`action-button ${
+                        voteData[problem.id]?.user_vote === "dislike"
+                          ? "active-dislike"
+                          : ""
+                      }`}
                     >
                       <img
                         src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg"
                         alt="Dislike"
-                        style={{
-                          height: isMobile ? "14px" : "18px",
-                          width: isMobile ? "14px" : "18px",
-                          objectFit: "contain"
-                        }}
+                        className="action-icon"
                       />
                       {voteData[problem.id]?.dislike_count || 0}
                     </button>
 
-                    {/* Comment Count */}
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: isMobile ? "6px" : "8px",
-                      padding: isMobile ? "8px 12px" : "10px 16px",
-                      backgroundColor: "#f8f9fa",
-                      borderRadius: "8px",
-                      border: "1px solid #dee2e6"
-                    }}>
+                    <div className="comment-pill">
                       <img
                         src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg"
                         alt="Comments"
-                        style={{
-                          height: isMobile ? "14px" : "18px",
-                          width: isMobile ? "14px" : "18px",
-                          objectFit: "contain"
-                        }}
+                        className="action-icon"
                       />
-                      <span style={{
-                        fontSize: isMobile ? "12px" : "14px",
-                        color: "#666",
-                        fontWeight: "500"
-                      }}>
-                        {problem.comment_count || 0}
-                      </span>
+                      <span>{problem.comment_count || 0}</span>
                     </div>
-                  </div>
 
-                  {/* Bookmark - Right Side */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleBookmark(problem.id);
-                    }}
-                    style={{
-                      padding: isMobile ? "8px 12px" : "10px 16px",
-                      backgroundColor: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: isMobile ? "6px" : "8px",
-                      borderRadius: "8px",
-                      transition: "all 0.2s ease"
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = "#f8f9fa";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = "transparent";
-                    }}
-                  >
-                    <img
-                      src={bookmarkData[problem.id]?.isBookmarked
-                        ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
-                        : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
-                      }
-                      alt="Bookmark"
-                      style={{
-                        height: isMobile ? "16px" : "20px",
-                        width: isMobile ? "16px" : "20px",
-                        objectFit: "contain"
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBookmark(problem.id);
                       }}
-                    />
-                    <span style={{
-                      fontSize: isMobile ? "12px" : "14px",
-                      color: bookmarkData[problem.id]?.isBookmarked ? "rgb(26, 77, 58)" : "#666",
-                      fontWeight: "500"
-                    }}>
-                      {bookmarkData[problem.id]?.isBookmarked ? "Saved" : "Save"}
-                    </span>
-                  </button>
+                      className={`bookmark-button ${
+                        bookmarkData[problem.id]?.isBookmarked ? "saved" : ""
+                      }`}
+                    >
+                      <img
+                        src={
+                          bookmarkData[problem.id]?.isBookmarked
+                            ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
+                            : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797443/Save_UNFULL_Icon_Green_wvn6qk.svg"
+                        }
+                        alt="Bookmark"
+                        className="action-icon"
+                      />
+
+                      <span>
+                        {bookmarkData[problem.id]?.isBookmarked
+                          ? "Saved"
+                          : "Save"}
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </Card>
             ))}
           </div>
-        )
-        }
+        )}
 
         {/* Pagination */}
-        {
-          (activeTab === "all" || activeTab === "trending") && totalPages > 1 && (
-            <div style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: spacing.md,
-              marginTop: spacing.xl,
-              paddingBottom: isMobile ? "100px" : "40px" // Added padding to prevent FAB overlap
-            }}>
+        {(activeTab === "all" || activeTab === "trending") &&
+          totalPages > 1 && (
+            <div className="pagination-shell">
               <Button
                 onClick={() => {
                   if (activeTab === "trending") {
@@ -1100,13 +1566,8 @@ function Feed() {
                 ← Previous
               </Button>
 
-              <span style={{
-                padding: `0 ${spacing.lg}`,
-                fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.base,
-                color: colors.gray[600],
-                fontWeight: typography.fontWeight.medium
-              }}>
-                Page {currentPage} of {totalPages} ({totalProblems} total problems)
+              <span className="pagination-text">
+                Page {currentPage} of {totalPages} · {totalProblems} total
               </span>
 
               <Button
@@ -1124,62 +1585,17 @@ function Feed() {
                 Next →
               </Button>
             </div>
-          )
-        }
+          )}
 
-        {/* Enhanced Floating Create Problem Button */}
-        <div style={{
-          position: "fixed",
-          bottom: spacing.xl,
-          right: spacing.xl,
-          zIndex: 1000
-        }}>
-          <Link to="/create-problem?from=/feed" style={{ textDecoration: "none" }}>
-            <div style={{
-              width: "60px",
-              height: "60px",
-              backgroundColor: colors.primary,
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-              transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-              fontSize: "24px",
-              color: colors.white,
-              fontWeight: typography.fontWeight.bold,
-              overflow: "hidden",
-              whiteSpace: "nowrap",
-              position: "relative"
-            }}
-              onMouseEnter={(e) => {
-                e.target.style.width = "220px";
-                e.target.style.borderRadius = "30px";
-                e.target.style.justifyContent = "flex-start";
-                e.target.style.paddingLeft = "20px";
-                e.target.style.backgroundColor = colors.secondary;
-                e.target.style.boxShadow = "0 6px 25px rgba(0,0,0,0.2)";
-                e.target.innerHTML = '<span style="font-size: 16px;">Create New Problem</span><span style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 24px;">+</span>';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.width = "60px";
-                e.target.style.borderRadius = "50%";
-                e.target.style.justifyContent = "center";
-                e.target.style.paddingLeft = "0px";
-                e.target.style.backgroundColor = colors.primary;
-                e.target.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
-                e.target.innerHTML = '+';
-              }}
-              title="Create New Problem"
-            >
-              +
-            </div>
-          </Link>
-        </div>
-
-      </div >
-    </Layout >
+        {/* Floating Create Problem Button */}
+        <Link to="/create-problem?from=/feed" className="fab-link">
+          <div className="create-fab" title="Create New Problem">
+            <span className="fab-plus">+</span>
+            <span className="fab-text">Create Problem</span>
+          </div>
+        </Link>
+      </div>
+    </Layout>
   );
 }
 
