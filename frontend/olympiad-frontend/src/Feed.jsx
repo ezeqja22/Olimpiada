@@ -189,21 +189,26 @@ function Feed() {
     }
   };
 
-  const fetchFollowingProblems = async () => {
+  const fetchFollowingProblems = async (page = 1) => {
     setLoading(true);
 
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.get(`${API_URL}/auth/feed/following`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await axios.get(
+        `${API_URL}/auth/feed/following?page=${page}&limit=10`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       const allProblems = Array.isArray(response.data.problems)
         ? response.data.problems
-        : [];
+        : Array.isArray(response.data)
+          ? response.data
+          : [];
 
       const filteredProblems = allProblems.filter((problem) => {
         if (problem.forum_id === null || problem.forum_id === undefined) {
@@ -214,6 +219,13 @@ function Feed() {
       });
 
       setProblems(filteredProblems);
+      setCurrentPage(page);
+      setTotalPages(response.data.total_pages || 1);
+      setTotalProblems(
+        response.data.total_problems ||
+          response.data.total ||
+          filteredProblems.length,
+      );
 
       if (filteredProblems.length > 0) {
         const problemIds = filteredProblems.map((problem) => problem.id);
@@ -225,6 +237,9 @@ function Feed() {
     } catch (error) {
       console.error("Error fetching following problems:", error);
       setProblems([]);
+      setCurrentPage(1);
+      setTotalPages(1);
+      setTotalProblems(0);
     } finally {
       setLoading(false);
     }
@@ -675,6 +690,104 @@ function Feed() {
             box-sizing: border-box;
           }
 
+          .feed-mini-banner {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 18px;
+            padding: 22px 24px;
+            border-radius: 24px;
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            background:
+              radial-gradient(circle at top right, rgba(26, 77, 58, 0.10), transparent 34%),
+              linear-gradient(135deg, #ffffff 0%, #f8fafc 72%, #eef7f2 100%);
+            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.05);
+          }
+
+          .feed-mini-banner-content {
+            position: relative;
+            z-index: 1;
+            min-width: 0;
+          }
+
+          .feed-mini-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #1a4d3a;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+          }
+
+          .feed-mini-kicker-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: #1a4d3a;
+            box-shadow: 0 0 0 4px rgba(26, 77, 58, 0.10);
+          }
+
+          .feed-mini-title {
+            margin: 0;
+            color: #0f172a;
+            font-size: 27px;
+            line-height: 1.15;
+            font-weight: 950;
+            letter-spacing: -0.035em;
+          }
+
+          .feed-mini-subtitle {
+            margin: 7px 0 0;
+            max-width: 680px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.65;
+            font-weight: 550;
+          }
+
+          .feed-mini-stats {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+          }
+
+          .feed-mini-stat {
+            min-width: 88px;
+            padding: 12px 14px;
+            border-radius: 18px;
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            background: rgba(255, 255, 255, 0.78);
+            text-align: center;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+          }
+
+          .feed-mini-stat-value {
+            display: block;
+            color: #1a4d3a;
+            font-size: 18px;
+            font-weight: 950;
+            line-height: 1;
+          }
+
+          .feed-mini-stat-label {
+            display: block;
+            margin-top: 5px;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+          }
+
           .feed-hero {
             position: relative;
             overflow: hidden;
@@ -1115,86 +1228,140 @@ function Feed() {
           }
 
 .create-fab {
-  position: fixed;
-  bottom: 28px;
-  right: 28px;
-  z-index: 1000;
-  height: 62px;
-  width: 62px;
-  background: #1a4d3a;
-  color: #ffffff;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 18px 40px rgba(26,77,58,0.30);
-  transition: width 0.45s cubic-bezier(0.34,1.56,0.64,1),
-    background 0.2s ease,
-    box-shadow 0.2s ease;
-  overflow: hidden;
-  white-space: nowrap;
-}
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 1000;
+            height: 62px;
+            width: 62px;
+            background: #1a4d3a;
+            color: #ffffff;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 18px 40px rgba(26,77,58,0.30);
+            transition: width 0.45s cubic-bezier(0.34,1.56,0.64,1),
+              background 0.2s ease,
+              box-shadow 0.2s ease,
+              padding-left 0.2s ease;
+            overflow: hidden;
+            white-space: nowrap;
+          }
 
-.create-fab::before {
-  content: "+";
-  color: #ffffff;
-  font-size: 34px;
-  font-weight: 800;
-  line-height: 1;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -52%);
-  transition: all 0.3s ease;
-}
+          .create-fab:hover {
+            width: 230px;
+            background: #163f31;
+            justify-content: flex-start;
+            padding-left: 22px;
+            box-shadow: 0 22px 50px rgba(26,77,58,0.36);
+          }
 
-.create-fab:hover {
-  width: 230px;
-  background: #163f31;
-  justify-content: flex-start;
-  padding-left: 22px;
-  box-shadow: 0 22px 50px rgba(26,77,58,0.36);
-}
+          .fab-plus {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 62px;
+            min-width: 62px;
+            height: 62px;
+            color: #ffffff;
+            font-size: 34px;
+            font-weight: 900;
+            line-height: 1;
+            transition: transform 0.35s ease;
+          }
 
-.create-fab:hover::before {
-  left: 28px;
-  transform: translateY(-52%) rotate(90deg);
-}
+          .create-fab:hover .fab-plus {
+            transform: rotate(90deg);
+          }
 
-.fab-plus {
-  display: none;
-}
+          .fab-text {
+            margin-left: 0;
+            padding-right: 20px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 900;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: all 0.22s ease 0.08s;
+          }
 
-.fab-text {
-  margin-left: 42px;
-  font-size: 14px;
-  font-weight: 900;
-  opacity: 0;
-  transform: translateX(-8px);
-  transition: all 0.22s ease 0.08s;
-}
+          .create-fab:hover .fab-text {
+            opacity: 1;
+            transform: translateX(0);
+          }
 
-.create-fab:hover .fab-text {
-  opacity: 1;
-  transform: translateX(0);
-}
+          @media (max-width: 768px) {
+            .feed-mini-banner {
+              flex-direction: column;
+              align-items: flex-start;
+              padding: 20px;
+              border-radius: 22px;
+            }
 
-@media (max-width: 768px) {
-  .create-fab {
-    bottom: 22px;
-    right: 20px;
-    height: 58px;
-    width: 58px;
-  }
+            .feed-mini-title {
+              font-size: 23px;
+            }
 
-  .create-fab:hover {
-    width: 205px;
-  }
-}
+            .feed-mini-stats {
+              width: 100%;
+            }
+
+            .feed-mini-stat {
+              flex: 1;
+              min-width: 0;
+            }
+
+            .create-fab {
+              bottom: 22px;
+              right: 20px;
+              height: 58px;
+              width: 58px;
+            }
+
+            .create-fab:hover {
+              width: 205px;
+            }
+
+            .fab-plus {
+              width: 58px;
+              min-width: 58px;
+              height: 58px;
+            }
+          }
         `}
       </style>
 
       <div className="feed-page">
+        {/* Minimal Feed Banner */}
+        <section className="feed-mini-banner">
+          <div className="feed-mini-banner-content">
+            <div className="feed-mini-kicker">
+              <span className="feed-mini-kicker-dot" />
+              <span>Science Practice Hub</span>
+            </div>
+
+            <h1 className="feed-mini-title">Science Problems Feed</h1>
+
+            <p className="feed-mini-subtitle">
+              Explore olympiad-style science problems, follow strong creators,
+              save useful questions, and discuss solutions with the community.
+            </p>
+          </div>
+
+          <div className="feed-mini-stats">
+            <div className="feed-mini-stat">
+              <span className="feed-mini-stat-value">{problems.length}</span>
+              <span className="feed-mini-stat-label">Shown</span>
+            </div>
+
+            <div className="feed-mini-stat">
+              <span className="feed-mini-stat-value">{activeTab}</span>
+              <span className="feed-mini-stat-label">Feed</span>
+            </div>
+          </div>
+        </section>
+
         {/* Search */}
         <div className="feed-search-shell">
           <SearchBar placeholder="Search problems, users, tags, levels..." />
@@ -1471,44 +1638,47 @@ function Feed() {
         )}
 
         {/* Pagination */}
-        {(activeTab === "all" || activeTab === "trending") &&
-          totalPages > 1 && (
-            <div className="pagination-shell">
-              <Button
-                onClick={() => {
-                  if (activeTab === "trending") {
-                    fetchTrendingProblems(currentPage - 1);
-                  } else {
-                    fetchProblems(currentPage - 1);
-                  }
-                }}
-                disabled={currentPage === 1}
-                variant={currentPage === 1 ? "ghost" : "primary"}
-                size="md"
-              >
-                ← Previous
-              </Button>
+        {totalPages > 1 && (
+          <div className="pagination-shell">
+            <Button
+              onClick={() => {
+                if (activeTab === "trending") {
+                  fetchTrendingProblems(currentPage - 1);
+                } else if (activeTab === "following") {
+                  fetchFollowingProblems(currentPage - 1);
+                } else {
+                  fetchProblems(currentPage - 1);
+                }
+              }}
+              disabled={currentPage === 1}
+              variant={currentPage === 1 ? "ghost" : "primary"}
+              size="md"
+            >
+              ← Previous
+            </Button>
 
-              <span className="pagination-text">
-                Page {currentPage} of {totalPages} · {totalProblems} total
-              </span>
+            <span className="pagination-text">
+              Page {currentPage} of {totalPages} · {totalProblems} total
+            </span>
 
-              <Button
-                onClick={() => {
-                  if (activeTab === "trending") {
-                    fetchTrendingProblems(currentPage + 1);
-                  } else {
-                    fetchProblems(currentPage + 1);
-                  }
-                }}
-                disabled={currentPage === totalPages}
-                variant={currentPage === totalPages ? "ghost" : "primary"}
-                size="md"
-              >
-                Next →
-              </Button>
-            </div>
-          )}
+            <Button
+              onClick={() => {
+                if (activeTab === "trending") {
+                  fetchTrendingProblems(currentPage + 1);
+                } else if (activeTab === "following") {
+                  fetchFollowingProblems(currentPage + 1);
+                } else {
+                  fetchProblems(currentPage + 1);
+                }
+              }}
+              disabled={currentPage === totalPages}
+              variant={currentPage === totalPages ? "ghost" : "primary"}
+              size="md"
+            >
+              Next →
+            </Button>
+          </div>
+        )}
 
         {/* Floating Create Problem Button */}
         <Link to="/create-problem?from=/feed" className="fab-link">
