@@ -1,4 +1,4 @@
-/* Minimal modern ProblemDetail page replacement */
+/* Clean minimal ProblemDetail page replacement - V3 */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/img-redundant-alt */
@@ -326,19 +326,18 @@ const CommentThread = ({
         style={{
           position: "relative",
           overflow: "hidden",
-          backgroundColor: comment.is_solution ? "#f0fdf4" : ui.card,
-          border: comment.is_solution
-            ? `2px solid ${ui.primary}`
+          backgroundColor: ui.card,
+          border: `1px solid ${comment.is_solution ? ui.primaryBorder : ui.border}`,
+          borderLeft: comment.is_solution
+            ? `4px solid ${ui.primary}`
             : `1px solid ${ui.border}`,
           borderRadius: isNested ? "14px" : "16px",
-          boxShadow: comment.is_solution
-            ? "0 6px 18px rgba(26, 77, 58, 0.08)"
-            : "0 3px 10px rgba(15, 23, 42, 0.05)",
+          boxShadow: "0 2px 8px rgba(15, 23, 42, 0.05)",
         }}
       >
         <div
           style={{
-            height: "2px",
+            height: "0px",
             background: comment.is_solution
               ? `linear-gradient(90deg, ${ui.primary}, #22c55e)`
               : `linear-gradient(90deg, ${ui.primary}, ${ui.purple})`,
@@ -484,7 +483,7 @@ const CommentThread = ({
                   style={{
                     color: ui.text,
                     lineHeight: 1.75,
-                    fontSize: isMobile ? "14px" : "15px",
+                    fontSize: isMobile ? "15px" : "15px",
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
                     marginTop: "10px",
@@ -587,12 +586,12 @@ const CommentThread = ({
                       padding: "8px 12px",
                       fontSize: "12px",
                       backgroundColor: comment.is_solution
-                        ? ui.dangerSoft
-                        : ui.primary,
-                      color: comment.is_solution ? "#991b1b" : "white",
+                        ? "#fff7ed"
+                        : ui.primarySoft,
+                      color: comment.is_solution ? "#9a3412" : ui.primary,
                       border: comment.is_solution
-                        ? "1px solid #fecaca"
-                        : `1px solid ${ui.primary}`,
+                        ? "1px solid #fed7aa"
+                        : `1px solid ${ui.primaryBorder}`,
                     }}
                   >
                     {comment.is_solution ? "Unmark Solution" : "Mark Solution"}
@@ -1521,7 +1520,7 @@ function ProblemDetail() {
               border: `1px solid ${ui.border}`,
               borderRadius: "18px",
               padding: isMobile ? "18px" : "18px",
-              boxShadow: ui.shadowLg,
+              boxShadow: "0 4px 14px rgba(15, 23, 42, 0.05)",
               marginBottom: "14px",
             }}
           >
@@ -1931,7 +1930,7 @@ function ProblemDetail() {
               backgroundColor: ui.card,
               border: `1px solid ${ui.border}`,
               borderRadius: "18px",
-              boxShadow: ui.shadowLg,
+              boxShadow: "0 4px 14px rgba(15, 23, 42, 0.05)",
               marginBottom: "14px",
             }}
           >
@@ -2271,7 +2270,7 @@ function ProblemDetail() {
             border: `1px solid ${ui.border}`,
             borderRadius: "18px",
             padding: isMobile ? "14px" : "18px",
-            boxShadow: ui.shadowLg,
+            boxShadow: "0 4px 14px rgba(15, 23, 42, 0.05)",
           }}
         >
           <div
@@ -2325,7 +2324,7 @@ function ProblemDetail() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: isMobile ? "1fr" : "auto 1fr auto",
+                gridTemplateColumns: "1fr",
                 gap: "12px",
                 alignItems: "stretch",
                 backgroundColor: "#f8fafc",
@@ -2333,7 +2332,7 @@ function ProblemDetail() {
                   isTextareaFocused ? "rgba(26,77,58,0.42)" : ui.border
                 }`,
                 borderRadius: "16px",
-                padding: "13px",
+                padding: "12px",
                 boxShadow: isTextareaFocused
                   ? "0 2px 10px rgba(26, 77, 58, 0.08)"
                   : "none",
@@ -2344,8 +2343,8 @@ function ProblemDetail() {
               <div
                 style={{
                   display: "flex",
-                  flexDirection: isMobile ? "row" : "column",
-                  alignItems: isMobile ? "center" : "stretch",
+                  flexDirection: "row",
+                  alignItems: "center",
                   gap: "10px",
                 }}
               >
@@ -2366,7 +2365,7 @@ function ProblemDetail() {
                 >
                   <UserAvatar
                     user={currentUser || { username: "User" }}
-                    size={38}
+                    size={34}
                   />
 
                   <span
@@ -2390,7 +2389,7 @@ function ProblemDetail() {
                     display: "flex",
                     gap: "8px",
                     flexWrap: "wrap",
-                    justifyContent: isMobile ? "flex-start" : "center",
+                    justifyContent: "flex-start",
                   }}
                 >
                   <ModernButton
@@ -2442,7 +2441,7 @@ function ProblemDetail() {
                   placeholder="Write a solution idea, question, or comment..."
                   style={{
                     width: "100%",
-                    minHeight: isMobile ? "120px" : "135px",
+                    minHeight: isMobile ? "110px" : "118px",
                     border: "none",
                     outline: "none",
                     resize: "vertical",
@@ -2531,9 +2530,10 @@ function ProblemDetail() {
                 disabled={!newComment.trim() && commentImages.length === 0}
                 style={{
                   ...buttonBase,
-                  minWidth: isMobile ? "100%" : "112px",
-                  minHeight: isMobile ? "48px" : "100%",
-                  padding: "12px 18px",
+                  minWidth: "112px",
+                  minHeight: "42px",
+                  padding: "10px 16px",
+                  justifySelf: "flex-end",
                   backgroundColor: ui.purple,
                   color: "white",
                   boxShadow: "0 2px 6px rgba(118, 75, 162, 0.14)",
