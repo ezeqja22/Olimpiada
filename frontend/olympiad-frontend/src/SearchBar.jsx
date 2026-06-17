@@ -340,9 +340,12 @@ function SearchBar({
           }
 
           .advanced-search-body {
-            padding: 24px 28px;
-            overflow-y: auto;
-          }
+  padding: 24px 28px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 
           .advanced-form {
             display: flex;
@@ -451,13 +454,14 @@ function SearchBar({
           }
 
           .advanced-search-footer {
-            padding: 18px 28px 24px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            border-top: 1px solid #f1f5f9;
-            background: #f8fafc;
-          }
+  padding: 18px 28px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #f1f5f9;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
 
           .advanced-secondary-btn,
           .advanced-primary-btn {
@@ -543,6 +547,25 @@ function SearchBar({
               width: 100%;
             }
           }
+            .advanced-search-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 0;
+}
+
+.advanced-search-body {
+  padding: 24px 28px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.advanced-search-footer {
+  flex-shrink: 0;
+}
         `}
       </style>
 
@@ -701,7 +724,7 @@ function AdvancedSearchModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="advanced-form">
+        <form onSubmit={handleSubmit} className="advanced-search-form">
           <div className="advanced-search-body">
             <div className="advanced-form">
               <div className="advanced-field">
