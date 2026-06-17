@@ -1,3 +1,4 @@
+/* Minimal modern ProblemDetail page replacement */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/img-redundant-alt */
@@ -36,9 +37,9 @@ const ui = {
   page: "#f7faf8",
   danger: "#dc2626",
   dangerSoft: "#fee2e2",
-  shadowSm: "0 8px 18px rgba(15, 23, 42, 0.06)",
-  shadowMd: "0 18px 42px rgba(15, 23, 42, 0.08)",
-  shadowLg: "0 28px 70px rgba(15, 23, 42, 0.10)",
+  shadowSm: "0 1px 2px rgba(15, 23, 42, 0.04)",
+  shadowMd: "0 6px 18px rgba(15, 23, 42, 0.05)",
+  shadowLg: "0 10px 30px rgba(15, 23, 42, 0.06)",
 };
 
 const renderMathContent = (text) => {
@@ -119,19 +120,19 @@ const ModernButton = ({
       backgroundColor: ui.primary,
       color: "white",
       border: `1px solid ${ui.primary}`,
-      boxShadow: "0 14px 26px rgba(26, 77, 58, 0.20)",
+      boxShadow: "0 2px 6px rgba(26, 77, 58, 0.14)",
     },
     purple: {
       backgroundColor: ui.purple,
       color: "white",
       border: `1px solid ${ui.purple}`,
-      boxShadow: "0 14px 26px rgba(118, 75, 162, 0.20)",
+      boxShadow: "0 2px 6px rgba(118, 75, 162, 0.14)",
     },
     danger: {
       backgroundColor: ui.danger,
       color: "white",
       border: `1px solid ${ui.danger}`,
-      boxShadow: "0 14px 26px rgba(220, 38, 38, 0.18)",
+      boxShadow: "0 2px 6px rgba(220, 38, 38, 0.12)",
     },
   };
 
@@ -187,7 +188,7 @@ const UserAvatar = ({ user, size = 42, onClick }) => {
         cursor: onClick ? "pointer" : "default",
         border: "3px solid white",
         outline: `1px solid ${ui.border}`,
-        boxShadow: "0 12px 28px rgba(26, 77, 58, 0.18)",
+        boxShadow: "0 1px 3px rgba(26, 77, 58, 0.10)",
       }}
     >
       {!hasImage && getUserInitial(user?.username || "U")}
@@ -302,7 +303,7 @@ const CommentThread = ({
       style={{
         position: "relative",
         marginLeft: isNested ? (isMobile ? "12px" : "36px") : 0,
-        paddingLeft: isNested ? (isMobile ? "12px" : "22px") : 0,
+        paddingLeft: isNested ? (isMobile ? "12px" : "14px") : 0,
         marginBottom: "16px",
       }}
     >
@@ -329,15 +330,15 @@ const CommentThread = ({
           border: comment.is_solution
             ? `2px solid ${ui.primary}`
             : `1px solid ${ui.border}`,
-          borderRadius: isNested ? "22px" : "28px",
+          borderRadius: isNested ? "14px" : "16px",
           boxShadow: comment.is_solution
-            ? "0 24px 56px rgba(26, 77, 58, 0.16)"
-            : "0 18px 42px rgba(15, 23, 42, 0.07)",
+            ? "0 6px 18px rgba(26, 77, 58, 0.08)"
+            : "0 3px 10px rgba(15, 23, 42, 0.05)",
         }}
       >
         <div
           style={{
-            height: "5px",
+            height: "2px",
             background: comment.is_solution
               ? `linear-gradient(90deg, ${ui.primary}, #22c55e)`
               : `linear-gradient(90deg, ${ui.primary}, ${ui.purple})`,
@@ -604,7 +605,7 @@ const CommentThread = ({
                   style={{
                     marginTop: "14px",
                     padding: "14px",
-                    borderRadius: "20px",
+                    borderRadius: "14px",
                     border: `1px solid ${ui.border}`,
                     backgroundColor: "#f8fafc",
                   }}
@@ -1473,7 +1474,7 @@ function ProblemDetail() {
             style={{
               backgroundColor: ui.card,
               border: `1px solid ${ui.border}`,
-              borderRadius: "28px",
+              borderRadius: "16px",
               padding: "38px",
               boxShadow: ui.shadowMd,
             }}
@@ -1504,8 +1505,8 @@ function ProblemDetail() {
         style={{
           background:
             "radial-gradient(circle at top left, rgba(26,77,58,0.12), transparent 32%), radial-gradient(circle at top right, rgba(118,75,162,0.13), transparent 28%)",
-          borderRadius: "34px",
-          padding: isMobile ? "14px" : "24px",
+          borderRadius: "18px",
+          padding: isMobile ? "14px" : "14px",
           minHeight: "calc(100vh - 120px)",
         }}
       >
@@ -1518,10 +1519,10 @@ function ProblemDetail() {
             style={{
               backgroundColor: ui.card,
               border: `1px solid ${ui.border}`,
-              borderRadius: "32px",
-              padding: isMobile ? "18px" : "30px",
+              borderRadius: "18px",
+              padding: isMobile ? "18px" : "18px",
               boxShadow: ui.shadowLg,
-              marginBottom: "22px",
+              marginBottom: "14px",
             }}
           >
             <div
@@ -1531,7 +1532,7 @@ function ProblemDetail() {
                 justifyContent: "space-between",
                 gap: "12px",
                 flexWrap: "wrap",
-                marginBottom: "22px",
+                marginBottom: "14px",
               }}
             >
               <div>
@@ -1539,7 +1540,7 @@ function ProblemDetail() {
                   style={{
                     margin: 0,
                     color: ui.text,
-                    fontSize: isMobile ? "25px" : "34px",
+                    fontSize: isMobile ? "25px" : "18px",
                     fontWeight: 950,
                     letterSpacing: "-0.04em",
                   }}
@@ -1592,7 +1593,7 @@ function ProblemDetail() {
                   padding: "15px 16px",
                   border: `1px solid ${ui.border}`,
                   borderRadius: "18px",
-                  fontSize: isMobile ? "20px" : "27px",
+                  fontSize: isMobile ? "14px" : "27px",
                   fontWeight: 950,
                   outline: "none",
                   fontFamily: "inherit",
@@ -1681,7 +1682,7 @@ function ProblemDetail() {
               style={{
                 backgroundColor: "#f8fafc",
                 border: `1px solid ${ui.border}`,
-                borderRadius: "22px",
+                borderRadius: "14px",
                 padding: "15px",
                 marginBottom: "16px",
               }}
@@ -1770,7 +1771,7 @@ function ProblemDetail() {
                   minHeight: "190px",
                   padding: "16px",
                   border: `1px solid ${ui.border}`,
-                  borderRadius: "22px",
+                  borderRadius: "14px",
                   resize: "vertical",
                   outline: "none",
                   fontFamily: "inherit",
@@ -1792,7 +1793,7 @@ function ProblemDetail() {
             <div
               style={{
                 border: `1px solid ${ui.border}`,
-                borderRadius: "24px",
+                borderRadius: "14px",
                 padding: "18px",
                 backgroundColor: "#fbfdfc",
               }}
@@ -1825,7 +1826,7 @@ function ProblemDetail() {
                       style={{
                         position: "relative",
                         height: "125px",
-                        borderRadius: "20px",
+                        borderRadius: "14px",
                         overflow: "hidden",
                         border: `1px solid ${ui.border}`,
                         backgroundColor: "#f8fafc",
@@ -1849,8 +1850,8 @@ function ProblemDetail() {
                           position: "absolute",
                           top: "8px",
                           right: "8px",
-                          width: "30px",
-                          height: "30px",
+                          width: "18px",
+                          height: "18px",
                           borderRadius: "50%",
                           border: "none",
                           backgroundColor: "rgba(220, 38, 38, 0.92)",
@@ -1887,7 +1888,7 @@ function ProblemDetail() {
                       width: isMobile ? "100%" : "205px",
                       height: "120px",
                       border: `2px dashed rgba(26,77,58,0.38)`,
-                      borderRadius: "22px",
+                      borderRadius: "14px",
                       backgroundColor: ui.primarySoft,
                       color: ui.primary,
                       cursor: "pointer",
@@ -1899,7 +1900,7 @@ function ProblemDetail() {
                       gap: "4px",
                     }}
                   >
-                    <span style={{ fontSize: "34px", lineHeight: 1 }}>+</span>
+                    <span style={{ fontSize: "18px", lineHeight: 1 }}>+</span>
                     <span>Add Image</span>
                     <small style={{ color: ui.muted }}>
                       {10 - problemImages.length} remaining
@@ -1929,24 +1930,24 @@ function ProblemDetail() {
               overflow: "hidden",
               backgroundColor: ui.card,
               border: `1px solid ${ui.border}`,
-              borderRadius: "34px",
+              borderRadius: "18px",
               boxShadow: ui.shadowLg,
-              marginBottom: "22px",
+              marginBottom: "14px",
             }}
           >
             <div
               style={{
-                height: "8px",
+                height: "3px",
                 background: `linear-gradient(90deg, ${ui.primary}, ${ui.purple})`,
               }}
             />
 
-            <div style={{ padding: isMobile ? "18px" : "32px" }}>
+            <div style={{ padding: isMobile ? "18px" : "18px" }}>
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  gap: "20px",
+                  gap: "14px",
                   alignItems: "flex-start",
                   flexDirection: isMobile ? "column" : "row",
                 }}
@@ -1965,7 +1966,7 @@ function ProblemDetail() {
                         alignItems: "center",
                         gap: "11px",
                         cursor: "pointer",
-                        marginBottom: "20px",
+                        marginBottom: "14px",
                         boxShadow: ui.shadowSm,
                       }}
                     >
@@ -2003,9 +2004,9 @@ function ProblemDetail() {
                     style={{
                       margin: "0 0 18px",
                       color: ui.text,
-                      fontSize: isMobile ? "31px" : "48px",
+                      fontSize: isMobile ? "27px" : "34px",
                       lineHeight: 1.08,
-                      letterSpacing: "-0.055em",
+                      letterSpacing: "-0.025em",
                       fontWeight: 950,
                     }}
                   >
@@ -2017,7 +2018,7 @@ function ProblemDetail() {
                       display: "flex",
                       gap: "10px",
                       flexWrap: "wrap",
-                      marginBottom: "22px",
+                      marginBottom: "14px",
                     }}
                   >
                     {problem.subject && (
@@ -2086,11 +2087,10 @@ function ProblemDetail() {
               <div
                 style={{
                   marginTop: "8px",
-                  background:
-                    "linear-gradient(180deg, rgba(248,250,252,0.92), rgba(255,255,255,1))",
+                  backgroundColor: "#ffffff",
                   border: `1px solid ${ui.border}`,
-                  borderRadius: "28px",
-                  padding: isMobile ? "17px" : "24px",
+                  borderRadius: "16px",
+                  padding: isMobile ? "17px" : "14px",
                   color: ui.text,
                   lineHeight: 1.82,
                   fontSize: isMobile ? "15px" : "16px",
@@ -2129,7 +2129,7 @@ function ProblemDetail() {
                         onClick={() => openImageModal(index, problemImages)}
                         style={{
                           border: `1px solid ${ui.border}`,
-                          borderRadius: "24px",
+                          borderRadius: "14px",
                           overflow: "hidden",
                           backgroundColor: "#f8fafc",
                           padding: 0,
@@ -2179,10 +2179,10 @@ function ProblemDetail() {
           style={{
             backgroundColor: ui.card,
             border: `1px solid ${ui.border}`,
-            borderRadius: "30px",
-            padding: isMobile ? "16px" : "22px",
+            borderRadius: "18px",
+            padding: isMobile ? "16px" : "14px",
             boxShadow: ui.shadowMd,
-            marginBottom: "22px",
+            marginBottom: "14px",
           }}
         >
           <div
@@ -2198,7 +2198,7 @@ function ProblemDetail() {
               <h3
                 style={{
                   margin: "0 0 5px",
-                  fontSize: "20px",
+                  fontSize: "14px",
                   fontWeight: 950,
                   color: ui.text,
                 }}
@@ -2269,8 +2269,8 @@ function ProblemDetail() {
           style={{
             backgroundColor: ui.card,
             border: `1px solid ${ui.border}`,
-            borderRadius: "34px",
-            padding: isMobile ? "17px" : "26px",
+            borderRadius: "18px",
+            padding: isMobile ? "14px" : "18px",
             boxShadow: ui.shadowLg,
           }}
         >
@@ -2289,12 +2289,12 @@ function ProblemDetail() {
                 style={{
                   margin: "0 0 5px",
                   color: ui.text,
-                  fontSize: isMobile ? "25px" : "32px",
+                  fontSize: isMobile ? "25px" : "18px",
                   fontWeight: 950,
                   letterSpacing: "-0.04em",
                 }}
               >
-                Discussion
+                Comments
               </h2>
 
               <p
@@ -2332,13 +2332,13 @@ function ProblemDetail() {
                 border: `1px solid ${
                   isTextareaFocused ? "rgba(26,77,58,0.42)" : ui.border
                 }`,
-                borderRadius: "28px",
+                borderRadius: "16px",
                 padding: "13px",
                 boxShadow: isTextareaFocused
-                  ? "0 18px 38px rgba(26, 77, 58, 0.10)"
-                  : "0 12px 28px rgba(15, 23, 42, 0.05)",
+                  ? "0 2px 10px rgba(26, 77, 58, 0.08)"
+                  : "none",
                 transition: "all 0.2s ease",
-                marginBottom: "24px",
+                marginBottom: "14px",
               }}
             >
               <div
@@ -2355,7 +2355,7 @@ function ProblemDetail() {
                   style={{
                     border: `1px solid ${ui.border}`,
                     backgroundColor: "white",
-                    borderRadius: "20px",
+                    borderRadius: "14px",
                     padding: "9px",
                     cursor: currentUser ? "pointer" : "default",
                     display: "flex",
@@ -2429,7 +2429,7 @@ function ProblemDetail() {
                   position: "relative",
                   backgroundColor: "white",
                   border: `1px solid ${ui.border}`,
-                  borderRadius: "22px",
+                  borderRadius: "14px",
                   overflow: "hidden",
                 }}
               >
@@ -2536,7 +2536,7 @@ function ProblemDetail() {
                   padding: "12px 18px",
                   backgroundColor: ui.purple,
                   color: "white",
-                  boxShadow: "0 14px 26px rgba(118, 75, 162, 0.20)",
+                  boxShadow: "0 2px 6px rgba(118, 75, 162, 0.14)",
                   opacity:
                     !newComment.trim() && commentImages.length === 0 ? 0.55 : 1,
                   cursor:
@@ -2556,7 +2556,7 @@ function ProblemDetail() {
                 textAlign: "center",
                 padding: "46px 18px",
                 border: `1px dashed ${ui.border}`,
-                borderRadius: "28px",
+                borderRadius: "16px",
                 backgroundColor: "#fbfdfc",
                 color: ui.muted,
               }}
@@ -2570,7 +2570,7 @@ function ProblemDetail() {
                   color: ui.primary,
                   display: "grid",
                   placeItems: "center",
-                  fontSize: "28px",
+                  fontSize: "16px",
                   fontWeight: 950,
                   margin: "0 auto 12px",
                 }}
@@ -2648,7 +2648,7 @@ function ProblemDetail() {
               justifyContent: "center",
               zIndex: 9999,
               cursor: "pointer",
-              padding: isMobile ? "18px" : "32px",
+              padding: isMobile ? "18px" : "18px",
             }}
             onClick={closeImageModal}
           >
@@ -2657,15 +2657,15 @@ function ProblemDetail() {
               onClick={closeImageModal}
               style={{
                 position: "absolute",
-                top: "20px",
-                right: "20px",
+                top: "14px",
+                right: "14px",
                 backgroundColor: "rgba(255,255,255,0.14)",
                 color: "white",
                 border: "1px solid rgba(255,255,255,0.18)",
                 borderRadius: "50%",
                 width: "46px",
                 height: "46px",
-                fontSize: "20px",
+                fontSize: "14px",
                 cursor: "pointer",
                 display: "grid",
                 placeItems: "center",
@@ -2685,7 +2685,7 @@ function ProblemDetail() {
                   }}
                   style={{
                     position: "absolute",
-                    left: isMobile ? "12px" : "28px",
+                    left: isMobile ? "12px" : "16px",
                     top: "50%",
                     transform: "translateY(-50%)",
                     backgroundColor: "rgba(255,255,255,0.14)",
@@ -2694,7 +2694,7 @@ function ProblemDetail() {
                     borderRadius: "50%",
                     width: isMobile ? "42px" : "54px",
                     height: isMobile ? "42px" : "54px",
-                    fontSize: "30px",
+                    fontSize: "18px",
                     cursor: "pointer",
                     zIndex: 10000,
                   }}
@@ -2710,7 +2710,7 @@ function ProblemDetail() {
                   }}
                   style={{
                     position: "absolute",
-                    right: isMobile ? "12px" : "28px",
+                    right: isMobile ? "12px" : "16px",
                     top: "50%",
                     transform: "translateY(-50%)",
                     backgroundColor: "rgba(255,255,255,0.14)",
@@ -2719,7 +2719,7 @@ function ProblemDetail() {
                     borderRadius: "50%",
                     width: isMobile ? "42px" : "54px",
                     height: isMobile ? "42px" : "54px",
-                    fontSize: "30px",
+                    fontSize: "18px",
                     cursor: "pointer",
                     zIndex: 10000,
                   }}
@@ -2730,7 +2730,7 @@ function ProblemDetail() {
                 <div
                   style={{
                     position: "absolute",
-                    bottom: "22px",
+                    bottom: "14px",
                     left: "50%",
                     transform: "translateX(-50%)",
                     backgroundColor: "rgba(0,0,0,0.55)",
