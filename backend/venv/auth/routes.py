@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form, Body
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form, Body, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import func, or_, text
@@ -570,56 +570,92 @@ async def get_problem_images(
     
     return {"images": image_filenames}
 
-@router.get("/problems/{subject}", response_model=List[ProblemResponse])
-def get_problems_by_subject(subject: str, db: Session = Depends(get_db)):
-    # First get problems with comment counts (case-insensitive search) - EXCLUDE forum problems
-    problems_with_counts = db.query(Problem, func.count(Comment.id).label('comment_count')).outerjoin(Comment).filter(
-        func.lower(Problem.subject) == func.lower(subject),
-        Problem.forum_id.is_(None)
-    ).group_by(Problem.id).order_by(Problem.created_at.desc()).all()
-    
-    # Then fetch authors for all problems
-    authors = db.query(User).filter(User.id.in_([p.author_id for p, _ in problems_with_counts])).all()
+@router.get("/problems/by-subject/{subject}")
+def get_problems_by_subject(
+    subject: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=50),
+    db: Session = Depends(get_db)
+):
+    offset = (page - 1) * limit
+
+    # Count total subject problems first
+    total_problems = (
+        db.query(func.count(Problem.id))
+        .filter(
+            func.lower(Problem.subject) == func.lower(subject),
+            Problem.forum_id.is_(None)
+        )
+        .scalar()
+        or 0
+    )
+
+    # Fetch only the current page of problems with comment counts
+    problems_with_counts = (
+        db.query(Problem, func.count(Comment.id).label("comment_count"))
+        .outerjoin(Comment, Comment.problem_id == Problem.id)
+        .filter(
+            func.lower(Problem.subject) == func.lower(subject),
+            Problem.forum_id.is_(None)
+        )
+        .group_by(Problem.id)
+        .order_by(Problem.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    # Fetch authors only for the current page
+    author_ids = list({
+        problem.author_id
+        for problem, _ in problems_with_counts
+        if problem.author_id is not None
+    })
+
+    authors = (
+        db.query(User)
+        .filter(User.id.in_(author_ids))
+        .all()
+        if author_ids
+        else []
+    )
+
     author_dict = {author.id: author for author in authors}
-    
+
     result = []
-    for p, comment_count in problems_with_counts:
-        author = author_dict.get(p.author_id)
-        if author:
-            result.append({
-                "id": p.id, 
-                "title": p.title, 
-                "description": p.description, 
-                "tags": p.tags, 
-                "subject": p.subject, 
-                "level": p.level, 
-                "year": p.year,
-                "author_id": p.author_id, 
-                "comment_count": comment_count, 
-                "created_at": p.created_at.isoformat() if p.created_at else None, 
-                "updated_at": p.updated_at.isoformat() if p.updated_at else None, 
-                "author": {
-                    "id": author.id, 
-                    "username": author.username, 
-                    "profile_picture": author.profile_picture
-                }
-            })
-        else:
-            result.append({
-                "id": p.id, 
-                "title": p.title, 
-                "description": p.description, 
-                "tags": p.tags, 
-                "subject": p.subject, 
-                "level": p.level, 
-                "year": p.year,
-                "author_id": p.author_id, 
-                "comment_count": comment_count, 
-                "created_at": p.created_at.isoformat() if p.created_at else None, 
-                "updated_at": p.updated_at.isoformat() if p.updated_at else None, 
-                "author": None
-            })
-    return result
+
+    for problem, comment_count in problems_with_counts:
+        author = author_dict.get(problem.author_id)
+
+        result.append({
+            "id": problem.id,
+            "title": problem.title,
+            "description": problem.description,
+            "tags": problem.tags,
+            "subject": problem.subject,
+            "level": problem.level,
+            "year": problem.year,
+            "author_id": problem.author_id,
+            "comment_count": comment_count,
+            "created_at": problem.created_at.isoformat() if problem.created_at else None,
+            "updated_at": problem.updated_at.isoformat() if problem.updated_at else None,
+            "author": {
+                "id": author.id,
+                "username": author.username,
+                "profile_picture": author.profile_picture
+            } if author else None
+        })
+
+    total_pages = max(1, (total_problems + limit - 1) // limit)
+
+    return {
+        "problems": result,
+        "total": total_problems,
+        "total_problems": total_problems,
+        "page": page,
+        "limit": limit,
+        "total_pages": total_pages
+    }
 
 
 @router.get("/problems/id/{problem_id}", response_model=ProblemResponse)
