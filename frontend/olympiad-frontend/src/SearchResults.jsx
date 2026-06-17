@@ -763,28 +763,32 @@ const SearchResults = () => {
       gap: 14px;
     }
 
-    .sr-avatar {
-      flex: 0 0 auto;
-      width: 52px;
-      height: 52px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #1a4d3a, #6f9f8a);
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 19px;
-      font-weight: 950;
-      background-size: cover;
-      background-position: center;
-      box-shadow: 0 10px 24px rgba(26, 77, 58, 0.18);
-    }
+.sr-avatar {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background-color: #1a4d3a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  font-weight: 950;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 12px 25px rgba(26, 77, 58, 0.18);
+  border: 2px solid white;
+  outline: 1px solid #e2e8f0;
+  overflow: hidden;
+}
 
-    .sr-avatar.small {
-      width: 44px;
-      height: 44px;
-      font-size: 16px;
-    }
+.sr-avatar.small {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  font-size: 16px;
+}
 
     .sr-user-info {
       flex: 1;
@@ -1169,11 +1173,6 @@ const SearchResults = () => {
 
       .sr-problem-main {
         gap: 12px;
-      }
-
-      .sr-avatar.small {
-        width: 38px;
-        height: 38px;
       }
 
       .sr-problem-card,
