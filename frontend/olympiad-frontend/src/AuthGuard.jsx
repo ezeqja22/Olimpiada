@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -24,8 +26,8 @@ function AuthGuard({ children }) {
   useEffect(() => {
     if (siteSettings.maintenance_mode) {
       // Allow admin access to admin routes
-      const isAdminRoute = location.pathname.startsWith('/admin');
-      const isAdmin = currentUser && currentUser.role === 'admin';
+      const isAdminRoute = location.pathname.startsWith("/admin");
+      const isAdmin = currentUser && currentUser.role === "admin";
 
       if (!isAdminRoute && !isAdmin) {
         // Show maintenance message
@@ -37,12 +39,14 @@ function AuthGuard({ children }) {
   const validateSession = async () => {
     const token = localStorage.getItem("token");
     // Allow homepage, login, and signup to be accessible without authentication
-    if (location.pathname === "/" ||
+    if (
+      location.pathname === "/" ||
       location.pathname === "/homepage" ||
       location.pathname === "/login" ||
       location.pathname === "/signup" ||
       location.pathname === "/forgot-password" ||
-      location.pathname === "/verify-email") {
+      location.pathname === "/verify-email"
+    ) {
       setIsAuthenticated(false);
       setIsValidating(false);
       setShowLoginPopup(false);
@@ -50,8 +54,10 @@ function AuthGuard({ children }) {
     }
 
     // During maintenance mode, allow login/signup pages even if not authenticated
-    if (siteSettings.maintenance_mode &&
-      (location.pathname === "/login" || location.pathname === "/signup")) {
+    if (
+      siteSettings.maintenance_mode &&
+      (location.pathname === "/login" || location.pathname === "/signup")
+    ) {
       setIsAuthenticated(false);
       setIsValidating(false);
       return;
@@ -68,11 +74,14 @@ function AuthGuard({ children }) {
     // If token exists, validate it
     if (token) {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
         if (response.data) {
           // Token is valid
@@ -90,7 +99,10 @@ function AuthGuard({ children }) {
         setIsValidating(false);
       } catch (error) {
         // Check if user is banned
-        if (error.response?.status === 403 && error.response?.data?.detail?.includes("Account has been banned")) {
+        if (
+          error.response?.status === 403 &&
+          error.response?.data?.detail?.includes("Account has been banned")
+        ) {
           // Show ban message and redirect to login
           alert("🚫 " + error.response.data.detail);
           localStorage.removeItem("token");
@@ -99,7 +111,10 @@ function AuthGuard({ children }) {
         }
 
         // Check if user is deactivated
-        if (error.response?.status === 403 && error.response?.data?.detail?.includes("Account has been deactivated")) {
+        if (
+          error.response?.status === 403 &&
+          error.response?.data?.detail?.includes("Account has been deactivated")
+        ) {
           // Show deactivation message and redirect to login
           alert("⚠️ " + error.response.data.detail);
           localStorage.removeItem("token");
@@ -130,9 +145,9 @@ function AuthGuard({ children }) {
       "/problem/",
       "/search",
       "/forums",
-      "/subject/"
+      "/subject/",
     ];
-    return protectedRoutes.some(route => pathname.startsWith(route));
+    return protectedRoutes.some((route) => pathname.startsWith(route));
   };
 
   const handleLoginSuccess = () => {
@@ -148,7 +163,6 @@ function AuthGuard({ children }) {
       navigate("/homepage");
     }
   };
-
 
   // Don't show children if popup is open and user is not authenticated
   if (showLoginPopup && !isAuthenticated) {
