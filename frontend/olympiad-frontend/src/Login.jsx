@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
@@ -16,10 +16,18 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginWithToken } = useAuth();
-
+  const { loginWithToken, currentUser, authLoading } = useAuth();
   // Get redirect path from location state
   const redirectTo = location.state?.redirectTo || "/homepage";
+
+  useEffect(() => {
+    if (!authLoading && currentUser) {
+      const safeRedirect =
+        redirectTo && redirectTo !== "/login" ? redirectTo : "/homepage";
+
+      navigate(safeRedirect, { replace: true });
+    }
+  }, [authLoading, currentUser, navigate, redirectTo]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -79,6 +87,25 @@ function Login() {
       }
     }
   };
+
+  if (authLoading || currentUser) {
+    return (
+      <Layout>
+        <div
+          style={{
+            minHeight: "60vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: colors.gray[600],
+            fontWeight: typography.fontWeight.medium,
+          }}
+        >
+          Checking session...
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
