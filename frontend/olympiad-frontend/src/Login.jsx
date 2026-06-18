@@ -1,36 +1,32 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import Card from "./components/Card";
 import Button from "./components/Button";
 import { colors, spacing, typography, borderRadius } from "./designSystem";
-import { Link } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
-import ForgotPassword from "./ForgotPassword";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginWithToken, currentUser, authLoading } = useAuth();
-  // Get redirect path from location state
+
+  const { loginWithToken } = useAuth();
+
   const redirectTo = location.state?.redirectTo || "/homepage";
-
-  useEffect(() => {
-    if (!authLoading && currentUser) {
-      const safeRedirect =
-        redirectTo && redirectTo !== "/login" ? redirectTo : "/homepage";
-
-      navigate(safeRedirect, { replace: true });
-    }
-  }, [authLoading, currentUser, navigate, redirectTo]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
 
     try {
       const response = await axios.post(
@@ -49,7 +45,10 @@ function Login() {
 
       await loginWithToken(token);
 
-      navigate(redirectTo || "/homepage", { replace: true });
+      const safeRedirect =
+        redirectTo && redirectTo !== "/login" ? redirectTo : "/homepage";
+
+      navigate(safeRedirect, { replace: true });
     } catch (err) {
       const errorMessage = err.response?.data?.detail || err.message;
 
@@ -85,27 +84,10 @@ function Login() {
       } else {
         alert("Login failed: " + errorMessage);
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  if (authLoading || currentUser) {
-    return (
-      <Layout>
-        <div
-          style={{
-            minHeight: "60vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: colors.gray[600],
-            fontWeight: typography.fontWeight.medium,
-          }}
-        >
-          Checking session...
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
@@ -129,6 +111,7 @@ function Login() {
             >
               Welcome Back
             </h1>
+
             <p
               style={{
                 color: colors.gray[600],
@@ -153,12 +136,14 @@ function Login() {
               >
                 Email
               </label>
+
               <input
                 type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isSubmitting}
                 style={{
                   width: "100%",
                   padding: spacing.md,
@@ -168,10 +153,7 @@ function Login() {
                   fontFamily: typography.fontFamily,
                   boxSizing: "border-box",
                   transition: "border-color 0.2s ease",
-                  "&:focus": {
-                    outline: "none",
-                    borderColor: colors.primary,
-                  },
+                  opacity: isSubmitting ? 0.7 : 1,
                 }}
                 onFocus={(e) => (e.target.style.borderColor = colors.primary)}
                 onBlur={(e) => (e.target.style.borderColor = colors.gray[300])}
@@ -190,7 +172,7 @@ function Login() {
               >
                 Password
               </label>
-              {/* Add wrapper div for password field */}
+
               <div style={{ position: "relative" }}>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -198,6 +180,7 @@ function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={isSubmitting}
                   style={{
                     width: "100%",
                     padding: spacing.md,
@@ -208,17 +191,22 @@ function Login() {
                     fontFamily: typography.fontFamily,
                     boxSizing: "border-box",
                     transition: "border-color 0.2s ease",
+                    opacity: isSubmitting ? 0.7 : 1,
                   }}
                   onFocus={(e) => (e.target.style.borderColor = colors.primary)}
                   onBlur={(e) =>
                     (e.target.style.borderColor = colors.gray[300])
                   }
                 />
-                {/* Add custom eye icon */}
+
                 <span
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => {
+                    if (!isSubmitting) {
+                      setShowPassword((prev) => !prev);
+                    }
+                  }}
                   style={{
-                    cursor: "pointer",
+                    cursor: isSubmitting ? "default" : "pointer",
                     position: "absolute",
                     right: "15px",
                     top: "50%",
@@ -227,6 +215,7 @@ function Login() {
                     padding: "8px",
                     userSelect: "none",
                     zIndex: 10,
+                    opacity: isSubmitting ? 0.6 : 1,
                   }}
                 >
                   <img
@@ -250,22 +239,31 @@ function Login() {
               type="submit"
               variant="primary"
               size="lg"
-              style={{ width: "100%", marginBottom: spacing.lg }}
+              disabled={isSubmitting}
+              style={{
+                width: "100%",
+                marginBottom: spacing.lg,
+                opacity: isSubmitting ? 0.75 : 1,
+                cursor: isSubmitting ? "not-allowed" : "pointer",
+              }}
             >
-              Sign In
+              {isSubmitting ? "Signing in..." : "Sign In"}
             </Button>
           </form>
+
           <Link
             to="/forgot-password"
             style={{ color: "#1a4d3a", textDecoration: "underline" }}
           >
             Forgot Password?
           </Link>
+
           <div
             style={{
               textAlign: "center",
               paddingTop: spacing.lg,
               borderTop: `1px solid ${colors.gray[200]}`,
+              marginTop: spacing.lg,
             }}
           >
             <p
@@ -277,9 +275,11 @@ function Login() {
             >
               Don't have an account?
             </p>
+
             <Button
               variant="outline"
               size="md"
+              disabled={isSubmitting}
               onClick={() => navigate("/signup", { state: { redirectTo } })}
             >
               Create Account
