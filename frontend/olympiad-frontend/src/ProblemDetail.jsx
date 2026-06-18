@@ -17,6 +17,8 @@ import { getUserInitial, getDisplayName } from "./utils";
 import ReportModal from "./ReportModal";
 import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import { useAuth } from "./context/AuthContext";
+import CommentComposer from "./components/problem-detail/CommentComposer";
+import CommentThread from "./components/problem-detail/CommentThread";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
@@ -243,492 +245,6 @@ const MiniAction = ({ children, onClick, tone = "default" }) => {
     >
       {children}
     </button>
-  );
-};
-
-const CommentThread = ({
-  comment,
-  currentUser,
-  problem,
-  onOpenAuthor,
-  onEditComment,
-  onDeleteComment,
-  onMarkAsSolution,
-  replyingTo,
-  setReplyingTo,
-  replyText,
-  setReplyText,
-  replyImages,
-  setReplyImages,
-  onSubmitReply,
-  onReportComment,
-  setCurrentImageIndex,
-  setModalImages,
-  setShowImageModal,
-  editingCommentId,
-  editText,
-  setEditText,
-  onSaveEdit,
-  onCancelEdit,
-  depth = 0,
-}) => {
-  const maxDepth = 3;
-  const [showReplies, setShowReplies] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
-
-  const isNested = depth > 0;
-  const canEdit = currentUser && currentUser.id === comment.author_id;
-  const canMarkSolution =
-    currentUser &&
-    problem &&
-    (currentUser.id === problem.author_id ||
-      currentUser.role === "admin" ||
-      currentUser.role === "moderator");
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  const openCommentImage = (index) => {
-    setModalImages(comment.images || []);
-    setCurrentImageIndex(index);
-    setShowImageModal(true);
-  };
-
-  return (
-    <div
-      style={{
-        position: "relative",
-        marginLeft: isNested ? (isMobile ? "12px" : "36px") : 0,
-        paddingLeft: isNested ? (isMobile ? "12px" : "14px") : 0,
-        marginBottom: "16px",
-      }}
-    >
-      {isNested && (
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            top: "4px",
-            bottom: "4px",
-            width: "3px",
-            borderRadius: "999px",
-            background:
-              "linear-gradient(180deg, rgba(26,77,58,0.35), rgba(118,75,162,0.18))",
-          }}
-        />
-      )}
-
-      <article
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          backgroundColor: ui.card,
-          border: `1px solid ${comment.is_solution ? ui.primaryBorder : ui.border}`,
-          borderLeft: comment.is_solution
-            ? `4px solid ${ui.primary}`
-            : `1px solid ${ui.border}`,
-          borderRadius: isNested ? "14px" : "16px",
-          boxShadow: "0 2px 8px rgba(15, 23, 42, 0.05)",
-        }}
-      >
-        <div
-          style={{
-            height: "0px",
-            background: comment.is_solution
-              ? `linear-gradient(90deg, ${ui.primary}, #22c55e)`
-              : `linear-gradient(90deg, ${ui.primary}, ${ui.purple})`,
-            opacity: comment.is_solution ? 1 : 0.65,
-          }}
-        />
-
-        <div style={{ padding: isMobile ? "15px" : "19px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "13px",
-            }}
-          >
-            <UserAvatar
-              user={comment.author}
-              size={isMobile ? 36 : 44}
-              onClick={() => onOpenAuthor(comment.author)}
-            />
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "14px",
-                  alignItems: "flex-start",
-                  flexWrap: "wrap",
-                  marginBottom: "8px",
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  <button
-                    type="button"
-                    onClick={() => onOpenAuthor(comment.author)}
-                    style={{
-                      border: "none",
-                      backgroundColor: "transparent",
-                      padding: 0,
-                      margin: 0,
-                      color: ui.primary,
-                      fontSize: isMobile ? "14px" : "15px",
-                      fontWeight: 950,
-                      letterSpacing: "-0.01em",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {getDisplayName(comment.author?.username) || "Unknown User"}
-                  </button>
-
-                  <div
-                    style={{
-                      marginTop: "3px",
-                      display: "flex",
-                      gap: "8px",
-                      flexWrap: "wrap",
-                      alignItems: "center",
-                      color: ui.muted,
-                      fontSize: "12px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    <span>{formatDate(comment.created_at)}</span>
-
-                    {isEdited(comment.created_at, comment.updated_at) && (
-                      <span>Edited</span>
-                    )}
-
-                    {isNested && (
-                      <span
-                        style={{
-                          backgroundColor: ui.purpleSoft,
-                          color: ui.purple,
-                          padding: "2px 8px",
-                          borderRadius: "999px",
-                          fontSize: "11px",
-                          fontWeight: 900,
-                        }}
-                      >
-                        Reply
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {comment.is_solution && (
-                  <Pill bg={ui.primary} color="white">
-                    ✓ Accepted Solution
-                  </Pill>
-                )}
-              </div>
-
-              {editingCommentId === comment.id ? (
-                <div
-                  style={{
-                    backgroundColor: "#f8fafc",
-                    border: `1px solid ${ui.border}`,
-                    borderRadius: "18px",
-                    padding: "12px",
-                    marginTop: "12px",
-                  }}
-                >
-                  <textarea
-                    value={editText}
-                    onChange={(event) => setEditText(event.target.value)}
-                    autoFocus
-                    style={{
-                      width: "100%",
-                      minHeight: "105px",
-                      padding: "13px 14px",
-                      borderRadius: "16px",
-                      border: `1px solid ${ui.primary}`,
-                      outline: "none",
-                      resize: "vertical",
-                      fontFamily: "inherit",
-                      fontSize: "14px",
-                      lineHeight: 1.6,
-                      backgroundColor: "white",
-                    }}
-                  />
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      gap: "8px",
-                      marginTop: "10px",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <ModernButton onClick={onCancelEdit}>Cancel</ModernButton>
-                    <ModernButton
-                      onClick={() => onSaveEdit(comment.id)}
-                      variant="green"
-                    >
-                      Save Changes
-                    </ModernButton>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  style={{
-                    color: ui.text,
-                    lineHeight: 1.75,
-                    fontSize: isMobile ? "15px" : "15px",
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    marginTop: "10px",
-                  }}
-                >
-                  {renderMathContent(comment.text)}
-                </div>
-              )}
-
-              {comment.images && comment.images.length > 0 && (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: isMobile
-                      ? "repeat(auto-fill, minmax(92px, 1fr))"
-                      : "repeat(auto-fill, minmax(118px, 145px))",
-                    gap: "10px",
-                    marginTop: "15px",
-                  }}
-                >
-                  {comment.images.map((imageUrl, index) => (
-                    <button
-                      type="button"
-                      key={`${imageUrl}-${index}`}
-                      onClick={() => openCommentImage(index)}
-                      style={{
-                        border: `1px solid ${ui.border}`,
-                        borderRadius: "18px",
-                        padding: 0,
-                        overflow: "hidden",
-                        height: isMobile ? "92px" : "112px",
-                        backgroundColor: "#f8fafc",
-                        cursor: "pointer",
-                        boxShadow: ui.shadowSm,
-                      }}
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={`Comment image ${index + 1}`}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          display: "block",
-                        }}
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <div
-                style={{
-                  marginTop: "16px",
-                  paddingTop: "13px",
-                  borderTop: `1px solid ${ui.border}`,
-                  display: "flex",
-                  gap: "6px",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                }}
-              >
-                <MiniAction
-                  tone={replyingTo === comment.id ? "green" : "default"}
-                  onClick={() =>
-                    setReplyingTo(replyingTo === comment.id ? null : comment.id)
-                  }
-                >
-                  Reply
-                </MiniAction>
-
-                <MiniAction
-                  tone="danger"
-                  onClick={() => onReportComment(comment)}
-                >
-                  Report
-                </MiniAction>
-
-                {canEdit && (
-                  <>
-                    <MiniAction onClick={() => onEditComment(comment)}>
-                      Edit
-                    </MiniAction>
-                    <MiniAction
-                      tone="danger"
-                      onClick={() => onDeleteComment(comment.id)}
-                    >
-                      Delete
-                    </MiniAction>
-                  </>
-                )}
-
-                {canMarkSolution && (
-                  <button
-                    type="button"
-                    onClick={() => onMarkAsSolution(comment.id)}
-                    style={{
-                      ...buttonBase,
-                      marginLeft: isMobile ? 0 : "auto",
-                      padding: "8px 12px",
-                      fontSize: "12px",
-                      backgroundColor: comment.is_solution
-                        ? "#fff7ed"
-                        : ui.primarySoft,
-                      color: comment.is_solution ? "#9a3412" : ui.primary,
-                      border: comment.is_solution
-                        ? "1px solid #fed7aa"
-                        : `1px solid ${ui.primaryBorder}`,
-                    }}
-                  >
-                    {comment.is_solution ? "Unmark Solution" : "Mark Solution"}
-                  </button>
-                )}
-              </div>
-
-              {replyingTo === comment.id && (
-                <div
-                  style={{
-                    marginTop: "14px",
-                    padding: "14px",
-                    borderRadius: "14px",
-                    border: `1px solid ${ui.border}`,
-                    backgroundColor: "#f8fafc",
-                  }}
-                >
-                  <textarea
-                    value={replyText}
-                    onChange={(event) => setReplyText(event.target.value)}
-                    placeholder="Write a reply..."
-                    style={{
-                      width: "100%",
-                      minHeight: "82px",
-                      padding: "12px 14px",
-                      borderRadius: "16px",
-                      border: `1px solid ${ui.border}`,
-                      resize: "vertical",
-                      outline: "none",
-                      fontFamily: "inherit",
-                      fontSize: "14px",
-                      lineHeight: 1.55,
-                      backgroundColor: "white",
-                    }}
-                  />
-
-                  <div style={{ marginTop: "10px" }}>
-                    <ImageUpload
-                      images={replyImages}
-                      onImagesChange={setReplyImages}
-                      maxImages={5}
-                      variant="compact"
-                      showHelper={false}
-                    />
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      gap: "8px",
-                      marginTop: "12px",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <ModernButton
-                      onClick={() => {
-                        setReplyingTo(null);
-                        setReplyText("");
-                        setReplyImages([]);
-                      }}
-                    >
-                      Cancel
-                    </ModernButton>
-
-                    <ModernButton
-                      onClick={() => onSubmitReply(comment.id)}
-                      disabled={!replyText.trim() && replyImages.length === 0}
-                      variant="purple"
-                    >
-                      Send Reply
-                    </ModernButton>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </article>
-
-      {comment.replies && comment.replies.length > 0 && depth < maxDepth && (
-        <div style={{ marginTop: "10px" }}>
-          <button
-            type="button"
-            onClick={() => setShowReplies((previous) => !previous)}
-            style={{
-              marginLeft: isNested ? 0 : isMobile ? "47px" : "58px",
-              border: `1px solid ${ui.border}`,
-              backgroundColor: showReplies ? ui.primarySoft : "#f8fafc",
-              color: showReplies ? ui.primary : ui.muted,
-              borderRadius: "999px",
-              padding: "7px 12px",
-              fontSize: "12px",
-              fontWeight: 900,
-              cursor: "pointer",
-            }}
-          >
-            {showReplies ? "Hide" : "Show"} {comment.replies.length}{" "}
-            {comment.replies.length === 1 ? "reply" : "replies"}
-          </button>
-
-          {showReplies && (
-            <div style={{ marginTop: "10px" }}>
-              {comment.replies.map((reply) => (
-                <CommentThread
-                  key={reply.id}
-                  comment={reply}
-                  currentUser={currentUser}
-                  problem={problem}
-                  onOpenAuthor={onOpenAuthor}
-                  onEditComment={onEditComment}
-                  onDeleteComment={onDeleteComment}
-                  onMarkAsSolution={onMarkAsSolution}
-                  replyingTo={replyingTo}
-                  setReplyingTo={setReplyingTo}
-                  replyText={replyText}
-                  setReplyText={setReplyText}
-                  replyImages={replyImages}
-                  setReplyImages={setReplyImages}
-                  onSubmitReply={onSubmitReply}
-                  onReportComment={onReportComment}
-                  setCurrentImageIndex={setCurrentImageIndex}
-                  setModalImages={setModalImages}
-                  setShowImageModal={setShowImageModal}
-                  editingCommentId={editingCommentId}
-                  editText={editText}
-                  setEditText={setEditText}
-                  onSaveEdit={onSaveEdit}
-                  onCancelEdit={onCancelEdit}
-                  depth={depth + 1}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
   );
 };
 
@@ -1086,12 +602,9 @@ function ProblemDetail() {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.delete(
-        `${API_URL}/auth/problems/${id}/comments/${commentId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      await axios.delete(`${API_URL}/auth/problems/${id}/comments/${commentId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       setComments((previous) => removeCommentFromTree(previous, commentId));
     } catch (error) {
@@ -1448,11 +961,7 @@ function ProblemDetail() {
   if (loading) {
     return (
       <Layout showHomeButton={true}>
-        <AnimatedLoader
-          type="problems"
-          message="Loading problem..."
-          size="large"
-        />
+        <AnimatedLoader type="problems" message="Loading problem..." size="large" />
       </Layout>
     );
   }
@@ -1559,9 +1068,7 @@ function ProblemDetail() {
               </div>
 
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <ModernButton onClick={handleCancelProblemEdit}>
-                  Cancel
-                </ModernButton>
+                <ModernButton onClick={handleCancelProblemEdit}>Cancel</ModernButton>
                 <ModernButton onClick={handleSaveProblem} variant="green">
                   Save Problem
                 </ModernButton>
@@ -1601,10 +1108,7 @@ function ProblemDetail() {
                 }}
               />
 
-              <ModernButton
-                onClick={() => openMathEditor("title")}
-                variant="purple"
-              >
+              <ModernButton onClick={() => openMathEditor("title")} variant="purple">
                 Symbols
               </ModernButton>
             </div>
@@ -2044,11 +1548,7 @@ function ProblemDetail() {
                         .map((tag) => tag.trim())
                         .filter(Boolean)
                         .map((tag, index) => (
-                          <Pill
-                            key={`${tag}-${index}`}
-                            bg={ui.purple}
-                            color="white"
-                          >
+                          <Pill key={`${tag}-${index}`} bg={ui.purple} color="white">
                             {tag}
                           </Pill>
                         ))}
@@ -2234,9 +1734,7 @@ function ProblemDetail() {
                   ...buttonBase,
                   padding: "10px 16px",
                   backgroundColor:
-                    voteStatus.user_vote === "like"
-                      ? ui.primary
-                      : "transparent",
+                    voteStatus.user_vote === "like" ? ui.primary : "transparent",
                   color: voteStatus.user_vote === "like" ? "white" : ui.muted,
                 }}
               >
@@ -2251,11 +1749,8 @@ function ProblemDetail() {
                   ...buttonBase,
                   padding: "10px 16px",
                   backgroundColor:
-                    voteStatus.user_vote === "dislike"
-                      ? ui.purple
-                      : "transparent",
-                  color:
-                    voteStatus.user_vote === "dislike" ? "white" : ui.muted,
+                    voteStatus.user_vote === "dislike" ? ui.purple : "transparent",
+                  color: voteStatus.user_vote === "dislike" ? "white" : ui.muted,
                 }}
               >
                 Dislike {voteStatus.dislike_count || 0}
@@ -2304,251 +1799,31 @@ function ProblemDetail() {
                   fontWeight: 750,
                 }}
               >
-                {comments.length}{" "}
-                {comments.length === 1 ? "comment" : "comments"}
+                {comments.length} {comments.length === 1 ? "comment" : "comments"}
               </p>
             </div>
 
             {comments.some((comment) => comment.is_solution) && (
-              <Pill
-                bg={ui.primarySoft}
-                color={ui.primary}
-                borderColor={ui.primaryBorder}
-              >
+              <Pill bg={ui.primarySoft} color={ui.primary} borderColor={ui.primaryBorder}>
                 ✓ Solution found
               </Pill>
             )}
           </div>
 
-          <form onSubmit={handleSubmitComment}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr",
-                gap: "12px",
-                alignItems: "stretch",
-                backgroundColor: "#f8fafc",
-                border: `1px solid ${
-                  isTextareaFocused ? "rgba(26,77,58,0.42)" : ui.border
-                }`,
-                borderRadius: "16px",
-                padding: "12px",
-                boxShadow: isTextareaFocused
-                  ? "0 2px 10px rgba(26, 77, 58, 0.08)"
-                  : "none",
-                transition: "all 0.2s ease",
-                marginBottom: "14px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => currentUser && navigate("/profile")}
-                  style={{
-                    border: `1px solid ${ui.border}`,
-                    backgroundColor: "white",
-                    borderRadius: "14px",
-                    padding: "9px",
-                    cursor: currentUser ? "pointer" : "default",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "9px",
-                    boxShadow: ui.shadowSm,
-                  }}
-                >
-                  <UserAvatar
-                    user={currentUser || { username: "User" }}
-                    size={34}
-                  />
-
-                  <span
-                    style={{
-                      display: isMobile ? "inline" : "none",
-                      color: ui.primary,
-                      fontWeight: 900,
-                      fontSize: "13px",
-                      maxWidth: "130px",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {currentUser?.username || "User"}
-                  </span>
-                </button>
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "8px",
-                    flexWrap: "wrap",
-                    justifyContent: "flex-start",
-                  }}
-                >
-                  <ModernButton
-                    onClick={openCommentMathEditor}
-                    style={{
-                      padding: "8px 10px",
-                      fontSize: "12px",
-                      backgroundColor: "white",
-                    }}
-                  >
-                    Symbols
-                  </ModernButton>
-
-                  <div
-                    style={{
-                      backgroundColor: "white",
-                      borderRadius: "999px",
-                      padding: "2px 6px",
-                      border: `1px solid ${ui.border}`,
-                    }}
-                  >
-                    <ImageUpload
-                      images={commentImages}
-                      onImagesChange={setCommentImages}
-                      maxImages={5}
-                      resetTrigger={imageResetKey}
-                      variant="compact"
-                      showHelper={false}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  position: "relative",
-                  backgroundColor: "white",
-                  border: `1px solid ${ui.border}`,
-                  borderRadius: "14px",
-                  overflow: "hidden",
-                }}
-              >
-                <textarea
-                  ref={editCommentRef}
-                  value={newComment}
-                  onChange={(event) => setNewComment(event.target.value)}
-                  onFocus={() => setIsTextareaFocused(true)}
-                  onBlur={() => setIsTextareaFocused(false)}
-                  placeholder="Write a solution idea, question, or comment..."
-                  style={{
-                    width: "100%",
-                    minHeight: isMobile ? "110px" : "118px",
-                    border: "none",
-                    outline: "none",
-                    resize: "vertical",
-                    fontFamily: "inherit",
-                    fontSize: isMobile ? "16px" : "15px",
-                    lineHeight: 1.65,
-                    padding: "16px",
-                    paddingBottom: commentImages.length > 0 ? "78px" : "16px",
-                    backgroundColor: "transparent",
-                    color: ui.text,
-                  }}
-                />
-
-                {commentImages.length > 0 && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: "14px",
-                      right: "14px",
-                      bottom: "12px",
-                      display: "flex",
-                      gap: "8px",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    {commentImages.map((image, index) => (
-                      <button
-                        type="button"
-                        key={image.id || index}
-                        onClick={() => openImageModal(index, commentImageUrls)}
-                        style={{
-                          position: "relative",
-                          width: "62px",
-                          height: "46px",
-                          borderRadius: "14px",
-                          overflow: "hidden",
-                          border: `1px solid ${ui.border}`,
-                          padding: 0,
-                          cursor: "pointer",
-                          backgroundColor: "#f8fafc",
-                        }}
-                      >
-                        <img
-                          src={image.preview}
-                          alt={image.name || `Comment image ${index + 1}`}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-
-                        <span
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setCommentImages((previous) =>
-                              previous.filter((img) => img.id !== image.id),
-                            );
-                          }}
-                          style={{
-                            position: "absolute",
-                            top: "-5px",
-                            right: "-5px",
-                            width: "18px",
-                            height: "18px",
-                            borderRadius: "50%",
-                            backgroundColor: ui.danger,
-                            color: "white",
-                            fontSize: "12px",
-                            fontWeight: 950,
-                            display: "grid",
-                            placeItems: "center",
-                            border: "2px solid white",
-                          }}
-                        >
-                          ×
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={!newComment.trim() && commentImages.length === 0}
-                style={{
-                  ...buttonBase,
-                  minWidth: "112px",
-                  minHeight: "42px",
-                  padding: "10px 16px",
-                  justifySelf: "flex-end",
-                  backgroundColor: ui.purple,
-                  color: "white",
-                  boxShadow: "0 2px 6px rgba(118, 75, 162, 0.14)",
-                  opacity:
-                    !newComment.trim() && commentImages.length === 0 ? 0.55 : 1,
-                  cursor:
-                    !newComment.trim() && commentImages.length === 0
-                      ? "not-allowed"
-                      : "pointer",
-                }}
-              >
-                Send →
-              </button>
-            </div>
-          </form>
+          <CommentComposer
+            onSubmit={handleSubmitComment}
+            currentUser={currentUser}
+            isMobile={isMobile}
+            editCommentRef={editCommentRef}
+            newComment={newComment}
+            setNewComment={setNewComment}
+            commentImages={commentImages}
+            setCommentImages={setCommentImages}
+            imageResetKey={imageResetKey}
+            openCommentMathEditor={openCommentMathEditor}
+            openImageModal={openImageModal}
+            commentImageUrls={commentImageUrls}
+          />
 
           {comments.length === 0 ? (
             <div
@@ -2578,9 +1853,7 @@ function ProblemDetail() {
                 ?
               </div>
 
-              <h3
-                style={{ margin: "0 0 6px", color: ui.text, fontWeight: 950 }}
-              >
+              <h3 style={{ margin: "0 0 6px", color: ui.text, fontWeight: 950 }}>
                 No comments yet
               </h3>
               <p style={{ margin: 0, fontWeight: 750 }}>
