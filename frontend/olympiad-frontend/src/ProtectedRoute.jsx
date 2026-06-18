@@ -1,58 +1,32 @@
-import React, { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
-import axios from "axios";
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import AnimatedLoader from "./components/AnimatedLoader";
+import { useAuth } from "./context/AuthContext";
 
 function ProtectedRoute({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = checking, true = authenticated, false = not authenticated
-  const [isLoading, setIsLoading] = useState(true);
+  const { currentUser, authLoading } = useAuth();
+  const location = useLocation();
 
-  useEffect(() => {
-    validateAuth();
-  }, []);
-
-  const validateAuth = async () => {
-    const token = localStorage.getItem("token");
-    
-    if (!token) {
-      setIsAuthenticated(false);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Validate token with backend
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      if (response.data) {
-        setIsAuthenticated(true);
-      } else {
-        // Token is invalid, clear it
-        localStorage.removeItem("token");
-        setIsAuthenticated(false);
-      }
-    } catch (error) {
-      // Token is invalid or expired, clear it
-      localStorage.removeItem("token");
-      setIsAuthenticated(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (isLoading) {
+  if (authLoading) {
     return (
-      <div style={{ textAlign: "center", marginTop: "50px" }}>
-        <h2>Validating authentication...</h2>
-      </div>
+      <AnimatedLoader
+        type="verify"
+        message="Validating session..."
+        size="large"
+      />
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (!currentUser) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{
+          redirectTo: location.pathname + location.search,
+        }}
+      />
+    );
   }
 
   return children;
