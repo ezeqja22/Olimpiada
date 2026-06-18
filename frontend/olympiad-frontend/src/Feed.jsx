@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 // src/Feed.jsx
@@ -15,6 +16,7 @@ import EmptyState from "./components/feed/EmptyState";
 import PaginationControls from "./components/feed/PaginationControls";
 import FloatingCreateButton from "./components/feed/FloatingCreateButton";
 import "./Feed.css";
+import { useAuth } from "./context/AuthContext";
 
 function Feed() {
   const location = useLocation();
@@ -151,7 +153,9 @@ function Feed() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    const { logout } = useAuth();
+    logout();
+    navigate("/homepage", { replace: true });
 
     setProblems([]);
     setVoteData({});
