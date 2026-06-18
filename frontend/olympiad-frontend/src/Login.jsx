@@ -6,8 +6,8 @@ import Card from "./components/Card";
 import Button from "./components/Button";
 import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { Link } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import ForgotPassword from "./ForgotPassword";
-
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -15,55 +15,65 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  
+  const { loginWithToken } = useAuth();
+
   // Get redirect path from location state
   const redirectTo = location.state?.redirectTo || "/homepage";
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/login`, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/login`,
+        {
+          email,
+          password,
+        },
+      );
 
-      // Save JWT token to localStorage
-      localStorage.setItem("token", response.data.token);
+      const token = response.data.token || response.data.access_token;
 
-      alert("Login successful!");
-      // Replace history entry to prevent back navigation to login
-      // If maintenance mode is enabled, redirect to homepage (maintenance screen will show)
-      navigate("/homepage", { replace: true });
+      if (!token) {
+        throw new Error("No token returned from login");
+      }
+
+      await loginWithToken(token);
+
+      navigate(redirectTo || "/homepage", { replace: true });
     } catch (err) {
       const errorMessage = err.response?.data?.detail || err.message;
-      
-      // Check if it's a maintenance mode error
+
       if (err.response?.status === 503) {
-        alert("🔧 Site is currently under maintenance. Please try again later.");
-      }
-      // Check if it's an email verification error
-      else if (err.response?.status === 403 && errorMessage.includes("Email not verified")) {
-        // Redirect to verification page
-        navigate("/verify-email", { 
-          state: { 
+        alert(" Site is currently under maintenance. Please try again later.");
+      } else if (
+        err.response?.status === 403 &&
+        errorMessage.includes("Email not verified")
+      ) {
+        navigate("/verify-email", {
+          state: {
             email: email,
-            fromLogin: true 
-          } 
+            fromLogin: true,
+          },
         });
-      } 
-      // Check if it's a banned user error
-      else if (err.response?.status === 403 && errorMessage.includes("Account has been banned")) {
-        alert("🚫 " + errorMessage);
-      } 
-      // Check if it's a deactivated user error
-      else if (err.response?.status === 403 && errorMessage.includes("Account has been deactivated")) {
+      } else if (
+        err.response?.status === 403 &&
+        errorMessage.includes("Account has been banned")
+      ) {
+        alert(" " + errorMessage);
+      } else if (
+        err.response?.status === 403 &&
+        errorMessage.includes("Account has been deactivated")
+      ) {
         alert("⚠️ " + errorMessage);
-      } 
-      // Check if it's a network error
-      else if (err.code === 'ERR_NETWORK' || err.message.includes('Network Error')) {
-        alert("🌐 Unable to connect to the server. Please check your internet connection and try again.");
-      }
-      else {
+      } else if (
+        err.code === "ERR_NETWORK" ||
+        err.message.includes("Network Error")
+      ) {
+        alert(
+          " Unable to connect to the server. Please check your internet connection and try again.",
+        );
+      } else {
         alert("Login failed: " + errorMessage);
       }
     }
@@ -71,40 +81,48 @@ function Login() {
 
   return (
     <Layout>
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "center", 
-        alignItems: "center", 
-        minHeight: "60vh" 
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
         <Card style={{ width: "100%", maxWidth: "400px" }}>
           <div style={{ textAlign: "center", marginBottom: spacing.xl }}>
-            <h1 style={{
-              fontSize: typography.fontSize["3xl"],
-              fontWeight: typography.fontWeight.bold,
-              color: colors.primary,
-              marginBottom: spacing.sm
-            }}>
+            <h1
+              style={{
+                fontSize: typography.fontSize["3xl"],
+                fontWeight: typography.fontWeight.bold,
+                color: colors.primary,
+                marginBottom: spacing.sm,
+              }}
+            >
               Welcome Back
             </h1>
-            <p style={{
-              color: colors.gray[600],
-              fontSize: typography.fontSize.base,
-              margin: 0
-            }}>
+            <p
+              style={{
+                color: colors.gray[600],
+                fontSize: typography.fontSize.base,
+                margin: 0,
+              }}
+            >
               Sign in to your Olimpiada account
             </p>
           </div>
 
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: spacing.lg }}>
-              <label style={{
-                display: "block",
-                marginBottom: spacing.sm,
-                fontWeight: typography.fontWeight.medium,
-                color: colors.dark,
-                fontSize: typography.fontSize.base
-              }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: spacing.sm,
+                  fontWeight: typography.fontWeight.medium,
+                  color: colors.dark,
+                  fontSize: typography.fontSize.base,
+                }}
+              >
                 Email
               </label>
               <input
@@ -124,26 +142,28 @@ function Login() {
                   transition: "border-color 0.2s ease",
                   "&:focus": {
                     outline: "none",
-                    borderColor: colors.primary
-                  }
+                    borderColor: colors.primary,
+                  },
                 }}
-                onFocus={(e) => e.target.style.borderColor = colors.primary}
-                onBlur={(e) => e.target.style.borderColor = colors.gray[300]}
+                onFocus={(e) => (e.target.style.borderColor = colors.primary)}
+                onBlur={(e) => (e.target.style.borderColor = colors.gray[300])}
               />
             </div>
 
             <div style={{ marginBottom: spacing.xl }}>
-              <label style={{
-                display: "block",
-                marginBottom: spacing.sm,
-                fontWeight: typography.fontWeight.medium,
-                color: colors.dark,
-                fontSize: typography.fontSize.base
-              }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: spacing.sm,
+                  fontWeight: typography.fontWeight.medium,
+                  color: colors.dark,
+                  fontSize: typography.fontSize.base,
+                }}
+              >
                 Password
               </label>
               {/* Add wrapper div for password field */}
-              <div style={{ position: 'relative' }}>
+              <div style={{ position: "relative" }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
@@ -153,69 +173,80 @@ function Login() {
                   style={{
                     width: "100%",
                     padding: spacing.md,
-                    paddingRight: '50px',
+                    paddingRight: "50px",
                     border: `1px solid ${colors.gray[300]}`,
                     borderRadius: borderRadius.md,
                     fontSize: typography.fontSize.base,
                     fontFamily: typography.fontFamily,
                     boxSizing: "border-box",
-                    transition: "border-color 0.2s ease"
+                    transition: "border-color 0.2s ease",
                   }}
-                  onFocus={(e) => e.target.style.borderColor = colors.primary}
-                  onBlur={(e) => e.target.style.borderColor = colors.gray[300]}
+                  onFocus={(e) => (e.target.style.borderColor = colors.primary)}
+                  onBlur={(e) =>
+                    (e.target.style.borderColor = colors.gray[300])
+                  }
                 />
                 {/* Add custom eye icon */}
-                <span 
+                <span
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{ 
-                    cursor: 'pointer', 
-                    position: 'absolute', 
-                    right: '15px', 
-                    top: '50%', 
-                    transform: 'translateY(-50%)',
+                  style={{
+                    cursor: "pointer",
+                    position: "absolute",
+                    right: "15px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
                     color: colors.gray[600],
-                    padding: '8px',
-                    userSelect: 'none',
-                    zIndex: 10
+                    padding: "8px",
+                    userSelect: "none",
+                    zIndex: 10,
                   }}
                 >
                   <img
-                    src={showPassword ? 
-                      "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_MBYLL_cioicv.svg" : 
-                      "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_HAP_yencim.svg"}
+                    src={
+                      showPassword
+                        ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_MBYLL_cioicv.svg"
+                        : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_HAP_yencim.svg"
+                    }
                     alt={showPassword ? "Hide password" : "Show password"}
                     style={{
-                      width: '20px',
-                      height: '20px',
-                      objectFit: 'contain'
+                      width: "20px",
+                      height: "20px",
+                      objectFit: "contain",
                     }}
                   />
                 </span>
               </div>
             </div>
 
-            <Button 
-              type="submit" 
-              variant="primary" 
-              size="lg" 
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
               style={{ width: "100%", marginBottom: spacing.lg }}
             >
               Sign In
             </Button>
           </form>
-          <Link to="/forgot-password" style={{ color: "#1a4d3a", textDecoration: "underline" }}>
+          <Link
+            to="/forgot-password"
+            style={{ color: "#1a4d3a", textDecoration: "underline" }}
+          >
             Forgot Password?
           </Link>
-          <div style={{
-            textAlign: "center",
-            paddingTop: spacing.lg,
-            borderTop: `1px solid ${colors.gray[200]}`
-          }}>
-            <p style={{
-              margin: `0 0 ${spacing.sm} 0`,
-              color: colors.gray[600],
-              fontSize: typography.fontSize.base
-            }}>
+          <div
+            style={{
+              textAlign: "center",
+              paddingTop: spacing.lg,
+              borderTop: `1px solid ${colors.gray[200]}`,
+            }}
+          >
+            <p
+              style={{
+                margin: `0 0 ${spacing.sm} 0`,
+                color: colors.gray[600],
+                fontSize: typography.fontSize.base,
+              }}
+            >
               Don't have an account?
             </p>
             <Button
