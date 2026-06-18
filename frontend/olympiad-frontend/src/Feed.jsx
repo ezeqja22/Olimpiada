@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 // src/Feed.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -52,13 +52,21 @@ function Feed() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const getInitialTab = () => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+
+    return ["all", "following", "trending"].includes(tab) ? tab : "all";
+  };
+
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showLoading, setShowLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const hasLoadedOnce = useRef(false);
   const [voteData, setVoteData] = useState({});
   const [followStatus, setFollowStatus] = useState({});
   const [bookmarkData, setBookmarkData] = useState({});
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -89,8 +97,9 @@ function Feed() {
     const token = localStorage.getItem("token");
 
     if (token) {
-      fetchProblems();
       fetchCurrentUser();
+    } else {
+      setLoading(false);
     }
   }, []);
 
@@ -100,32 +109,14 @@ function Feed() {
   }, [currentPage]);
 
   useEffect(() => {
-    let loadingTimeout;
+    const token = localStorage.getItem("token");
 
-    loadingTimeout = setTimeout(() => {
-      setShowLoading(true);
-    }, 300);
-
-    if (activeTab === "all") {
-      fetchProblems().finally(() => {
-        clearTimeout(loadingTimeout);
-        setShowLoading(false);
-      });
-    } else if (activeTab === "following") {
-      fetchFollowingProblems().finally(() => {
-        clearTimeout(loadingTimeout);
-        setShowLoading(false);
-      });
-    } else if (activeTab === "trending") {
-      fetchTrendingProblems().finally(() => {
-        clearTimeout(loadingTimeout);
-        setShowLoading(false);
-      });
+    if (!token) {
+      setLoading(false);
+      return;
     }
 
-    return () => {
-      clearTimeout(loadingTimeout);
-    };
+    loadFeedPage(1, activeTab);
   }, [activeTab]);
 
   // Handle URL parameters for tab navigation
@@ -133,10 +124,63 @@ function Feed() {
     const urlParams = new URLSearchParams(location.search);
     const tabParam = urlParams.get("tab");
 
-    if (tabParam && ["all", "following", "trending"].includes(tabParam)) {
+    if (
+      tabParam &&
+      ["all", "following", "trending"].includes(tabParam) &&
+      tabParam !== activeTab
+    ) {
       setActiveTab(tabParam);
     }
-  }, [location]);
+  }, [location.search]);
+
+  const handleTabChange = (tab) => {
+    if (tab === activeTab) return;
+
+    setActiveTab(tab);
+    navigate(`/feed?tab=${tab}`, { replace: true });
+  };
+
+  const loadFeedPage = async (page = 1, tab = activeTab) => {
+    const isInitialLoad = !hasLoadedOnce.current && problems.length === 0;
+
+    if (isInitialLoad) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
+
+    try {
+      if (tab === "all") {
+        await fetchProblems(page);
+      } else if (tab === "following") {
+        await fetchFollowingProblems(page);
+      } else if (tab === "trending") {
+        await fetchTrendingProblems(page);
+      }
+
+      hasLoadedOnce.current = true;
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const hydrateProblemMetadata = (problemList) => {
+    const problemIds = problemList.map((problem) => problem.id);
+
+    if (problemIds.length === 0) {
+      setVoteData({});
+      setBookmarkData({});
+      setFollowStatus({});
+      return;
+    }
+
+    Promise.allSettled([
+      fetchVoteData(problemIds),
+      fetchBookmarkData(problemIds),
+      fetchFollowStatus(problemList),
+    ]);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -149,16 +193,11 @@ function Feed() {
   };
 
   const fetchProblems = async (page = 1) => {
-    setLoading(true);
-
     try {
-      let endpoint = `${API_URL}/auth/problems/?page=${page}&limit=10`;
+      const response = await axios.get(
+        `${API_URL}/auth/problems/?page=${page}&limit=10`,
+      );
 
-      if (activeTab === "trending") {
-        endpoint = `${API_URL}/auth/problems/trending?page=${page}&limit=10`;
-      }
-
-      const response = await axios.get(endpoint);
       const allProblems = response.data.problems || response.data;
 
       const standaloneProblems = allProblems.filter(
@@ -172,26 +211,20 @@ function Feed() {
       setTotalProblems(
         response.data.total_problems ||
           response.data.total ||
-          response.data.length,
+          standaloneProblems.length,
       );
 
-      const problemIds = standaloneProblems.map((problem) => problem.id);
-
-      await Promise.all([
-        fetchVoteData(problemIds),
-        fetchBookmarkData(problemIds),
-        fetchFollowStatus(standaloneProblems),
-      ]);
+      hydrateProblemMetadata(standaloneProblems);
     } catch (error) {
       console.error("Error fetching problems:", error);
-    } finally {
-      setLoading(false);
+      setProblems([]);
+      setCurrentPage(1);
+      setTotalPages(1);
+      setTotalProblems(0);
     }
   };
 
   const fetchFollowingProblems = async (page = 1) => {
-    setLoading(true);
-
     try {
       const token = localStorage.getItem("token");
 
@@ -227,27 +260,18 @@ function Feed() {
           filteredProblems.length,
       );
 
-      if (filteredProblems.length > 0) {
-        const problemIds = filteredProblems.map((problem) => problem.id);
-
-        await fetchVoteData(problemIds);
-        await fetchBookmarkData(problemIds);
-        await fetchFollowStatus(filteredProblems);
-      }
+      hydrateProblemMetadata(filteredProblems);
     } catch (error) {
       console.error("Error fetching following problems:", error);
       setProblems([]);
       setCurrentPage(1);
       setTotalPages(1);
       setTotalProblems(0);
-    } finally {
-      setLoading(false);
+      hydrateProblemMetadata([]);
     }
   };
 
   const fetchTrendingProblems = async (page = 1) => {
-    setLoading(true);
-
     try {
       const token = localStorage.getItem("token");
 
@@ -270,20 +294,20 @@ function Feed() {
       setProblems(standaloneProblems);
       setCurrentPage(page);
       setTotalPages(response.data.total_pages || 1);
-      setTotalProblems(standaloneProblems.length);
+      setTotalProblems(
+        response.data.total_problems ||
+          response.data.total ||
+          standaloneProblems.length,
+      );
 
-      if (standaloneProblems && standaloneProblems.length > 0) {
-        const problemIds = standaloneProblems.map((problem) => problem.id);
-
-        await fetchVoteData(problemIds);
-        await fetchBookmarkData(problemIds);
-        await fetchFollowStatus(standaloneProblems);
-      }
+      hydrateProblemMetadata(standaloneProblems);
     } catch (error) {
       console.error("Error fetching trending problems:", error);
       setProblems([]);
-    } finally {
-      setLoading(false);
+      setCurrentPage(1);
+      setTotalPages(1);
+      setTotalProblems(0);
+      hydrateProblemMetadata([]);
     }
   };
 
@@ -666,7 +690,7 @@ function Feed() {
 
   const emptyState = getEmptyStateContent();
 
-  if (showLoading) {
+  if (loading && problems.length === 0) {
     return (
       <Layout showHomeButton={true}>
         <AnimatedLoader
@@ -1146,6 +1170,24 @@ function Feed() {
             box-shadow: 0 12px 24px rgba(26,77,58,0.18);
           }
 
+          .feed-refreshing-pill {
+            width: fit-content;
+            margin: -10px 0 16px auto;
+            padding: 8px 13px;
+            border-radius: 999px;
+            background: rgba(26, 77, 58, 0.08);
+            color: #1a4d3a;
+            border: 1px solid rgba(26, 77, 58, 0.14);
+            font-size: 12px;
+            font-weight: 850;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+          }
+
+          .feed-list-refreshing {
+            opacity: 0.78;
+            transition: opacity 0.2s ease;
+          }
+
           .empty-state {
             text-align: center;
             margin-top: 28px;
@@ -1353,14 +1395,14 @@ function Feed() {
         <section className="feed-tabs-card">
           <div className="feed-tabs">
             <button
-              onClick={() => setActiveTab("all")}
+              onClick={() => handleTabChange("all")}
               className={`feed-tab-button ${activeTab === "all" ? "active" : ""}`}
             >
               All Problems
             </button>
 
             <button
-              onClick={() => setActiveTab("following")}
+              onClick={() => handleTabChange("following")}
               className={`feed-tab-button ${
                 activeTab === "following" ? "active" : ""
               }`}
@@ -1369,7 +1411,7 @@ function Feed() {
             </button>
 
             <button
-              onClick={() => setActiveTab("trending")}
+              onClick={() => handleTabChange("trending")}
               className={`feed-tab-button ${
                 activeTab === "trending" ? "active" : ""
               }`}
@@ -1383,6 +1425,10 @@ function Feed() {
             {problems.length === 1 ? "problem" : "problems"} shown
           </div>
         </section>
+
+        {refreshing && problems.length > 0 && (
+          <div className="feed-refreshing-pill">Updating feed...</div>
+        )}
 
         {problems.length === 0 ? (
           <div className="empty-state">
@@ -1401,7 +1447,7 @@ function Feed() {
             )}
           </div>
         ) : (
-          <div>
+          <div className={refreshing ? "feed-list-refreshing" : ""}>
             {problems.map((problem) => (
               <Card
                 key={problem.id}
@@ -1623,17 +1669,9 @@ function Feed() {
         {totalPages > 1 && (
           <div className="pagination-shell">
             <Button
-              onClick={() => {
-                if (activeTab === "trending") {
-                  fetchTrendingProblems(currentPage - 1);
-                } else if (activeTab === "following") {
-                  fetchFollowingProblems(currentPage - 1);
-                } else {
-                  fetchProblems(currentPage - 1);
-                }
-              }}
-              disabled={currentPage === 1}
-              variant={currentPage === 1 ? "ghost" : "primary"}
+              onClick={() => loadFeedPage(currentPage - 1, activeTab)}
+              disabled={currentPage === 1 || refreshing}
+              variant={currentPage === 1 || refreshing ? "ghost" : "primary"}
               size="md"
             >
               ← Previous
@@ -1644,17 +1682,11 @@ function Feed() {
             </span>
 
             <Button
-              onClick={() => {
-                if (activeTab === "trending") {
-                  fetchTrendingProblems(currentPage + 1);
-                } else if (activeTab === "following") {
-                  fetchFollowingProblems(currentPage + 1);
-                } else {
-                  fetchProblems(currentPage + 1);
-                }
-              }}
-              disabled={currentPage === totalPages}
-              variant={currentPage === totalPages ? "ghost" : "primary"}
+              onClick={() => loadFeedPage(currentPage + 1, activeTab)}
+              disabled={currentPage === totalPages || refreshing}
+              variant={
+                currentPage === totalPages || refreshing ? "ghost" : "primary"
+              }
               size="md"
             >
               Next →
