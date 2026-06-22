@@ -1968,8 +1968,8 @@ def search_problems(
         comment_count = db.query(Comment).filter(Comment.problem_id == problem.id).count()
         
         # Get vote counts
-        upvotes = db.query(Vote).filter(Vote.problem_id == problem.id, Vote.vote_type == "upvote").count()
-        downvotes = db.query(Vote).filter(Vote.problem_id == problem.id, Vote.vote_type == "downvote").count()
+        upvotes = db.query(Vote).filter(Vote.problem_id == problem.id, Vote.vote_type == "like").count()
+        downvotes = db.query(Vote).filter(Vote.problem_id == problem.id, Vote.vote_type == "dislike").count()
         
         results.append({
             "id": problem.id,
