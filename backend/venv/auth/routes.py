@@ -1745,7 +1745,7 @@ def get_follow_status(
 
 @router.post("/follow/status-bulk")
 def get_follow_status_bulk(
-    user_ids: List[int],
+    user_ids: List[int] = Body(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
