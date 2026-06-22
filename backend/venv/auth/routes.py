@@ -948,28 +948,47 @@ def update_comment(
 ):
     # Check if problem exists
     problem = db.query(Problem).filter(Problem.id == problem_id).first()
+
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
-    
-    # Check if comment exists and belongs to current user
+
+    # Find comment by ID and problem only
     db_comment = db.query(Comment).filter(
         Comment.id == comment_id,
-        Comment.problem_id == problem_id,
-        Comment.author_id == current_user.id
+        Comment.problem_id == problem_id
     ).first()
-    
+
     if not db_comment:
-        raise HTTPException(status_code=404, detail="Comment not found or you don't have permission to edit it")
-    
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    # Permission:
+    # - comment author can edit their own comment
+    # - admin/moderator can edit any comment
+    is_comment_author = db_comment.author_id == current_user.id
+    is_staff = current_user.role in ["admin", "moderator"]
+
+    if not is_comment_author and not is_staff:
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have permission to edit this comment"
+        )
+
     # Update comment
     db_comment.text = comment.text
     db_comment.images = comment.images
     db_comment.updated_at = datetime.utcnow()
+
     db.commit()
     db.refresh(db_comment)
-    
+
     # Fetch the comment with author relationship
-    db_comment = db.query(Comment).options(joinedload(Comment.author)).filter(Comment.id == comment_id).first()
+    db_comment = (
+        db.query(Comment)
+        .options(joinedload(Comment.author))
+        .filter(Comment.id == comment_id)
+        .first()
+    )
+
     return db_comment
 
 @router.delete("/problems/{problem_id}/comments/{comment_id}")
@@ -981,23 +1000,34 @@ def delete_comment(
 ):
     # Check if problem exists
     problem = db.query(Problem).filter(Problem.id == problem_id).first()
+
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
-    
-    # Check if comment exists and belongs to current user
+
+    # Find comment by ID and problem only
     db_comment = db.query(Comment).filter(
         Comment.id == comment_id,
-        Comment.problem_id == problem_id,
-        Comment.author_id == current_user.id
+        Comment.problem_id == problem_id
     ).first()
-    
+
     if not db_comment:
-        raise HTTPException(status_code=404, detail="Comment not found or you don't have permission to delete it")
-    
-    # Delete comment
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    # Permission:
+    # - comment author can delete their own comment
+    # - admin/moderator can delete any comment
+    is_comment_author = db_comment.author_id == current_user.id
+    is_staff = current_user.role in ["admin", "moderator"]
+
+    if not is_comment_author and not is_staff:
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have permission to delete this comment"
+        )
+
     db.delete(db_comment)
     db.commit()
-    
+
     return {"message": "Comment deleted successfully"}
 
 @router.put("/problems/{problem_id}/comments/{comment_id}/solution")
