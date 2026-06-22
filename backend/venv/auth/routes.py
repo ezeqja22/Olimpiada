@@ -728,21 +728,31 @@ def get_problem(problem_id: int, current_user: User = Depends(get_current_user),
         }
 
 @router.put("/problems/{problem_id}", response_model=ProblemResponse)
+@router.put("/problems/{problem_id}", response_model=ProblemResponse)
 def update_problem(
     problem_id: int,
     problem: ProblemCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Check if problem exists and belongs to current user
-    db_problem = db.query(Problem).filter(
-        Problem.id == problem_id,
-        Problem.author_id == current_user.id
-    ).first()
-    
+    # First get the problem by ID only
+    db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
+
     if not db_problem:
-        raise HTTPException(status_code=404, detail="Problem not found or you don't have permission to edit it")
-    
+        raise HTTPException(status_code=404, detail="Problem not found")
+
+    # Permission check:
+    # - owner can edit their own problem
+    # - admin/moderator can edit any problem
+    is_owner = db_problem.author_id == current_user.id
+    is_staff = current_user.role in ["admin", "moderator"]
+
+    if not is_owner and not is_staff:
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have permission to edit this problem"
+        )
+
     # Update problem
     db_problem.title = problem.title
     db_problem.description = problem.description
@@ -751,50 +761,47 @@ def update_problem(
     db_problem.level = problem.level
     db_problem.year = problem.year
     db_problem.updated_at = datetime.utcnow()
-    
+
     db.commit()
     db.refresh(db_problem)
-    
+
     # Return with comment count
-    result = db.query(Problem, func.count(Comment.id).label('comment_count')).outerjoin(Comment).filter(Problem.id == problem_id).group_by(Problem.id).first()
-    problem, comment_count = result
-    # Fetch the author
-    author = db.query(User).filter(User.id == problem.author_id).first()
-    
-    if author:
-        return {
-            "id": problem.id, 
-            "title": problem.title, 
-            "description": problem.description, 
-            "tags": problem.tags, 
-            "subject": problem.subject, 
-            "level": problem.level, 
-            "year": problem.year,
-            "author_id": problem.author_id, 
-            "comment_count": comment_count, 
-            "created_at": problem.created_at.isoformat() if problem.created_at else None,
-            "updated_at": problem.updated_at.isoformat() if problem.updated_at else None, 
-            "author": {
-                "id": author.id, 
-                "username": author.username, 
-                "profile_picture": author.profile_picture
-            }
+    result = (
+        db.query(Problem, func.count(Comment.id).label("comment_count"))
+        .outerjoin(Comment)
+        .filter(Problem.id == problem_id)
+        .group_by(Problem.id)
+        .first()
+    )
+
+    updated_problem, comment_count = result
+
+    author = db.query(User).filter(User.id == updated_problem.author_id).first()
+
+    return {
+        "id": updated_problem.id,
+        "title": updated_problem.title,
+        "description": updated_problem.description,
+        "tags": updated_problem.tags,
+        "subject": updated_problem.subject,
+        "level": updated_problem.level,
+        "year": updated_problem.year,
+        "author_id": updated_problem.author_id,
+        "comment_count": comment_count,
+        "created_at": updated_problem.created_at.isoformat()
+        if updated_problem.created_at
+        else None,
+        "updated_at": updated_problem.updated_at.isoformat()
+        if updated_problem.updated_at
+        else None,
+        "author": {
+            "id": author.id,
+            "username": author.username,
+            "profile_picture": author.profile_picture,
         }
-    else:
-        return {
-            "id": problem.id, 
-            "title": problem.title, 
-            "description": problem.description, 
-            "tags": problem.tags, 
-            "subject": problem.subject, 
-            "level": problem.level, 
-            "year": problem.year,
-            "author_id": problem.author_id, 
-            "comment_count": comment_count, 
-            "created_at": problem.created_at.isoformat() if problem.created_at else None,
-            "updated_at": problem.updated_at.isoformat() if problem.updated_at else None, 
-            "author": None
-        }
+        if author
+        else None,
+    }
 
 @router.delete("/problems/{problem_id}")
 def delete_problem(
