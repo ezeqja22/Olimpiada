@@ -152,18 +152,6 @@ function Feed() {
     ]);
   };
 
-  const handleLogout = () => {
-    const { logout } = useAuth();
-    logout();
-    navigate("/homepage", { replace: true });
-
-    setProblems([]);
-    setVoteData({});
-    setFollowStatus({});
-
-    navigate("/homepage", { replace: true });
-  };
-
   const fetchProblems = async (page = 1) => {
     try {
       const response = await axios.get(
