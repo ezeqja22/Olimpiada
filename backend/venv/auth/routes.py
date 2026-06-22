@@ -728,7 +728,6 @@ def get_problem(problem_id: int, current_user: User = Depends(get_current_user),
         }
 
 @router.put("/problems/{problem_id}", response_model=ProblemResponse)
-@router.put("/problems/{problem_id}", response_model=ProblemResponse)
 def update_problem(
     problem_id: int,
     problem: ProblemCreate,
@@ -1617,36 +1616,79 @@ def unfollow_user(
 
 @router.get("/feed/following")
 def get_following_feed(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=50),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get problems from users you follow"""
+    """Get paginated problems from users you follow"""
+    offset = (page - 1) * limit
+
     # Get list of user IDs that current user follows
     following_ids = db.query(Follow.following_id).filter(
         Follow.follower_id == current_user.id
     ).all()
+
     following_ids = [user_id[0] for user_id in following_ids]
-    
+
     if not following_ids:
         return {
             "problems": [],
             "message": "You don't follow anyone yet",
-            "following_count": 0
+            "following_count": 0,
+            "total_problems": 0,
+            "total": 0,
+            "page": page,
+            "limit": limit,
+            "total_pages": 1,
         }
-    
-    # Get problems from followed users with comment counts
-    problems = db.query(Problem, func.count(Comment.id).label('comment_count')).outerjoin(Comment).filter(
-        Problem.author_id.in_(following_ids)
-    ).group_by(Problem.id).order_by(Problem.created_at.desc()).all()
-    
-    # Fetch authors for all problems
-    author_ids = [p.author_id for p, _ in problems]
-    authors = db.query(User).filter(User.id.in_(author_ids)).all()
+
+    # Count total followed-user problems, excluding forum problems
+    total_problems = (
+        db.query(func.count(Problem.id))
+        .filter(
+            Problem.author_id.in_(following_ids),
+            Problem.forum_id.is_(None)
+        )
+        .scalar()
+        or 0
+    )
+
+    # Get current page of followed-user problems with comment counts
+    problems = (
+        db.query(Problem, func.count(Comment.id).label("comment_count"))
+        .outerjoin(Comment, Comment.problem_id == Problem.id)
+        .filter(
+            Problem.author_id.in_(following_ids),
+            Problem.forum_id.is_(None)
+        )
+        .group_by(Problem.id)
+        .order_by(Problem.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    # Fetch authors for current page only
+    author_ids = list({
+        problem.author_id
+        for problem, _ in problems
+        if problem.author_id is not None
+    })
+
+    authors = (
+        db.query(User).filter(User.id.in_(author_ids)).all()
+        if author_ids
+        else []
+    )
+
     author_dict = {author.id: author for author in authors}
-    
-    # Serialize problems
+
     problems_data = []
+
     for problem, comment_count in problems:
+        author = author_dict.get(problem.author_id)
+
         problems_data.append({
             "id": problem.id,
             "title": problem.title,
@@ -1654,20 +1696,34 @@ def get_following_feed(
             "tags": problem.tags,
             "subject": problem.subject,
             "level": problem.level,
+            "year": problem.year,
             "author_id": problem.author_id,
             "comment_count": comment_count,
-            "created_at": problem.created_at.isoformat() if problem.created_at else None,
-            "updated_at": problem.updated_at.isoformat() if problem.updated_at else None,
+            "created_at": problem.created_at.isoformat()
+            if problem.created_at
+            else None,
+            "updated_at": problem.updated_at.isoformat()
+            if problem.updated_at
+            else None,
             "author": {
-                "id": author_dict[problem.author_id].id,
-                "username": author_dict[problem.author_id].username,
-                "profile_picture": author_dict[problem.author_id].profile_picture
+                "id": author.id,
+                "username": author.username,
+                "profile_picture": author.profile_picture,
             }
+            if author
+            else None,
         })
-    
+
+    total_pages = max(1, (total_problems + limit - 1) // limit)
+
     return {
         "problems": problems_data,
-        "following_count": len(following_ids)
+        "following_count": len(following_ids),
+        "total_problems": total_problems,
+        "total": total_problems,
+        "page": page,
+        "limit": limit,
+        "total_pages": total_pages,
     }
 
 @router.get("/follow/status/{user_id}")
