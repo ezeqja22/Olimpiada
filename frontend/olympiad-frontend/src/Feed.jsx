@@ -304,7 +304,7 @@ function Feed() {
       }
 
       const response = await axios.post(
-        `${API_URL}/auth/follow/status-bulk`,
+        `${API_URL}/auth/follow/status/bulk`,
         authorIds,
         {
           headers: {
