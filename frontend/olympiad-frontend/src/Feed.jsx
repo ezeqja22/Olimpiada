@@ -364,81 +364,68 @@ function Feed() {
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      const isCurrentlyBookmarked = bookmarkData[problemId]?.isBookmarked;
+    const token = localStorage.getItem("token");
 
-      if (isCurrentlyBookmarked) {
-        try {
-          await axios.delete(`${API_URL}/auth/problems/${problemId}/bookmark`, {
+    if (!token) {
+      alert("Please log in to save problems.");
+      return;
+    }
+
+    const wasBookmarked = Boolean(bookmarkData[problemId]?.isBookmarked);
+    const nextBookmarkState = !wasBookmarked;
+
+    // Optimistic UI update
+    setBookmarkData((prev) => ({
+      ...prev,
+      [problemId]: {
+        ...(prev[problemId] || {}),
+        isBookmarked: nextBookmarkState,
+      },
+    }));
+
+    try {
+      if (wasBookmarked) {
+        await axios.delete(`${API_URL}/auth/problems/${problemId}/bookmark`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } else {
+        await axios.post(
+          `${API_URL}/auth/problems/${problemId}/bookmark`,
+          {},
+          {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          });
-
-          setBookmarkData((prev) => ({
-            ...prev,
-            [problemId]: { isBookmarked: false },
-          }));
-        } catch (deleteError) {
-          if (deleteError.response?.status === 404) {
-            await axios.post(
-              `${API_URL}/auth/problems/${problemId}/bookmark`,
-              {},
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              },
-            );
-
-            setBookmarkData((prev) => ({
-              ...prev,
-              [problemId]: { isBookmarked: true },
-            }));
-          } else {
-            throw deleteError;
-          }
-        }
-      } else {
-        try {
-          await axios.post(
-            `${API_URL}/auth/problems/${problemId}/bookmark`,
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            },
-          );
-
-          setBookmarkData((prev) => ({
-            ...prev,
-            [problemId]: { isBookmarked: true },
-          }));
-        } catch (postError) {
-          if (postError.response?.status === 400) {
-            await axios.delete(
-              `${API_URL}/auth/problems/${problemId}/bookmark`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              },
-            );
-
-            setBookmarkData((prev) => ({
-              ...prev,
-              [problemId]: { isBookmarked: false },
-            }));
-          } else {
-            throw postError;
-          }
-        }
+          },
+        );
       }
     } catch (error) {
+      // If frontend thought it was saved, but backend says it was already unsaved,
+      // our optimistic state is already correct.
+      if (wasBookmarked && error.response?.status === 404) {
+        return;
+      }
+
+      // If frontend thought it was not saved, but backend says it was already saved,
+      // our optimistic state is already correct.
+      if (!wasBookmarked && error.response?.status === 400) {
+        return;
+      }
+
+      // Roll back UI if it was a real error
+      setBookmarkData((prev) => ({
+        ...prev,
+        [problemId]: {
+          ...(prev[problemId] || {}),
+          isBookmarked: wasBookmarked,
+        },
+      }));
+
       console.error("Error toggling bookmark:", error);
       console.error("Error details:", error.response?.data);
+
       alert(
         `Error updating bookmark: ${
           error.response?.data?.detail || error.message

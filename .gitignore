@@ -1,12 +1,30 @@
-# Created by venv; see https://docs.python.org/3/library/venv.html
-#Development files that should not be tracked
-backend/venv/minimal_models.py
-backend/venv/fix_foreign_key.py
-backend/venv/simple_auth_routes.py
-backend/venv/fix_pinned_field.py
-backend/venv/main_minimal.py
+# Python virtual environments
+backend/venv/
+venv/
+.venv/
+env/
+ENV/
+
+# Python cache
 __pycache__/
 *.pyc
-backend/pyvenv.cfg
+*.pyo
+*.pyd
+
+# Environment variables
 .env
+.env.*
+!.env.example
+
+# Local Python/venv config
+pyvenv.cfg
+backend/pyvenv.cfg
+
+# Alembic local config
 alembic.ini
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
