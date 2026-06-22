@@ -1,9 +1,9 @@
+/* eslint-disable jsx-a11y/img-redundant-alt */
 import React, { useEffect, useState } from "react";
 import ImageUpload from "../ImageUpload";
 import { getDisplayName } from "../../utils";
 import CommentActions from "./CommentActions";
 import {
-  buttonBase,
   formatDate,
   isEdited,
   ModernButton,
@@ -44,13 +44,24 @@ function CommentThread({
   const [isMobile, setIsMobile] = useState(false);
 
   const isNested = depth > 0;
-  const canEdit = currentUser && currentUser.id === comment.author_id;
-  const canMarkSolution =
+  const currentUserRole = (currentUser?.role || "").toLowerCase();
+
+  const isStaff =
+    currentUserRole === "admin" || currentUserRole === "moderator";
+
+  const isCommentAuthor =
+    currentUser && String(currentUser.id) === String(comment.author_id);
+
+  const isProblemAuthor =
     currentUser &&
     problem &&
-    (currentUser.id === problem.author_id ||
-      currentUser.role === "admin" ||
-      currentUser.role === "moderator");
+    String(currentUser.id) === String(problem.author_id);
+
+  const canEdit = Boolean(currentUser && (isCommentAuthor || isStaff));
+
+  const canMarkSolution = Boolean(
+    currentUser && problem && (isProblemAuthor || isStaff),
+  );
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -163,8 +174,7 @@ function CommentThread({
                       cursor: "pointer",
                     }}
                   >
-                    {getDisplayName(comment.author?.username) ||
-                      "Unknown User"}
+                    {getDisplayName(comment.author?.username) || "Unknown User"}
                   </button>
 
                   <div
