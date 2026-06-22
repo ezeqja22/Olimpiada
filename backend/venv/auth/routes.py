@@ -207,7 +207,7 @@ async def get_trending_problems(
         })
     
     # Get total count for pagination
-    total_problems = db.query(Problem).count()
+    total_problems = db.query(Problem).filter(Problem.forum_id.is_(None)).count()
     total_pages = max(1, (total_problems + limit - 1) // limit)
     
     return {
@@ -1741,6 +1741,30 @@ def get_follow_status(
     return {
         "is_following": follow is not None,
         "user_id": user_id
+    }
+
+@router.post("/follow/status-bulk")
+def get_follow_status_bulk(
+    user_ids: List[int],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Check if current user is following multiple users"""
+    if not user_ids:
+        return {}
+
+    unique_user_ids = list(set(user_ids))
+
+    follows = db.query(Follow.following_id).filter(
+        Follow.follower_id == current_user.id,
+        Follow.following_id.in_(unique_user_ids)
+    ).all()
+
+    followed_ids = {follow[0] for follow in follows}
+
+    return {
+        str(user_id): user_id in followed_ids
+        for user_id in unique_user_ids
     }
 
 @router.get("/user/{username}")

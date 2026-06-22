@@ -286,38 +286,38 @@ function Feed() {
   const fetchFollowStatus = async (problemsToCheck) => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return;
 
-      const followPromises = problemsToCheck.map(async (problem) => {
-        if (!problem.author) return { authorId: null, isFollowing: false };
+      if (!token) {
+        setFollowStatus({});
+        return;
+      }
 
-        try {
-          const response = await axios.get(
-            `${API_URL}/auth/follow/status/${problem.author.id}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            },
-          );
+      const authorIds = [
+        ...new Set(
+          problemsToCheck.map((problem) => problem.author?.id).filter(Boolean),
+        ),
+      ];
 
-          return {
-            authorId: problem.author.id,
-            isFollowing: response.data.is_following,
-          };
-        } catch (error) {
-          return { authorId: problem.author.id, isFollowing: false };
-        }
-      });
+      if (authorIds.length === 0) {
+        setFollowStatus({});
+        return;
+      }
 
-      const results = await Promise.all(followPromises);
-      const followStatusMap = {};
+      const response = await axios.post(
+        `${API_URL}/auth/follow/status-bulk`,
+        authorIds,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
-      results.forEach((result) => {
-        followStatusMap[result.authorId] = result.isFollowing;
-      });
-
-      setFollowStatus(followStatusMap);
+      setFollowStatus(response.data || {});
     } catch (error) {
       console.error("Error fetching follow status:", error);
+      setFollowStatus({});
     }
   };
 
