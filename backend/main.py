@@ -1,7 +1,7 @@
 import warnings
 warnings.filterwarnings("ignore")
 
-from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import models
@@ -34,7 +34,7 @@ except ImportError:
     get_settings_service = None
 # Removed push notification service
 import jwt
-from auth.dependencies import SECRET_KEY
+from auth.dependencies import SECRET_KEY, get_current_user
 
 # Load environment variables
 load_dotenv()
@@ -181,6 +181,11 @@ async def get_site_info():
             # Default privacy settings
             "profile_visibility": "public"
         }
+    
+def require_staff_user(current_user: User):
+    if current_user.role not in ["admin", "moderator"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
 
 # Auto-cleanup function
 async def cleanup_expired_users():
@@ -234,7 +239,8 @@ def read_root():
     return {"message": "Hello, Science Pioneers with PostgreSQL!"}
 
 @app.get("/test-settings")
-async def test_settings_simple():
+async def test_settings_simple(current_user: User = Depends(get_current_user)):
+    require_staff_user(current_user)
     """Simple test endpoint without authentication"""
     try:
         from database import get_db
@@ -278,7 +284,8 @@ async def test_settings_simple():
         }
 
 @app.get("/get-settings")
-async def get_all_settings():
+async def get_all_settings(current_user: User = Depends(get_current_user)):
+    require_staff_user(current_user)
     """Get all settings without authentication"""
     try:
         from database import get_db
@@ -397,7 +404,11 @@ async def get_all_settings():
         }
 
 @app.post("/save-settings")
-async def save_settings_simple(settings_data: dict):
+async def save_settings_simple(
+    settings_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    require_staff_user(current_user)
     """Simple save endpoint without authentication"""
     try:
         from database import get_db
@@ -451,7 +462,8 @@ async def save_settings_simple(settings_data: dict):
 
 # Migration endpoint for manual migration
 @app.post("/admin/migrate")
-async def run_manual_migration():
+async def run_manual_migration(current_user: User = Depends(get_current_user)):
+    require_staff_user(current_user)
     """Manual migration endpoint to add images column to comments table"""
     try:
         with engine.connect() as conn:

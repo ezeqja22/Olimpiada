@@ -234,6 +234,16 @@ const AdminSettings = () => {
     },
   };
 
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+  };
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -242,6 +252,7 @@ const AdminSettings = () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/get-settings`,
+        getAuthHeaders(),
       );
 
       // Parse the nested settings structure
@@ -316,6 +327,7 @@ const AdminSettings = () => {
         {
           settings: settingsToSave,
         },
+        getAuthHeaders(),
       );
 
       showToast("Settings saved successfully!", "success");
@@ -387,10 +399,8 @@ const AdminSettings = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/settings/export`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/test-settings`,
+        getAuthHeaders(),
       );
 
       const dataStr = JSON.stringify(response.data, null, 2);
@@ -413,7 +423,8 @@ const AdminSettings = () => {
       // Testing settings
 
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/test-settings`,
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/get-settings`,
+        getAuthHeaders(),
       );
 
       // Test completed
