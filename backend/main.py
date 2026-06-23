@@ -1,8 +1,10 @@
 import warnings
 warnings.filterwarnings("ignore")
 
-from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconnect, Depends
-from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+
+from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconnect, Depends # pyright: ignore[reportMissingImports]
+from fastapi.middleware.cors import CORSMiddleware # pyright: ignore[reportMissingImports]
 from fastapi.responses import JSONResponse
 import models
 from database import engine, get_db
@@ -460,44 +462,5 @@ async def save_settings_simple(
             "error": str(e)
         }
 
-# Migration endpoint for manual migration
-@app.post("/admin/migrate")
-async def run_manual_migration(current_user: User = Depends(get_current_user)):
-    require_staff_user(current_user)
-    """Manual migration endpoint to add images column to comments table"""
-    try:
-        with engine.connect() as conn:
-            # Check if column already exists
-            result = conn.execute(text("""
-                SELECT column_name 
-                FROM information_schema.columns 
-                WHERE table_name='comments' AND column_name='images'
-            """))
-            
-            if result.fetchone():
-                return {
-                    "message": "Column 'images' already exists in comments table",
-                    "status": "already_exists"
-                }
-            else:
-                # Add the column
-                conn.execute(text("""
-                    ALTER TABLE comments 
-                    ADD COLUMN images JSON
-                """))
-                conn.commit()
-                return {
-                    "message": "Successfully added 'images' column to comments table",
-                    "status": "success"
-                }
-    except Exception as e:
-        return {
-            "message": f"Failed to run migration: {str(e)}",
-            "status": "error",
-            "error": str(e)
-        }
-
-
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
