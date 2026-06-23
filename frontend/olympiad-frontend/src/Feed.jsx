@@ -17,7 +17,7 @@ import PaginationControls from "./components/feed/PaginationControls";
 import FloatingCreateButton from "./components/feed/FloatingCreateButton";
 import "./Feed.css";
 import { useAuth } from "./context/AuthContext";
-import { useToast } from "./ToastProvider";
+import { useToast } from "../src/components/ToastProvider";
 
 function Feed() {
   const location = useLocation();

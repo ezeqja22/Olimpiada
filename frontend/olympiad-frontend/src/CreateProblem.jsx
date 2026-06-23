@@ -7,7 +7,7 @@ import MathEditor from "./MathEditor";
 import "./MathEditor.css";
 import Layout from "./components/Layout";
 import Card from "./components/Card";
-import { useToast } from "./ToastProvider";
+import { useToast } from "../src/components/ToastProvider";
 import {
   colors,
   spacing,

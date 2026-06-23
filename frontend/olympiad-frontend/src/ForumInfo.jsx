@@ -18,7 +18,7 @@ import {
 import { getUserInitial, getDisplayName } from "./utils";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
-import { useToast } from "./ToastProvider";
+import { useToast } from "../src/components/ToastProvider";
 
 // Helper function to render math content
 const renderMathContent = (text) => {

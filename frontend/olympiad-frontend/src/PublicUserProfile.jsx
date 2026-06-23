@@ -15,7 +15,7 @@ import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import { useProfileVisibility } from "./hooks/useProfileVisibility";
-import { useToast } from "./ToastProvider";
+import { useToast } from "../src/components/ToastProvider";
 
 // Helper function to render math content
 const renderMathContent = (text) => {

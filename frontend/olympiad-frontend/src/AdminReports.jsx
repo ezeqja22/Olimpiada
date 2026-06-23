@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ReportDetailsModal from "./ReportDetailsModal";
-import { useToast } from "./ToastProvider";
+import { useToast } from "../src/components/ToastProvider";
 import "./AdminLayout.css";
 
 const AdminReports = () => {

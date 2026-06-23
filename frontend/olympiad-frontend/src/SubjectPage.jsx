@@ -13,7 +13,7 @@ import SearchBar from "./SearchBar";
 import FollowButton from "./components/FollowButton";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
-import { useToast } from "./ToastProvider";
+import { useToast } from "../src/components/ToastProvider";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 const PAGE_SIZE = 10;

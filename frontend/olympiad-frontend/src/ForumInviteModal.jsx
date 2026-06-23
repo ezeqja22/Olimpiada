@@ -9,7 +9,7 @@ import {
   shadows,
 } from "./designSystem";
 import { getUserInitial } from "./utils";
-import { useToast } from "./ToastProvider";
+import { useToast } from "../src/components/ToastProvider";
 
 const { fontSize, fontWeight } = typography;
 

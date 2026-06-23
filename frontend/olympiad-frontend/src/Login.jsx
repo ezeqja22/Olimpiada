@@ -7,7 +7,7 @@ import Card from "./components/Card";
 import Button from "./components/Button";
 import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { useAuth } from "./context/AuthContext";
-import { useToast } from "./ToastProvider";
+import { useToast } from "../src/components/ToastProvider";
 
 function Login() {
   const [email, setEmail] = useState("");
