@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useToast } from "./components/ToastProvider";
+import { useToast } from "./ToastProvider";
 
 // Admin Panel Design System
 const colors = {

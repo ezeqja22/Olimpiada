@@ -11,7 +11,7 @@ import NotificationBell from "./components/NotificationBell";
 import { useSiteSettings } from "./hooks/useSiteSettings";
 import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import { useAuth } from "./context/AuthContext";
-import { useToast } from "./components/ToastProvider";
+import { useToast } from "./ToastProvider";
 
 function Homepage() {
   const [currentUser, setCurrentUser] = useState(null);

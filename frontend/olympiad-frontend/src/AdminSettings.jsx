@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useToast } from "./components/ToastProvider";
+import { useToast } from "./ToastProvider";
 
 const AdminSettings = () => {
   const [settings, setSettings] = useState({});

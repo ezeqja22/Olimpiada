@@ -15,7 +15,7 @@ import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import ForumProblemModal from "./ForumProblemModal";
 import ForumProblemCard from "./ForumProblemCard";
-import { useToast } from "./components/ToastProvider";
+import { useToast } from "./ToastProvider";
 
 // Helper function to render math content
 const renderMathContent = (text) => {

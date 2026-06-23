@@ -12,7 +12,7 @@ import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import MathEditor from "./MathEditor";
 import "./MathEditor.css";
-import { useToast } from "./components/ToastProvider";
+import { useToast } from "./ToastProvider";
 
 const ForumProblemModal = ({ isOpen, onClose, forumId, onProblemCreated }) => {
   const [formData, setFormData] = useState({

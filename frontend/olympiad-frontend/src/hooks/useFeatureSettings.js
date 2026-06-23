@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useToast } from "../components/ToastProvider";
+import { useToast } from "./ToastProvider";
 
 export const useFeatureSettings = () => {
   const [featureSettings, setFeatureSettings] = useState({});

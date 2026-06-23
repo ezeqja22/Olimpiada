@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { colors, spacing, typography, shadows } from "../designSystem";
-import { useToast } from "./components/ToastProvider";
+import { useToast } from "./ToastProvider";
 
 function NotificationBell({ onNotificationClick }) {
   const [unreadCount, setUnreadCount] = useState(0);
