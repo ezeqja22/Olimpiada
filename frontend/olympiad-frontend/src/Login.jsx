@@ -7,6 +7,7 @@ import Card from "./components/Card";
 import Button from "./components/Button";
 import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { useAuth } from "./context/AuthContext";
+import { useToast } from "./components/ToastProvider";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ function Login() {
   const location = useLocation();
 
   const { loginWithToken } = useAuth();
-
+  const { showToast } = useToast();
   const redirectTo = location.state?.redirectTo || "/homepage";
 
   const handleLogin = async (e) => {
@@ -53,7 +54,10 @@ function Login() {
       const errorMessage = err.response?.data?.detail || err.message;
 
       if (err.response?.status === 503) {
-        alert(" Site is currently under maintenance. Please try again later.");
+        showToast(
+          " Site is currently under maintenance. Please try again later.",
+          "error",
+        );
       } else if (
         err.response?.status === 403 &&
         errorMessage.includes("Email not verified")
@@ -68,21 +72,22 @@ function Login() {
         err.response?.status === 403 &&
         errorMessage.includes("Account has been banned")
       ) {
-        alert(" " + errorMessage);
+        showToast(" " + errorMessage, "error");
       } else if (
         err.response?.status === 403 &&
         errorMessage.includes("Account has been deactivated")
       ) {
-        alert("⚠️ " + errorMessage);
+        showToast(errorMessage, "error");
       } else if (
         err.code === "ERR_NETWORK" ||
         err.message.includes("Network Error")
       ) {
-        alert(
+        showToast(
           " Unable to connect to the server. Please check your internet connection and try again.",
+          "error",
         );
       } else {
-        alert("Login failed: " + errorMessage);
+        showToast("Login failed: " + errorMessage, "error");
       }
     } finally {
       setIsSubmitting(false);

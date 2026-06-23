@@ -13,6 +13,7 @@ import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { getUserInitial } from "./utils";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
+import { useToast } from "./components/ToastProvider";
 
 // Helper function to render math content
 const renderMathContent = (text) => {
@@ -56,6 +57,7 @@ function UserProfile() {
   });
 
   const [isMobile, setIsMobile] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -234,7 +236,7 @@ function UserProfile() {
       }));
     } catch (error) {
       console.error("Error voting:", error);
-      alert("Error voting on problem");
+      showToast("Error voting on problem", "error");
     }
   };
 
@@ -268,10 +270,10 @@ function UserProfile() {
       }));
 
       setIsEditingProfile(false);
-      alert("Profile updated successfully!");
+      showToast("Profile updated successfully!", "success");
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("Error updating profile. Please try again.");
+      showToast("Error updating profile. Please try again.", "error");
     }
   };
 
@@ -361,10 +363,10 @@ function UserProfile() {
         },
       }));
 
-      alert("Profile picture updated successfully!");
+      showToast("Profile picture updated successfully!", "success");
     } catch (error) {
       console.error("Error uploading file:", error);
-      alert("Error uploading file. Please try again.");
+      showToast("Error uploading file. Please try again.", "error");
     } finally {
       setUploading(false);
     }
@@ -380,7 +382,7 @@ function UserProfile() {
 
   const handleRemoveProfilePicture = async () => {
     if (!user.profile_picture) {
-      alert("No profile picture to remove!");
+      showToast("No profile picture to remove!", "error");
       return;
     }
 
@@ -412,10 +414,10 @@ function UserProfile() {
         },
       }));
 
-      alert("Profile picture removed successfully!");
+      showToast("Profile picture removed successfully!", "success");
     } catch (error) {
       console.error("Error removing profile picture:", error);
-      alert("Error removing profile picture. Please try again.");
+      showToast("Error removing profile picture. Please try again.", "error");
     } finally {
       setUploading(false);
     }
@@ -430,7 +432,7 @@ function UserProfile() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Please log in to delete draft");
+        showToast("Please log in to delete draft", "error");
         return;
       }
 
@@ -443,10 +445,13 @@ function UserProfile() {
 
       setDrafts((prev) => prev.filter((draft) => draft.id !== draftId));
 
-      alert("Draft deleted successfully!");
+      showToast("Draft deleted successfully!", "success");
     } catch (error) {
       console.error("Error deleting draft:", error);
-      alert(error.response?.data?.detail || "Failed to delete draft");
+      showToast(
+        error.response?.data?.detail || "Failed to delete draft",
+        "error",
+      );
     }
   };
 
@@ -479,7 +484,7 @@ function UserProfile() {
     const problemId = getCommentProblemId(comment);
 
     if (!problemId) {
-      alert("Could not find the problem for this comment.");
+      showToast("Could not find the problem for this comment.", "error");
       return;
     }
 

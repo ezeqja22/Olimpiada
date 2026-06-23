@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import ReportDetailsModal from './ReportDetailsModal';
-import './AdminLayout.css';
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import ReportDetailsModal from "./ReportDetailsModal";
+import { useToast } from "./components/ToastProvider";
+import "./AdminLayout.css";
 
 const AdminReports = () => {
   const [reports, setReports] = useState([]);
@@ -9,12 +12,13 @@ const AdminReports = () => {
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({});
   const [filters, setFilters] = useState({
-    status: '',
-    page: 1
+    status: "",
+    page: 1,
   });
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     fetchReports();
@@ -23,83 +27,97 @@ const AdminReports = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/me`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setCurrentUser(response.data);
     } catch (err) {
-      console.error('Failed to fetch current user:', err);
+      console.error("Failed to fetch current user:", err);
     }
   };
 
   const fetchReports = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const params = new URLSearchParams();
-      
-      if (filters.status) params.append('status', filters.status);
-      params.append('page', filters.page);
-      params.append('limit', 20);
 
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/admin/reports?${params}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      if (filters.status) params.append("status", filters.status);
+      params.append("page", filters.page);
+      params.append("limit", 20);
+
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/reports?${params}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
       setReports(response.data.reports);
       setPagination(response.data.pagination);
     } catch (err) {
-      setError('Failed to load reports');
-      console.error('Reports error:', err);
+      setError("Failed to load reports");
+      console.error("Reports error:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [key]: value,
-      page: 1
+      page: 1,
     }));
   };
 
   const handlePageChange = (newPage) => {
-    setFilters(prev => ({ ...prev, page: newPage }));
+    setFilters((prev) => ({ ...prev, page: newPage }));
   };
 
   const handleResolveReport = async (reportId, resolution) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/admin/reports/${reportId}/resolve`, 
-        { resolution }, 
-        { headers: { Authorization: `Bearer ${token}` } }
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/reports/${reportId}/resolve`,
+        { resolution },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-      
+
       // Refresh the reports list
       fetchReports();
-      alert('Report resolved successfully');
+      showToast("Report resolved successfully", "success");
     } catch (err) {
-      console.error('Resolve report error:', err);
-      alert(`Failed to resolve report: ${err.response?.data?.detail || err.message}`);
+      console.error("Resolve report error:", err);
+      showToast(
+        `Failed to resolve report: ${err.response?.data?.detail || err.message}`,
+        "error",
+      );
     }
   };
 
   const handleDismissReport = async (reportId, reason) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/admin/reports/${reportId}/dismiss`, 
-        { reason }, 
-        { headers: { Authorization: `Bearer ${token}` } }
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/reports/${reportId}/dismiss`,
+        { reason },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-      
+
       // Refresh the reports list
       fetchReports();
-      alert('Report dismissed successfully');
+      showToast("Report dismissed successfully", "success");
     } catch (err) {
-      console.error('Dismiss report error:', err);
-      alert(`Failed to dismiss report: ${err.response?.data?.detail || err.message}`);
+      console.error("Dismiss report error:", err);
+      showToast(
+        `Failed to dismiss report: ${err.response?.data?.detail || err.message}`,
+        "error",
+      );
     }
   };
 
@@ -114,14 +132,14 @@ const AdminReports = () => {
 
   const getStatusBadge = (status) => {
     const statusColors = {
-      pending: 'pending',
-      reviewed: 'active',
-      resolved: 'resolved',
-      dismissed: 'inactive'
+      pending: "pending",
+      reviewed: "active",
+      resolved: "resolved",
+      dismissed: "inactive",
     };
-    
+
     return (
-      <span className={`status-badge ${statusColors[status] || 'inactive'}`}>
+      <span className={`status-badge ${statusColors[status] || "inactive"}`}>
         {status}
       </span>
     );
@@ -129,22 +147,22 @@ const AdminReports = () => {
 
   const getReportTypeIcon = (type) => {
     const icons = {
-      user: '👤',
-      forum: '',
-      problem: '',
-      comment: '💭',
-      message: ''
+      user: "👤",
+      forum: "",
+      problem: "",
+      comment: "💭",
+      message: "",
     };
-    return icons[type] || '📄';
+    return icons[type] || "📄";
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -173,12 +191,12 @@ const AdminReports = () => {
       {/* Filters */}
       <div className="admin-card">
         <h2>Content Reports</h2>
-        <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
+        <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
           <div>
             <label>Status</label>
             <select
               value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
+              onChange={(e) => handleFilterChange("status", e.target.value)}
             >
               <option value="">All Reports</option>
               <option value="pending">Pending</option>
@@ -206,25 +224,28 @@ const AdminReports = () => {
               </tr>
             </thead>
             <tbody>
-              {reports.map(report => (
+              {reports.map((report) => (
                 <tr key={report.id}>
                   <td>
                     <div>
                       <strong>
-                        {getReportTypeIcon(report.report_type)} {report.report_type}
+                        {getReportTypeIcon(report.report_type)}{" "}
+                        {report.report_type}
                       </strong>
                       <br />
                       <small>Target ID: {report.target_id}</small>
                       {report.description && (
-                        <div style={{ 
-                          fontSize: '0.9rem', 
-                          color: '#6c757d', 
-                          marginTop: '4px',
-                          maxWidth: '200px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
-                        }}>
+                        <div
+                          style={{
+                            fontSize: "0.9rem",
+                            color: "#6c757d",
+                            marginTop: "4px",
+                            maxWidth: "200px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
                           {report.description}
                         </div>
                       )}
@@ -236,48 +257,59 @@ const AdminReports = () => {
                     </div>
                   </td>
                   <td>
-                    <span style={{ 
-                      background: '#e9ecef', 
-                      padding: '4px 8px', 
-                      borderRadius: '12px',
-                      fontSize: '0.8rem'
-                    }}>
+                    <span
+                      style={{
+                        background: "#e9ecef",
+                        padding: "4px 8px",
+                        borderRadius: "12px",
+                        fontSize: "0.8rem",
+                      }}
+                    >
                       {report.report_type}
                     </span>
                   </td>
                   <td>
-                    <span style={{ 
-                      background: '#f8d7da', 
-                      color: '#721c24',
-                      padding: '4px 8px', 
-                      borderRadius: '12px',
-                      fontSize: '0.8rem'
-                    }}>
+                    <span
+                      style={{
+                        background: "#f8d7da",
+                        color: "#721c24",
+                        padding: "4px 8px",
+                        borderRadius: "12px",
+                        fontSize: "0.8rem",
+                      }}
+                    >
                       {report.reason}
                     </span>
                   </td>
                   <td>{getStatusBadge(report.status)}</td>
                   <td>{formatDate(report.created_at)}</td>
                   <td>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                      }}
+                    >
                       <button
                         className="admin-btn primary"
                         onClick={() => handleViewReport(report.id)}
                         style={{
-                          backgroundColor: '#007bff',
-                          color: 'white',
-                          border: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.8rem'
+                          backgroundColor: "#007bff",
+                          color: "white",
+                          border: "none",
+                          padding: "6px 12px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          fontSize: "0.8rem",
                         }}
                       >
                         View Details
                       </button>
-                      
+
                       {report.assigned_to && (
-                        <span style={{ fontSize: '0.8rem', color: '#6c757d' }}>
+                        <span style={{ fontSize: "0.8rem", color: "#6c757d" }}>
                           Assigned to {report.assigned_to}
                         </span>
                       )}
@@ -299,12 +331,14 @@ const AdminReports = () => {
 
         {/* Pagination */}
         {pagination.pages > 1 && (
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            gap: '10px', 
-            marginTop: '20px' 
-          }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "10px",
+              marginTop: "20px",
+            }}
+          >
             <button
               className="admin-btn secondary"
               onClick={() => handlePageChange(filters.page - 1)}
@@ -312,16 +346,18 @@ const AdminReports = () => {
             >
               Previous
             </button>
-            
-            <span style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              padding: '0 15px',
-              color: '#495057'
-            }}>
+
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "0 15px",
+                color: "#495057",
+              }}
+            >
               Page {filters.page} of {pagination.pages}
             </span>
-            
+
             <button
               className="admin-btn secondary"
               onClick={() => handlePageChange(filters.page + 1)}

@@ -9,6 +9,7 @@ import FollowButton from "./components/FollowButton";
 import { getUserInitial, getDisplayName } from "./utils";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
+import { useToast } from "./components/ToastProvider";
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
@@ -58,6 +59,7 @@ const SearchResults = () => {
   });
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const { showToast } = useToast();
   const [currentUser, setCurrentUser] = useState(null);
   const [voteData, setVoteData] = useState({});
   const [bookmarkData, setBookmarkData] = useState({});
@@ -376,7 +378,7 @@ const SearchResults = () => {
       fetchSearchResults();
     } catch (error) {
       console.error("Error following user:", error);
-      alert("Error following user");
+      showToast("Error following user", "error");
     }
   };
 
@@ -389,7 +391,7 @@ const SearchResults = () => {
       fetchSearchResults();
     } catch (error) {
       console.error("Error unfollowing user:", error);
-      alert("Error unfollowing user");
+      showToast("Error unfollowing user", "error");
     }
   };
 
@@ -398,7 +400,7 @@ const SearchResults = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Please log in to bookmark problems");
+        showToast("Please log in to bookmark problems", "error");
         return;
       }
 
@@ -429,10 +431,10 @@ const SearchResults = () => {
       }
     } catch (error) {
       console.error("Error toggling bookmark:", error);
-      alert(
-        `Error updating bookmark: ${
-          error.response?.data?.detail || error.message
-        }`,
+      showToast(
+        "Error updating bookmark: " +
+          (error.response?.data?.detail || error.message),
+        "error",
       );
     }
   };
@@ -453,7 +455,7 @@ const SearchResults = () => {
       }));
     } catch (error) {
       console.error("Error voting:", error);
-      alert("Error voting on problem");
+      showToast("Error voting on problem", "error");
     }
   };
 

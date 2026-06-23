@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/CreateProblem.jsx
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
@@ -6,7 +7,14 @@ import MathEditor from "./MathEditor";
 import "./MathEditor.css";
 import Layout from "./components/Layout";
 import Card from "./components/Card";
-import { colors, spacing, typography, borderRadius, shadows } from "./designSystem";
+import { useToast } from "./components/ToastProvider";
+import {
+  colors,
+  spacing,
+  typography,
+  borderRadius,
+  shadows,
+} from "./designSystem";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 const secondaryColor = colors.secondary || colors.primary;
@@ -36,6 +44,8 @@ function CreateProblem() {
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
   const imageInputRef = useRef(null);
+
+  const { showToast } = useToast();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -70,7 +80,7 @@ function CreateProblem() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Please log in to load draft");
+        showToast("Please log in to load draft", "error");
         return;
       }
 
@@ -97,10 +107,16 @@ function CreateProblem() {
         setTags(draftTags.length > 0 ? draftTags : [""]);
       }
 
-      alert("Draft loaded successfully! You can now finish and publish your problem.");
+      showToast(
+        "Draft loaded successfully! You can now finish and publish your problem.",
+        "success",
+      );
     } catch (error) {
       console.error("Error loading draft:", error);
-      alert(error.response?.data?.detail || "Failed to load draft");
+      showToast(
+        error.response?.data?.detail || "Failed to load draft",
+        "error",
+      );
     }
   };
 
@@ -203,7 +219,7 @@ function CreateProblem() {
     if (tags.length < 5) {
       setTags([...tags, ""]);
     } else {
-      alert("Maximum 5 tags allowed");
+      showToast("Maximum 5 tags allowed", "error");
     }
   };
 
@@ -219,13 +235,16 @@ function CreateProblem() {
     if (files.length === 0) return;
 
     if (images.length + files.length > 10) {
-      alert("Maximum 10 images allowed. Please select fewer images.");
+      showToast(
+        "Maximum 10 images allowed. Please select fewer images.",
+        "error",
+      );
       return;
     }
 
     const validFiles = files.filter((file) => {
       if (!file.type.startsWith("image/")) {
-        alert(`${file.name} is not an image file`);
+        showToast(`${file.name} is not an image file`, "error");
         return false;
       }
 
@@ -244,8 +263,15 @@ function CreateProblem() {
   };
 
   const handleSaveDraft = async () => {
-    if (!formData.title.trim() || !formData.description.trim() || !formData.subject) {
-      alert("Please fill in at least title, description, and subject to save as draft");
+    if (
+      !formData.title.trim() ||
+      !formData.description.trim() ||
+      !formData.subject
+    ) {
+      showToast(
+        "Please fill in at least title, description, and subject to save as draft",
+        "error",
+      );
       return;
     }
 
@@ -255,7 +281,7 @@ function CreateProblem() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Please log in to save a draft");
+        showToast("Please log in to save a draft", "error");
         return;
       }
 
@@ -272,10 +298,13 @@ function CreateProblem() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("Draft saved successfully!");
+      showToast("Draft saved successfully!", "success");
     } catch (error) {
       console.error("Error saving draft:", error);
-      alert(error.response?.data?.detail || "Failed to save draft");
+      showToast(
+        error.response?.data?.detail || "Failed to save draft",
+        "error",
+      );
     } finally {
       setSavingDraft(false);
     }
@@ -289,7 +318,7 @@ function CreateProblem() {
       const validTags = tags.filter((tag) => tag.trim() !== "");
 
       if (validTags.length > 5) {
-        alert("Maximum 5 tags allowed");
+        showToast("Maximum 5 tags allowed", "error");
         setLoading(false);
         return;
       }
@@ -297,7 +326,7 @@ function CreateProblem() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Please log in to create a problem");
+        showToast("Please log in to create a problem", "error");
         setLoading(false);
         return;
       }
@@ -309,11 +338,15 @@ function CreateProblem() {
         year: formData.year ? parseInt(formData.year) : null,
       };
 
-      const response = await axios.post(`${API_URL}/auth/problems/`, requestData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await axios.post(
+        `${API_URL}/auth/problems/`,
+        requestData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       let imageUploadFailed = false;
 
@@ -333,7 +366,7 @@ function CreateProblem() {
                   Authorization: `Bearer ${token}`,
                   "Content-Type": "multipart/form-data",
                 },
-              }
+              },
             );
           }
         } catch (error) {
@@ -360,20 +393,21 @@ function CreateProblem() {
       }
 
       if (imageUploadFailed) {
-        alert(
-          "Problem created successfully, but some images failed to upload. You can add them later by editing the problem."
+        showToast(
+          "Problem created successfully, but some images failed to upload. You can add them later by editing the problem.",
+          "error",
         );
       } else {
-        alert("Problem created successfully!");
+        showToast("Problem created successfully!", "success");
       }
 
       navigate(getRedirectPath());
     } catch (error) {
-      console.error("Error creating problem:", error);
-      console.error("Error response:", error.response?.data);
-      console.error("Error status:", error.response?.status);
-      console.error("Error message:", error.message);
-      alert("Error creating problem: " + (error.response?.data?.detail || error.message));
+      showToast(
+        "Error creating problem: " +
+          (error.response?.data?.detail || error.message),
+        "error",
+      );
     } finally {
       setLoading(false);
       setUploadingImages(false);
@@ -822,7 +856,10 @@ function CreateProblem() {
               {images.length > 0 && (
                 <div style={previewGridStyle}>
                   {images.map((file, index) => (
-                    <div key={`${file.name}-${index}`} style={imagePreviewStyle}>
+                    <div
+                      key={`${file.name}-${index}`}
+                      style={imagePreviewStyle}
+                    >
                       <img
                         src={URL.createObjectURL(file)}
                         alt={`Preview ${index + 1}`}
@@ -856,7 +893,8 @@ function CreateProblem() {
                 disabled={loading || uploadingImages}
                 style={{
                   ...primaryButtonStyle,
-                  cursor: loading || uploadingImages ? "not-allowed" : "pointer",
+                  cursor:
+                    loading || uploadingImages ? "not-allowed" : "pointer",
                   opacity: loading || uploadingImages ? 0.75 : 1,
                 }}
                 onMouseEnter={(e) => {
@@ -873,8 +911,8 @@ function CreateProblem() {
                 {uploadingImages
                   ? "Uploading Images..."
                   : loading
-                  ? "Creating..."
-                  : "Create Problem"}
+                    ? "Creating..."
+                    : "Create Problem"}
               </button>
 
               <button

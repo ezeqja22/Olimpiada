@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable jsx-a11y/alt-text */
@@ -10,6 +11,7 @@ import NotificationBell from "./components/NotificationBell";
 import { useSiteSettings } from "./hooks/useSiteSettings";
 import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import { useAuth } from "./context/AuthContext";
+import { useToast } from "./components/ToastProvider";
 
 function Homepage() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -24,7 +26,7 @@ function Homepage() {
     return saved ? JSON.parse(saved) : [];
   });
   const navigate = useNavigate();
-
+  const { showToast } = useToast();
   // Site settings
   const {
     siteSettings,
@@ -91,7 +93,7 @@ function Homepage() {
         !checkFeatureEnabled("notifications_enabled")
       ) {
         setTimeout(() => {
-          alert("Notifications are temporarily disabled");
+          showToast("Notifications are temporarily disabled", "error");
           sessionStorage.setItem("notificationAlertShown", "true");
         }, 1000);
       }

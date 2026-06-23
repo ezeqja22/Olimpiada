@@ -17,6 +17,7 @@ import PaginationControls from "./components/feed/PaginationControls";
 import FloatingCreateButton from "./components/feed/FloatingCreateButton";
 import "./Feed.css";
 import { useAuth } from "./context/AuthContext";
+import { useToast } from "./components/ToastProvider";
 
 function Feed() {
   const location = useLocation();
@@ -53,6 +54,8 @@ function Feed() {
     useFeatureSettings();
 
   const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+
+  const { showToast } = useToast();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -367,7 +370,7 @@ function Feed() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("Please log in to save problems.");
+      showToast("Please log in to save problems.", "error");
       return;
     }
 
@@ -426,10 +429,11 @@ function Feed() {
       console.error("Error toggling bookmark:", error);
       console.error("Error details:", error.response?.data);
 
-      alert(
+      showToast(
         `Error updating bookmark: ${
           error.response?.data?.detail || error.message
         }`,
+        "error",
       );
     }
   };
@@ -459,7 +463,7 @@ function Feed() {
       }));
     } catch (error) {
       console.error("Error voting:", error);
-      alert("Error voting on problem");
+      showToast("Error voting on problem", "error");
     }
   };
 
@@ -473,7 +477,7 @@ function Feed() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Please log in to follow users");
+        showToast("Please log in to follow users", "error");
         return;
       }
 
@@ -501,7 +505,7 @@ function Feed() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Please log in to follow users");
+        showToast("Please log in to follow users", "error");
         return;
       }
 

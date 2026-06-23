@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './AdminLayout.css';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useToast } from "./components/ToastProvider";
+import "./AdminLayout.css";
 
 const AdminUsers = () => {
   const [allUsers, setAllUsers] = useState([]); // Store all users for filtering
@@ -8,11 +10,12 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({});
+  const { showToast } = useToast();
   const [filters, setFilters] = useState({
-    search: '',
-    role: '',
-    status: '',
-    page: 1
+    search: "",
+    role: "",
+    status: "",
+    page: 1,
   });
 
   useEffect(() => {
@@ -22,35 +25,38 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const params = new URLSearchParams();
-      
-      if (filters.search) params.append('search', filters.search);
-      if (filters.role) params.append('role', filters.role);
-      if (filters.status) params.append('status', filters.status);
-      params.append('page', filters.page);
-      params.append('limit', 20);
 
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/admin/users?${params}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      if (filters.search) params.append("search", filters.search);
+      if (filters.role) params.append("role", filters.role);
+      if (filters.status) params.append("status", filters.status);
+      params.append("page", filters.page);
+      params.append("limit", 20);
+
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/users?${params}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
       setAllUsers(response.data.users);
       setUsers(response.data.users);
       setPagination(response.data.pagination);
     } catch (err) {
-      setError('Failed to load users');
-      console.error('Users error:', err);
+      setError("Failed to load users");
+      console.error("Users error:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [key]: value,
-      page: 1 // Reset to first page when filters change
+      page: 1, // Reset to first page when filters change
     }));
   };
 
@@ -61,7 +67,7 @@ const AdminUsers = () => {
       return;
     }
 
-    const filtered = allUsers.filter(user => {
+    const filtered = allUsers.filter((user) => {
       const searchTerm = searchQuery.toLowerCase();
       return (
         user.username.toLowerCase().includes(searchTerm) ||
@@ -73,49 +79,64 @@ const AdminUsers = () => {
   };
 
   const handleSearchChange = (value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       search: value,
-      page: 1
+      page: 1,
     }));
     filterUsers(value);
   };
 
   const handlePageChange = (newPage) => {
-    setFilters(prev => ({ ...prev, page: newPage }));
+    setFilters((prev) => ({ ...prev, page: newPage }));
   };
 
   const handleUserAction = async (userId, action, data = {}) => {
     try {
-      const token = localStorage.getItem('token');
-      
-      if (action === 'update') {
-        await axios.put(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/admin/users/${userId}`, data, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      } else if (action === 'delete') {
-        await axios.delete(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/admin/users/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      } else if (action === 'unban') {
-        await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/admin/users/${userId}/unban`, {
-          reason: 'Unbanned from admin panel'
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      } else if (action === 'activate') {
-        await axios.post(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/admin/users/${userId}/activate`, {
-          reason: 'Activated from admin panel'
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+      const token = localStorage.getItem("token");
+
+      if (action === "update") {
+        await axios.put(
+          `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/users/${userId}`,
+          data,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+      } else if (action === "delete") {
+        await axios.delete(
+          `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/users/${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+      } else if (action === "unban") {
+        await axios.post(
+          `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/users/${userId}/unban`,
+          {
+            reason: "Unbanned from admin panel",
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+      } else if (action === "activate") {
+        await axios.post(
+          `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/users/${userId}/activate`,
+          {
+            reason: "Activated from admin panel",
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
       }
-      
+
       // Refresh the users list
       fetchUsers();
     } catch (err) {
-      console.error('User action error:', err);
-      alert('Failed to perform action');
+      console.error("User action error:", err);
+      showToast("Failed to perform action", "error");
     }
   };
 
@@ -131,13 +152,13 @@ const AdminUsers = () => {
 
   const getRoleBadge = (role) => {
     const roleColors = {
-      admin: 'active',
-      moderator: 'pending',
-      user: 'inactive'
+      admin: "active",
+      moderator: "pending",
+      user: "inactive",
     };
-    
+
     return (
-      <span className={`status-badge ${roleColors[role] || 'inactive'}`}>
+      <span className={`status-badge ${roleColors[role] || "inactive"}`}>
         {role}
       </span>
     );
@@ -156,7 +177,14 @@ const AdminUsers = () => {
       {/* Filters */}
       <div className="admin-card">
         <h2>User Management</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "15px",
+            marginBottom: "20px",
+          }}
+        >
           <div>
             <label>Search</label>
             <input
@@ -170,7 +198,7 @@ const AdminUsers = () => {
             <label>Role</label>
             <select
               value={filters.role}
-              onChange={(e) => handleFilterChange('role', e.target.value)}
+              onChange={(e) => handleFilterChange("role", e.target.value)}
             >
               <option value="">All Roles</option>
               <option value="admin">Admin</option>
@@ -182,7 +210,7 @@ const AdminUsers = () => {
             <label>Status</label>
             <select
               value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
+              onChange={(e) => handleFilterChange("status", e.target.value)}
             >
               <option value="">All Status</option>
               <option value="active">Active</option>
@@ -207,7 +235,7 @@ const AdminUsers = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map(user => (
+              {users.map((user) => (
                 <tr key={user.id}>
                   <td>
                     <div>
@@ -220,80 +248,94 @@ const AdminUsers = () => {
                   <td>{getStatusBadge(user)}</td>
                   <td>{new Date(user.created_at).toLocaleDateString()}</td>
                   <td>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <div
+                      style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
+                    >
                       <select
                         value={user.role}
                         onChange={(e) => {
                           if (e.target.value !== user.role) {
-                            handleUserAction(user.id, 'update', { role: e.target.value });
+                            handleUserAction(user.id, "update", {
+                              role: e.target.value,
+                            });
                           }
                         }}
-                        disabled={user.role === 'admin'}
+                        disabled={user.role === "admin"}
                         style={{
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          border: '2px solid #e9ecef',
-                          backgroundColor: user.role === 'admin' ? '#f8f9fa' : 'white',
-                          color: user.role === 'admin' ? '#6c757d' : '#495057',
-                          fontSize: '0.8rem',
-                          cursor: user.role === 'admin' ? 'not-allowed' : 'pointer'
+                          padding: "6px 12px",
+                          borderRadius: "6px",
+                          border: "2px solid #e9ecef",
+                          backgroundColor:
+                            user.role === "admin" ? "#f8f9fa" : "white",
+                          color: user.role === "admin" ? "#6c757d" : "#495057",
+                          fontSize: "0.8rem",
+                          cursor:
+                            user.role === "admin" ? "not-allowed" : "pointer",
                         }}
                       >
                         <option value="user">User</option>
                         <option value="moderator">Moderator</option>
                         <option value="admin">Admin</option>
                       </select>
-                      
+
                       <button
-                        className={`admin-btn ${user.is_banned ? 'success' : 'warning'}`}
+                        className={`admin-btn ${user.is_banned ? "success" : "warning"}`}
                         onClick={() => {
                           if (user.is_banned) {
                             // Unban user
-                            handleUserAction(user.id, 'unban');
+                            handleUserAction(user.id, "unban");
                           } else {
                             // Ban user - ask for reason
-                            const reason = prompt('Enter ban reason (optional):');
-                            handleUserAction(user.id, 'update', { 
+                            const reason = prompt(
+                              "Enter ban reason (optional):",
+                            );
+                            handleUserAction(user.id, "update", {
                               is_banned: true,
-                              ban_reason: reason || 'Banned by admin'
+                              ban_reason: reason || "Banned by admin",
                             });
                           }
                         }}
                       >
-                        {user.is_banned ? 'Unban' : 'Ban'}
+                        {user.is_banned ? "Unban" : "Ban"}
                       </button>
-                      
+
                       <button
-                        className={`admin-btn ${user.is_active ? 'warning' : 'success'}`}
+                        className={`admin-btn ${user.is_active ? "warning" : "success"}`}
                         onClick={() => {
                           if (user.is_active) {
-                            handleUserAction(user.id, 'update', { is_active: false });
+                            handleUserAction(user.id, "update", {
+                              is_active: false,
+                            });
                           } else {
-                            handleUserAction(user.id, 'activate');
+                            handleUserAction(user.id, "activate");
                           }
                         }}
                       >
-                        {user.is_active ? 'Deactivate' : 'Activate'}
+                        {user.is_active ? "Deactivate" : "Activate"}
                       </button>
-                      
+
                       <button
                         className="admin-btn danger"
                         onClick={() => {
-                          if (window.confirm(`Are you sure you want to delete ${user.username}?`)) {
-                            handleUserAction(user.id, 'delete');
+                          if (
+                            window.confirm(
+                              `Are you sure you want to delete ${user.username}?`,
+                            )
+                          ) {
+                            handleUserAction(user.id, "delete");
                           }
                         }}
-                        disabled={user.role === 'admin'}
+                        disabled={user.role === "admin"}
                       >
                         <img
-                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
-                            alt="Delete"
-                            style={{
-                                width: "16px",
-                                height: "16px",
-                                objectFit: "contain",
-                                marginRight: "8px"
-                            }}
+                          src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
+                          alt="Delete"
+                          style={{
+                            width: "16px",
+                            height: "16px",
+                            objectFit: "contain",
+                            marginRight: "8px",
+                          }}
                         />
                         Delete
                       </button>
@@ -307,12 +349,14 @@ const AdminUsers = () => {
 
         {/* Pagination */}
         {pagination.pages > 1 && (
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            gap: '10px', 
-            marginTop: '20px' 
-          }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "10px",
+              marginTop: "20px",
+            }}
+          >
             <button
               className="admin-btn secondary"
               onClick={() => handlePageChange(filters.page - 1)}
@@ -320,16 +364,18 @@ const AdminUsers = () => {
             >
               Previous
             </button>
-            
-            <span style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              padding: '0 15px',
-              color: '#495057'
-            }}>
+
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "0 15px",
+                color: "#495057",
+              }}
+            >
               Page {filters.page} of {pagination.pages}
             </span>
-            
+
             <button
               className="admin-btn secondary"
               onClick={() => handlePageChange(filters.page + 1)}

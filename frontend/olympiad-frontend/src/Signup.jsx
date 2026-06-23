@@ -7,6 +7,7 @@ import Card from "./components/Card";
 import Button from "./components/Button";
 import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { useAuth } from "./context/AuthContext";
+import { useToast } from "./components/ToastProvider";
 
 function Signup() {
   const [username, setUsername] = useState("");
@@ -17,6 +18,8 @@ function Signup() {
   const [marketingEmails, setMarketingEmails] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { showToast } = useToast();
 
   // Get redirect path from location state
   const redirectTo = location.state?.redirectTo || "/homepage";
@@ -64,7 +67,10 @@ function Signup() {
         });
       }
     } catch (err) {
-      alert("Signup failed: " + (err.response?.data?.detail || err.message));
+      showToast(
+        "Signup failed: " + (err.response?.data?.detail || err.message),
+        "error",
+      );
     }
   };
 

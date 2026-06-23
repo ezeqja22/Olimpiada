@@ -19,6 +19,7 @@ import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import { useAuth } from "./context/AuthContext";
 import CommentComposer from "./components/problem-detail/CommentComposer";
 import CommentThread from "./components/problem-detail/CommentThread";
+import { useToast } from "./components/ToastProvider";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
@@ -299,6 +300,7 @@ function ProblemDetail() {
   const editTitleRef = useRef(null);
   const editDescriptionRef = useRef(null);
   const editCommentRef = useRef(null);
+  const { showToast } = useToast();
 
   const getSmartFallbackPath = () => {
     const urlParams = new URLSearchParams(location.search);
@@ -407,7 +409,10 @@ function ProblemDetail() {
       console.error("Error fetching problem:", error);
 
       if (error.response?.status === 403) {
-        alert("Access denied: You are not a member of this forum.");
+        showToast(
+          "Access denied: You are not a member of this forum.",
+          "error",
+        );
         navigate("/forums");
       }
     } finally {
@@ -522,7 +527,7 @@ function ProblemDetail() {
       setImageResetKey((previous) => previous + 1);
     } catch (error) {
       console.error("Error adding comment:", error);
-      alert(`Error adding comment: ${error.message}`);
+      showToast(`Error adding comment: ${error.message}`, "error");
     }
   };
 
@@ -602,9 +607,12 @@ function ProblemDetail() {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.delete(`${API_URL}/auth/problems/${id}/comments/${commentId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `${API_URL}/auth/problems/${id}/comments/${commentId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       setComments((previous) => removeCommentFromTree(previous, commentId));
     } catch (error) {
@@ -676,7 +684,7 @@ function ProblemDetail() {
 
   const addEditTag = () => {
     if (editTags.length >= 5) {
-      alert("Maximum 5 tags allowed");
+      showToast("Maximum 5 tags allowed", "error");
       return;
     }
 
@@ -697,7 +705,7 @@ function ProblemDetail() {
       const validTags = editTags.filter((tag) => tag.trim() !== "");
 
       if (validTags.length > 5) {
-        alert("Maximum 5 tags allowed");
+        showToast("Maximum 5 tags allowed", "error");
         return;
       }
 
@@ -725,10 +733,11 @@ function ProblemDetail() {
       setEditingProblem(false);
     } catch (error) {
       console.error("Error updating problem:", error);
-      alert(
+      showToast(
         `Error updating problem: ${
           error.response?.data?.detail || error.message
         }`,
+        "error",
       );
     }
   };
@@ -764,7 +773,7 @@ function ProblemDetail() {
       navigate(getSmartFallbackPath());
     } catch (error) {
       console.error("Error deleting problem:", error);
-      alert("Error deleting problem. Please try again.");
+      showToast("Error deleting problem. Please try again.", "error");
     }
   };
 
@@ -780,8 +789,9 @@ function ProblemDetail() {
       await fetchProblem();
     } catch (error) {
       console.error("Error deleting image:", error);
-      alert(
+      showToast(
         `Error deleting image: ${error.response?.data?.detail || error.message}`,
+        "error",
       );
     }
   };
@@ -791,7 +801,10 @@ function ProblemDetail() {
     if (files.length === 0) return;
 
     if (problemImages.length + files.length > 10) {
-      alert("Maximum 10 images allowed. Please select fewer images.");
+      showToast(
+        "Maximum 10 images allowed. Please select fewer images.",
+        "error",
+      );
       return;
     }
 
@@ -800,7 +813,7 @@ function ProblemDetail() {
 
       for (const file of files) {
         if (!file.type.startsWith("image/")) {
-          alert(`${file.name} is not an image file`);
+          showToast(`${file.name} is not an image file`, "error");
           continue;
         }
 
@@ -819,8 +832,9 @@ function ProblemDetail() {
       await fetchProblem();
     } catch (error) {
       console.error("Error uploading images:", error);
-      alert(
+      showToast(
         `Error uploading images: ${error.response?.data?.detail || error.message}`,
+        "error",
       );
     }
   };
@@ -961,7 +975,11 @@ function ProblemDetail() {
   if (loading) {
     return (
       <Layout showHomeButton={true}>
-        <AnimatedLoader type="problems" message="Loading problem..." size="large" />
+        <AnimatedLoader
+          type="problems"
+          message="Loading problem..."
+          size="large"
+        />
       </Layout>
     );
   }
@@ -1068,7 +1086,9 @@ function ProblemDetail() {
               </div>
 
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <ModernButton onClick={handleCancelProblemEdit}>Cancel</ModernButton>
+                <ModernButton onClick={handleCancelProblemEdit}>
+                  Cancel
+                </ModernButton>
                 <ModernButton onClick={handleSaveProblem} variant="green">
                   Save Problem
                 </ModernButton>
@@ -1108,7 +1128,10 @@ function ProblemDetail() {
                 }}
               />
 
-              <ModernButton onClick={() => openMathEditor("title")} variant="purple">
+              <ModernButton
+                onClick={() => openMathEditor("title")}
+                variant="purple"
+              >
                 Symbols
               </ModernButton>
             </div>
@@ -1548,7 +1571,11 @@ function ProblemDetail() {
                         .map((tag) => tag.trim())
                         .filter(Boolean)
                         .map((tag, index) => (
-                          <Pill key={`${tag}-${index}`} bg={ui.purple} color="white">
+                          <Pill
+                            key={`${tag}-${index}`}
+                            bg={ui.purple}
+                            color="white"
+                          >
                             {tag}
                           </Pill>
                         ))}
@@ -1734,7 +1761,9 @@ function ProblemDetail() {
                   ...buttonBase,
                   padding: "10px 16px",
                   backgroundColor:
-                    voteStatus.user_vote === "like" ? ui.primary : "transparent",
+                    voteStatus.user_vote === "like"
+                      ? ui.primary
+                      : "transparent",
                   color: voteStatus.user_vote === "like" ? "white" : ui.muted,
                 }}
               >
@@ -1749,8 +1778,11 @@ function ProblemDetail() {
                   ...buttonBase,
                   padding: "10px 16px",
                   backgroundColor:
-                    voteStatus.user_vote === "dislike" ? ui.purple : "transparent",
-                  color: voteStatus.user_vote === "dislike" ? "white" : ui.muted,
+                    voteStatus.user_vote === "dislike"
+                      ? ui.purple
+                      : "transparent",
+                  color:
+                    voteStatus.user_vote === "dislike" ? "white" : ui.muted,
                 }}
               >
                 Dislike {voteStatus.dislike_count || 0}
@@ -1799,12 +1831,17 @@ function ProblemDetail() {
                   fontWeight: 750,
                 }}
               >
-                {comments.length} {comments.length === 1 ? "comment" : "comments"}
+                {comments.length}{" "}
+                {comments.length === 1 ? "comment" : "comments"}
               </p>
             </div>
 
             {comments.some((comment) => comment.is_solution) && (
-              <Pill bg={ui.primarySoft} color={ui.primary} borderColor={ui.primaryBorder}>
+              <Pill
+                bg={ui.primarySoft}
+                color={ui.primary}
+                borderColor={ui.primaryBorder}
+              >
                 ✓ Solution found
               </Pill>
             )}
@@ -1853,7 +1890,9 @@ function ProblemDetail() {
                 ?
               </div>
 
-              <h3 style={{ margin: "0 0 6px", color: ui.text, fontWeight: 950 }}>
+              <h3
+                style={{ margin: "0 0 6px", color: ui.text, fontWeight: 950 }}
+              >
                 No comments yet
               </h3>
               <p style={{ margin: 0, fontWeight: 750 }}>

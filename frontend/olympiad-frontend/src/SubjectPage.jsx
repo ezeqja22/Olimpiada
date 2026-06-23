@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -12,6 +13,7 @@ import SearchBar from "./SearchBar";
 import FollowButton from "./components/FollowButton";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
+import { useToast } from "./components/ToastProvider";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 const PAGE_SIZE = 10;
@@ -60,6 +62,8 @@ function SubjectPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobile, setIsMobile] = useState(false);
+
+  const { showToast } = useToast();
 
   const { checkFeatureEnabled, showFeatureDisabledAlert } =
     useFeatureSettings();
@@ -321,7 +325,7 @@ function SubjectPage() {
       }));
     } catch (error) {
       console.error("Error voting:", error);
-      alert("Error voting on problem");
+      showToast("Error voting on problem", "error");
     }
   };
 
@@ -335,7 +339,7 @@ function SubjectPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Please log in to bookmark problems");
+        showToast("Please log in to bookmark problems", "error");
         return;
       }
 
@@ -413,10 +417,11 @@ function SubjectPage() {
       console.error("Error toggling bookmark:", error);
       console.error("Error details:", error.response?.data);
 
-      alert(
+      showToast(
         `Error updating bookmark: ${
           error.response?.data?.detail || error.message
         }`,
+        "error",
       );
     }
   };
@@ -431,7 +436,7 @@ function SubjectPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Please log in to follow users");
+        showToast("Please log in to follow users", "error");
         return;
       }
 
@@ -464,7 +469,7 @@ function SubjectPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Please log in to follow users");
+        showToast("Please log in to follow users", "error");
         return;
       }
 
