@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form, Body, Query
-from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import func, or_, text
 from database import get_db
@@ -29,7 +28,6 @@ from auth.schemas import (
 from email_service import email_service
 from typing import List
 from datetime import datetime, timedelta
-from PIL import Image
 import hashlib
 import uuid
 import os
@@ -312,8 +310,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     
     if not success:
         return {
-            "message": "Registration successful! Email sending failed, but user created for testing.",
-            "debug_code": verification_code,
+            "message": "Registration successful, but the verification email could not be sent. Please request a new verification code.",
             "email": req.email,
             "username": req.username,
             "access_token": access_token,
@@ -862,7 +859,7 @@ async def create_comment(
     
     # Send notification if not the author commenting on their own problem
     if problem.author_id != current_user.id:
-        notification_service = NotificationService(db) if NotificationService else None if NotificationService else None
+        notification_service = NotificationService(db) if NotificationService else None
         if notification_service:
             await notification_service.send_comment_notification(
             user_id=problem.author_id,
@@ -1192,7 +1189,7 @@ async def vote_problem(
         
         # Send notification if it's a like and not the author liking their own problem
         if vote_type == "like" and problem.author_id != current_user.id:
-            notification_service = NotificationService(db) if NotificationService else None if NotificationService else None
+            notification_service = NotificationService(db) if NotificationService else None
             if notification_service:
                 await notification_service.send_like_notification(
                 user_id=problem.author_id,
@@ -1551,28 +1548,7 @@ async def upload_forum_image(
     return {"message": "Image uploaded successfully", "file_path": cloudinary_url}
 
 
-@router.get("/serve-image/{filename}")
-def serve_image(filename: str):
-    """Direct image serving endpoint for testing"""
-    from fastapi.responses import FileResponse
-    import os
-    
-    # Try profile pictures first
-    profile_path = f"../../uploads/profile_pictures/{filename}"
-    if os.path.exists(profile_path):
-        return FileResponse(profile_path)
-    
-    # Try forum images
-    forum_path = f"../../uploads/forum_images/{filename}"
-    if os.path.exists(forum_path):
-        return FileResponse(forum_path)
-    
-    # Try problem images
-    problem_path = f"../../uploads/problem_images/{filename}"
-    if os.path.exists(problem_path):
-        return FileResponse(problem_path)
-    
-    return {"error": "File not found", "path": f"Tried: {profile_path}, {forum_path}, {problem_path}"}
+
 
 @router.post("/follow/{user_id}")
 async def follow_user(
@@ -2277,10 +2253,10 @@ async def delete_account_request(
     )
     
     if not success:
-        return {
-            "message": "Failed to send verification email. Please try again.",
-            "debug_code": verification_code  # For testing
-        }
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to send verification email. Please try again."
+        )
     
     return {"message": "Verification code sent to your email address"}
 
