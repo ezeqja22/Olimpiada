@@ -23,7 +23,7 @@ import ForumProblemModal from "./ForumProblemModal";
 import ForumProblemCard from "./ForumProblemCard";
 import ForumInviteModal from "./ForumInviteModal";
 import ReportModal from "./ReportModal";
-import { useToast } from "../src/components/ToastProvider";
+import { useToast } from "./components/ToastProvider";
 
 // CSS for typing animation and new message indicator
 const typingAnimation = `

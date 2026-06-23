@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useFeatureSettings } from "./hooks/useFeatureSettings";
-import { useToast } from "../src/components/ToastProvider";
+import { useToast } from "./components/ToastProvider";
 
 const ReportModal = ({ isOpen, onClose, reportType, targetId, targetUser }) => {
   const [category, setCategory] = useState("");

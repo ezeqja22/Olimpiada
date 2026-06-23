@@ -10,7 +10,7 @@ import ForumInviteModal from "./ForumInviteModal";
 import SearchBar from "./SearchBar";
 import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { useFeatureSettings } from "./hooks/useFeatureSettings";
-import { useToast } from "../src/components/ToastProvider";
+import { useToast } from "./components/ToastProvider";
 
 const Forums = () => {
   const [forums, setForums] = useState([]);

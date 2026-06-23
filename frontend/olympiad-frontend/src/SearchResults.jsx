@@ -9,7 +9,7 @@ import FollowButton from "./components/FollowButton";
 import { getUserInitial, getDisplayName } from "./utils";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
-import { useToast } from "../src/components/ToastProvider";
+import { useToast } from "./components/ToastProvider";
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 

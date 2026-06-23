@@ -19,7 +19,7 @@ import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import { useAuth } from "./context/AuthContext";
 import CommentComposer from "./components/problem-detail/CommentComposer";
 import CommentThread from "./components/problem-detail/CommentThread";
-import { useToast } from "../src/components/ToastProvider";
+import { useToast } from "./components/ToastProvider";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
