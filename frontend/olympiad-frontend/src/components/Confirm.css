@@ -1,0 +1,156 @@
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(8px);
+  animation: confirmFadeIn 0.16s ease-out;
+}
+
+.confirm-modal {
+  width: min(420px, 100%);
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.28);
+  padding: 24px;
+  animation: confirmPopIn 0.18s ease-out;
+}
+
+.confirm-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 950;
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+.confirm-danger {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.confirm-warning {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.confirm-success {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.confirm-info {
+  background: rgba(26, 77, 58, 0.1);
+  color: #1a4d3a;
+}
+
+.confirm-content h3 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+}
+
+.confirm-content p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 550;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.confirm-cancel,
+.confirm-button {
+  border: none;
+  border-radius: 14px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.confirm-cancel {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.confirm-cancel:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.confirm-button {
+  color: white;
+}
+
+.confirm-button-danger {
+  background: #dc2626;
+}
+
+.confirm-button-danger:hover {
+  background: #b91c1c;
+}
+
+.confirm-button-warning {
+  background: #d97706;
+}
+
+.confirm-button-warning:hover {
+  background: #b45309;
+}
+
+.confirm-button-success {
+  background: #16a34a;
+}
+
+.confirm-button-success:hover {
+  background: #15803d;
+}
+
+.confirm-button-info {
+  background: #1a4d3a;
+}
+
+.confirm-button-info:hover {
+  background: #163f31;
+}
+
+@keyframes confirmFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes confirmPopIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

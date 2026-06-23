@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -316,12 +317,15 @@ const AdminUsers = () => {
 
                       <button
                         className="admin-btn danger"
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              `Are you sure you want to delete ${user.username}?`,
-                            )
-                          ) {
+                        onClick={async () => {
+                          const confirmed = await confirm({
+                            title: "Delete user?",
+                            message: `Are you sure you want to delete ${user.username}?`,
+                            confirmText: "Delete",
+                            cancelText: "Cancel",
+                            variant: "danger",
+                          });
+                          if (confirmed) {
                             handleUserAction(user.id, "delete");
                           }
                         }}

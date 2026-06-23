@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useToast } from "./components/ToastProvider";
+import { useConfirm } from "./components/ConfirmProvider";
 import "./AdminLayout.css";
 
 const AdminEmail = () => {
@@ -11,6 +12,7 @@ const AdminEmail = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const { showToast } = useToast();
+  const { confirm } = useConfirm();
   const [newCampaign, setNewCampaign] = useState({
     subject: "",
     content: "",
@@ -133,13 +135,16 @@ const AdminEmail = () => {
   };
 
   const handleSendCampaign = async (campaignId) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to send this email campaign? This action cannot be undone.",
-      )
-    ) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: "Send email campaign?",
+      message:
+        "This will send the campaign to the selected users. This action cannot be undone.",
+      confirmText: "Send campaign",
+      cancelText: "Cancel",
+      variant: "success",
+    });
+
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -187,13 +192,16 @@ const AdminEmail = () => {
   };
 
   const handleDeleteCampaign = async (campaignId) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this campaign? This action cannot be undone.",
-      )
-    ) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: "Delete email campaign?",
+      message:
+        "This will delete the campaign and all associated data. This action cannot be undone.",
+      confirmText: "Delete campaign",
+      cancelText: "Cancel",
+      variant: "success",
+    });
+
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem("token");

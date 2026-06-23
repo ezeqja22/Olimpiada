@@ -20,6 +20,7 @@ import { useAuth } from "./context/AuthContext";
 import CommentComposer from "./components/problem-detail/CommentComposer";
 import CommentThread from "./components/problem-detail/CommentThread";
 import { useToast } from "./components/ToastProvider";
+import { useConfirm } from "./components/ConfirmProvider";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
@@ -301,6 +302,7 @@ function ProblemDetail() {
   const editDescriptionRef = useRef(null);
   const editCommentRef = useRef(null);
   const { showToast } = useToast();
+  const { confirm } = useConfirm();
 
   const getSmartFallbackPath = () => {
     const urlParams = new URLSearchParams(location.search);
@@ -600,9 +602,14 @@ function ProblemDetail() {
   };
 
   const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Are you sure you want to delete this comment?")) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: "Delete comment?",
+      message: "Are you sure you want to delete this comment?",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -755,13 +762,15 @@ function ProblemDetail() {
   };
 
   const handleDeleteProblem = async () => {
-    if (
-      !window.confirm(
+    const confirmed = await confirm({
+      title: "Delete problem?",
+      message:
         "Are you sure you want to delete this problem? This will also delete all comments and votes.",
-      )
-    ) {
-      return;
-    }
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem("token");

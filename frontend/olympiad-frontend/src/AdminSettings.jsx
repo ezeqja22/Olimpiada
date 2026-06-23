@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useToast } from "./components/ToastProvider";
+import { useConfirm } from "./components/ConfirmProvider";
 
 const AdminSettings = () => {
   const [settings, setSettings] = useState({});
@@ -12,6 +13,7 @@ const AdminSettings = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const { showToast } = useToast();
+  const { confirm } = useConfirm();
 
   // Settings categories
   const categories = {
@@ -326,9 +328,14 @@ const AdminSettings = () => {
   };
 
   const initializeSettings = async () => {
-    const confirmed = window.confirm(
-      "This will initialize default settings. Continue?",
-    );
+    const confirmed = await confirm({
+      title: "Initialize default settings?",
+      message:
+        "This will initialize all settings to their default values. This action cannot be undone.",
+      confirmText: "Initialize",
+      cancelText: "Cancel",
+      variant: "success",
+    });
     if (confirmed) {
       try {
         const token = localStorage.getItem("token");
@@ -349,9 +356,14 @@ const AdminSettings = () => {
   };
 
   const resetSettings = async () => {
-    const confirmed = window.confirm(
-      "This will reset ALL settings to defaults. This cannot be undone. Continue?",
-    );
+    const confirmed = await confirm({
+      title: "Reset settings?",
+      message:
+        "This will reset ALL settings to defaults. This cannot be undone. Continue?",
+      confirmText: "Reset settings",
+      cancelText: "Cancel",
+      variant: "success",
+    });
     if (confirmed) {
       try {
         const token = localStorage.getItem("token");

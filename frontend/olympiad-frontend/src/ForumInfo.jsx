@@ -19,6 +19,7 @@ import { getUserInitial, getDisplayName } from "./utils";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import { useToast } from "./components/ToastProvider";
+import { useConfirm } from "./components/ConfirmProvider";
 
 // Helper function to render math content
 const renderMathContent = (text) => {
@@ -48,7 +49,7 @@ const ForumInfo = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeTab, setActiveTab] = useState("members"); // 'members', 'problems'
   const { showToast } = useToast();
-
+  const { confirm } = useConfirm();
   useEffect(() => {
     fetchCurrentUser();
     fetchForum();
@@ -139,7 +140,14 @@ const ForumInfo = () => {
   };
 
   const handleLeaveForum = async () => {
-    if (!window.confirm("Are you sure you want to leave this forum?")) return;
+    const confirmed = await confirm({
+      title: "Leave forum?",
+      message: "Are you sure you want to leave this forum?",
+      confirmText: "Leave",
+      cancelText: "Cancel",
+      variant: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem("token");

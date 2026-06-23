@@ -24,6 +24,7 @@ import ForumProblemCard from "./ForumProblemCard";
 import ForumInviteModal from "./ForumInviteModal";
 import ReportModal from "./ReportModal";
 import { useToast } from "./components/ToastProvider";
+import { useConfirm } from "./components/ConfirmProvider";
 
 // CSS for typing animation and new message indicator
 const typingAnimation = `
@@ -144,7 +145,7 @@ const ForumDetail = () => {
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
   const [replyCounts, setReplyCounts] = useState({});
   const { showToast } = useToast();
-
+  const { confirm } = useConfirm();
   // Auto-scroll to bottom of messages
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -1110,7 +1111,14 @@ const ForumDetail = () => {
   };
 
   const handleLeaveForum = async () => {
-    if (!window.confirm("Are you sure you want to leave this forum?")) return;
+    const confirmed = await confirm({
+      title: "Leave forum?",
+      message: "Are you sure you want to leave this forum?",
+      confirmText: "Leave",
+      cancelText: "Cancel",
+      variant: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem("token");

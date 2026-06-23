@@ -14,6 +14,7 @@ import { getUserInitial } from "./utils";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import { useToast } from "./components/ToastProvider";
+import { useConfirm } from "./components/ConfirmProvider";
 
 // Helper function to render math content
 const renderMathContent = (text) => {
@@ -58,6 +59,7 @@ function UserProfile() {
 
   const [isMobile, setIsMobile] = useState(false);
   const { showToast } = useToast();
+  const { confirm } = useConfirm();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -386,11 +388,15 @@ function UserProfile() {
       return;
     }
 
-    if (
-      !window.confirm("Are you sure you want to remove your profile picture?")
-    ) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: "Remove profile picture?",
+      message: "Are you sure you want to remove your profile picture?",
+      confirmText: "Remove",
+      cancelText: "Cancel",
+      variant: "success",
+    });
+
+    if (!confirmed) return;
 
     setUploading(true);
 
@@ -424,9 +430,14 @@ function UserProfile() {
   };
 
   const handleDeleteDraft = async (draftId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this draft? This action cannot be undone.",
-    );
+    const confirmed = await confirm({
+      title: "Delete draft?",
+      message:
+        "Are you sure you want to delete this draft? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "success",
+    });
     if (!confirmed) return;
 
     try {
