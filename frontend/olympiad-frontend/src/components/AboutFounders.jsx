@@ -8,6 +8,7 @@ const founders = [
     name: "Klevisa Zeqja",
     role: "Co-founder",
     image: klevisaPhoto,
+    description: "Co-founder and lead developer of the Olimpiada.al platform.",
     highlights: [
       "European Girls’ Mathematical Olympiad (EGMO) Honorable Mention",
       "Jane Street WiSE 2026 Participant",
@@ -18,8 +19,7 @@ const founders = [
     name: "Enio Zeqja",
     role: "Co-founder",
     placeholder: true,
-    description:
-      "Co-founder and developer of the Olimpiada.al platform, focused on building a centralized educational space for olympiad preparation, forums and problem solving.",
+    description: "Co-founder and developer of the Olimpiada.al platform.",
     highlights: [
       "Full-stack platform development",
       "Educational technology and olympiad preparation",
