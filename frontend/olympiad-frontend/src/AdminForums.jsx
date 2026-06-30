@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useToast } from "./components/ToastProvider";
+import { useConfirm } from "./components/ConfirmProvider";
 import "./AdminLayout.css";
 
 const AdminForums = () => {
@@ -10,6 +11,7 @@ const AdminForums = () => {
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({});
   const { showToast } = useToast();
+  const { confirm } = useConfirm();
   const [filters, setFilters] = useState({
     search: "",
     privacy: "",
@@ -61,13 +63,15 @@ const AdminForums = () => {
   };
 
   const handleDeleteForum = async (forumId, forumTitle) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete the forum ${forumTitle}? This action cannot be undone.`,
-      )
-    ) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: "Delete forum?",
+      message: `Are you sure you want to delete the forum "${forumTitle}"? This action cannot be undone.`,
+      confirmText: "Delete forum",
+      cancelText: "Cancel",
+      variant: "success",
+    });
+
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem("token");

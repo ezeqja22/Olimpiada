@@ -12,6 +12,7 @@ import { useSiteSettings } from "./hooks/useSiteSettings";
 import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import { useAuth } from "./context/AuthContext";
 import { useToast } from "./components/ToastProvider";
+import AboutFounders from "./components/AboutFounders";
 
 function Homepage() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -1396,6 +1397,7 @@ function Homepage() {
             </div>
           </div>
         </section>
+        <AboutFounders />
       </main>
 
       {/* Click outside to close dropdowns */}
