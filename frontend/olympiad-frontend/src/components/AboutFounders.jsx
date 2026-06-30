@@ -23,7 +23,7 @@ const founders = [
     highlights: [
       "Full-stack platform development",
       "Educational technology and olympiad preparation",
-      "Co-creator of the Olimpiada.al system architecture ",
+      "Co-creator of the Olimpiada.al system architecture",
     ],
   },
 ];
