@@ -1,7 +1,7 @@
 import React from "react";
 import { UserRound } from "lucide-react";
 import klevisaPhoto from "../assets/klevisa.jpeg";
-import gangoPhoto from "../assets/gango.jpeg";
+import gangoPhoto from "../assets/gango1.jpeg";
 import "./AboutFounders.css";
 
 const founders = [
