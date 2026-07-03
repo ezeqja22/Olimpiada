@@ -1,6 +1,7 @@
 import React from "react";
 import { UserRound } from "lucide-react";
 import klevisaPhoto from "../assets/klevisa.jpeg";
+import gangoPhoto from "../assets/gango.jpeg";
 import "./AboutFounders.css";
 
 const founders = [
@@ -10,16 +11,15 @@ const founders = [
     image: klevisaPhoto,
     description: "Co-founder and developer of the Olimpiada.al platform.",
     highlights: [
-      "European Girls’ Mathematical Olympiad 2025 (EGMO) Honorable Mention",
+      "European Girls’ Mathematical Olympiad 2025 (EGMO) | Honorable Mention",
       "Jane Street WiSE 2026 Participant",
-      "Top 5 math students nationally",
-      "Ranked top 5 in the albanian national math olympiad",
+      "Ranked top 5 in the Albanian National Math Olympiad",
     ],
   },
   {
     name: "Enio Zeqja",
     role: "Co-founder",
-    placeholder: true,
+    image: gangoPhoto,
     description: "Co-founder and developer of the Olimpiada.al platform.",
     highlights: [
       "Full-stack platform development",
