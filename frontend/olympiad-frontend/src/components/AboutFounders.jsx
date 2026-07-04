@@ -36,10 +36,7 @@ export default function AboutFounders() {
       <div className="about-founders-header">
         <span className="about-eyebrow">About Us</span>
         <h2>Built by students, for ambitious learners</h2>
-        <p>
-          SciencePioneers was created to make olympiad preparation more
-          accessible, structured, and community-driven.
-        </p>
+        <p>Meet the team behind Olimpiada Learn from those who've done it.</p>
       </div>
 
       <div className="founders-grid">
