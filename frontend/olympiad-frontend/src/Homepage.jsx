@@ -5,11 +5,9 @@ import {
   ChevronDown,
   LogOut,
   Menu,
-  Pin,
   Settings,
   ShieldCheck,
   UserRound,
-  X,
 } from "lucide-react";
 import { getUserInitial } from "./utils";
 import NotificationBell from "./components/NotificationBell";
@@ -18,6 +16,7 @@ import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import { useAuth } from "./context/AuthContext";
 import { useToast } from "./components/ToastProvider";
 import AboutFounders from "./components/AboutFounders";
+import ForumsSidebar from "./components/ForumsSidebar";
 import "./Homepage.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
@@ -556,97 +555,16 @@ function Homepage() {
         />
       )}
 
-      {showHamburgerMenu && (
-        <button
-          className="page-backdrop sidebar-backdrop"
-          onClick={() => setShowHamburgerMenu(false)}
-          aria-label="Close forums panel"
-        />
-      )}
-
-      <aside
-        className={`forums-sidebar ${showHamburgerMenu ? "open" : ""}`}
-        aria-hidden={!showHamburgerMenu}
-      >
-        <div className="forums-sidebar-header">
-          <button
-            className="sidebar-close-button"
-            onClick={() => setShowHamburgerMenu(false)}
-            aria-label="Close my forums"
-          >
-            <X size={22} />
-          </button>
-          <h3>
-            {checkFeatureEnabled("forums_enabled")
-              ? "My Forums"
-              : "Forums Disabled"}
-          </h3>
-        </div>
-
-        <div className="forums-sidebar-body">
-          {checkFeatureEnabled("forums_enabled") && (
-            <>
-              {loadingForums ? (
-                <div className="sidebar-state">Loading forums...</div>
-              ) : sortedForums.length === 0 ? (
-                <div className="sidebar-state">
-                  No forums found.
-                  <br />
-                  Join or create a forum to see it here.
-                </div>
-              ) : (
-                <div className="forum-list">
-                  {sortedForums.map((forum) => (
-                    <div className="forum-list-item" key={forum.id}>
-                      <button
-                        className="forum-main-button"
-                        onClick={() => handleForumClick(forum.id)}
-                      >
-                        <img
-                          src={getSubjectIcon(forum.subject)}
-                          alt=""
-                          aria-hidden="true"
-                          className="forum-subject-icon"
-                        />
-
-                        <span className="forum-copy">
-                          <strong>{forum.title}</strong>
-                          {forum.description && (
-                            <span className="forum-description">
-                              {forum.description.length > 80
-                                ? `${forum.description.substring(0, 80)}...`
-                                : forum.description}
-                            </span>
-                          )}
-                          {forum.subject && (
-                            <span className="forum-subject-badge">
-                              {forum.subject}
-                            </span>
-                          )}
-                        </span>
-                      </button>
-
-                      <button
-                        className={`forum-pin-button ${
-                          pinnedForums.includes(forum.id) ? "pinned" : ""
-                        }`}
-                        onClick={() => togglePin(forum.id)}
-                        aria-label={
-                          pinnedForums.includes(forum.id)
-                            ? `Unpin ${forum.title}`
-                            : `Pin ${forum.title}`
-                        }
-                      >
-                        <Pin size={16} fill="currentColor" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </aside>
+      <ForumsSidebar
+        open={showHamburgerMenu}
+        onClose={() => setShowHamburgerMenu(false)}
+        forumsEnabled={checkFeatureEnabled("forums_enabled")}
+        loading={loadingForums}
+        forums={sortedForums}
+        pinnedForums={pinnedForums}
+        onForumClick={handleForumClick}
+        onTogglePin={togglePin}
+      />
     </div>
   );
 }
