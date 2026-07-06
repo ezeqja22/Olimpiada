@@ -65,21 +65,44 @@ const typingAnimation = `
 }
 `;
 
-// Helper function to render math content
+// Helper function to render mixed text and LaTeX content
 const renderMathContent = (text) => {
-  if (!text) return "";
+  if (!text) return null;
 
-  const latexPattern =
-    /\\[a-zA-Z]+|\\[^a-zA-Z]|\$\$|\\\(|\\\)|\\\[|\\\]|\^|\_|\{|\}|\[|\]|∫|∑|∏|√|α|β|γ|δ|ε|ζ|η|θ|ι|κ|λ|μ|ν|ξ|ο|π|ρ|σ|τ|υ|φ|χ|ψ|ω|∞|±|∓|×|÷|≤|≥|≠|≈|≡|∈|∉|⊂|⊃|∪|∩|∅|∇|∂|∆|Ω|Φ|Ψ|Λ|Σ|Π|Θ|Ξ|Γ|Δ/;
-  if (!latexPattern.test(text)) {
-    return text;
-  }
+  const parts = String(text).split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g);
 
-  try {
-    return <InlineMath math={text} />;
-  } catch (error) {
-    return text;
-  }
+  return parts.map((part, index) => {
+    if (!part) return null;
+
+    // Block math: $$...$$
+    if (part.startsWith("$$") && part.endsWith("$$")) {
+      const math = part.slice(2, -2).trim();
+
+      return (
+        <div
+          key={index}
+          style={{
+            width: "100%",
+            overflowX: "auto",
+            overflowY: "hidden",
+            margin: "8px 0",
+          }}
+        >
+          <BlockMath math={math} />
+        </div>
+      );
+    }
+
+    // Inline math: $...$
+    if (part.startsWith("$") && part.endsWith("$")) {
+      const math = part.slice(1, -1).trim();
+
+      return <InlineMath key={index} math={math} />;
+    }
+
+    // Normal text
+    return <React.Fragment key={index}>{part}</React.Fragment>;
+  });
 };
 
 const ForumDetail = () => {
