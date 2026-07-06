@@ -244,16 +244,10 @@ const AdminEmail = () => {
   }
 
   return (
-    <div>
+    <div className="admin-page admin-email-page">
       {/* Header */}
       <div className="admin-card">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <div className="admin-card-header admin-card-header-wrap">
           <h2>Email Campaigns</h2>
           <button className="admin-btn" onClick={() => setShowCreateForm(true)}>
             Create Campaign
@@ -338,7 +332,7 @@ const AdminEmail = () => {
               </div>
             )}
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div className="admin-form-actions">
               <button type="submit" className="admin-btn">
                 Create Campaign
               </button>
@@ -408,9 +402,7 @@ const AdminEmail = () => {
                   <td>{formatDate(campaign.created_at)}</td>
                   <td>{formatDate(campaign.sent_at)}</td>
                   <td>
-                    <div
-                      style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
-                    >
+                    <div className="admin-table-actions">
                       {campaign.status === "draft" && (
                         <button
                           className="admin-btn"
@@ -488,6 +480,7 @@ const AdminEmail = () => {
       {/* Campaign View Modal */}
       {showViewModal && selectedCampaign && (
         <div
+          className="admin-modal-overlay"
           style={{
             position: "fixed",
             top: 0,
@@ -502,6 +495,7 @@ const AdminEmail = () => {
           }}
         >
           <div
+            className="admin-modal admin-email-modal"
             style={{
               backgroundColor: "white",
               borderRadius: "12px",
@@ -513,14 +507,7 @@ const AdminEmail = () => {
               width: "90vw",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "20px",
-              }}
-            >
+            <div className="admin-modal-header">
               <h3
                 style={{
                   margin: 0,
@@ -696,13 +683,7 @@ const AdminEmail = () => {
               </div>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "12px",
-              }}
-            >
+            <div className="admin-modal-footer">
               <button
                 onClick={() => {
                   setShowViewModal(false);

@@ -695,7 +695,7 @@ All settings are working correctly! 🎉
   }
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div className="admin-page admin-settings-page" style={{ padding: "24px" }}>
       {/* Header */}
       <div style={{ marginBottom: "32px" }}>
         <h1
@@ -716,16 +716,8 @@ All settings are working correctly! 🎉
       </div>
 
       {/* Search and Controls */}
-      <div
-        style={{
-          display: "flex",
-          gap: "16px",
-          marginBottom: "24px",
-          flexWrap: "wrap",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ flex: 1, minWidth: "300px" }}>
+      <div className="settings-toolbar">
+        <div className="settings-search">
           <input
             type="text"
             placeholder="Search settings..."
@@ -741,7 +733,7 @@ All settings are working correctly! 🎉
           />
         </div>
 
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+        <div className="settings-actions">
           <button
             onClick={saveSettings}
             disabled={saving}
@@ -857,16 +849,7 @@ All settings are working correctly! 🎉
       </div>
 
       {/* Settings Tabs */}
-      <div
-        style={{
-          display: "flex",
-          gap: "8px",
-          marginBottom: "24px",
-          flexWrap: "wrap",
-          borderBottom: "2px solid #e5e7eb",
-          paddingBottom: "16px",
-        }}
-      >
+      <div className="settings-tabs">
         {filteredCategories.map((category) => (
           <button
             key={category}
@@ -936,6 +919,7 @@ All settings are working correctly! 🎉
               return (
                 <div
                   key={key}
+                  className="settings-field-card"
                   style={{
                     padding: "20px",
                     border: "1px solid #e5e7eb",

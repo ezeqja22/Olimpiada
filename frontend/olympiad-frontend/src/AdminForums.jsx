@@ -1,22 +1,25 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useToast } from "./components/ToastProvider";
 import { useConfirm } from "./components/ConfirmProvider";
 import "./AdminLayout.css";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 const AdminForums = () => {
   const [forums, setForums] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({});
-  const { showToast } = useToast();
-  const { confirm } = useConfirm();
   const [filters, setFilters] = useState({
     search: "",
     privacy: "",
     page: 1,
   });
+
+  const { showToast } = useToast();
+  const { confirm } = useConfirm();
 
   useEffect(() => {
     fetchForums();
@@ -25,6 +28,8 @@ const AdminForums = () => {
   const fetchForums = async () => {
     try {
       setLoading(true);
+      setError(null);
+
       const token = localStorage.getItem("token");
       const params = new URLSearchParams();
 
@@ -33,12 +38,9 @@ const AdminForums = () => {
       params.append("page", filters.page);
       params.append("limit", 20);
 
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/forums?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const response = await axios.get(`${API_URL}/admin/forums?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       setForums(response.data.forums);
       setPagination(response.data.pagination);
@@ -75,14 +77,11 @@ const AdminForums = () => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(
-        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/forums/${forumId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      await axios.delete(`${API_URL}/admin/forums/${forumId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      // Refresh the forums list
+      showToast("Forum deleted successfully", "success");
       fetchForums();
     } catch (err) {
       console.error("Delete forum error:", err);
@@ -90,15 +89,15 @@ const AdminForums = () => {
     }
   };
 
-  const getPrivacyBadge = (isPrivate) => {
-    return (
-      <span className={`status-badge ${isPrivate ? "inactive" : "active"}`}>
-        {isPrivate ? "Private" : "Public"}
-      </span>
-    );
-  };
+  const getPrivacyBadge = (isPrivate) => (
+    <span className={`status-badge ${isPrivate ? "inactive" : "active"}`}>
+      {isPrivate ? "Private" : "Public"}
+    </span>
+  );
 
   const formatDate = (dateString) => {
+    if (!dateString) return "—";
+
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -111,14 +110,14 @@ const AdminForums = () => {
   if (loading) {
     return (
       <div className="loading">
-        <div className="loading-spinner"></div>
+        <div className="loading-spinner" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="admin-card">
+      <div className="admin-card admin-error-card">
         <h2>Error</h2>
         <p>{error}</p>
         <button className="admin-btn" onClick={fetchForums}>
@@ -129,32 +128,32 @@ const AdminForums = () => {
   }
 
   return (
-    <div>
-      {/* Filters */}
-      <div className="admin-card">
+    <div className="admin-page admin-forums-page">
+      <section className="admin-card">
         <h2>Forum Management</h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "15px",
-            marginBottom: "20px",
-          }}
-        >
-          <div>
-            <label>Search</label>
+
+        <div className="admin-filter-grid admin-filter-grid-two">
+          <div className="admin-field">
+            <label htmlFor="forum-search">Search</label>
             <input
+              id="forum-search"
               type="text"
               placeholder="Forum title..."
               value={filters.search}
-              onChange={(e) => handleFilterChange("search", e.target.value)}
+              onChange={(event) =>
+                handleFilterChange("search", event.target.value)
+              }
             />
           </div>
-          <div>
-            <label>Privacy</label>
+
+          <div className="admin-field">
+            <label htmlFor="forum-privacy">Privacy</label>
             <select
+              id="forum-privacy"
               value={filters.privacy}
-              onChange={(e) => handleFilterChange("privacy", e.target.value)}
+              onChange={(event) =>
+                handleFilterChange("privacy", event.target.value)
+              }
             >
               <option value="">All Forums</option>
               <option value="public">Public</option>
@@ -162,11 +161,10 @@ const AdminForums = () => {
             </select>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Forums Table */}
-      <div className="admin-card">
-        <div className="admin-table">
+      <section className="admin-card">
+        <div className="admin-table admin-table-scroll">
           <table>
             <thead>
               <tr>
@@ -183,70 +181,46 @@ const AdminForums = () => {
               {forums.map((forum) => (
                 <tr key={forum.id}>
                   <td>
-                    <div>
+                    <div className="admin-primary-cell admin-wide-cell">
                       <strong>{forum.title}</strong>
                       {forum.description && (
-                        <div
-                          style={{
-                            fontSize: "0.9rem",
-                            color: "#6c757d",
-                            marginTop: "4px",
-                          }}
-                        >
+                        <small>
                           {forum.description.length > 100
                             ? `${forum.description.substring(0, 100)}...`
                             : forum.description}
-                        </div>
+                        </small>
                       )}
                     </div>
                   </td>
                   <td>
-                    <div>
-                      <strong>{forum.creator}</strong>
-                    </div>
+                    <strong>{forum.creator}</strong>
                   </td>
                   <td>{getPrivacyBadge(forum.is_private)}</td>
                   <td>
-                    <span
-                      style={{
-                        background: "#e9ecef",
-                        padding: "4px 8px",
-                        borderRadius: "12px",
-                        fontSize: "0.8rem",
-                      }}
-                    >
+                    <span className="admin-neutral-badge">
                       {forum.max_members} max
                     </span>
                   </td>
                   <td>{formatDate(forum.created_at)}</td>
                   <td>{formatDate(forum.last_activity)}</td>
                   <td>
-                    <div
-                      style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
-                    >
+                    <div className="admin-table-actions">
                       <button
-                        className="admin-btn secondary"
-                        onClick={() => {
-                          // Navigate to forum detail or open in new tab
-                          window.open(`/forum/${forum.id}`, "_blank");
-                        }}
+                        className="admin-btn secondary admin-btn-small"
+                        onClick={() =>
+                          window.open(`/forum/${forum.id}`, "_blank")
+                        }
                       >
                         View
                       </button>
 
                       <button
-                        className="admin-btn danger"
+                        className="admin-btn danger admin-btn-small"
                         onClick={() => handleDeleteForum(forum.id, forum.title)}
                       >
                         <img
                           src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
-                          alt="Delete"
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                            objectFit: "contain",
-                            marginRight: "8px",
-                          }}
+                          alt=""
                         />
                         Delete
                       </button>
@@ -258,7 +232,6 @@ const AdminForums = () => {
           </table>
         </div>
 
-        {/* Empty State */}
         {forums.length === 0 && (
           <div className="empty-state">
             <h3>No forums found</h3>
@@ -266,45 +239,32 @@ const AdminForums = () => {
           </div>
         )}
 
-        {/* Pagination */}
         {pagination.pages > 1 && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "10px",
-              marginTop: "20px",
-            }}
-          >
-            <button
-              className="admin-btn secondary"
-              onClick={() => handlePageChange(filters.page - 1)}
-              disabled={filters.page <= 1}
-            >
-              Previous
-            </button>
-
-            <span
-              style={{
-                display: "flex",
-                alignItems: "center",
-                padding: "0 15px",
-                color: "#495057",
-              }}
-            >
+          <div className="admin-pagination">
+            <span className="admin-pagination-text">
               Page {filters.page} of {pagination.pages}
             </span>
 
-            <button
-              className="admin-btn secondary"
-              onClick={() => handlePageChange(filters.page + 1)}
-              disabled={filters.page >= pagination.pages}
-            >
-              Next
-            </button>
+            <div className="admin-pagination-actions">
+              <button
+                className="admin-btn secondary"
+                onClick={() => handlePageChange(filters.page - 1)}
+                disabled={filters.page <= 1}
+              >
+                Previous
+              </button>
+
+              <button
+                className="admin-btn secondary"
+                onClick={() => handlePageChange(filters.page + 1)}
+                disabled={filters.page >= pagination.pages}
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 };

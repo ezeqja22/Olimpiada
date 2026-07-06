@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import './AdminLayout.css';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import "./AdminLayout.css";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -13,225 +16,226 @@ const AdminLayout = () => {
 
   useEffect(() => {
     fetchCurrentUser();
-    
-    // Mobile detection
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-      if (window.innerWidth <= 768) {
-        setSidebarOpen(false); // Close sidebar on mobile by default
-      }
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+
+    const syncLayout = (event) => {
+      const mobile = event.matches;
+      setIsMobile(mobile);
+      setSidebarOpen(!mobile);
+    };
+
+    syncLayout(mediaQuery);
+    mediaQuery.addEventListener("change", syncLayout);
+
+    return () => mediaQuery.removeEventListener("change", syncLayout);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname, isMobile]);
 
   const fetchCurrentUser = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
+
       if (!token) {
-        navigate('/login');
+        navigate("/login", { replace: true });
         return;
       }
 
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.get(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (!["admin", "moderator"].includes(response.data.role)) {
+        navigate("/", { replace: true });
+        return;
+      }
+
       setCurrentUser(response.data);
     } catch (error) {
-      console.error('Error fetching current user:', error);
-      navigate('/login');
+      console.error("Error fetching current user:", error);
+      navigate("/login", { replace: true });
     } finally {
       setLoading(false);
     }
   };
 
-  // Show loading while fetching user data
+  const menuItems = [
+    {
+      path: "/admin",
+      label: "Dashboard",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811298/Dashboard_admin_panel_omb7cw.svg",
+      adminOnly: false,
+    },
+    {
+      path: "/admin/users",
+      label: "Users",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg",
+      adminOnly: false,
+    },
+    {
+      path: "/admin/forums",
+      label: "Forums",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",
+      adminOnly: false,
+    },
+    {
+      path: "/admin/reports",
+      label: "Reports",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg",
+      adminOnly: false,
+    },
+    {
+      path: "/admin/user-history",
+      label: "User History",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811353/Users_Hirstory_admin_panel_eqvfdf.svg",
+      adminOnly: false,
+    },
+    {
+      path: "/admin/settings",
+      label: "Settings",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811439/Settings_admin_panel_cpayja.svg",
+      adminOnly: true,
+    },
+    {
+      path: "/admin/email",
+      label: "Email",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811297/Email_admin_panel_zjmkz7.svg",
+      adminOnly: true,
+    },
+    {
+      path: "/admin/analytics",
+      label: "Analytics",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/Analytics_admin_panel_en0409.svg",
+      adminOnly: false,
+    },
+  ];
+
+  const filteredMenuItems = menuItems.filter(
+    (item) => !item.adminOnly || currentUser?.role === "admin",
+  );
+
+  const isActiveRoute = (path) => {
+    if (path === "/admin") {
+      return location.pathname === "/admin";
+    }
+
+    return location.pathname.startsWith(path);
+  };
+
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '18px',
-        color: '#6c757d'
-      }}>
-        Loading...
+      <div className="admin-auth-loading">
+        <div className="loading-spinner" />
+        <span>Loading admin panel...</span>
       </div>
     );
   }
 
-  // Redirect if not admin or moderator
-  if (!currentUser || !['admin', 'moderator'].includes(currentUser.role)) {
-    navigate('/');
+  if (!currentUser) {
     return null;
   }
 
-  const menuItems = [
-    {
-      path: '/admin',
-      label: 'Dashboard',
-      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811298/Dashboard_admin_panel_omb7cw.svg',
-      adminOnly: false
-    },
-    {
-      path: '/admin/users',
-      label: 'Users',
-      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg',
-      adminOnly: false
-    },
-    {
-      path: '/admin/forums',
-      label: 'Forums',
-      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg',
-      adminOnly: false
-    },
-    {
-      path: '/admin/reports',
-      label: 'Reports',
-      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg',
-      adminOnly: false
-    },
-        {
-          path: '/admin/user-history',
-          label: 'User History',
-          icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811353/Users_Hirstory_admin_panel_eqvfdf.svg',
-          adminOnly: false
-        },
-        {
-          path: '/admin/settings',
-          label: 'Settings',
-          icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811439/Settings_admin_panel_cpayja.svg',
-          adminOnly: true
-        },
-    {
-      path: '/admin/email',
-      label: 'Email',
-      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811297/Email_admin_panel_zjmkz7.svg',
-      adminOnly: true
-    },
-    {
-      path: '/admin/analytics',
-      label: 'Analytics',
-      icon: 'https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/Analytics_admin_panel_en0409.svg',
-      adminOnly: false
-    }
-  ];
-
-  const filteredMenuItems = menuItems.filter(item => 
-    !item.adminOnly || currentUser.role === 'admin'
-  );
-
   return (
-    <div className="admin-layout">
-      {/* Mobile Hamburger Menu */}
-      {isMobile && (
-        <button 
-          className="mobile-menu-toggle"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          ☰
-        </button>
-      )}
-      
-      {/* Mobile Overlay */}
+    <div
+      className={`admin-layout ${sidebarOpen ? "sidebar-expanded" : "sidebar-collapsed"}`}
+    >
       {isMobile && sidebarOpen && (
-        <div 
+        <button
+          type="button"
           className="mobile-overlay show"
+          aria-label="Close admin navigation"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
-      {/* Sidebar */}
-      <div className={`admin-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+
+      <aside className={`admin-sidebar ${sidebarOpen ? "open" : "closed"}`}>
         <div className="admin-sidebar-header">
-          <h2> Admin Panel</h2>
-          <button 
+          {sidebarOpen && <h2>Admin Panel</h2>}
+
+          <button
+            type="button"
             className="sidebar-toggle"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+            onClick={() => setSidebarOpen((open) => !open)}
+            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
-            {sidebarOpen ? '◀' : '▶'}
+            {isMobile ? "×" : sidebarOpen ? "◀" : "▶"}
           </button>
         </div>
-        
-        <nav className="admin-nav">
+
+        <nav className="admin-nav" aria-label="Admin navigation">
           {filteredMenuItems.map((item) => (
             <button
+              type="button"
               key={item.path}
-              className={`admin-nav-item ${
-                location.pathname === item.path ? 'active' : ''
-              }`}
-              onClick={() => {
-                navigate(item.path);
-                if (isMobile) {
-                  setSidebarOpen(false);
-                }
-              }}
+              className={`admin-nav-item ${isActiveRoute(item.path) ? "active" : ""}`}
+              onClick={() => navigate(item.path)}
+              title={!sidebarOpen ? item.label : undefined}
             >
               <span className="nav-icon">
-                <img 
-                  src={item.icon} 
-                  alt={item.label}
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    objectFit: "contain"
-                  }}
-                />
+                <img src={item.icon} alt="" />
               </span>
               {sidebarOpen && <span className="nav-label">{item.label}</span>}
             </button>
           ))}
         </nav>
-        
+
         <div className="admin-sidebar-footer">
-          <button 
+          <button
+            type="button"
             className="back-to-site"
-            onClick={() => {
-              navigate('/');
-              if (isMobile) {
-                setSidebarOpen(false);
-              }
-            }}
+            onClick={() => navigate("/")}
+            title={!sidebarOpen ? "Back to Site" : undefined}
           >
             <span className="nav-icon">
-              <img 
-                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795078/Home_icon_gezrca.svg" 
-                alt="Home"
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  objectFit: "contain"
-                }}
+              <img
+                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795078/Home_icon_gezrca.svg"
+                alt=""
               />
             </span>
             {sidebarOpen && <span className="nav-label">Back to Site</span>}
           </button>
         </div>
-      </div>
+      </aside>
 
-      {/* Main Content */}
       <div className="admin-content">
-        <div className="admin-header">
+        <header className="admin-header">
           <div className="admin-header-left">
-            <h1>Admin Panel</h1>
-            <span className="user-role">
-              {currentUser.role === 'admin' ? '👑 Admin' : '🛡️ Moderator'}
-            </span>
+            {isMobile && (
+              <button
+                type="button"
+                className="mobile-menu-toggle"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open admin navigation"
+              >
+                ☰
+              </button>
+            )}
+
+            <div className="admin-header-copy">
+              <h1>Admin Panel</h1>
+              <span className="user-role">
+                {currentUser.role === "admin" ? "👑 Admin" : "🛡️ Moderator"}
+              </span>
+            </div>
           </div>
+
           <div className="admin-header-right">
             <span className="welcome-text">
               Welcome, {currentUser.username}
             </span>
           </div>
-        </div>
-        
-        <div className="admin-main">
+        </header>
+
+        <main className="admin-main">
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );

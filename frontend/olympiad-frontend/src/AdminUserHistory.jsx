@@ -92,8 +92,8 @@ const AdminUserHistory = () => {
   };
 
   return (
-    <div className="admin-content">
-      <div className="admin-header">
+    <div className="admin-page admin-user-history-page">
+      <div className="admin-page-heading">
         <h1>User History</h1>
         <p>Search for a user to view their moderation history</p>
       </div>
@@ -108,10 +108,7 @@ const AdminUserHistory = () => {
           marginBottom: "20px",
         }}
       >
-        <form
-          onSubmit={handleSearch}
-          style={{ display: "flex", gap: "10px", alignItems: "center" }}
-        >
+        <form onSubmit={handleSearch} className="admin-search-form">
           <input
             type="text"
             value={searchQuery}
@@ -172,6 +169,7 @@ const AdminUserHistory = () => {
         >
           {/* User Info */}
           <div
+            className="admin-user-summary"
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -189,7 +187,7 @@ const AdminUserHistory = () => {
                 {userHistory.user.email}
               </p>
             </div>
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div className="admin-user-statuses">
               <span
                 style={{
                   padding: "4px 12px",
@@ -244,6 +242,7 @@ const AdminUserHistory = () => {
                 {userHistory.history.map((entry, index) => (
                   <div
                     key={index}
+                    className="history-entry"
                     style={{
                       display: "flex",
                       alignItems: "flex-start",

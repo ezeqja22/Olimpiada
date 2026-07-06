@@ -175,18 +175,11 @@ const AdminUsers = () => {
   }
 
   return (
-    <div>
+    <div className="admin-page admin-users-page">
       {/* Filters */}
       <div className="admin-card">
         <h2>User Management</h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "15px",
-            marginBottom: "20px",
-          }}
-        >
+        <div className="admin-filter-grid">
           <div>
             <label>Search</label>
             <input
@@ -250,9 +243,7 @@ const AdminUsers = () => {
                   <td>{getStatusBadge(user)}</td>
                   <td>{new Date(user.created_at).toLocaleDateString()}</td>
                   <td>
-                    <div
-                      style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
-                    >
+                    <div className="admin-table-actions">
                       <select
                         value={user.role}
                         onChange={(e) => {
@@ -355,6 +346,7 @@ const AdminUsers = () => {
         {/* Pagination */}
         {pagination.pages > 1 && (
           <div
+            className="admin-pagination"
             style={{
               display: "flex",
               justifyContent: "center",

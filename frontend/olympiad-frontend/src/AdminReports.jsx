@@ -187,11 +187,11 @@ const AdminReports = () => {
   }
 
   return (
-    <div>
+    <div className="admin-page admin-reports-page">
       {/* Filters */}
       <div className="admin-card">
         <h2>Content Reports</h2>
-        <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
+        <div className="admin-filter-row">
           <div>
             <label>Status</label>
             <select
@@ -285,6 +285,7 @@ const AdminReports = () => {
                   <td>{formatDate(report.created_at)}</td>
                   <td>
                     <div
+                      className="admin-table-actions"
                       style={{
                         display: "flex",
                         gap: "8px",
@@ -332,6 +333,7 @@ const AdminReports = () => {
         {/* Pagination */}
         {pagination.pages > 1 && (
           <div
+            className="admin-pagination"
             style={{
               display: "flex",
               justifyContent: "center",
