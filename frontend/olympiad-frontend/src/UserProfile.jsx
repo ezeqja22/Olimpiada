@@ -3,7 +3,7 @@
 /* eslint-disable jsx-a11y/img-redundant-alt */
 import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import Card from "./components/Card";
 import Button from "./components/Button";
@@ -13,6 +13,7 @@ import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { getUserInitial } from "./utils";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
+import "./ProfilePages.css";
 import { useToast } from "./components/ToastProvider";
 import { useConfirm } from "./components/ConfirmProvider";
 
@@ -41,6 +42,7 @@ const renderMathContent = (text) => {
 
 function UserProfile() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("problems");
@@ -60,6 +62,24 @@ function UserProfile() {
   const [isMobile, setIsMobile] = useState(false);
   const { showToast } = useToast();
   const { confirm } = useConfirm();
+
+  const openConnections = (connectionType, userId) => {
+    if (!userId) return;
+
+    const returnTo = `${location.pathname}${location.search || ""}`;
+    sessionStorage.setItem(`connectionsReturnTo:${userId}`, returnTo);
+
+    navigate(`/${connectionType}/${userId}`, {
+      state: { returnTo },
+    });
+  };
+
+  const storedProfileReturnTo = profileData?.user?.id
+    ? sessionStorage.getItem(`connectionsReturnTo:${profileData.user.id}`)
+    : null;
+
+  const profileBackPath =
+    location.state?.returnTo || storedProfileReturnTo || "/feed";
 
   useEffect(() => {
     const checkMobile = () => {
@@ -555,902 +575,654 @@ function UserProfile() {
 
   return (
     <Layout showHomeButton={true}>
-      <div style={{ marginBottom: spacing.md }}>
-        <BackButton fallbackPath="/feed" />
-      </div>
+      <div className="profile-page profile-page--self">
+        <div style={{ marginBottom: spacing.md }}>
+          <BackButton fallbackPath={profileBackPath} />
+        </div>
 
-      <div style={{ marginBottom: spacing.xl }}>
-        <h1
-          style={{
-            fontSize: typography.fontSize["3xl"],
-            fontWeight: typography.fontWeight.bold,
-            color: colors.primary,
-            marginBottom: spacing.lg,
-            textAlign: "center",
-          }}
-        >
-          My Profile
-        </h1>
-      </div>
-
-      <input
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handleFileSelect}
-        ref={fileInputRef}
-        style={{ display: "none" }}
-      />
-
-      <div
-        style={{
-          backgroundColor: "#f8f9fa",
-          padding: "30px",
-          borderRadius: "10px",
-          marginBottom: "30px",
-          border: "1px solid #e9ecef",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-          <div
-            onClick={handleProfilePictureClick}
+        <div style={{ marginBottom: spacing.xl }}>
+          <h1
             style={{
-              width: "80px",
-              height: "80px",
-              borderRadius: "50%",
-              backgroundColor: "#1a4d3a",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontSize: "32px",
-              fontWeight: "bold",
-              backgroundImage: user.profile_picture
-                ? `url(${user.profile_picture})`
-                : "none",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              cursor: "pointer",
-              position: "relative",
-              transition: "all 0.2s ease",
-              overflow: "hidden",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.05)";
-              e.currentTarget.style.boxShadow =
-                "0 4px 12px rgba(0, 123, 255, 0.3)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "none";
+              fontSize: typography.fontSize["3xl"],
+              fontWeight: typography.fontWeight.bold,
+              color: colors.primary,
+              marginBottom: spacing.lg,
+              textAlign: "center",
             }}
           >
-            {!user.profile_picture && getUserInitial(user.username)}
+            My Profile
+          </h1>
+        </div>
 
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileSelect}
+          ref={fileInputRef}
+          style={{ display: "none" }}
+        />
+
+        <div
+          className="profile-hero profile-hero--self"
+          style={{
+            backgroundColor: "#f8f9fa",
+            padding: "30px",
+            borderRadius: "10px",
+            marginBottom: "30px",
+            border: "1px solid #e9ecef",
+          }}
+        >
+          <div
+            className="profile-self-main"
+            style={{ display: "flex", alignItems: "center", gap: "20px" }}
+          >
             <div
-              onClick={handleCameraOverlayClick}
+              className="profile-avatar profile-avatar--editable"
+              onClick={handleProfilePictureClick}
               style={{
-                position: "absolute",
-                bottom: "0",
-                left: "0",
-                right: "0",
-                height: "30%",
-                backgroundColor: "rgba(26, 77, 58, 0.9)",
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                backgroundColor: "#1a4d3a",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "16px",
                 color: "white",
-                borderRadius: "0 0 50% 50%",
-                transform: "translateY(0)",
-                transition: "all 0.2s ease",
+                fontSize: "32px",
+                fontWeight: "bold",
+                backgroundImage: user.profile_picture
+                  ? `url(${user.profile_picture})`
+                  : "none",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
                 cursor: "pointer",
+                position: "relative",
+                transition: "all 0.2s ease",
+                overflow: "hidden",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "rgba(26, 77, 58, 1)";
-                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.transform = "scale(1.05)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 12px rgba(0, 123, 255, 0.3)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "rgba(26, 77, 58, 0.9)";
-                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.boxShadow = "none";
               }}
             >
-              <img
-                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Camera_Icon_My_Profile_cmmlrm.svg"
-                alt="Camera"
-                style={{
-                  height: "14px",
-                  width: "14px",
-                  objectFit: "contain",
-                }}
-              />
-            </div>
-          </div>
+              {!user.profile_picture && getUserInitial(user.username)}
 
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <h1 style={{ margin: "0 0 10px 0", color: "#333" }}>
-                {user.username}
-              </h1>
-              <button
-                onClick={handleEditProfile}
+              <div
+                onClick={handleCameraOverlayClick}
                 style={{
-                  padding: "8px 16px",
-                  backgroundColor: colors.primary,
+                  position: "absolute",
+                  bottom: "0",
+                  left: "0",
+                  right: "0",
+                  height: "30%",
+                  backgroundColor: "rgba(26, 77, 58, 0.9)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "16px",
                   color: "white",
-                  border: "none",
-                  borderRadius: "20px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)",
+                  borderRadius: "0 0 50% 50%",
+                  transform: "translateY(0)",
                   transition: "all 0.2s ease",
+                  cursor: "pointer",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 12px rgba(26, 77, 58, 0.4)";
+                  e.currentTarget.style.backgroundColor = "rgba(26, 77, 58, 1)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    "rgba(26, 77, 58, 0.9)";
                   e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow =
-                    "0 2px 8px rgba(26, 77, 58, 0.3)";
                 }}
               >
-                Edit Profile
-              </button>
+                <img
+                  src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Camera_Icon_My_Profile_cmmlrm.svg"
+                  alt="Camera"
+                  style={{
+                    height: "14px",
+                    width: "14px",
+                    objectFit: "contain",
+                  }}
+                />
+              </div>
             </div>
 
-            <p
-              style={{ margin: "0 0 10px 0", color: "#666", fontSize: "14px" }}
+            <div
+              className="profile-identity profile-self-identity"
+              style={{ flex: 1 }}
             >
-              {user.email}
-            </p>
-
-            <div style={{ display: "flex", gap: "20px", margin: "10px 0" }}>
               <div
-                style={{
-                  textAlign: "center",
-                  cursor: "pointer",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  transition: "all 0.2s ease",
-                }}
-                onClick={() => navigate(`/followers/${user.id}`)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.gray[100];
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
+                className="profile-self-name-row"
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
               >
-                <div
+                <h1 style={{ margin: "0 0 10px 0", color: "#333" }}>
+                  {user.username}
+                </h1>
+                <button
+                  onClick={handleEditProfile}
                   style={{
-                    fontWeight: "bold",
-                    fontSize: "18px",
-                    color: "#333",
+                    padding: "8px 16px",
+                    backgroundColor: colors.primary,
+                    color: "white",
+                    border: "none",
+                    borderRadius: "20px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 4px 12px rgba(26, 77, 58, 0.4)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 8px rgba(26, 77, 58, 0.3)";
                   }}
                 >
-                  {user.follower_count || 0}
-                </div>
-                <div style={{ fontSize: "12px", color: "#666" }}>Followers</div>
+                  Edit Profile
+                </button>
               </div>
 
-              <div
+              <p
                 style={{
-                  textAlign: "center",
-                  cursor: "pointer",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  transition: "all 0.2s ease",
-                }}
-                onClick={() => navigate(`/following/${user.id}`)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.gray[100];
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
+                  margin: "0 0 10px 0",
+                  color: "#666",
+                  fontSize: "14px",
                 }}
               >
-                <div
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "18px",
-                    color: "#333",
-                  }}
-                >
-                  {user.following_count || 0}
-                </div>
-                <div style={{ fontSize: "12px", color: "#666" }}>Following</div>
-              </div>
-            </div>
-
-            {user.bio && (
-              <p style={{ margin: "0", color: "#555", fontSize: "16px" }}>
-                {user.bio}
+                {user.email}
               </p>
-            )}
+
+              <div
+                className="profile-social-stats profile-social-stats--self"
+                style={{ display: "flex", gap: "20px", margin: "10px 0" }}
+              >
+                <div
+                  style={{
+                    textAlign: "center",
+                    cursor: "pointer",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    transition: "all 0.2s ease",
+                  }}
+                  onClick={() => openConnections("followers", user.id)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.gray[100];
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "18px",
+                      color: "#333",
+                    }}
+                  >
+                    {user.follower_count || 0}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#666" }}>
+                    Followers
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    textAlign: "center",
+                    cursor: "pointer",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    transition: "all 0.2s ease",
+                  }}
+                  onClick={() => openConnections("following", user.id)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.gray[100];
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "18px",
+                      color: "#333",
+                    }}
+                  >
+                    {user.following_count || 0}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#666" }}>
+                    Following
+                  </div>
+                </div>
+              </div>
+
+              {user.bio && (
+                <p style={{ margin: "0", color: "#555", fontSize: "16px" }}>
+                  {user.bio}
+                </p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {isEditingProfile && (
-        <div
-          style={{
-            backgroundColor: "#f8f9fa",
-            padding: "32px",
-            borderRadius: "12px",
-            marginBottom: "30px",
-            border: "1px solid #e9ecef",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-          }}
-        >
-          <h3
+        {isEditingProfile && (
+          <div
+            className="profile-edit-card"
             style={{
-              margin: "0 0 24px 0",
-              color: "#333",
-              fontSize: "20px",
-              fontWeight: "600",
+              backgroundColor: "#f8f9fa",
+              padding: "32px",
+              borderRadius: "12px",
+              marginBottom: "30px",
+              border: "1px solid #e9ecef",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
             }}
           >
-            Edit Profile
-          </h3>
+            <h3
+              style={{
+                margin: "0 0 24px 0",
+                color: "#333",
+                fontSize: "20px",
+                fontWeight: "600",
+              }}
+            >
+              Edit Profile
+            </h3>
 
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-          >
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: "600",
-                  color: "#333",
-                  fontSize: "16px",
-                }}
-              >
-                Bio:
-              </label>
-
-              <textarea
-                value={editFormData.bio}
-                onChange={(e) =>
-                  setEditFormData({ ...editFormData, bio: e.target.value })
-                }
-                placeholder="Tell us about yourself..."
-                style={{
-                  width: "100%",
-                  padding: "12px 16px",
-                  border: "2px solid #e9ecef",
-                  borderRadius: "8px",
-                  fontSize: "16px",
-                  minHeight: "100px",
-                  resize: "vertical",
-                  outline: "none",
-                  transition: "border-color 0.2s ease",
-                  fontFamily: "inherit",
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = colors.primary;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = "#e9ecef";
-                }}
-              />
-            </div>
-
-            {user && (
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+            >
               <div>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "8px",
+                    fontWeight: "600",
+                    color: "#333",
+                    fontSize: "16px",
+                  }}
+                >
+                  Bio:
+                </label>
+
+                <textarea
+                  value={editFormData.bio}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, bio: e.target.value })
+                  }
+                  placeholder="Tell us about yourself..."
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    border: "2px solid #e9ecef",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    minHeight: "100px",
+                    resize: "vertical",
+                    outline: "none",
+                    transition: "border-color 0.2s ease",
+                    fontFamily: "inherit",
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = colors.primary;
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = "#e9ecef";
+                  }}
+                />
+              </div>
+
+              {user && (
+                <div>
+                  <button
+                    onClick={handleRemoveProfilePicture}
+                    disabled={uploading}
+                    style={{
+                      padding: "12px 24px",
+                      backgroundColor: uploading ? colors.gray[400] : "#dc3545",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: uploading ? "not-allowed" : "pointer",
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      boxShadow: uploading
+                        ? "none"
+                        : "0 2px 8px rgba(220, 53, 69, 0.3)",
+                      transition: "all 0.2s ease",
+                      marginBottom: "20px",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!uploading) {
+                        e.currentTarget.style.transform = "translateY(-1px)";
+                        e.currentTarget.style.boxShadow =
+                          "0 4px 12px rgba(220, 53, 69, 0.4)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!uploading) {
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.boxShadow =
+                          "0 2px 8px rgba(220, 53, 69, 0.3)";
+                      }
+                    }}
+                  >
+                    {uploading ? "Removing..." : " Remove Profile Picture"}
+                  </button>
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: "12px" }}>
                 <button
-                  onClick={handleRemoveProfilePicture}
-                  disabled={uploading}
+                  onClick={handleSaveProfile}
                   style={{
                     padding: "12px 24px",
-                    backgroundColor: uploading ? colors.gray[400] : "#dc3545",
+                    backgroundColor: colors.primary,
                     color: "white",
                     border: "none",
                     borderRadius: "8px",
-                    cursor: uploading ? "not-allowed" : "pointer",
+                    cursor: "pointer",
                     fontSize: "16px",
                     fontWeight: "600",
-                    boxShadow: uploading
-                      ? "none"
-                      : "0 2px 8px rgba(220, 53, 69, 0.3)",
+                    boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)",
                     transition: "all 0.2s ease",
-                    marginBottom: "20px",
                   }}
                   onMouseEnter={(e) => {
-                    if (!uploading) {
-                      e.currentTarget.style.transform = "translateY(-1px)";
-                      e.currentTarget.style.boxShadow =
-                        "0 4px 12px rgba(220, 53, 69, 0.4)";
-                    }
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 4px 12px rgba(26, 77, 58, 0.4)";
                   }}
                   onMouseLeave={(e) => {
-                    if (!uploading) {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow =
-                        "0 2px 8px rgba(220, 53, 69, 0.3)";
-                    }
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 8px rgba(26, 77, 58, 0.3)";
                   }}
                 >
-                  {uploading ? "Removing..." : " Remove Profile Picture"}
+                  Save Changes
+                </button>
+
+                <button
+                  onClick={handleCancelEdit}
+                  style={{
+                    padding: "12px 24px",
+                    backgroundColor: colors.gray[500],
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 4px 12px rgba(0,0,0,0.15)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 8px rgba(0,0,0,0.1)";
+                  }}
+                >
+                  Cancel
                 </button>
               </div>
-            )}
-
-            <div style={{ display: "flex", gap: "12px" }}>
-              <button
-                onClick={handleSaveProfile}
-                style={{
-                  padding: "12px 24px",
-                  backgroundColor: colors.primary,
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 12px rgba(26, 77, 58, 0.4)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow =
-                    "0 2px 8px rgba(26, 77, 58, 0.3)";
-                }}
-              >
-                Save Changes
-              </button>
-
-              <button
-                onClick={handleCancelEdit}
-                style={{
-                  padding: "12px 24px",
-                  backgroundColor: colors.gray[500],
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 12px rgba(0,0,0,0.15)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-                }}
-              >
-                Cancel
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div
-        style={{
-          display: "flex",
-          gap: "15px",
-          marginBottom: "30px",
-          flexWrap: isMobile ? "wrap" : "nowrap",
-        }}
-      >
         <div
+          className="profile-summary-grid"
           style={{
-            textAlign: "center",
-            padding: "15px",
-            backgroundColor: "#e8f5e9",
-            borderRadius: "8px",
-            minWidth: isMobile ? "calc(50% - 8px)" : "100px",
-            flex: isMobile ? "1" : "none",
+            display: "flex",
+            gap: "15px",
+            marginBottom: "30px",
+            flexWrap: isMobile ? "wrap" : "nowrap",
           }}
         >
           <div
-            style={{ fontSize: "24px", fontWeight: "bold", color: "#2e7d32" }}
+            style={{
+              textAlign: "center",
+              padding: "15px",
+              backgroundColor: "#e8f5e9",
+              borderRadius: "8px",
+              minWidth: isMobile ? "calc(50% - 8px)" : "100px",
+              flex: isMobile ? "1" : "none",
+            }}
           >
-            {problems.length}
+            <div
+              style={{ fontSize: "24px", fontWeight: "bold", color: "#2e7d32" }}
+            >
+              {problems.length}
+            </div>
+            <div style={{ fontSize: "14px", color: "#666" }}>Problems</div>
           </div>
-          <div style={{ fontSize: "14px", color: "#666" }}>Problems</div>
+
+          <div
+            style={{
+              textAlign: "center",
+              padding: "15px",
+              backgroundColor: "#f3e5f5",
+              borderRadius: "8px",
+              minWidth: isMobile ? "calc(50% - 8px)" : "100px",
+              flex: isMobile ? "1" : "none",
+            }}
+          >
+            <div
+              style={{ fontSize: "24px", fontWeight: "bold", color: "#7b1fa2" }}
+            >
+              {comments.length}
+            </div>
+            <div style={{ fontSize: "14px", color: "#666" }}>Comments</div>
+          </div>
+
+          <div
+            style={{
+              textAlign: "center",
+              padding: "15px",
+              backgroundColor: "#fff3e0",
+              borderRadius: "8px",
+              minWidth: isMobile ? "calc(50% - 8px)" : "100px",
+              flex: isMobile ? "1" : "none",
+            }}
+          >
+            <div
+              style={{ fontSize: "24px", fontWeight: "bold", color: "#f57c00" }}
+            >
+              {bookmarks.length}
+            </div>
+            <div style={{ fontSize: "14px", color: "#666" }}>Bookmarks</div>
+          </div>
         </div>
 
         <div
+          className="profile-tabs"
           style={{
-            textAlign: "center",
-            padding: "15px",
-            backgroundColor: "#f3e5f5",
-            borderRadius: "8px",
-            minWidth: isMobile ? "calc(50% - 8px)" : "100px",
-            flex: isMobile ? "1" : "none",
+            display: "flex",
+            gap: "8px",
+            marginBottom: "30px",
+            backgroundColor: "#f8f9fa",
+            padding: "6px",
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            overflowX: "auto",
+            whiteSpace: "nowrap",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
           }}
         >
-          <div
-            style={{ fontSize: "24px", fontWeight: "bold", color: "#7b1fa2" }}
-          >
-            {comments.length}
-          </div>
-          <div style={{ fontSize: "14px", color: "#666" }}>Comments</div>
-        </div>
-
-        <div
-          style={{
-            textAlign: "center",
-            padding: "15px",
-            backgroundColor: "#fff3e0",
-            borderRadius: "8px",
-            minWidth: isMobile ? "calc(50% - 8px)" : "100px",
-            flex: isMobile ? "1" : "none",
-          }}
-        >
-          <div
-            style={{ fontSize: "24px", fontWeight: "bold", color: "#f57c00" }}
-          >
-            {bookmarks.length}
-          </div>
-          <div style={{ fontSize: "14px", color: "#666" }}>Bookmarks</div>
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "8px",
-          marginBottom: "30px",
-          backgroundColor: "#f8f9fa",
-          padding: "6px",
-          borderRadius: "12px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          overflowX: "auto",
-          whiteSpace: "nowrap",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-      >
-        <style>{`
+          <style>{`
                     div::-webkit-scrollbar {
                         display: none;
                     }
                 `}</style>
 
-        <button
-          onClick={() => setActiveTab("problems")}
-          style={{
-            padding: isMobile ? "10px 16px" : "12px 24px",
-            backgroundColor:
-              activeTab === "problems" ? colors.primary : "transparent",
-            color: activeTab === "problems" ? "white" : colors.gray[600],
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: isMobile ? "14px" : "16px",
-            fontWeight: "600",
-            transition: "all 0.2s ease",
-            boxShadow:
-              activeTab === "problems"
-                ? "0 2px 8px rgba(26, 77, 58, 0.3)"
-                : "none",
-            flexShrink: 0,
-          }}
-          onMouseEnter={(e) => {
-            if (activeTab !== "problems") {
-              e.currentTarget.style.backgroundColor = colors.gray[200];
-              e.currentTarget.style.color = colors.gray[800];
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (activeTab !== "problems") {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = colors.gray[600];
-            }
-          }}
-        >
-          My Problems ({problems.length})
-        </button>
+          <button
+            onClick={() => setActiveTab("problems")}
+            style={{
+              padding: isMobile ? "10px 16px" : "12px 24px",
+              backgroundColor:
+                activeTab === "problems" ? colors.primary : "transparent",
+              color: activeTab === "problems" ? "white" : colors.gray[600],
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: isMobile ? "14px" : "16px",
+              fontWeight: "600",
+              transition: "all 0.2s ease",
+              boxShadow:
+                activeTab === "problems"
+                  ? "0 2px 8px rgba(26, 77, 58, 0.3)"
+                  : "none",
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== "problems") {
+                e.currentTarget.style.backgroundColor = colors.gray[200];
+                e.currentTarget.style.color = colors.gray[800];
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== "problems") {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = colors.gray[600];
+              }
+            }}
+          >
+            My Problems ({problems.length})
+          </button>
 
-        <button
-          onClick={() => setActiveTab("comments")}
-          style={{
-            padding: isMobile ? "10px 16px" : "12px 24px",
-            backgroundColor:
-              activeTab === "comments" ? colors.primary : "transparent",
-            color: activeTab === "comments" ? "white" : colors.gray[600],
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: isMobile ? "14px" : "16px",
-            fontWeight: "600",
-            transition: "all 0.2s ease",
-            boxShadow:
-              activeTab === "comments"
-                ? "0 2px 8px rgba(26, 77, 58, 0.3)"
-                : "none",
-            flexShrink: 0,
-          }}
-          onMouseEnter={(e) => {
-            if (activeTab !== "comments") {
-              e.currentTarget.style.backgroundColor = colors.gray[200];
-              e.currentTarget.style.color = colors.gray[800];
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (activeTab !== "comments") {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = colors.gray[600];
-            }
-          }}
-        >
-          My Comments ({sortedComments.length})
-        </button>
+          <button
+            onClick={() => setActiveTab("comments")}
+            style={{
+              padding: isMobile ? "10px 16px" : "12px 24px",
+              backgroundColor:
+                activeTab === "comments" ? colors.primary : "transparent",
+              color: activeTab === "comments" ? "white" : colors.gray[600],
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: isMobile ? "14px" : "16px",
+              fontWeight: "600",
+              transition: "all 0.2s ease",
+              boxShadow:
+                activeTab === "comments"
+                  ? "0 2px 8px rgba(26, 77, 58, 0.3)"
+                  : "none",
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== "comments") {
+                e.currentTarget.style.backgroundColor = colors.gray[200];
+                e.currentTarget.style.color = colors.gray[800];
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== "comments") {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = colors.gray[600];
+              }
+            }}
+          >
+            My Comments ({sortedComments.length})
+          </button>
 
-        <button
-          onClick={() => setActiveTab("bookmarks")}
-          style={{
-            padding: isMobile ? "10px 16px" : "12px 24px",
-            backgroundColor:
-              activeTab === "bookmarks" ? colors.primary : "transparent",
-            color: activeTab === "bookmarks" ? "white" : colors.gray[600],
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: isMobile ? "14px" : "16px",
-            fontWeight: "600",
-            transition: "all 0.2s ease",
-            boxShadow:
-              activeTab === "bookmarks"
-                ? "0 2px 8px rgba(26, 77, 58, 0.3)"
-                : "none",
-            flexShrink: 0,
-          }}
-          onMouseEnter={(e) => {
-            if (activeTab !== "bookmarks") {
-              e.currentTarget.style.backgroundColor = colors.gray[200];
-              e.currentTarget.style.color = colors.gray[800];
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (activeTab !== "bookmarks") {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = colors.gray[600];
-            }
-          }}
-        >
-          My Bookmarks ({bookmarks.length})
-        </button>
+          <button
+            onClick={() => setActiveTab("bookmarks")}
+            style={{
+              padding: isMobile ? "10px 16px" : "12px 24px",
+              backgroundColor:
+                activeTab === "bookmarks" ? colors.primary : "transparent",
+              color: activeTab === "bookmarks" ? "white" : colors.gray[600],
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: isMobile ? "14px" : "16px",
+              fontWeight: "600",
+              transition: "all 0.2s ease",
+              boxShadow:
+                activeTab === "bookmarks"
+                  ? "0 2px 8px rgba(26, 77, 58, 0.3)"
+                  : "none",
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== "bookmarks") {
+                e.currentTarget.style.backgroundColor = colors.gray[200];
+                e.currentTarget.style.color = colors.gray[800];
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== "bookmarks") {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = colors.gray[600];
+              }
+            }}
+          >
+            My Bookmarks ({bookmarks.length})
+          </button>
 
-        <button
-          onClick={() => {
-            setActiveTab("drafts");
-            fetchDrafts();
-          }}
-          style={{
-            padding: isMobile ? "10px 16px" : "12px 24px",
-            backgroundColor:
-              activeTab === "drafts" ? colors.primary : "transparent",
-            color: activeTab === "drafts" ? "white" : colors.gray[600],
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: isMobile ? "14px" : "16px",
-            fontWeight: "600",
-            transition: "all 0.2s ease",
-            boxShadow:
-              activeTab === "drafts"
-                ? "0 2px 8px rgba(26, 77, 58, 0.3)"
-                : "none",
-            flexShrink: 0,
-          }}
-          onMouseEnter={(e) => {
-            if (activeTab !== "drafts") {
-              e.currentTarget.style.backgroundColor = colors.gray[200];
-              e.currentTarget.style.color = colors.gray[800];
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (activeTab !== "drafts") {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = colors.gray[600];
-            }
-          }}
-        >
-          My Drafts ({drafts.length})
-        </button>
-      </div>
+          <button
+            onClick={() => {
+              setActiveTab("drafts");
+              fetchDrafts();
+            }}
+            style={{
+              padding: isMobile ? "10px 16px" : "12px 24px",
+              backgroundColor:
+                activeTab === "drafts" ? colors.primary : "transparent",
+              color: activeTab === "drafts" ? "white" : colors.gray[600],
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: isMobile ? "14px" : "16px",
+              fontWeight: "600",
+              transition: "all 0.2s ease",
+              boxShadow:
+                activeTab === "drafts"
+                  ? "0 2px 8px rgba(26, 77, 58, 0.3)"
+                  : "none",
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== "drafts") {
+                e.currentTarget.style.backgroundColor = colors.gray[200];
+                e.currentTarget.style.color = colors.gray[800];
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== "drafts") {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = colors.gray[600];
+              }
+            }}
+          >
+            My Drafts ({drafts.length})
+          </button>
+        </div>
 
-      <div>
-        {activeTab === "problems" && (
-          <div>
-            <h3 style={{ marginBottom: "20px", color: "#333" }}>My Problems</h3>
+        <div>
+          {activeTab === "problems" && (
+            <div>
+              <h3 style={{ marginBottom: "20px", color: "#333" }}>
+                My Problems
+              </h3>
 
-            {problems.length === 0 ? (
-              <div
-                style={{ textAlign: "center", padding: "40px", color: "#666" }}
-              >
-                <p>You haven't created any problems yet.</p>
-                <Link to="/create-problem?from=/profile">
-                  <button
-                    style={{
-                      padding: "12px 24px",
-                      backgroundColor: colors.primary,
-                      color: "white",
-                      border: "none",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-1px)";
-                      e.currentTarget.style.boxShadow =
-                        "0 4px 12px rgba(26, 77, 58, 0.4)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow =
-                        "0 2px 8px rgba(26, 77, 58, 0.3)";
-                    }}
-                  >
-                    Create Your First Problem
-                  </button>
-                </Link>
-              </div>
-            ) : (
-              <div>
-                {problems.map((problem) => (
-                  <div
-                    key={problem.id}
-                    onClick={() => openProblem(problem.id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) =>
-                      handleClickableKeyDown(e, () => openProblem(problem.id))
-                    }
-                    style={{
-                      border: "1px solid #e9ecef",
-                      borderRadius: "12px",
-                      padding: "24px",
-                      marginBottom: "20px",
-                      backgroundColor: "white",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                      transition: "all 0.2s ease",
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow =
-                        "0 8px 20px rgba(0,0,0,0.12)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow =
-                        "0 4px 12px rgba(0,0,0,0.08)";
-                    }}
-                  >
-                    <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>
-                      {renderMathContent(problem.title)}
-                    </h4>
-
-                    <p
-                      style={{
-                        color: "#666",
-                        margin: "0 0 15px 0",
-                        whiteSpace: "pre-wrap",
-                      }}
-                    >
-                      {renderMathContent(problem.description.substring(0, 150))}
-                      ...
-                    </p>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <span
-                        style={{
-                          backgroundColor: "#e0e7ff",
-                          color: "#3730a3",
-                          padding: "6px 12px",
-                          borderRadius: "16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          marginRight: "8px",
-                          boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        {problem.subject}
-                      </span>
-
-                      <span
-                        style={{
-                          backgroundColor: "#fef3c7",
-                          color: "#92400e",
-                          padding: "6px 12px",
-                          borderRadius: "16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          marginRight: "8px",
-                          boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        {problem.level}
-                      </span>
-
-                      {problem.tags &&
-                        problem.tags.trim() &&
-                        problem.tags.split(",").map((tag, index) => (
-                          <span
-                            key={index}
-                            style={{
-                              backgroundColor: colors.tertiary,
-                              color: "white",
-                              padding: "6px 12px",
-                              borderRadius: "16px",
-                              fontSize: "12px",
-                              fontWeight: "600",
-                              boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
-                              transition: "all 0.2s ease",
-                            }}
-                          >
-                            {tag.trim()}
-                          </span>
-                        ))}
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleVote(problem.id, "like");
-                        }}
-                        style={{
-                          backgroundColor:
-                            voteData[problem.id]?.user_vote === "like"
-                              ? "#e8f5e8"
-                              : "#f8f9fa",
-                          border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "#4CAF50" : "#dee2e6"}`,
-                          cursor: "pointer",
-                          fontSize: "14px",
-                          color:
-                            voteData[problem.id]?.user_vote === "like"
-                              ? "#4CAF50"
-                              : "#666",
-                          fontWeight:
-                            voteData[problem.id]?.user_vote === "like"
-                              ? "bold"
-                              : "500",
-                          padding: "6px 12px",
-                          borderRadius: "6px",
-                          transition: "all 0.2s ease",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
-                      >
-                        {voteData[problem.id]?.like_count || 0}
-                      </button>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleVote(problem.id, "dislike");
-                        }}
-                        style={{
-                          backgroundColor:
-                            voteData[problem.id]?.user_vote === "dislike"
-                              ? "#ffebee"
-                              : "#f8f9fa",
-                          border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "#f44336" : "#dee2e6"}`,
-                          cursor: "pointer",
-                          fontSize: "14px",
-                          color:
-                            voteData[problem.id]?.user_vote === "dislike"
-                              ? "#f44336"
-                              : "#666",
-                          fontWeight:
-                            voteData[problem.id]?.user_vote === "dislike"
-                              ? "bold"
-                              : "500",
-                          padding: "6px 12px",
-                          borderRadius: "6px",
-                          transition: "all 0.2s ease",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
-                      >
-                        {voteData[problem.id]?.dislike_count || 0}
-                      </button>
-
-                      <span style={{ fontSize: "12px", color: "#666" }}>
-                        {new Date(problem.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "comments" && (
-          <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "20px",
-              }}
-            >
-              <h3 style={{ margin: "0", color: "#333" }}>My Comments</h3>
-
-              <div style={{ marginLeft: "20px", display: "flex", gap: "10px" }}>
-                <button
-                  onClick={() => setCommentsSubTab("all")}
-                  style={{
-                    padding: "8px 16px",
-                    backgroundColor:
-                      commentsSubTab === "all" ? colors.primary : "transparent",
-                    color:
-                      commentsSubTab === "all" ? "white" : colors.gray[600],
-                    border: `1px solid ${commentsSubTab === "all" ? colors.primary : colors.gray[300]}`,
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  All ({sortedComments.length})
-                </button>
-
-                <button
-                  onClick={() => setCommentsSubTab("solutions")}
-                  style={{
-                    padding: "8px 16px",
-                    backgroundColor:
-                      commentsSubTab === "solutions"
-                        ? colors.primary
-                        : "transparent",
-                    color:
-                      commentsSubTab === "solutions"
-                        ? "white"
-                        : colors.gray[600],
-                    border: `1px solid ${commentsSubTab === "solutions" ? colors.primary : colors.gray[300]}`,
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  Solutions (
-                  {
-                    sortedComments.filter((comment) => comment.is_solution)
-                      .length
-                  }
-                  )
-                </button>
-              </div>
-            </div>
-
-            {commentsSubTab === "all" ? (
-              sortedComments.length === 0 ? (
+              {problems.length === 0 ? (
                 <div
                   style={{
                     textAlign: "center",
@@ -1458,46 +1230,429 @@ function UserProfile() {
                     color: "#666",
                   }}
                 >
-                  <p>You haven't made any comments yet.</p>
-                </div>
-              ) : (
-                <div>
-                  {sortedComments.map((comment) => (
-                    <div
-                      key={comment.id}
-                      onClick={() => openCommentProblem(comment)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) =>
-                        handleClickableKeyDown(e, () =>
-                          openCommentProblem(comment),
-                        )
-                      }
+                  <p>You haven't created any problems yet.</p>
+                  <Link to="/create-problem?from=/profile">
+                    <button
                       style={{
-                        border: comment.is_solution
-                          ? "2px solid #28a745"
-                          : "1px solid #ddd",
+                        padding: "12px 24px",
+                        backgroundColor: colors.primary,
+                        color: "white",
+                        border: "none",
                         borderRadius: "8px",
-                        padding: "15px",
-                        marginBottom: "15px",
-                        backgroundColor: comment.is_solution
-                          ? "#e8f5e8"
-                          : "#f9f9f9",
-                        position: "relative",
                         cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        boxShadow: "0 2px 8px rgba(26, 77, 58, 0.3)",
                         transition: "all 0.2s ease",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = "translateY(-1px)";
                         e.currentTarget.style.boxShadow =
-                          "0 4px 12px rgba(0,0,0,0.08)";
+                          "0 4px 12px rgba(26, 77, 58, 0.4)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "none";
+                        e.currentTarget.style.boxShadow =
+                          "0 2px 8px rgba(26, 77, 58, 0.3)";
                       }}
                     >
-                      {comment.is_solution && (
+                      Create Your First Problem
+                    </button>
+                  </Link>
+                </div>
+              ) : (
+                <div>
+                  {problems.map((problem) => (
+                    <div
+                      key={problem.id}
+                      className="profile-content-card"
+                      onClick={() => openProblem(problem.id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) =>
+                        handleClickableKeyDown(e, () => openProblem(problem.id))
+                      }
+                      style={{
+                        border: "1px solid #e9ecef",
+                        borderRadius: "12px",
+                        padding: "24px",
+                        marginBottom: "20px",
+                        backgroundColor: "white",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                        transition: "all 0.2s ease",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "translateY(-2px)";
+                        e.currentTarget.style.boxShadow =
+                          "0 8px 20px rgba(0,0,0,0.12)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.boxShadow =
+                          "0 4px 12px rgba(0,0,0,0.08)";
+                      }}
+                    >
+                      <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>
+                        {renderMathContent(problem.title)}
+                      </h4>
+
+                      <p
+                        style={{
+                          color: "#666",
+                          margin: "0 0 15px 0",
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        {renderMathContent(
+                          problem.description.substring(0, 150),
+                        )}
+                        ...
+                      </p>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "10px",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span
+                          style={{
+                            backgroundColor: "#e0e7ff",
+                            color: "#3730a3",
+                            padding: "6px 12px",
+                            borderRadius: "16px",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            marginRight: "8px",
+                            boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
+                            transition: "all 0.2s ease",
+                          }}
+                        >
+                          {problem.subject}
+                        </span>
+
+                        <span
+                          style={{
+                            backgroundColor: "#fef3c7",
+                            color: "#92400e",
+                            padding: "6px 12px",
+                            borderRadius: "16px",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            marginRight: "8px",
+                            boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
+                            transition: "all 0.2s ease",
+                          }}
+                        >
+                          {problem.level}
+                        </span>
+
+                        {problem.tags &&
+                          problem.tags.trim() &&
+                          problem.tags.split(",").map((tag, index) => (
+                            <span
+                              key={index}
+                              style={{
+                                backgroundColor: colors.tertiary,
+                                color: "white",
+                                padding: "6px 12px",
+                                borderRadius: "16px",
+                                fontSize: "12px",
+                                fontWeight: "600",
+                                boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              {tag.trim()}
+                            </span>
+                          ))}
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleVote(problem.id, "like");
+                          }}
+                          style={{
+                            backgroundColor:
+                              voteData[problem.id]?.user_vote === "like"
+                                ? "#e8f5e8"
+                                : "#f8f9fa",
+                            border: `1px solid ${voteData[problem.id]?.user_vote === "like" ? "#4CAF50" : "#dee2e6"}`,
+                            cursor: "pointer",
+                            fontSize: "14px",
+                            color:
+                              voteData[problem.id]?.user_vote === "like"
+                                ? "#4CAF50"
+                                : "#666",
+                            fontWeight:
+                              voteData[problem.id]?.user_vote === "like"
+                                ? "bold"
+                                : "500",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            transition: "all 0.2s ease",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
+                          {voteData[problem.id]?.like_count || 0}
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleVote(problem.id, "dislike");
+                          }}
+                          style={{
+                            backgroundColor:
+                              voteData[problem.id]?.user_vote === "dislike"
+                                ? "#ffebee"
+                                : "#f8f9fa",
+                            border: `1px solid ${voteData[problem.id]?.user_vote === "dislike" ? "#f44336" : "#dee2e6"}`,
+                            cursor: "pointer",
+                            fontSize: "14px",
+                            color:
+                              voteData[problem.id]?.user_vote === "dislike"
+                                ? "#f44336"
+                                : "#666",
+                            fontWeight:
+                              voteData[problem.id]?.user_vote === "dislike"
+                                ? "bold"
+                                : "500",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            transition: "all 0.2s ease",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
+                          {voteData[problem.id]?.dislike_count || 0}
+                        </button>
+
+                        <span style={{ fontSize: "12px", color: "#666" }}>
+                          {new Date(problem.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "comments" && (
+            <div>
+              <div
+                className="profile-comment-header"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginBottom: "20px",
+                }}
+              >
+                <h3 style={{ margin: "0", color: "#333" }}>My Comments</h3>
+
+                <div
+                  className="profile-comment-subtabs"
+                  style={{ marginLeft: "20px", display: "flex", gap: "10px" }}
+                >
+                  <button
+                    onClick={() => setCommentsSubTab("all")}
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor:
+                        commentsSubTab === "all"
+                          ? colors.primary
+                          : "transparent",
+                      color:
+                        commentsSubTab === "all" ? "white" : colors.gray[600],
+                      border: `1px solid ${commentsSubTab === "all" ? colors.primary : colors.gray[300]}`,
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    All ({sortedComments.length})
+                  </button>
+
+                  <button
+                    onClick={() => setCommentsSubTab("solutions")}
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor:
+                        commentsSubTab === "solutions"
+                          ? colors.primary
+                          : "transparent",
+                      color:
+                        commentsSubTab === "solutions"
+                          ? "white"
+                          : colors.gray[600],
+                      border: `1px solid ${commentsSubTab === "solutions" ? colors.primary : colors.gray[300]}`,
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    Solutions (
+                    {
+                      sortedComments.filter((comment) => comment.is_solution)
+                        .length
+                    }
+                    )
+                  </button>
+                </div>
+              </div>
+
+              {commentsSubTab === "all" ? (
+                sortedComments.length === 0 ? (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "40px",
+                      color: "#666",
+                    }}
+                  >
+                    <p>You haven't made any comments yet.</p>
+                  </div>
+                ) : (
+                  <div>
+                    {sortedComments.map((comment) => (
+                      <div
+                        key={comment.id}
+                        className="profile-content-card profile-comment-card"
+                        onClick={() => openCommentProblem(comment)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) =>
+                          handleClickableKeyDown(e, () =>
+                            openCommentProblem(comment),
+                          )
+                        }
+                        style={{
+                          border: comment.is_solution
+                            ? "2px solid #28a745"
+                            : "1px solid #ddd",
+                          borderRadius: "8px",
+                          padding: "15px",
+                          marginBottom: "15px",
+                          backgroundColor: comment.is_solution
+                            ? "#e8f5e8"
+                            : "#f9f9f9",
+                          position: "relative",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = "translateY(-1px)";
+                          e.currentTarget.style.boxShadow =
+                            "0 4px 12px rgba(0,0,0,0.08)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = "translateY(0)";
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
+                      >
+                        {comment.is_solution && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "10px",
+                              right: "10px",
+                              backgroundColor: "#28a745",
+                              color: "white",
+                              padding: "4px 8px",
+                              borderRadius: "12px",
+                              fontSize: "11px",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            SOLUTION
+                          </div>
+                        )}
+
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "flex-start",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          <h5 style={{ margin: "0", color: colors.primary }}>
+                            {renderMathContent(
+                              comment.problem?.title || "View related problem",
+                            )}
+                          </h5>
+
+                          <span style={{ fontSize: "12px", color: "#666" }}>
+                            {new Date(comment.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        <p style={{ color: "#333", margin: "0" }}>
+                          {renderMathContent(comment.text)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : sortedComments.filter((comment) => comment.is_solution)
+                  .length === 0 ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "40px",
+                    color: "#666",
+                  }}
+                >
+                  <p>You don't have any comments marked as solutions yet.</p>
+                  <p>Keep contributing helpful answers to problems!</p>
+                </div>
+              ) : (
+                <div>
+                  {sortedComments
+                    .filter((comment) => comment.is_solution)
+                    .map((comment) => (
+                      <div
+                        key={comment.id}
+                        className="profile-content-card profile-comment-card"
+                        onClick={() => openCommentProblem(comment)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) =>
+                          handleClickableKeyDown(e, () =>
+                            openCommentProblem(comment),
+                          )
+                        }
+                        style={{
+                          border: "2px solid #28a745",
+                          borderRadius: "8px",
+                          padding: "15px",
+                          marginBottom: "15px",
+                          backgroundColor: "#e8f5e8",
+                          position: "relative",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = "translateY(-1px)";
+                          e.currentTarget.style.boxShadow =
+                            "0 4px 12px rgba(0,0,0,0.08)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = "translateY(0)";
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
+                      >
                         <div
                           style={{
                             position: "absolute",
@@ -1513,64 +1668,74 @@ function UserProfile() {
                         >
                           SOLUTION
                         </div>
-                      )}
 
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          marginBottom: "10px",
-                        }}
-                      >
-                        <h5 style={{ margin: "0", color: colors.primary }}>
-                          {renderMathContent(
-                            comment.problem?.title || "View related problem",
-                          )}
-                        </h5>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "flex-start",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          <h5 style={{ margin: "0", color: colors.primary }}>
+                            {renderMathContent(
+                              comment.problem?.title || "View related problem",
+                            )}
+                          </h5>
 
-                        <span style={{ fontSize: "12px", color: "#666" }}>
-                          {new Date(comment.created_at).toLocaleDateString()}
-                        </span>
+                          <span style={{ fontSize: "12px", color: "#666" }}>
+                            {new Date(comment.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        <p style={{ color: "#333", margin: "0" }}>
+                          {renderMathContent(comment.text)}
+                        </p>
                       </div>
-
-                      <p style={{ color: "#333", margin: "0" }}>
-                        {renderMathContent(comment.text)}
-                      </p>
-                    </div>
-                  ))}
+                    ))}
                 </div>
-              )
-            ) : sortedComments.filter((comment) => comment.is_solution)
-                .length === 0 ? (
-              <div
-                style={{ textAlign: "center", padding: "40px", color: "#666" }}
-              >
-                <p>You don't have any comments marked as solutions yet.</p>
-                <p>Keep contributing helpful answers to problems!</p>
-              </div>
-            ) : (
-              <div>
-                {sortedComments
-                  .filter((comment) => comment.is_solution)
-                  .map((comment) => (
+              )}
+            </div>
+          )}
+
+          {activeTab === "bookmarks" && (
+            <div>
+              <h3 style={{ marginBottom: "20px", color: "#333" }}>
+                My Bookmarks
+              </h3>
+
+              {bookmarks.length === 0 ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "40px",
+                    color: "#666",
+                  }}
+                >
+                  <p>You haven't bookmarked any problems yet.</p>
+                  <p>
+                    Click the bookmark button on problems to save them here!
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  {bookmarks.map((bookmark) => (
                     <div
-                      key={comment.id}
-                      onClick={() => openCommentProblem(comment)}
+                      key={bookmark.id}
+                      onClick={() => openProblem(bookmark.problem.id)}
                       role="button"
                       tabIndex={0}
                       onKeyDown={(e) =>
                         handleClickableKeyDown(e, () =>
-                          openCommentProblem(comment),
+                          openProblem(bookmark.problem.id),
                         )
                       }
                       style={{
-                        border: "2px solid #28a745",
+                        border: "1px solid #ddd",
                         borderRadius: "8px",
-                        padding: "15px",
+                        padding: "20px",
                         marginBottom: "15px",
-                        backgroundColor: "#e8f5e8",
-                        position: "relative",
+                        backgroundColor: "#f9f9f9",
                         cursor: "pointer",
                         transition: "all 0.2s ease",
                       }}
@@ -1586,20 +1751,272 @@ function UserProfile() {
                     >
                       <div
                         style={{
-                          position: "absolute",
-                          top: "10px",
-                          right: "10px",
-                          backgroundColor: "#28a745",
-                          color: "white",
-                          padding: "4px 8px",
-                          borderRadius: "12px",
-                          fontSize: "11px",
-                          fontWeight: "bold",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          marginBottom: "10px",
                         }}
                       >
-                        SOLUTION
+                        <h4 style={{ margin: "0", color: "#333" }}>
+                          {renderMathContent(bookmark.problem.title)}
+                        </h4>
                       </div>
 
+                      <p
+                        style={{
+                          color: "#666",
+                          margin: "0 0 15px 0",
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        {renderMathContent(
+                          bookmark.problem.description.substring(0, 150),
+                        )}
+                        ...
+                      </p>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "10px",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span
+                          style={{
+                            backgroundColor: "#e0e7ff",
+                            color: "#3730a3",
+                            padding: "6px 12px",
+                            borderRadius: "16px",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            marginRight: "8px",
+                            boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
+                            transition: "all 0.2s ease",
+                          }}
+                        >
+                          {bookmark.problem.subject}
+                        </span>
+
+                        <span
+                          style={{
+                            backgroundColor: "#fef3c7",
+                            color: "#92400e",
+                            padding: "6px 12px",
+                            borderRadius: "16px",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            marginRight: "8px",
+                            boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
+                            transition: "all 0.2s ease",
+                          }}
+                        >
+                          {bookmark.problem.level}
+                        </span>
+
+                        {bookmark.problem.tags &&
+                          bookmark.problem.tags.trim() &&
+                          bookmark.problem.tags.split(",").map((tag, index) => (
+                            <span
+                              key={index}
+                              style={{
+                                backgroundColor: colors.tertiary,
+                                color: "white",
+                                padding: "6px 12px",
+                                borderRadius: "16px",
+                                fontSize: "12px",
+                                fontWeight: "600",
+                                boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              {tag.trim()}
+                            </span>
+                          ))}
+
+                        <div
+                          style={{
+                            marginLeft: "auto",
+                            display: "flex",
+                            gap: "10px",
+                            alignItems: "center",
+                          }}
+                        >
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleVote(bookmark.problem.id, "like");
+                            }}
+                            style={{
+                              backgroundColor:
+                                voteData[bookmark.problem.id]?.user_vote ===
+                                "like"
+                                  ? "rgba(26, 77, 58, 0.1)"
+                                  : "#f8f9fa",
+                              border: `1px solid ${voteData[bookmark.problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
+                              cursor: "pointer",
+                              fontSize: "14px",
+                              color:
+                                voteData[bookmark.problem.id]?.user_vote ===
+                                "like"
+                                  ? "rgb(26, 77, 58)"
+                                  : "#666",
+                              fontWeight:
+                                voteData[bookmark.problem.id]?.user_vote ===
+                                "like"
+                                  ? "bold"
+                                  : "500",
+                              padding: "6px 12px",
+                              borderRadius: "6px",
+                              transition: "all 0.2s ease",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <img
+                              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg"
+                              alt="Like"
+                              style={{
+                                height: "14px",
+                                width: "14px",
+                                objectFit: "contain",
+                              }}
+                            />
+                            {voteData[bookmark.problem.id]?.like_count || 0}
+                          </button>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleVote(bookmark.problem.id, "dislike");
+                            }}
+                            style={{
+                              backgroundColor:
+                                voteData[bookmark.problem.id]?.user_vote ===
+                                "dislike"
+                                  ? "rgba(118, 75, 162, 0.1)"
+                                  : "#f8f9fa",
+                              border: `1px solid ${voteData[bookmark.problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
+                              cursor: "pointer",
+                              fontSize: "14px",
+                              color:
+                                voteData[bookmark.problem.id]?.user_vote ===
+                                "dislike"
+                                  ? "rgb(118, 75, 162)"
+                                  : "#666",
+                              fontWeight:
+                                voteData[bookmark.problem.id]?.user_vote ===
+                                "dislike"
+                                  ? "bold"
+                                  : "500",
+                              padding: "6px 12px",
+                              borderRadius: "6px",
+                              transition: "all 0.2s ease",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <img
+                              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg"
+                              alt="Dislike"
+                              style={{
+                                height: "14px",
+                                width: "14px",
+                                objectFit: "contain",
+                              }}
+                            />
+                            {voteData[bookmark.problem.id]?.dislike_count || 0}
+                          </button>
+
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "#666",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <img
+                              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg"
+                              alt="Comments"
+                              style={{
+                                height: "14px",
+                                width: "14px",
+                                objectFit: "contain",
+                              }}
+                            />
+                            {bookmark.problem.comment_count || 0}
+                          </span>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleBookmark(bookmark.problem.id);
+                            }}
+                            style={{
+                              padding: "4px 8px",
+                              backgroundColor: "transparent",
+                              border: "none",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <img
+                              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
+                              alt="Bookmark"
+                              style={{
+                                height: "16px",
+                                width: "16px",
+                                objectFit: "contain",
+                              }}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "drafts" && (
+            <div>
+              <h3 style={{ marginBottom: "20px", color: "#333" }}>My Drafts</h3>
+
+              {drafts.length === 0 ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "40px",
+                    color: "#666",
+                  }}
+                >
+                  <p>You don't have any drafts yet.</p>
+                  <p>
+                    Start creating a problem and use "Save in Drafts" to save
+                    your work!
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  {drafts.map((draft) => (
+                    <div
+                      key={draft.id}
+                      style={{
+                        border: "1px solid #ddd",
+                        borderRadius: "8px",
+                        padding: "20px",
+                        marginBottom: "15px",
+                        backgroundColor: "#f9f9f9",
+                      }}
+                    >
                       <div
                         style={{
                           display: "flex",
@@ -1608,580 +2025,243 @@ function UserProfile() {
                           marginBottom: "10px",
                         }}
                       >
-                        <h5 style={{ margin: "0", color: colors.primary }}>
-                          {renderMathContent(
-                            comment.problem?.title || "View related problem",
-                          )}
-                        </h5>
+                        <h4 style={{ margin: "0", color: "#333" }}>
+                          {renderMathContent(draft.title)}
+                        </h4>
 
-                        <span style={{ fontSize: "12px", color: "#666" }}>
-                          {new Date(comment.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-
-                      <p style={{ color: "#333", margin: "0" }}>
-                        {renderMathContent(comment.text)}
-                      </p>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "bookmarks" && (
-          <div>
-            <h3 style={{ marginBottom: "20px", color: "#333" }}>
-              My Bookmarks
-            </h3>
-
-            {bookmarks.length === 0 ? (
-              <div
-                style={{ textAlign: "center", padding: "40px", color: "#666" }}
-              >
-                <p>You haven't bookmarked any problems yet.</p>
-                <p>Click the bookmark button on problems to save them here!</p>
-              </div>
-            ) : (
-              <div>
-                {bookmarks.map((bookmark) => (
-                  <div
-                    key={bookmark.id}
-                    onClick={() => openProblem(bookmark.problem.id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) =>
-                      handleClickableKeyDown(e, () =>
-                        openProblem(bookmark.problem.id),
-                      )
-                    }
-                    style={{
-                      border: "1px solid #ddd",
-                      borderRadius: "8px",
-                      padding: "20px",
-                      marginBottom: "15px",
-                      backgroundColor: "#f9f9f9",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-1px)";
-                      e.currentTarget.style.boxShadow =
-                        "0 4px 12px rgba(0,0,0,0.08)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      <h4 style={{ margin: "0", color: "#333" }}>
-                        {renderMathContent(bookmark.problem.title)}
-                      </h4>
-                    </div>
-
-                    <p
-                      style={{
-                        color: "#666",
-                        margin: "0 0 15px 0",
-                        whiteSpace: "pre-wrap",
-                      }}
-                    >
-                      {renderMathContent(
-                        bookmark.problem.description.substring(0, 150),
-                      )}
-                      ...
-                    </p>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <span
-                        style={{
-                          backgroundColor: "#e0e7ff",
-                          color: "#3730a3",
-                          padding: "6px 12px",
-                          borderRadius: "16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          marginRight: "8px",
-                          boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        {bookmark.problem.subject}
-                      </span>
-
-                      <span
-                        style={{
-                          backgroundColor: "#fef3c7",
-                          color: "#92400e",
-                          padding: "6px 12px",
-                          borderRadius: "16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          marginRight: "8px",
-                          boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        {bookmark.problem.level}
-                      </span>
-
-                      {bookmark.problem.tags &&
-                        bookmark.problem.tags.trim() &&
-                        bookmark.problem.tags.split(",").map((tag, index) => (
-                          <span
-                            key={index}
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <button
+                            onClick={() =>
+                              navigate(`/create-problem?draft=${draft.id}`)
+                            }
                             style={{
-                              backgroundColor: colors.tertiary,
-                              color: "white",
                               padding: "6px 12px",
-                              borderRadius: "16px",
+                              backgroundColor: colors.primary,
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
                               fontSize: "12px",
-                              fontWeight: "600",
-                              boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
-                              transition: "all 0.2s ease",
                             }}
                           >
-                            {tag.trim()}
-                          </span>
-                        ))}
+                            Finish Problem
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteDraft(draft.id)}
+                            style={{
+                              padding: "6px 12px",
+                              backgroundColor: "#dc3545",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              fontSize: "12px",
+                            }}
+                          >
+                            <img
+                              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
+                              alt="Delete"
+                              style={{
+                                width: "12px",
+                                height: "12px",
+                                objectFit: "contain",
+                                marginRight: "6px",
+                              }}
+                            />
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+
+                      <p
+                        style={{
+                          color: "#666",
+                          margin: "0 0 15px 0",
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        {renderMathContent(draft.description.substring(0, 150))}
+                        ...
+                      </p>
 
                       <div
                         style={{
-                          marginLeft: "auto",
                           display: "flex",
                           gap: "10px",
                           alignItems: "center",
                         }}
                       >
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleVote(bookmark.problem.id, "like");
-                          }}
-                          style={{
-                            backgroundColor:
-                              voteData[bookmark.problem.id]?.user_vote ===
-                              "like"
-                                ? "rgba(26, 77, 58, 0.1)"
-                                : "#f8f9fa",
-                            border: `1px solid ${voteData[bookmark.problem.id]?.user_vote === "like" ? "rgb(26, 77, 58)" : "#dee2e6"}`,
-                            cursor: "pointer",
-                            fontSize: "14px",
-                            color:
-                              voteData[bookmark.problem.id]?.user_vote ===
-                              "like"
-                                ? "rgb(26, 77, 58)"
-                                : "#666",
-                            fontWeight:
-                              voteData[bookmark.problem.id]?.user_vote ===
-                              "like"
-                                ? "bold"
-                                : "500",
-                            padding: "6px 12px",
-                            borderRadius: "6px",
-                            transition: "all 0.2s ease",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
-                          <img
-                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795079/Like_Icon_hf3gef.svg"
-                            alt="Like"
-                            style={{
-                              height: "14px",
-                              width: "14px",
-                              objectFit: "contain",
-                            }}
-                          />
-                          {voteData[bookmark.problem.id]?.like_count || 0}
-                        </button>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleVote(bookmark.problem.id, "dislike");
-                          }}
-                          style={{
-                            backgroundColor:
-                              voteData[bookmark.problem.id]?.user_vote ===
-                              "dislike"
-                                ? "rgba(118, 75, 162, 0.1)"
-                                : "#f8f9fa",
-                            border: `1px solid ${voteData[bookmark.problem.id]?.user_vote === "dislike" ? "rgb(118, 75, 162)" : "#dee2e6"}`,
-                            cursor: "pointer",
-                            fontSize: "14px",
-                            color:
-                              voteData[bookmark.problem.id]?.user_vote ===
-                              "dislike"
-                                ? "rgb(118, 75, 162)"
-                                : "#666",
-                            fontWeight:
-                              voteData[bookmark.problem.id]?.user_vote ===
-                              "dislike"
-                                ? "bold"
-                                : "500",
-                            padding: "6px 12px",
-                            borderRadius: "6px",
-                            transition: "all 0.2s ease",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
-                          <img
-                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795077/Dislike_icon_vdy4ss.svg"
-                            alt="Dislike"
-                            style={{
-                              height: "14px",
-                              width: "14px",
-                              objectFit: "contain",
-                            }}
-                          />
-                          {voteData[bookmark.problem.id]?.dislike_count || 0}
-                        </button>
-
                         <span
                           style={{
-                            fontSize: "12px",
-                            color: "#666",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
-                          <img
-                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811309/Comment_Icon_Green_x7qrz6.svg"
-                            alt="Comments"
-                            style={{
-                              height: "14px",
-                              width: "14px",
-                              objectFit: "contain",
-                            }}
-                          />
-                          {bookmark.problem.comment_count || 0}
-                        </span>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleBookmark(bookmark.problem.id);
-                          }}
-                          style={{
-                            padding: "4px 8px",
-                            backgroundColor: "transparent",
-                            border: "none",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
-                          <img
-                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760797449/Save_FULL_Icon_Green_fdrxbj.svg"
-                            alt="Bookmark"
-                            style={{
-                              height: "16px",
-                              width: "16px",
-                              objectFit: "contain",
-                            }}
-                          />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "drafts" && (
-          <div>
-            <h3 style={{ marginBottom: "20px", color: "#333" }}>My Drafts</h3>
-
-            {drafts.length === 0 ? (
-              <div
-                style={{ textAlign: "center", padding: "40px", color: "#666" }}
-              >
-                <p>You don't have any drafts yet.</p>
-                <p>
-                  Start creating a problem and use "Save in Drafts" to save your
-                  work!
-                </p>
-              </div>
-            ) : (
-              <div>
-                {drafts.map((draft) => (
-                  <div
-                    key={draft.id}
-                    style={{
-                      border: "1px solid #ddd",
-                      borderRadius: "8px",
-                      padding: "20px",
-                      marginBottom: "15px",
-                      backgroundColor: "#f9f9f9",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      <h4 style={{ margin: "0", color: "#333" }}>
-                        {renderMathContent(draft.title)}
-                      </h4>
-
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        <button
-                          onClick={() =>
-                            navigate(`/create-problem?draft=${draft.id}`)
-                          }
-                          style={{
-                            padding: "6px 12px",
-                            backgroundColor: colors.primary,
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            fontSize: "12px",
-                          }}
-                        >
-                          Finish Problem
-                        </button>
-
-                        <button
-                          onClick={() => handleDeleteDraft(draft.id)}
-                          style={{
-                            padding: "6px 12px",
-                            backgroundColor: "#dc3545",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            fontSize: "12px",
-                          }}
-                        >
-                          <img
-                            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
-                            alt="Delete"
-                            style={{
-                              width: "12px",
-                              height: "12px",
-                              objectFit: "contain",
-                              marginRight: "6px",
-                            }}
-                          />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-
-                    <p
-                      style={{
-                        color: "#666",
-                        margin: "0 0 15px 0",
-                        whiteSpace: "pre-wrap",
-                      }}
-                    >
-                      {renderMathContent(draft.description.substring(0, 150))}
-                      ...
-                    </p>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      <span
-                        style={{
-                          backgroundColor: "#e0e7ff",
-                          color: "#3730a3",
-                          padding: "6px 12px",
-                          borderRadius: "16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          marginRight: "8px",
-                          boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        {draft.subject}
-                      </span>
-
-                      <span
-                        style={{
-                          backgroundColor: "#f0f9ff",
-                          color: "#0369a1",
-                          padding: "6px 12px",
-                          borderRadius: "16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          marginRight: "8px",
-                          boxShadow: "0 2px 6px rgba(3, 105, 161, 0.2)",
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        {draft.level}
-                      </span>
-
-                      {draft.year && (
-                        <span
-                          style={{
-                            backgroundColor: "#fef3c7",
-                            color: "#d97706",
+                            backgroundColor: "#e0e7ff",
+                            color: "#3730a3",
                             padding: "6px 12px",
                             borderRadius: "16px",
                             fontSize: "12px",
                             fontWeight: "600",
                             marginRight: "8px",
-                            boxShadow: "0 2px 6px rgba(217, 119, 6, 0.2)",
+                            boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
                             transition: "all 0.2s ease",
                           }}
                         >
-                          {draft.year}
+                          {draft.subject}
                         </span>
-                      )}
-                    </div>
 
-                    {draft.tags && draft.tags.trim() && (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: "8px",
-                          marginTop: "10px",
-                        }}
-                      >
-                        {draft.tags.split(",").map((tag, index) => (
+                        <span
+                          style={{
+                            backgroundColor: "#f0f9ff",
+                            color: "#0369a1",
+                            padding: "6px 12px",
+                            borderRadius: "16px",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            marginRight: "8px",
+                            boxShadow: "0 2px 6px rgba(3, 105, 161, 0.2)",
+                            transition: "all 0.2s ease",
+                          }}
+                        >
+                          {draft.level}
+                        </span>
+
+                        {draft.year && (
                           <span
-                            key={index}
                             style={{
-                              backgroundColor: colors.tertiary,
-                              color: "white",
+                              backgroundColor: "#fef3c7",
+                              color: "#d97706",
                               padding: "6px 12px",
                               borderRadius: "16px",
                               fontSize: "12px",
                               fontWeight: "600",
-                              whiteSpace: "nowrap",
-                              boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
+                              marginRight: "8px",
+                              boxShadow: "0 2px 6px rgba(217, 119, 6, 0.2)",
                               transition: "all 0.2s ease",
                             }}
                           >
-                            {tag.trim()}
+                            {draft.year}
                           </span>
-                        ))}
+                        )}
                       </div>
-                    )}
 
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#666",
-                        marginTop: "10px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <span>
-                        Created:{" "}
-                        {new Date(draft.created_at).toLocaleDateString()}
-                      </span>
-                      <span>
-                        Updated:{" "}
-                        {new Date(draft.updated_at).toLocaleDateString()}
-                      </span>
+                      {draft.tags && draft.tags.trim() && (
+                        <div
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: "8px",
+                            marginTop: "10px",
+                          }}
+                        >
+                          {draft.tags.split(",").map((tag, index) => (
+                            <span
+                              key={index}
+                              style={{
+                                backgroundColor: colors.tertiary,
+                                color: "white",
+                                padding: "6px 12px",
+                                borderRadius: "16px",
+                                fontSize: "12px",
+                                fontWeight: "600",
+                                whiteSpace: "nowrap",
+                                boxShadow: "0 2px 6px rgba(124, 58, 237, 0.3)",
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              {tag.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#666",
+                          marginTop: "10px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span>
+                          Created:{" "}
+                          {new Date(draft.created_at).toLocaleDateString()}
+                        </span>
+                        <span>
+                          Updated:{" "}
+                          {new Date(draft.updated_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {showImageModal && user.profile_picture && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1000,
+            }}
+            onClick={() => setShowImageModal(false)}
+          >
+            <div
+              style={{
+                position: "relative",
+                maxWidth: "90vw",
+                maxHeight: "90vh",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowImageModal(false)}
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  background: "rgba(0, 0, 0, 0.7)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "30px",
+                  height: "30px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 1001,
+                }}
+              >
+                ×
+              </button>
+
+              <img
+                src={user.profile_picture}
+                alt="Profile Picture"
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "90vh",
+                  objectFit: "contain",
+                  borderRadius: "8px",
+                  display: "block",
+                }}
+              />
+            </div>
           </div>
         )}
       </div>
-
-      {showImageModal && user.profile_picture && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-          onClick={() => setShowImageModal(false)}
-        >
-          <div
-            style={{
-              position: "relative",
-              maxWidth: "90vw",
-              maxHeight: "90vh",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShowImageModal(false)}
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "10px",
-                background: "rgba(0, 0, 0, 0.7)",
-                color: "white",
-                border: "none",
-                borderRadius: "50%",
-                width: "30px",
-                height: "30px",
-                cursor: "pointer",
-                fontSize: "16px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 1001,
-              }}
-            >
-              ×
-            </button>
-
-            <img
-              src={user.profile_picture}
-              alt="Profile Picture"
-              style={{
-                maxWidth: "100%",
-                maxHeight: "90vh",
-                objectFit: "contain",
-                borderRadius: "8px",
-                display: "block",
-              }}
-            />
-          </div>
-        </div>
-      )}
     </Layout>
   );
 }
