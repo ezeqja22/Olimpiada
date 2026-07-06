@@ -1,6 +1,4 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-unused-vars */
 // src/Feed.jsx
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
@@ -16,7 +14,6 @@ import EmptyState from "./components/feed/EmptyState";
 import PaginationControls from "./components/feed/PaginationControls";
 import FloatingCreateButton from "./components/feed/FloatingCreateButton";
 import "./Feed.css";
-import { useAuth } from "./context/AuthContext";
 import { useToast } from "./components/ToastProvider";
 
 function Feed() {
@@ -40,11 +37,7 @@ function Feed() {
   const [bookmarkData, setBookmarkData] = useState({});
 
   const [activeTab, setActiveTab] = useState(getInitialTab);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [showSearchResults, setShowSearchResults] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -56,17 +49,6 @@ function Feed() {
   const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
   const { showToast } = useToast();
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -519,44 +501,6 @@ function Feed() {
     }
   };
 
-  const searchUsers = async (query) => {
-    if (query.length < 2) {
-      setSearchResults([]);
-      setShowSearchResults(false);
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const response = await axios.get(
-        `${API_URL}/auth/users/search?q=${encodeURIComponent(query)}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-
-      setSearchResults(response.data.users);
-      setShowSearchResults(true);
-    } catch (error) {
-      console.error("Error searching users:", error);
-      setSearchResults([]);
-    }
-  };
-
-  const handleSearchChange = (event) => {
-    const query = event.target.value;
-
-    setSearchQuery(query);
-    searchUsers(query);
-  };
-
-  const handleSearchSubmit = (event) => {
-    if (event.key === "Enter" && searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
-
   const fetchCurrentUser = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -633,7 +577,10 @@ function Feed() {
         {problems.length === 0 ? (
           <EmptyState emptyState={emptyState} />
         ) : (
-          <div className={refreshing ? "feed-list-refreshing" : ""}>
+          <div
+            className={`feed-list ${refreshing ? "feed-list-refreshing" : ""}`}
+            aria-busy={refreshing}
+          >
             {problems.map((problem) => (
               <ProblemCard
                 key={problem.id}
