@@ -26,6 +26,7 @@ import ForumInviteModal from "./ForumInviteModal";
 import ReportModal from "./ReportModal";
 import { useToast } from "./components/ToastProvider";
 import { useConfirm } from "./components/ConfirmProvider";
+import "./forumModern.css";
 
 // CSS for typing animation and new message indicator
 const typingAnimation = `
@@ -1470,12 +1471,21 @@ const ForumDetail = () => {
                 `}
       </style>
       <div
-        style={{ height: "100vh", display: "flex", flexDirection: "column" }}
+        className="forum-detail-page"
+        style={{
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          "--forum-primary": colors.primary,
+        }}
       >
         <Header />
 
         {/* Main Content */}
         <div
+          className={`forum-detail-layout ${showChat ? "is-chat-open" : ""} ${
+            showSidebar ? "is-sidebar-open" : ""
+          }`}
           style={{
             display: "flex",
             height: "calc(100vh - 80px)",
@@ -1484,6 +1494,7 @@ const ForumDetail = () => {
         >
           {/* Forum Info Panel */}
           <div
+            className="forum-detail-info-panel"
             style={{
               width: showChat
                 ? isMobile
@@ -1506,12 +1517,14 @@ const ForumDetail = () => {
             }}
           >
             <div
+              className="forum-detail-info-scroll"
               style={{ padding: spacing.lg, height: "100%", overflowY: "auto" }}
             >
               <BackButton fallbackPath="/forums" />
 
               <div style={{ marginTop: spacing.md }}>
                 <div
+                  className="forum-detail-heading-row"
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -1520,6 +1533,7 @@ const ForumDetail = () => {
                   }}
                 >
                   <h1
+                    className="forum-detail-title"
                     style={{
                       color: colors.primary,
                       margin: 0,
@@ -1532,6 +1546,7 @@ const ForumDetail = () => {
                   {/* Actions Dropdown */}
                   <div style={{ position: "relative" }} data-actions-dropdown>
                     <button
+                      className="forum-detail-actions-button"
                       onClick={() =>
                         setShowActionsDropdown(!showActionsDropdown)
                       }
@@ -1731,6 +1746,7 @@ const ForumDetail = () => {
 
               {/* Chat Toggle Button */}
               <div
+                className="forum-detail-chat-toggle-row"
                 style={{
                   display: "flex",
                   justifyContent: "flex-start",
@@ -1789,6 +1805,7 @@ const ForumDetail = () => {
 
               {/* Tabs */}
               <div
+                className="forum-detail-tabs"
                 style={{
                   display: "flex",
                   borderBottom: `2px solid ${colors.gray[200]}`,
@@ -2780,6 +2797,7 @@ const ForumDetail = () => {
           {/* Chat Panel */}
           {showChat && (
             <div
+              className="forum-detail-chat-panel"
               data-chat-panel
               style={{
                 width: isMobile ? "100%" : "70%",
@@ -2800,6 +2818,7 @@ const ForumDetail = () => {
             >
               {/* Chat Header */}
               <div
+                className="forum-detail-chat-header"
                 style={{
                   backgroundColor: colors.gray[100],
                   color: colors.gray[800],
@@ -2982,6 +3001,7 @@ const ForumDetail = () => {
 
               {/* Messages */}
               <div
+                className="forum-detail-messages"
                 data-messages-container
                 style={{
                   flex: 1,
@@ -3012,6 +3032,7 @@ const ForumDetail = () => {
                     return (
                       <div
                         key={message.id}
+                        className="forum-detail-message-row"
                         data-message-id={message.id}
                         style={{
                           display: "flex",
@@ -3068,6 +3089,7 @@ const ForumDetail = () => {
                         )}
 
                         <div
+                          className="forum-detail-message-bubble"
                           data-message-bubble
                           style={{
                             maxWidth: isMobile ? "85%" : "70%",
@@ -3564,6 +3586,7 @@ const ForumDetail = () => {
 
               {/* Message Input */}
               <form
+                className="forum-detail-composer"
                 data-chat-input-form
                 onSubmit={sendMessage}
                 style={{
@@ -3586,6 +3609,7 @@ const ForumDetail = () => {
                   }}
                 >
                   <button
+                    className="forum-detail-attach-button"
                     type="button"
                     onClick={handleAttachmentClick}
                     style={{
@@ -3618,6 +3642,7 @@ const ForumDetail = () => {
                   </button>
 
                   <input
+                    className="forum-detail-chat-input"
                     type="text"
                     value={newMessage}
                     onChange={(e) => {
@@ -3640,6 +3665,7 @@ const ForumDetail = () => {
                     }}
                   />
                   <Button
+                    className="forum-detail-send-button"
                     type="submit"
                     style={{
                       backgroundColor: colors.primary,
@@ -3665,6 +3691,7 @@ const ForumDetail = () => {
               {/* Attachment Menu */}
               {showAttachmentMenu && (
                 <div
+                  className="forum-detail-attachment-menu"
                   style={{
                     position: "absolute",
                     bottom: "80px",
@@ -3691,6 +3718,7 @@ const ForumDetail = () => {
                     }}
                   >
                     <button
+                      className="forum-detail-attachment-action"
                       onClick={handleCreateProblem}
                       style={{
                         display: "flex",
@@ -3733,6 +3761,7 @@ const ForumDetail = () => {
                     </button>
 
                     <button
+                      className="forum-detail-attachment-action"
                       onClick={handleUploadImage}
                       style={{
                         display: "flex",
@@ -3775,6 +3804,7 @@ const ForumDetail = () => {
                     </button>
 
                     <button
+                      className="forum-detail-attachment-action"
                       onClick={handleMathSymbols}
                       style={{
                         display: "flex",

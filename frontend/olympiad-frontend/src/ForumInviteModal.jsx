@@ -10,6 +10,7 @@ import {
 } from "./designSystem";
 import { getUserInitial } from "./utils";
 import { useToast } from "./components/ToastProvider";
+import "./forumModern.css";
 
 const { fontSize, fontWeight } = typography;
 
@@ -425,7 +426,11 @@ const ForumInviteModal = ({ isOpen, onClose, forumId, onInvite }) => {
         }
       `}</style>
 
-      <div className="modal-overlay" onClick={onClose}>
+      <div
+        className="modal-overlay forum-invite-modal"
+        style={{ "--forum-primary": colors.primary }}
+        onClick={onClose}
+      >
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           {/* Header */}
           <div className="modal-header">

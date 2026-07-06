@@ -16,6 +16,7 @@ import "katex/dist/katex.min.css";
 import ForumProblemModal from "./ForumProblemModal";
 import ForumProblemCard from "./ForumProblemCard";
 import { useToast } from "./components/ToastProvider";
+import "./forumModern.css";
 
 // Helper function to render math content
 const renderMathContent = (text) => {
@@ -480,8 +481,10 @@ const ForumChat = () => {
 
   return (
     <div
+      className="forum-chat-page"
       style={{
         height: "100vh",
+        "--forum-primary": colors.primary,
         display: "flex",
         flexDirection: "column",
         backgroundColor: colors.light,
@@ -489,6 +492,7 @@ const ForumChat = () => {
     >
       {/* Header */}
       <div
+        className="forum-chat-header"
         style={{
           backgroundColor: colors.primary,
           color: colors.white,
@@ -543,6 +547,7 @@ const ForumChat = () => {
 
       {/* Messages Area */}
       <div
+        className="forum-chat-messages"
         style={{
           flex: 1,
           overflowY: "auto",
@@ -559,6 +564,7 @@ const ForumChat = () => {
           return (
             <div
               key={message.id}
+              className="forum-message-row"
               style={{
                 display: "flex",
                 justifyContent: isOwnMessage ? "flex-end" : "flex-start",
@@ -566,6 +572,7 @@ const ForumChat = () => {
               }}
             >
               <div
+                className="forum-message-bubble"
                 style={{
                   maxWidth: "70%",
                   backgroundColor: isOwnMessage ? colors.primary : colors.white,
@@ -704,6 +711,7 @@ const ForumChat = () => {
 
       {/* Input Area */}
       <div
+        className="forum-chat-composer"
         style={{
           backgroundColor: colors.white,
           padding: spacing.md,
@@ -713,11 +721,13 @@ const ForumChat = () => {
         }}
       >
         <form
+          className="forum-chat-composer-form"
           onSubmit={sendMessage}
           style={{ display: "flex", gap: spacing.sm, alignItems: "flex-end" }}
         >
           {/* Attachment Button */}
           <button
+            className="forum-icon-button"
             type="button"
             onClick={handleAttachmentClick}
             style={{
@@ -754,6 +764,7 @@ const ForumChat = () => {
           />
 
           <input
+            className="forum-chat-input"
             type="text"
             value={newMessage}
             onChange={handleTyping}
@@ -768,6 +779,7 @@ const ForumChat = () => {
             }}
           />
           <button
+            className="forum-send-button"
             type="submit"
             disabled={!newMessage.trim()}
             style={{
@@ -789,6 +801,7 @@ const ForumChat = () => {
         {/* Attachment Menu */}
         {showAttachmentMenu && (
           <div
+            className="forum-attachment-menu"
             style={{
               position: "absolute",
               bottom: "100%",
@@ -814,6 +827,7 @@ const ForumChat = () => {
             >
               {/* Create Problem */}
               <button
+                className="forum-attachment-action"
                 onClick={handleCreateProblem}
                 style={{
                   display: "flex",
@@ -856,6 +870,7 @@ const ForumChat = () => {
 
               {/* Upload File */}
               <button
+                className="forum-attachment-action"
                 onClick={() => fileInputRef.current.click()}
                 style={{
                   display: "flex",
@@ -898,6 +913,7 @@ const ForumChat = () => {
 
               {/* Math Symbols */}
               <button
+                className="forum-attachment-action"
                 onClick={handleMathSymbols}
                 style={{
                   display: "flex",

@@ -21,6 +21,7 @@ import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import { useToast } from "./components/ToastProvider";
 import { useConfirm } from "./components/ConfirmProvider";
+import "./forumModern.css";
 
 // Helper function to render math content
 const renderMathContent = (text) => {
@@ -201,12 +202,19 @@ const ForumInfo = () => {
   return (
     <Layout showHomeButton={true}>
       <div
-        style={{ maxWidth: "1000px", margin: "0 auto", padding: spacing.lg }}
+        className="forum-info-page"
+        style={{
+          maxWidth: "1000px",
+          margin: "0 auto",
+          padding: spacing.lg,
+          "--forum-primary": colors.primary,
+        }}
       >
         <BackButton fallbackPath={`/forum/${forumId}`} />
 
         {/* Forum Header */}
         <div
+          className="forum-info-header"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -254,7 +262,10 @@ const ForumInfo = () => {
               </span>
             </div>
           </div>
-          <div style={{ display: "flex", gap: spacing.sm }}>
+          <div
+            className="forum-info-header__actions"
+            style={{ display: "flex", gap: spacing.sm }}
+          >
             <Button
               onClick={() => navigate(`/forum/${forumId}`)}
               style={{ backgroundColor: colors.primary }}
@@ -272,6 +283,7 @@ const ForumInfo = () => {
 
         {/* Tabs */}
         <div
+          className="forum-info-tabs"
           style={{
             display: "flex",
             borderBottom: `1px solid ${colors.gray[300]}`,
@@ -320,6 +332,7 @@ const ForumInfo = () => {
         {activeTab === "members" && (
           <div>
             <div
+              className="forum-info-list"
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -327,7 +340,11 @@ const ForumInfo = () => {
               }}
             >
               {members.map((member) => (
-                <Card key={member.id} style={{ padding: spacing.md }}>
+                <Card
+                  key={member.id}
+                  className="forum-info-member-card"
+                  style={{ padding: spacing.md }}
+                >
                   <div
                     style={{
                       display: "flex",
@@ -395,6 +412,7 @@ const ForumInfo = () => {
         {activeTab === "problems" && (
           <div>
             <div
+              className="forum-info-list"
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -404,6 +422,7 @@ const ForumInfo = () => {
               {problems.map((problem) => (
                 <Card
                   key={problem.id}
+                  className="forum-info-problem-card"
                   hover={true}
                   style={{ cursor: "pointer" }}
                   onClick={() =>

@@ -11,6 +11,7 @@ import SearchBar from "./SearchBar";
 import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import { useToast } from "./components/ToastProvider";
+import "./forumModern.css";
 
 const Forums = () => {
   const [forums, setForums] = useState([]);
@@ -453,10 +454,17 @@ const Forums = () => {
   return (
     <Layout showHomeButton={true}>
       <div
-        style={{ maxWidth: "1200px", margin: "0 auto", padding: spacing.lg }}
+        className="forums-page"
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: spacing.lg,
+          "--forum-primary": colors.primary,
+        }}
       >
         {/* Header */}
         <div
+          className="forums-page__header"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -465,6 +473,7 @@ const Forums = () => {
           }}
         >
           <h1
+            className="forums-page__title"
             style={{
               fontSize: "2.5rem",
               fontWeight: "700",
@@ -475,6 +484,7 @@ const Forums = () => {
             Forums
           </h1>
           <div
+            className="forums-create-button-wrap"
             style={{
               position: "fixed",
               bottom: spacing.xl,
@@ -483,6 +493,16 @@ const Forums = () => {
             }}
           >
             <div
+              className="forums-create-button"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setShowCreateForm(true);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
               onClick={() => {
                 setShowCreateForm(true);
                 window.scrollTo({ top: 0, behavior: "smooth" });
@@ -505,34 +525,21 @@ const Forums = () => {
                 whiteSpace: "nowrap",
                 position: "relative",
               }}
-              onMouseEnter={(e) => {
-                e.target.style.width = "220px";
-                e.target.style.borderRadius = "30px";
-                e.target.style.justifyContent = "flex-start";
-                e.target.style.paddingLeft = "20px";
-                e.target.style.backgroundColor = colors.secondary;
-                e.target.style.boxShadow = "0 6px 25px rgba(0,0,0,0.2)";
-                e.target.innerHTML =
-                  '<span style="font-size: 16px;">Create New Forum</span><span style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 24px;">+</span>';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.width = "60px";
-                e.target.style.borderRadius = "50%";
-                e.target.style.justifyContent = "center";
-                e.target.style.paddingLeft = "0px";
-                e.target.style.backgroundColor = colors.primary;
-                e.target.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
-                e.target.innerHTML = "+";
-              }}
               title="Create New Forum"
             >
-              +
+              <span className="forums-create-button__label">Create forum</span>
+              <span className="forums-create-button__icon" aria-hidden="true">
+                +
+              </span>
             </div>
           </div>
         </div>
 
         {/* Search Bar */}
-        <div style={{ marginBottom: spacing.lg }}>
+        <div
+          className="forums-search-wrap"
+          style={{ marginBottom: spacing.lg }}
+        >
           <SearchBar
             placeholder="Search forums, users, tags..."
             searchMode="forums"
@@ -543,6 +550,7 @@ const Forums = () => {
 
         {/* Tabs */}
         <div
+          className="forums-tabs"
           style={{
             display: "flex",
             borderBottom: `2px solid ${colors.gray[200]}`,
@@ -581,7 +589,10 @@ const Forums = () => {
 
         {/* Create Forum Form */}
         {showCreateForm && (
-          <Card style={{ marginBottom: spacing.xl, padding: spacing.lg }}>
+          <Card
+            className="forums-create-form"
+            style={{ marginBottom: spacing.xl, padding: spacing.lg }}
+          >
             <h3 style={{ marginBottom: spacing.md }}>Create New Forum</h3>
             <form onSubmit={handleCreateForum}>
               <div style={{ marginBottom: spacing.md }}>
@@ -860,6 +871,7 @@ const Forums = () => {
         {/* Forum Count */}
         {filteredForums.length > 0 && (
           <div
+            className="forums-count"
             style={{
               marginBottom: spacing.md,
               textAlign: "center",
@@ -881,6 +893,7 @@ const Forums = () => {
 
         {/* Forums Grid */}
         <div
+          className="forums-grid"
           style={{
             display: "grid",
             gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
@@ -890,6 +903,7 @@ const Forums = () => {
           {currentForums.map((forum) => (
             <Card
               key={forum.id}
+              className="forum-list-card"
               hover={true}
               style={{
                 cursor: "pointer",
@@ -908,6 +922,7 @@ const Forums = () => {
                   {forum.title}
                 </h3>
                 <p
+                  className="forum-list-card__description"
                   style={{
                     margin: "0 0 12px 0",
                     color: colors.gray[600],
@@ -929,6 +944,7 @@ const Forums = () => {
                 >
                   {forum.subject && (
                     <span
+                      className="forum-list-card__badge forum-list-card__badge--subject"
                       style={{
                         backgroundColor: "#e0e7ff",
                         color: "#3730a3",
@@ -943,6 +959,7 @@ const Forums = () => {
                   )}
                   {forum.level && (
                     <span
+                      className="forum-list-card__badge forum-list-card__badge--level"
                       style={{
                         backgroundColor: "#fef3c7",
                         color: "#92400e",
@@ -962,6 +979,7 @@ const Forums = () => {
                       .map((tag, index) => (
                         <span
                           key={index}
+                          className="forum-list-card__badge forum-list-card__badge--tag"
                           style={{
                             backgroundColor: "#dcfce7",
                             color: "#166534",
@@ -977,6 +995,7 @@ const Forums = () => {
                 </div>
 
                 <div
+                  className="forum-list-card__meta"
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -1029,6 +1048,7 @@ const Forums = () => {
                     </div>
                   </div>
                   <span
+                    className="forum-list-card__privacy"
                     style={{
                       color: colors.gray[700], // Changed from colors.warning to black
                       fontSize: "0.85rem",
@@ -1041,6 +1061,7 @@ const Forums = () => {
               </div>
 
               <div
+                className="forum-card-actions"
                 style={{
                   display: "flex",
                   gap: spacing.sm,
@@ -1130,6 +1151,7 @@ const Forums = () => {
         {/* Pagination Controls */}
         {filteredForums.length > itemsPerPage && (
           <div
+            className="forums-pagination"
             style={{
               display: "flex",
               justifyContent: "center",

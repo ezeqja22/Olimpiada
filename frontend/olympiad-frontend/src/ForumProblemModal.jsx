@@ -13,6 +13,7 @@ import "katex/dist/katex.min.css";
 import MathEditor from "./MathEditor";
 import "./MathEditor.css";
 import { useToast } from "./components/ToastProvider";
+import "./forumModern.css";
 
 const ForumProblemModal = ({ isOpen, onClose, forumId, onProblemCreated }) => {
   const [formData, setFormData] = useState({
@@ -212,8 +213,10 @@ const ForumProblemModal = ({ isOpen, onClose, forumId, onProblemCreated }) => {
 
   return (
     <div
+      className="forum-problem-modal"
       style={{
         position: "fixed",
+        "--forum-primary": colors.primary,
         top: 0,
         left: 0,
         right: 0,
@@ -226,6 +229,7 @@ const ForumProblemModal = ({ isOpen, onClose, forumId, onProblemCreated }) => {
       }}
     >
       <div
+        className="forum-problem-modal__content"
         style={{
           backgroundColor: colors.white,
           borderRadius: borderRadius.lg,
@@ -239,6 +243,7 @@ const ForumProblemModal = ({ isOpen, onClose, forumId, onProblemCreated }) => {
       >
         {/* Header */}
         <div
+          className="forum-problem-modal__header"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -272,99 +277,35 @@ const ForumProblemModal = ({ isOpen, onClose, forumId, onProblemCreated }) => {
           </button>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div
-            style={{
-              backgroundColor: colors.error + "20",
-              color: colors.error,
-              padding: spacing.md,
-              borderRadius: borderRadius.md,
-              marginBottom: spacing.lg,
-              border: `1px solid ${colors.error}40`,
-            }}
-          >
-            {error}
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: spacing.md,
-            }}
-          >
-            {/* Title */}
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: typography.fontSize.sm,
-                  fontWeight: typography.fontWeight.medium,
-                  color: colors.dark,
-                  marginBottom: spacing.xs,
-                }}
-              >
-                Title *
-              </label>
-              <div style={{ display: "flex", gap: spacing.sm }}>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  placeholder="Enter problem title..."
-                  required
-                  style={{
-                    flex: 1,
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.fontSize.base,
-                    outline: "none",
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => openMathEditor("title")}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "12px 16px",
-                    background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-                    color: "white",
-                    border: "none",
-                    borderRadius: "999px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "700",
-                    whiteSpace: "nowrap",
-                    boxShadow: `0 6px 16px ${colors.primary}35`,
-                    transition: "all 0.2s ease",
-                  }}
-                  title="Insert LaTeX formula"
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.boxShadow = `0 8px 20px ${colors.primary}45`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = `0 6px 16px ${colors.primary}35`;
-                  }}
-                >
-                  <span style={{ fontSize: "17px", fontWeight: "800" }}>∑</span>
-                  <span>LaTeX</span>
-                </button>
-              </div>
+        <div className="forum-problem-modal__body">
+          {/* Error Message */}
+          {error && (
+            <div
+              style={{
+                backgroundColor: colors.error + "20",
+                color: colors.error,
+                padding: spacing.md,
+                borderRadius: borderRadius.md,
+                marginBottom: spacing.lg,
+                border: `1px solid ${colors.error}40`,
+              }}
+            >
+              {error}
             </div>
+          )}
 
-            {/* Subject and Level */}
-            <div style={{ display: "flex", gap: spacing.md }}>
-              <div style={{ flex: 1 }}>
+          {/* Form */}
+          <form onSubmit={handleSubmit}>
+            <div
+              className="forum-problem-modal__form-grid"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: spacing.md,
+              }}
+            >
+              {/* Title */}
+              <div>
                 <label
                   style={{
                     display: "block",
@@ -374,370 +315,445 @@ const ForumProblemModal = ({ isOpen, onClose, forumId, onProblemCreated }) => {
                     marginBottom: spacing.xs,
                   }}
                 >
-                  Subject *
+                  Title *
                 </label>
-                <select
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.fontSize.base,
-                    outline: "none",
-                  }}
-                >
-                  <option value="">Select subject...</option>
-                  {subjects.map((subject) => (
-                    <option key={subject} value={subject}>
-                      {subject}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={{ flex: 1 }}>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: typography.fontSize.sm,
-                    fontWeight: typography.fontWeight.medium,
-                    color: colors.dark,
-                    marginBottom: spacing.xs,
-                  }}
-                >
-                  Level
-                </label>
-                <input
-                  type="text"
-                  name="level"
-                  value={formData.level}
-                  onChange={handleChange}
-                  placeholder="e.g., High School, Undergraduate"
-                  style={{
-                    width: "100%",
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.fontSize.base,
-                    outline: "none",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Year and Tags */}
-            <div style={{ display: "flex", gap: spacing.md }}>
-              <div style={{ flex: 1 }}>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: typography.fontSize.sm,
-                    fontWeight: typography.fontWeight.medium,
-                    color: colors.dark,
-                    marginBottom: spacing.xs,
-                  }}
-                >
-                  Year
-                </label>
-                <input
-                  type="number"
-                  name="year"
-                  value={formData.year}
-                  onChange={handleChange}
-                  placeholder="e.g., 2024"
-                  style={{
-                    width: "100%",
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.fontSize.base,
-                    outline: "none",
-                  }}
-                />
-              </div>
-
-              <div style={{ flex: 1 }}>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: typography.fontSize.sm,
-                    fontWeight: typography.fontWeight.medium,
-                    color: colors.dark,
-                    marginBottom: spacing.xs,
-                  }}
-                >
-                  Tags
-                </label>
-                <input
-                  type="text"
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleChange}
-                  placeholder="e.g., algebra, geometry"
-                  style={{
-                    width: "100%",
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.fontSize.base,
-                    outline: "none",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Description */}
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: typography.fontSize.sm,
-                  fontWeight: typography.fontWeight.medium,
-                  color: colors.dark,
-                  marginBottom: spacing.xs,
-                }}
-              >
-                Description *
-              </label>
-              <div style={{ display: "flex", gap: spacing.sm }}>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder="Describe the problem in detail..."
-                  required
-                  rows={6}
-                  style={{
-                    flex: 1,
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.fontSize.base,
-                    outline: "none",
-                    resize: "vertical",
-                    fontFamily: "inherit",
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => openMathEditor("description")}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "12px 16px",
-                    background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-                    color: "white",
-                    border: "none",
-                    borderRadius: "999px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "700",
-                    whiteSpace: "nowrap",
-                    alignSelf: "flex-start",
-                    boxShadow: `0 6px 16px ${colors.primary}35`,
-                    transition: "all 0.2s ease",
-                  }}
-                  title="Insert LaTeX formula"
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.boxShadow = `0 8px 20px ${colors.primary}45`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = `0 6px 16px ${colors.primary}35`;
-                  }}
-                >
-                  <span style={{ fontSize: "17px", fontWeight: "800" }}>∑</span>
-                  <span>Add formula</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Images */}
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: typography.fontSize.sm,
-                  fontWeight: typography.fontWeight.medium,
-                  color: colors.dark,
-                  marginBottom: spacing.xs,
-                }}
-              >
-                Images (Optional) - {images.length}/10
-              </label>
-              <div
-                style={{
-                  border: `2px dashed ${colors.gray[300]}`,
-                  borderRadius: borderRadius.md,
-                  padding: spacing.lg,
-                  textAlign: "center",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  backgroundColor:
-                    images.length > 0 ? colors.gray[50] : "transparent",
-                }}
-                onClick={() => document.getElementById("image-upload").click()}
-                onMouseEnter={(e) => {
-                  e.target.style.borderColor = colors.primary;
-                  e.target.style.backgroundColor = colors.primary + "10";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.borderColor = colors.gray[300];
-                  e.target.style.backgroundColor =
-                    images.length > 0 ? colors.gray[50] : "transparent";
-                }}
-              >
-                <input
-                  id="image-upload"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  style={{ display: "none" }}
-                />
-                <div style={{ fontSize: "24px", marginBottom: spacing.sm }}>
-                  📷
-                </div>
-                <div
-                  style={{
-                    fontSize: typography.fontSize.base,
-                    color: colors.dark,
-                    marginBottom: spacing.xs,
-                  }}
-                >
-                  {images.length > 0
-                    ? `${images.length} image(s) selected`
-                    : "Add Image"}
-                </div>
-                <div
-                  style={{
-                    fontSize: typography.fontSize.sm,
-                    color: colors.gray[600],
-                  }}
-                >
-                  Upload up to 10 diagrams, graphs, or other images to help
-                  illustrate your problem
-                </div>
-              </div>
-
-              {/* Image Preview */}
-              {images.length > 0 && (
-                <div style={{ marginTop: spacing.md }}>
-                  <div
+                <div style={{ display: "flex", gap: spacing.sm }}>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="Enter problem title..."
+                    required
                     style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: spacing.sm,
+                      flex: 1,
+                      padding: spacing.sm,
+                      border: `1px solid ${colors.gray[300]}`,
+                      borderRadius: borderRadius.md,
+                      fontSize: typography.fontSize.base,
+                      outline: "none",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => openMathEditor("title")}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "12px 16px",
+                      background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+                      color: "white",
+                      border: "none",
+                      borderRadius: "999px",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      fontWeight: "700",
+                      whiteSpace: "nowrap",
+                      boxShadow: `0 6px 16px ${colors.primary}35`,
+                      transition: "all 0.2s ease",
+                    }}
+                    title="Insert LaTeX formula"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                      e.currentTarget.style.boxShadow = `0 8px 20px ${colors.primary}45`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = `0 6px 16px ${colors.primary}35`;
                     }}
                   >
-                    {images.map((file, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          position: "relative",
-                          width: "80px",
-                          height: "80px",
-                          borderRadius: borderRadius.md,
-                          overflow: "hidden",
-                          border: `1px solid ${colors.gray[300]}`,
-                        }}
-                      >
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`Preview ${index + 1}`}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          style={{
-                            position: "absolute",
-                            top: "4px",
-                            right: "4px",
-                            width: "20px",
-                            height: "20px",
-                            borderRadius: "50%",
-                            backgroundColor: colors.error,
-                            color: "white",
-                            border: "none",
-                            cursor: "pointer",
-                            fontSize: "12px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
+                    <span style={{ fontSize: "17px", fontWeight: "800" }}>
+                      ∑
+                    </span>
+                    <span>LaTeX</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Subject and Level */}
+              <div style={{ display: "flex", gap: spacing.md }}>
+                <div style={{ flex: 1 }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: typography.fontSize.sm,
+                      fontWeight: typography.fontWeight.medium,
+                      color: colors.dark,
+                      marginBottom: spacing.xs,
+                    }}
+                  >
+                    Subject *
+                  </label>
+                  <select
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: spacing.sm,
+                      border: `1px solid ${colors.gray[300]}`,
+                      borderRadius: borderRadius.md,
+                      fontSize: typography.fontSize.base,
+                      outline: "none",
+                    }}
+                  >
+                    <option value="">Select subject...</option>
+                    {subjects.map((subject) => (
+                      <option key={subject} value={subject}>
+                        {subject}
+                      </option>
                     ))}
+                  </select>
+                </div>
+
+                <div style={{ flex: 1 }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: typography.fontSize.sm,
+                      fontWeight: typography.fontWeight.medium,
+                      color: colors.dark,
+                      marginBottom: spacing.xs,
+                    }}
+                  >
+                    Level
+                  </label>
+                  <input
+                    type="text"
+                    name="level"
+                    value={formData.level}
+                    onChange={handleChange}
+                    placeholder="e.g., High School, Undergraduate"
+                    style={{
+                      width: "100%",
+                      padding: spacing.sm,
+                      border: `1px solid ${colors.gray[300]}`,
+                      borderRadius: borderRadius.md,
+                      fontSize: typography.fontSize.base,
+                      outline: "none",
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Year and Tags */}
+              <div style={{ display: "flex", gap: spacing.md }}>
+                <div style={{ flex: 1 }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: typography.fontSize.sm,
+                      fontWeight: typography.fontWeight.medium,
+                      color: colors.dark,
+                      marginBottom: spacing.xs,
+                    }}
+                  >
+                    Year
+                  </label>
+                  <input
+                    type="number"
+                    name="year"
+                    value={formData.year}
+                    onChange={handleChange}
+                    placeholder="e.g., 2024"
+                    style={{
+                      width: "100%",
+                      padding: spacing.sm,
+                      border: `1px solid ${colors.gray[300]}`,
+                      borderRadius: borderRadius.md,
+                      fontSize: typography.fontSize.base,
+                      outline: "none",
+                    }}
+                  />
+                </div>
+
+                <div style={{ flex: 1 }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: typography.fontSize.sm,
+                      fontWeight: typography.fontWeight.medium,
+                      color: colors.dark,
+                      marginBottom: spacing.xs,
+                    }}
+                  >
+                    Tags
+                  </label>
+                  <input
+                    type="text"
+                    name="tags"
+                    value={formData.tags}
+                    onChange={handleChange}
+                    placeholder="e.g., algebra, geometry"
+                    style={{
+                      width: "100%",
+                      padding: spacing.sm,
+                      border: `1px solid ${colors.gray[300]}`,
+                      borderRadius: borderRadius.md,
+                      fontSize: typography.fontSize.base,
+                      outline: "none",
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: typography.fontSize.sm,
+                    fontWeight: typography.fontWeight.medium,
+                    color: colors.dark,
+                    marginBottom: spacing.xs,
+                  }}
+                >
+                  Description *
+                </label>
+                <div style={{ display: "flex", gap: spacing.sm }}>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Describe the problem in detail..."
+                    required
+                    rows={6}
+                    style={{
+                      flex: 1,
+                      padding: spacing.sm,
+                      border: `1px solid ${colors.gray[300]}`,
+                      borderRadius: borderRadius.md,
+                      fontSize: typography.fontSize.base,
+                      outline: "none",
+                      resize: "vertical",
+                      fontFamily: "inherit",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => openMathEditor("description")}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "12px 16px",
+                      background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+                      color: "white",
+                      border: "none",
+                      borderRadius: "999px",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      fontWeight: "700",
+                      whiteSpace: "nowrap",
+                      alignSelf: "flex-start",
+                      boxShadow: `0 6px 16px ${colors.primary}35`,
+                      transition: "all 0.2s ease",
+                    }}
+                    title="Insert LaTeX formula"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                      e.currentTarget.style.boxShadow = `0 8px 20px ${colors.primary}45`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = `0 6px 16px ${colors.primary}35`;
+                    }}
+                  >
+                    <span style={{ fontSize: "17px", fontWeight: "800" }}>
+                      ∑
+                    </span>
+                    <span>Add formula</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Images */}
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: typography.fontSize.sm,
+                    fontWeight: typography.fontWeight.medium,
+                    color: colors.dark,
+                    marginBottom: spacing.xs,
+                  }}
+                >
+                  Images (Optional) - {images.length}/10
+                </label>
+                <div
+                  style={{
+                    border: `2px dashed ${colors.gray[300]}`,
+                    borderRadius: borderRadius.md,
+                    padding: spacing.lg,
+                    textAlign: "center",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    backgroundColor:
+                      images.length > 0 ? colors.gray[50] : "transparent",
+                  }}
+                  onClick={() =>
+                    document.getElementById("image-upload").click()
+                  }
+                  onMouseEnter={(e) => {
+                    e.target.style.borderColor = colors.primary;
+                    e.target.style.backgroundColor = colors.primary + "10";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.borderColor = colors.gray[300];
+                    e.target.style.backgroundColor =
+                      images.length > 0 ? colors.gray[50] : "transparent";
+                  }}
+                >
+                  <input
+                    id="image-upload"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: "none" }}
+                  />
+                  <div style={{ fontSize: "24px", marginBottom: spacing.sm }}>
+                    📷
+                  </div>
+                  <div
+                    style={{
+                      fontSize: typography.fontSize.base,
+                      color: colors.dark,
+                      marginBottom: spacing.xs,
+                    }}
+                  >
+                    {images.length > 0
+                      ? `${images.length} image(s) selected`
+                      : "Add Image"}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: typography.fontSize.sm,
+                      color: colors.gray[600],
+                    }}
+                  >
+                    Upload up to 10 diagrams, graphs, or other images to help
+                    illustrate your problem
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
 
-          {/* Buttons */}
-          <div
-            style={{
-              display: "flex",
-              gap: spacing.md,
-              justifyContent: "flex-end",
-              marginTop: spacing.xl,
-            }}
-          >
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={loading}
+                {/* Image Preview */}
+                {images.length > 0 && (
+                  <div style={{ marginTop: spacing.md }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: spacing.sm,
+                      }}
+                    >
+                      {images.map((file, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            position: "relative",
+                            width: "80px",
+                            height: "80px",
+                            borderRadius: borderRadius.md,
+                            overflow: "hidden",
+                            border: `1px solid ${colors.gray[300]}`,
+                          }}
+                        >
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Preview ${index + 1}`}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            style={{
+                              position: "absolute",
+                              top: "4px",
+                              right: "4px",
+                              width: "20px",
+                              height: "20px",
+                              borderRadius: "50%",
+                              backgroundColor: colors.error,
+                              color: "white",
+                              border: "none",
+                              cursor: "pointer",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div
+              className="forum-problem-modal__actions"
               style={{
-                padding: `${spacing.sm} ${spacing.lg}`,
-                backgroundColor: colors.gray[200],
-                color: colors.gray[700],
-                border: "none",
-                borderRadius: borderRadius.md,
-                cursor: loading ? "not-allowed" : "pointer",
-                fontSize: typography.fontSize.base,
-                fontWeight: typography.fontWeight.medium,
+                display: "flex",
+                gap: spacing.md,
+                justifyContent: "flex-end",
+                marginTop: spacing.xl,
               }}
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading || uploadingImages}
-              style={{
-                padding: `${spacing.sm} ${spacing.lg}`,
-                backgroundColor:
-                  loading || uploadingImages
-                    ? colors.gray[400]
-                    : colors.primary,
-                color: colors.white,
-                border: "none",
-                borderRadius: borderRadius.md,
-                cursor: loading || uploadingImages ? "not-allowed" : "pointer",
-                fontSize: typography.fontSize.base,
-                fontWeight: typography.fontWeight.medium,
-              }}
-            >
-              {uploadingImages
-                ? "Uploading Images..."
-                : loading
-                  ? "Creating..."
-                  : "Create Problem"}
-            </button>
-          </div>
-        </form>
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={loading}
+                style={{
+                  padding: `${spacing.sm} ${spacing.lg}`,
+                  backgroundColor: colors.gray[200],
+                  color: colors.gray[700],
+                  border: "none",
+                  borderRadius: borderRadius.md,
+                  cursor: loading ? "not-allowed" : "pointer",
+                  fontSize: typography.fontSize.base,
+                  fontWeight: typography.fontWeight.medium,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading || uploadingImages}
+                style={{
+                  padding: `${spacing.sm} ${spacing.lg}`,
+                  backgroundColor:
+                    loading || uploadingImages
+                      ? colors.gray[400]
+                      : colors.primary,
+                  color: colors.white,
+                  border: "none",
+                  borderRadius: borderRadius.md,
+                  cursor:
+                    loading || uploadingImages ? "not-allowed" : "pointer",
+                  fontSize: typography.fontSize.base,
+                  fontWeight: typography.fontWeight.medium,
+                }}
+              >
+                {uploadingImages
+                  ? "Uploading Images..."
+                  : loading
+                    ? "Creating..."
+                    : "Create Problem"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
       {/* Math Editor Modal */}

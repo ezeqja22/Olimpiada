@@ -1,215 +1,147 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { colors, spacing, typography, borderRadius, shadows } from './designSystem';
-import MathRenderer from './MathRenderer';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { colors } from "./designSystem";
+import MathRenderer from "./MathRenderer";
+import "./forumModern.css";
 
 const ForumProblemCard = ({ problem, author, forumId }) => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const handleClick = () => {
-        if (problem?.id) {
-            navigate(`/problem/${problem.id}?from=forum&forumId=${forumId}`);
-        }
-    };
+  const handleClick = () => {
+    if (!problem?.id) return;
 
-    if (!problem) {
-        return (
-            <div style={{
-                backgroundColor: colors.gray[100],
-                border: `1px solid ${colors.gray[200]}`,
-                borderRadius: borderRadius.lg,
-                padding: spacing.md,
-                textAlign: 'center',
-                color: colors.gray[600]
-            }}>
-                Loading problem...
-            </div>
-        );
+    const forumQuery = forumId ? `&forumId=${forumId}` : "";
+    navigate(`/problem/${problem.id}?from=forum${forumQuery}`);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleClick();
     }
+  };
 
-    const getDifficultyColor = (level) => {
-        switch (level?.toLowerCase()) {
-            case 'elementary':
-                return colors.success;
-            case 'middle school':
-                return colors.warning;
-            case 'high school':
-                return colors.primary;
-            case 'undergraduate':
-                return colors.secondary;
-            case 'graduate':
-                return colors.error;
-            default:
-                return colors.gray[500];
-        }
+  if (!problem) {
+    return <div className="forum-problem-card">Loading problem...</div>;
+  }
+
+  const getDifficultyColor = (level) => {
+    switch (level?.toLowerCase()) {
+      case "elementary":
+        return colors.success;
+      case "middle school":
+        return colors.warning;
+      case "high school":
+        return colors.primary;
+      case "undergraduate":
+        return colors.secondary;
+      case "graduate":
+        return colors.error;
+      default:
+        return colors.gray[500];
+    }
+  };
+
+  const getSubjectColor = (subject) => {
+    const subjectColors = {
+      mathematics: colors.primary,
+      physics: colors.secondary,
+      chemistry: colors.success,
+      biology: colors.warning,
+      "computer science": colors.error,
+      other: colors.gray[500],
     };
 
-    const getSubjectColor = (subject) => {
-        const colors_map = {
-            'mathematics': colors.primary,
-            'physics': colors.secondary,
-            'chemistry': colors.success,
-            'biology': colors.warning,
-            'computer science': colors.error,
-            'other': colors.gray[500]
-        };
-        return colors_map[subject?.toLowerCase()] || colors.gray[500];
-    };
+    return subjectColors[subject?.toLowerCase()] || colors.gray[500];
+  };
 
-    return (
-        <div
-            onClick={handleClick}
-            style={{
-                backgroundColor: colors.white,
-                border: `1px solid ${colors.gray[200]}`,
-                borderRadius: borderRadius.lg,
-                padding: spacing.md,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: shadows.sm,
-                margin: `${spacing.xs} 0`
-            }}
-            onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = shadows.md;
-            }}
-            onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = shadows.sm;
-            }}
-        >
-            {/* Header */}
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                marginBottom: spacing.sm,
-                pointerEvents: 'none'
-            }}>
-                <h3 style={{
-                    fontSize: typography.fontSize.base,
-                    fontWeight: typography.fontWeight.semibold,
-                    color: colors.dark,
-                    margin: 0,
-                    flex: 1,
-                    lineHeight: 1.3
-                }}>
-                    <MathRenderer text={problem.title} />
-                </h3>
-            </div>
+  const tags = problem.tags
+    ? problem.tags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    : [];
 
-            {/* Description Preview */}
-            <p style={{
-                fontSize: typography.fontSize.sm,
-                color: colors.gray[600],
-                margin: `0 0 ${spacing.sm} 0`,
-                lineHeight: 1.4,
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                pointerEvents: 'none'
-            }}>
-                <MathRenderer text={problem.description} />
-            </p>
+  return (
+    <div
+      className="forum-problem-card"
+      role="button"
+      tabIndex={0}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      aria-label={`Open problem: ${problem.title || "Untitled problem"}`}
+      style={{ "--forum-primary": colors.primary }}
+    >
+      <h3 className="forum-problem-card__title">
+        <MathRenderer text={problem.title} />
+      </h3>
 
-            {/* Tags and Badges */}
-            <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: spacing.xs,
-                alignItems: 'center',
-                marginBottom: spacing.sm,
-                pointerEvents: 'none'
-            }}>
-                {/* Subject Badge */}
-                {problem.subject && (
-                    <span style={{
-                        backgroundColor: getSubjectColor(problem.subject) + '20',
-                        color: getSubjectColor(problem.subject),
-                        padding: `${spacing.xs} ${spacing.sm}`,
-                        borderRadius: borderRadius.sm,
-                        fontSize: typography.fontSize.xs,
-                        fontWeight: typography.fontWeight.medium
-                    }}>
-                        {problem.subject}
-                    </span>
-                )}
-
-                {/* Difficulty Badge */}
-                {problem.level && problem.level !== 'Any Level' && (
-                    <span style={{
-                        backgroundColor: getDifficultyColor(problem.level) + '20',
-                        color: getDifficultyColor(problem.level),
-                        padding: `${spacing.xs} ${spacing.sm}`,
-                        borderRadius: borderRadius.sm,
-                        fontSize: typography.fontSize.xs,
-                        fontWeight: typography.fontWeight.medium
-                    }}>
-                        {problem.level}
-                    </span>
-                )}
-
-                {/* Year Badge */}
-                {problem.year && (
-                    <span style={{
-                        backgroundColor: colors.gray[100],
-                        color: colors.gray[600],
-                        padding: `${spacing.xs} ${spacing.sm}`,
-                        borderRadius: borderRadius.sm,
-                        fontSize: typography.fontSize.xs,
-                        fontWeight: typography.fontWeight.medium
-                    }}>
-                        {problem.year}
-                    </span>
-                )}
-            </div>
-
-            {/* Tags */}
-            {problem.tags && (
-                <div style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: spacing.xs,
-                    marginBottom: spacing.sm,
-                    pointerEvents: 'none'
-                }}>
-                    {problem.tags.split(',').map((tag, index) => (
-                        <span
-                            key={index}
-                            style={{
-                                backgroundColor: colors.gray[50],
-                                color: colors.gray[600],
-                                padding: `${spacing.xs} ${spacing.sm}`,
-                                borderRadius: borderRadius.sm,
-                                fontSize: typography.fontSize.xs,
-                                fontWeight: typography.fontWeight.medium
-                            }}
-                        >
-                            #{tag.trim()}
-                        </span>
-                    ))}
-                </div>
-            )}
-
-            {/* Footer */}
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                fontSize: typography.fontSize.xs,
-                color: colors.gray[500],
-                pointerEvents: 'none'
-            }}>
-                <span>
-                    Click to view full problem
-                </span>
-                <span>
-                    {new Date(problem.created_at).toLocaleDateString()}
-                </span>
-            </div>
+      {problem.description && (
+        <div className="forum-problem-card__description">
+          <MathRenderer text={problem.description} />
         </div>
-    );
+      )}
+
+      <div className="forum-problem-card__badges">
+        {problem.subject && (
+          <span
+            className="forum-problem-card__badge"
+            style={{
+              backgroundColor: `${getSubjectColor(problem.subject)}18`,
+              color: getSubjectColor(problem.subject),
+            }}
+          >
+            {problem.subject}
+          </span>
+        )}
+
+        {problem.level && problem.level !== "Any Level" && (
+          <span
+            className="forum-problem-card__badge"
+            style={{
+              backgroundColor: `${getDifficultyColor(problem.level)}18`,
+              color: getDifficultyColor(problem.level),
+            }}
+          >
+            {problem.level}
+          </span>
+        )}
+
+        {problem.year && (
+          <span
+            className="forum-problem-card__badge"
+            style={{
+              backgroundColor: colors.gray[100],
+              color: colors.gray[600],
+            }}
+          >
+            {problem.year}
+          </span>
+        )}
+      </div>
+
+      {tags.length > 0 && (
+        <div className="forum-problem-card__tags">
+          {tags.map((tag, index) => (
+            <span key={`${tag}-${index}`} className="forum-problem-card__tag">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="forum-problem-card__footer">
+        <span>
+          {author?.username
+            ? `Shared by ${author.username}`
+            : "View full problem"}
+        </span>
+        {problem.created_at && (
+          <span>{new Date(problem.created_at).toLocaleDateString()}</span>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default ForumProblemCard;
