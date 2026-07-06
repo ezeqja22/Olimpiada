@@ -1,142 +1,233 @@
 .about-founders-section {
   width: 100%;
-  padding: 80px 24px;
-  background: #f8fafc;
+  padding: clamp(3.5rem, 7vw, 6rem) 1.25rem;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(45, 122, 95, 0.1),
+      transparent 34%
+    ),
+    #f7faf8;
+  box-sizing: border-box;
+}
+
+.about-founders-shell {
+  width: min(1120px, 100%);
+  margin: 0 auto;
 }
 
 .about-founders-header {
-  max-width: 780px;
-  margin: 0 auto 44px;
+  max-width: 760px;
+  margin: 0 auto clamp(2rem, 5vw, 3.25rem);
   text-align: center;
 }
 
 .about-eyebrow {
-  display: inline-block;
-  margin-bottom: 12px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.8rem;
+  padding: 0.38rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(26, 77, 58, 0.1);
+  color: #1a4d3a;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
-  color: #2563eb;
 }
 
 .about-founders-header h2 {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3rem);
+  color: #173d31;
+  font-size: clamp(2rem, 5vw, 3.25rem);
   line-height: 1.08;
-  color: #0f172a;
+  letter-spacing: -0.035em;
 }
 
 .about-founders-header p {
-  margin: 18px auto 0;
-  max-width: 620px;
-  font-size: 1rem;
+  max-width: 640px;
+  margin: 1rem auto 0;
+  color: #62706a;
+  font-size: clamp(1rem, 2vw, 1.12rem);
   line-height: 1.7;
-  color: #64748b;
 }
 
 .founders-grid {
-  max-width: 1050px;
-  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 28px;
+  gap: clamp(1.25rem, 3vw, 2rem);
 }
 
 .founder-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 28px;
-  padding: 28px;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
+  position: relative;
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+  min-width: 0;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(26, 77, 58, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 18px 50px rgba(26, 77, 58, 0.08);
+}
+
+.founder-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, #1a4d3a, #2d7a5f, #764ba2);
 }
 
 .founder-image-wrap {
-  flex: 0 0 auto;
-}
-
-.founder-image,
-.founder-placeholder {
-  width: 132px;
-  height: 132px;
-  border-radius: 24px;
+  width: 148px;
+  max-width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #e9f0ec;
+  box-shadow: 0 10px 28px rgba(26, 77, 58, 0.14);
 }
 
 .founder-image {
-  object-fit: cover;
   display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
-.founder-placeholder {
+.founder-content {
+  min-width: 0;
+}
+
+.founder-heading-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #e2e8f0, #f8fafc);
-  color: #64748b;
-  border: 1px solid #cbd5e1;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .founder-content h3 {
-  margin: 4px 0 4px;
-  font-size: 1.35rem;
-  color: #0f172a;
+  margin: 0;
+  color: #173d31;
+  font-size: clamp(1.3rem, 2.5vw, 1.65rem);
+  line-height: 1.2;
 }
 
 .founder-role {
-  margin: 0 0 14px;
-  font-weight: 700;
-  color: #2563eb;
+  margin: 0.35rem 0 0;
+  color: #2d7a5f;
+  font-size: 0.9rem;
+  font-weight: 800;
 }
 
 .founder-description {
-  margin: 0 0 16px;
+  margin: 1rem 0 1.1rem;
+  color: #596760;
   font-size: 0.95rem;
   line-height: 1.6;
-  color: #475569;
 }
 
 .founder-highlights {
-  list-style: none;
+  display: grid;
+  gap: 0.75rem;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 10px;
+  list-style: none;
 }
 
 .founder-highlights li {
   position: relative;
-  padding-left: 18px;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: #334155;
+  padding-left: 1.35rem;
+  color: #33443d;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
 }
 
 .founder-highlights li::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 0.62em;
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: #2563eb;
+  top: 0.56em;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #2d7a5f;
+  box-shadow: 0 0 0 4px rgba(45, 122, 95, 0.1);
 }
 
-@media (max-width: 850px) {
+@media (max-width: 940px) {
   .founders-grid {
     grid-template-columns: 1fr;
   }
 
   .founder-card {
-    flex-direction: column;
+    grid-template-columns: 132px minmax(0, 1fr);
   }
 
-  .founder-image,
-  .founder-placeholder {
-    width: 120px;
-    height: 120px;
+  .founder-image-wrap {
+    width: 132px;
+  }
+}
+
+@media (max-width: 600px) {
+  .about-founders-section {
+    padding: 3.25rem 1rem;
+  }
+
+  .about-founders-header {
+    margin-bottom: 1.75rem;
+  }
+
+  .about-founders-header h2 {
+    font-size: clamp(1.8rem, 9vw, 2.45rem);
+  }
+
+  .founder-card {
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+    padding: 1.2rem;
+    border-radius: 20px;
+  }
+
+  .founder-image-wrap {
+    width: min(48vw, 150px);
+    margin: 0 auto;
+    border-radius: 50%;
+  }
+
+  .founder-content {
+    text-align: center;
+  }
+
+  .founder-heading-row {
+    justify-content: center;
+  }
+
+  .founder-description {
+    margin-top: 0.85rem;
+  }
+
+  .founder-highlights {
+    text-align: left;
+  }
+}
+
+@media (max-width: 380px) {
+  .about-founders-section {
+    padding-inline: 0.75rem;
+  }
+
+  .founder-card {
+    padding: 1rem;
+  }
+
+  .founder-highlights li {
+    font-size: 0.88rem;
   }
 }

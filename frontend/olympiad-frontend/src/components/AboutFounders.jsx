@@ -1,5 +1,4 @@
 import React from "react";
-import { UserRound } from "lucide-react";
 import klevisaPhoto from "../assets/klevisa.jpeg";
 import gangoPhoto from "../assets/gango1.jpeg";
 import "./AboutFounders.css";
@@ -11,9 +10,9 @@ const founders = [
     image: klevisaPhoto,
     description: "Co-founder and developer of the Olimpiada.al platform.",
     highlights: [
-      "European Girls’ Mathematical Olympiad 2025 (EGMO) | Honorable Mention",
+      "European Girls’ Mathematical Olympiad 2025 (EGMO) — Honorable Mention",
       "Jane Street WiSE 2026 Participant",
-      "Ranked top 5 in the Albanian National Math Olympiad",
+      "Ranked among the top 5 students in the Albanian National Mathematics Olympiad",
     ],
   },
   {
@@ -25,53 +24,60 @@ const founders = [
       "Full-stack platform development",
       "BSc graduate in Software Engineering",
       "Educational technology and olympiad preparation",
-      "Co-creator of the Olimpiada.al system architecture ",
+      "Co-creator of the Olimpiada.al system architecture",
     ],
   },
 ];
 
 export default function AboutFounders() {
   return (
-    <section className="about-founders-section">
-      <div className="about-founders-header">
-        <span className="about-eyebrow">About Us</span>
-        <h2>Built by students, for ambitious learners</h2>
-        <p>Meet the team behind Olimpiada Learn from those who've done it.</p>
-      </div>
+    <section
+      className="about-founders-section"
+      aria-labelledby="about-founders-title"
+    >
+      <div className="about-founders-shell">
+        <div className="about-founders-header">
+          <span className="about-eyebrow">About Us</span>
+          <h2 id="about-founders-title">
+            Built by students, for ambitious learners
+          </h2>
+          <p>
+            Meet the team behind Olimpiada.al. Learn from those who have done
+            it.
+          </p>
+        </div>
 
-      <div className="founders-grid">
-        {founders.map((founder) => (
-          <article className="founder-card" key={founder.name}>
-            <div className="founder-image-wrap">
-              {founder.placeholder ? (
-                <div className="founder-placeholder">
-                  <UserRound size={72} strokeWidth={1.6} />
-                </div>
-              ) : (
+        <div className="founders-grid">
+          {founders.map((founder) => (
+            <article className="founder-card" key={founder.name}>
+              <div className="founder-image-wrap">
                 <img
                   src={founder.image}
-                  alt={founder.name}
+                  alt={`${founder.name}, ${founder.role}`}
                   className="founder-image"
+                  loading="lazy"
                 />
-              )}
-            </div>
+              </div>
 
-            <div className="founder-content">
-              <h3>{founder.name}</h3>
-              <p className="founder-role">{founder.role}</p>
+              <div className="founder-content">
+                <div className="founder-heading-row">
+                  <div>
+                    <h3>{founder.name}</h3>
+                    <p className="founder-role">{founder.role}</p>
+                  </div>
+                </div>
 
-              {founder.description && (
                 <p className="founder-description">{founder.description}</p>
-              )}
 
-              <ul className="founder-highlights">
-                {founder.highlights.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          </article>
-        ))}
+                <ul className="founder-highlights">
+                  {founder.highlights.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
