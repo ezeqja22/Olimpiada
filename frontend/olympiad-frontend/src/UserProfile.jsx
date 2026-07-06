@@ -74,12 +74,15 @@ function UserProfile() {
     });
   };
 
-  const storedProfileReturnTo = profileData?.user?.id
-    ? sessionStorage.getItem(`connectionsReturnTo:${profileData.user.id}`)
-    : null;
+  const currentProfilePath = `${location.pathname}${location.search || ""}`;
+  const requestedProfileBackPath = location.state?.returnTo;
 
   const profileBackPath =
-    location.state?.returnTo || storedProfileReturnTo || "/feed";
+    typeof requestedProfileBackPath === "string" &&
+    requestedProfileBackPath.startsWith("/") &&
+    requestedProfileBackPath !== currentProfilePath
+      ? requestedProfileBackPath
+      : "/feed";
 
   useEffect(() => {
     const checkMobile = () => {

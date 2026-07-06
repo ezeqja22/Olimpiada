@@ -90,12 +90,15 @@ const PublicUserProfile = () => {
     });
   };
 
-  const storedProfileReturnTo = userProfile?.user?.id
-    ? sessionStorage.getItem(`connectionsReturnTo:${userProfile.user.id}`)
-    : null;
+  const currentProfilePath = `${location.pathname}${location.search || ""}`;
+  const requestedProfileBackPath = location.state?.returnTo;
 
   const profileBackPath =
-    location.state?.returnTo || storedProfileReturnTo || "/feed";
+    typeof requestedProfileBackPath === "string" &&
+    requestedProfileBackPath.startsWith("/") &&
+    requestedProfileBackPath !== currentProfilePath
+      ? requestedProfileBackPath
+      : "/feed";
 
   // Mobile detection
   useEffect(() => {
