@@ -18,7 +18,7 @@ import { useToast } from "./components/ToastProvider";
 import AboutFounders from "./components/AboutFounders";
 import ForumsSidebar from "./components/ForumsSidebar";
 import "./Homepage.css";
-import biologySubjectIcon from "./assets/Biology_subject_pcxmoa.svg";
+import biologySubjectIcon from "./assets/Biology_subject_pcxmoa";
 import chemistrySubjectIcon from "./assets/chemistry_subject_r4n7jq.svg";
 import computerEngineeringSubjectIcon from "./assets/computer_engineering_subject_u2m2ze.svg";
 import communityIcon from "./assets/Comunity_lejla_1_kpxiv0.svg";
