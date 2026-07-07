@@ -28,7 +28,7 @@ import { useToast } from "./components/ToastProvider";
 import { useConfirm } from "./components/ConfirmProvider";
 import "./forumModern.css";
 import koshIcon from "./assets/kosh_icon_red_yr4dpb.svg";
-import xIcon from "./assets/X_icon_White_ehzzaz.svg";
+import xIcon from "./assets/X_Icon_White_ehzzaz.svg";
 import sandwichIcon from "./assets/sanwich_icon_hlmeja.svg";
 import problemIcon from "./assets/PROBLEM_icon_green_imu7rq.svg";
 import fotoIcon from "./assets/foto_icon_green_ywrime.svg";
