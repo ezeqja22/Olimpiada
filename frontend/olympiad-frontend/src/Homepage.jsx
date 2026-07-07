@@ -18,16 +18,16 @@ import { useToast } from "./components/ToastProvider";
 import AboutFounders from "./components/AboutFounders";
 import ForumsSidebar from "./components/ForumsSidebar";
 import "./Homepage.css";
-import biologySubjectIcon from "./assets/Biology_subject_pcxmoa.svg";
-import chemistrySubjectIcon from "./assets/chemistry_subject_r4n7jq.svg";
-import computerEngineeringSubjectIcon from "./assets/computer_engineering_subject_u2m2ze.svg";
-import communityIcon from "./assets/Comunity_lejla_1_kpxiv0.svg";
-import mathSubjectIcon from "./assets/math_subject_iqigfx.svg";
-import numratoreIcon from "./assets/numratore_xpudpv.svg";
-import olimpiadaLogo from "./assets/Olimpiada_Logo_hosmuj.png";
-import otherSubjectIcon from "./assets/other_subject_nkoxvo.svg";
-import physicsSubjectIcon from "./assets/physics_subject_m90gto.svg";
-import trophyIcon from "./assets/trofeu_px38ap.svg";
+import biologySubjectIcon from "../../../assets/Biology_subject_pcxmoa.svg";
+import chemistrySubjectIcon from "../../../assets/chemistry_subject_r4n7jq.svg";
+import computerEngineeringSubjectIcon from "../../../assets/computer_engineering_subject_u2m2ze.svg";
+import communityIcon from "../../../assets/Comunity_lejla_1_kpxiv0.svg";
+import mathSubjectIcon from "../../../assets/math_subject_iqigfx.svg";
+import numratoreIcon from "../../../assets/numratore_xpudpv.svg";
+import olimpiadaLogo from "../../../assets/Olimpiada_Logo_hosmuj.png";
+import otherSubjectIcon from "../../../assets/other_subject_nkoxvo.svg";
+import physicsSubjectIcon from "../../../assets/physics_subject_m90gto.svg";
+import trophyIcon from "../../../assets/trofeu_px38ap.svg";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
