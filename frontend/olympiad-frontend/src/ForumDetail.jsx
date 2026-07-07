@@ -27,6 +27,12 @@ import ReportModal from "./ReportModal";
 import { useToast } from "./components/ToastProvider";
 import { useConfirm } from "./components/ConfirmProvider";
 import "./forumModern.css";
+import koshIcon from "./assets/kosh_icon_red_yr4dpb.svg";
+import xIcon from "./assets/X_icon_White_ehzzaz.svg";
+import sandwichIcon from "./assets/sanwich_icon_hlmeja.svg";
+import problemIcon from "./assets/PROBLEM_icon_green_imu7rq.svg";
+import fotoIcon from "./assets/foto_icon_green_ywrime.svg";
+import dunno from "./assets/Untitled-3_gv62pc.svg";
 
 // CSS for typing animation and new message indicator
 const typingAnimation = `
@@ -1703,7 +1709,7 @@ const ForumDetail = () => {
                               }
                             >
                               <img
-                                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/kosh_icon_red_yr4dpb.svg"
+                                src={koshIcon}
                                 alt="Delete"
                                 style={{
                                   width: "16px",
@@ -2929,7 +2935,7 @@ const ForumDetail = () => {
                   }}
                 >
                   <img
-                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/X_Icon_White_ehzzaz.svg"
+                    src={xIcon}
                     alt="Close Chat"
                     style={{
                       width: "20px",
@@ -2952,7 +2958,7 @@ const ForumDetail = () => {
                     }}
                   >
                     <img
-                      src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
+                      src={sandwichIcon}
                       alt="Menu"
                       style={{
                         width: "20px",
@@ -3382,7 +3388,7 @@ const ForumDetail = () => {
                                         }}
                                       >
                                         <img
-                                          src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/kosh_icon_red_yr4dpb.svg"
+                                          src={koshIcon}
                                           alt="Delete"
                                           style={{
                                             width: "14px",
@@ -3764,7 +3770,7 @@ const ForumDetail = () => {
                       }}
                     >
                       <img
-                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761254783/PROBLEM_icon_green_imu7rq.svg"
+                        src={problemIcon}
                         alt="Problem"
                         style={{
                           width: "24px",
@@ -3807,7 +3813,7 @@ const ForumDetail = () => {
                       }}
                     >
                       <img
-                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761254783/foto_icon_green_ywrime.svg"
+                        src={fotoIcon}
                         alt="Image"
                         style={{
                           width: "24px",
@@ -3850,7 +3856,7 @@ const ForumDetail = () => {
                       }}
                     >
                       <img
-                        src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761254783/Untitled-3_gv62pc.svg"
+                        src={dunno}
                         alt="Symbols"
                         style={{
                           width: "24px",
@@ -4513,7 +4519,7 @@ const ForumDetail = () => {
                     }}
                   >
                     <img
-                      src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760907040/kosh_icon_red_yr4dpb.svg"
+                      src={koshIcon}
                       alt="Delete"
                       style={{
                         width: "16px",
