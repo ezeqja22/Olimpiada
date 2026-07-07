@@ -18,6 +18,16 @@ import { useToast } from "./components/ToastProvider";
 import AboutFounders from "./components/AboutFounders";
 import ForumsSidebar from "./components/ForumsSidebar";
 import "./Homepage.css";
+import biologySubjectIcon from "./assets/Biology_subject_pcxmoa.svg";
+import chemistrySubjectIcon from "./assets/chemistry_subject_r4n7jq.svg";
+import computerEngineeringSubjectIcon from "./assets/computer_engineering_subject_u2m2ze.svg";
+import communityIcon from "./assets/Comunity_lejla_1_kpxiv0.svg";
+import mathSubjectIcon from "./assets/math_subject_iqigfx.svg";
+import numratoreIcon from "./assets/numratore_xpudpv.svg";
+import olimpiadaLogo from "./assets/Olimpiada_Logo_hosmuj.png";
+import otherSubjectIcon from "./assets/other_subject_nkoxvo.svg";
+import physicsSubjectIcon from "./assets/physics_subject_m90gto.svg";
+import trophyIcon from "./assets/trofeu_px38ap.svg";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
@@ -35,19 +45,19 @@ const featureCards = [
     title: "Mathematical Excellence",
     description:
       "Solve complex mathematical problems with advanced LaTeX rendering and visual math editor tools.",
-    icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811441/numratore_xpudpv.svg",
+    icon: numratoreIcon,
   },
   {
     title: "Community Learning",
     description:
       "Connect with fellow problem-solvers, share solutions, and learn from the community's collective knowledge.",
-    icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760812222/Comunity_lejla_1_kpxiv0.svg",
+    icon: communityIcon,
   },
   {
     title: "Olympiad Focus",
     description:
       "Practice with olympiad-style problems across multiple subjects and difficulty levels to prepare for competitions.",
-    icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811741/trofeu_px38ap.svg",
+    icon: trophyIcon,
   },
 ];
 
@@ -55,22 +65,22 @@ const getSubjectIcon = (subject) => {
   const subjectLower = subject?.toLowerCase() || "";
 
   if (subjectLower.includes("biology")) {
-    return "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/Biology_subject_pcxmoa.svg";
+    return biologySubjectIcon;
   }
   if (subjectLower.includes("chemistry")) {
-    return "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/chemistry_subject_r4n7jq.svg";
+    return chemistrySubjectIcon;
   }
   if (subjectLower.includes("mathematics") || subjectLower.includes("math")) {
-    return "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/math_subject_iqigfx.svg";
+    return mathSubjectIcon;
   }
   if (subjectLower.includes("physics")) {
-    return "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/physics_subject_m90gto.svg";
+    return physicsSubjectIcon;
   }
   if (subjectLower.includes("computer")) {
-    return "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828176/computer_engineerin_subject_u2m2ze.svg";
+    return computerEngineeringSubjectIcon;
   }
 
-  return "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg";
+  return otherSubjectIcon;
 };
 
 function Homepage() {
@@ -250,7 +260,7 @@ function Homepage() {
   const siteLogo =
     siteSettings.site_logo && siteSettings.site_logo.trim() !== ""
       ? siteSettings.site_logo
-      : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png";
+      : olimpiadaLogo;
 
   const openSubjectDropdown = () => {
     setShowSubjectDropdown((previous) => !previous);
@@ -283,8 +293,7 @@ function Homepage() {
                 alt={`${siteName} logo`}
                 className="homepage-logo"
                 onError={(event) => {
-                  event.currentTarget.src =
-                    "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png";
+                  event.currentTarget.src = olimpiadaLogo;
                 }}
               />
               <span className="homepage-site-name">{siteName}</span>
@@ -407,8 +416,7 @@ function Homepage() {
                 alt={`${siteName} logo`}
                 className="mobile-logo"
                 onError={(event) => {
-                  event.currentTarget.src =
-                    "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png";
+                  event.currentTarget.src = olimpiadaLogo;
                 }}
               />
               <span>{siteName}</span>
