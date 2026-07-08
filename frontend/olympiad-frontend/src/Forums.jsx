@@ -90,6 +90,26 @@ const Forums = () => {
     fetchForums();
   }, []);
 
+  useEffect(() => {
+    if (!showCreateForm) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setShowCreateForm(false);
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [showCreateForm]);
+
   const fetchCurrentUser = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -463,75 +483,15 @@ const Forums = () => {
         }}
       >
         {/* Header */}
-        <div
-          className="forums-page__header"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: spacing.xl,
-          }}
-        >
-          <h1
-            className="forums-page__title"
-            style={{
-              fontSize: "2.5rem",
-              fontWeight: "700",
-              color: colors.primary,
-              margin: 0,
-            }}
-          >
-            Forums
-          </h1>
-          <div
-            className="forums-create-button-wrap"
-            style={{
-              position: "fixed",
-              bottom: spacing.xl,
-              right: spacing.xl,
-              zIndex: 1000,
-            }}
-          >
-            <div
-              className="forums-create-button"
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setShowCreateForm(true);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }
-              }}
-              onClick={() => {
-                setShowCreateForm(true);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              style={{
-                width: "60px",
-                height: "60px",
-                backgroundColor: colors.primary,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                fontSize: "24px",
-                color: colors.white,
-                fontWeight: typography.fontWeight.bold,
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-                position: "relative",
-              }}
-              title="Create New Forum"
-            >
-              <span className="forums-create-button__label">Create forum</span>
-              <span className="forums-create-button__icon" aria-hidden="true">
-                +
-              </span>
-            </div>
+        {/* Header */}
+        <div className="forums-page__header">
+          <div className="forums-page__heading-wrap">
+            <h1 className="forums-page__title">Forums</h1>
+
+            <p className="forums-page__subtitle">
+              Discover communities, discuss olympiad problems, and learn
+              together.
+            </p>
           </div>
         </div>
 
@@ -587,285 +547,213 @@ const Forums = () => {
           ))}
         </div>
 
-        {/* Create Forum Form */}
+        {/* Create Forum Modal */}
         {showCreateForm && (
-          <Card
-            className="forums-create-form"
-            style={{ marginBottom: spacing.xl, padding: spacing.lg }}
+          <div
+            className="forum-create-modal-backdrop"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setShowCreateForm(false);
+              }
+            }}
           >
-            <h3 style={{ marginBottom: spacing.md }}>Create New Forum</h3>
-            <form onSubmit={handleCreateForum}>
-              <div style={{ marginBottom: spacing.md }}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: spacing.xs,
-                    fontWeight: "600",
-                  }}
-                >
-                  Forum Title
-                </label>
-                <input
-                  type="text"
-                  value={newForum.title}
-                  onChange={(e) =>
-                    setNewForum({ ...newForum, title: e.target.value })
-                  }
-                  required
-                  style={{
-                    width: "100%",
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.body,
-                  }}
-                />
-              </div>
-              <div style={{ marginBottom: spacing.md }}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: spacing.xs,
-                    fontWeight: "600",
-                  }}
-                >
-                  Description
-                </label>
-                <textarea
-                  value={newForum.description}
-                  onChange={(e) =>
-                    setNewForum({ ...newForum, description: e.target.value })
-                  }
-                  rows={3}
-                  style={{
-                    width: "100%",
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.body,
-                    resize: "vertical",
-                  }}
-                />
-              </div>
+            <div
+              className="forum-create-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="create-forum-title"
+            >
+              <div className="forum-create-modal__header">
+                <div>
+                  <h2 id="create-forum-title">Create New Forum</h2>
 
-              {/* Badge Fields */}
-              <div style={{ marginBottom: spacing.md }}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: spacing.xs,
-                    fontWeight: "600",
-                  }}
-                >
-                  Subject
-                </label>
-                <select
-                  value={newForum.subject}
-                  onChange={(e) =>
-                    setNewForum({ ...newForum, subject: e.target.value })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.body,
-                  }}
-                >
-                  <option value="">Select Subject (Optional)</option>
-                  <option value="Mathematics">Mathematics</option>
-                  <option value="Physics">Physics</option>
-                  <option value="Chemistry">Chemistry</option>
-                  <option value="Biology">Biology</option>
-                  <option value="Computer Science">Computer Science</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
+                  <p>
+                    Create a space for discussing problems, competitions, and
+                    ideas.
+                  </p>
+                </div>
 
-              <div style={{ marginBottom: spacing.md }}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: spacing.xs,
-                    fontWeight: "600",
-                  }}
-                >
-                  Level
-                </label>
-                <input
-                  type="text"
-                  value={newForum.level}
-                  onChange={(e) =>
-                    setNewForum({ ...newForum, level: e.target.value })
-                  }
-                  placeholder="e.g., National Albanian Olympiad 5th Class Phase 1, EGMO Phase 2, IMO, etc."
-                  style={{
-                    width: "100%",
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.body,
-                  }}
-                />
-              </div>
-
-              <div style={{ marginBottom: spacing.md }}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: spacing.xs,
-                    fontWeight: "600",
-                  }}
-                >
-                  Tags (Optional) - {newForum.tags.length}/5
-                </label>
-                {newForum.tags.map((tag, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    <input
-                      type="text"
-                      value={tag}
-                      onChange={(e) => handleTagChange(index, e.target.value)}
-                      style={{
-                        flex: 1,
-                        padding: "10px",
-                        border: "1px solid #ddd",
-                        borderRadius: "4px",
-                        fontSize: "14px",
-                      }}
-                      placeholder={`Tag ${index + 1}`}
-                    />
-                    {newForum.tags.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeTag(index)}
-                        style={{
-                          padding: "10px",
-                          backgroundColor: "#dc3545",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          fontSize: "12px",
-                        }}
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                ))}
-                {newForum.tags.length < 5 && (
-                  <button
-                    type="button"
-                    onClick={addTag}
-                    style={{
-                      padding: "10px 20px",
-                      backgroundColor: "#28a745",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      fontSize: "14px",
-                    }}
-                  >
-                    + Add New Tag
-                  </button>
-                )}
-                <small
-                  style={{
-                    color: "#666",
-                    fontSize: "12px",
-                    display: "block",
-                    marginTop: "5px",
-                  }}
-                >
-                  Add up to 5 tags to help categorize your forum
-                </small>
-              </div>
-
-              <div style={{ marginBottom: spacing.md }}>
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: spacing.sm,
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={newForum.is_private}
-                    onChange={(e) =>
-                      setNewForum({ ...newForum, is_private: e.target.checked })
-                    }
-                  />
-                  <span>Private Forum (requires approval to join)</span>
-                </label>
-              </div>
-              <div style={{ display: "flex", gap: spacing.sm }}>
-                <button
-                  type="submit"
-                  style={{
-                    padding: "16px 32px",
-                    backgroundColor: colors.primary,
-                    color: "white",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    flex: 1,
-                    boxShadow: "0 4px 12px rgba(26, 77, 58, 0.3)",
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = "translateY(-2px)";
-                    e.target.style.boxShadow =
-                      "0 6px 16px rgba(26, 77, 58, 0.4)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = "translateY(0)";
-                    e.target.style.boxShadow =
-                      "0 4px 12px rgba(26, 77, 58, 0.3)";
-                  }}
-                >
-                  Create Forum
-                </button>
                 <button
                   type="button"
+                  className="forum-create-modal__close"
                   onClick={() => setShowCreateForm(false)}
-                  style={{
-                    padding: "16px 32px",
-                    backgroundColor: colors.gray[500],
-                    color: "white",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = "translateY(-1px)";
-                    e.target.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = "translateY(0)";
-                    e.target.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-                  }}
+                  aria-label="Close create forum modal"
                 >
-                  Cancel
+                  ×
                 </button>
               </div>
-            </form>
-          </Card>
+
+              <form className="forums-create-form" onSubmit={handleCreateForum}>
+                <div className="forum-create-modal__body">
+                  <div className="forum-create-modal__field">
+                    <label htmlFor="forum-title">Forum Title</label>
+
+                    <input
+                      id="forum-title"
+                      type="text"
+                      value={newForum.title}
+                      onChange={(event) =>
+                        setNewForum({
+                          ...newForum,
+                          title: event.target.value,
+                        })
+                      }
+                      placeholder="Give your forum a clear name"
+                      required
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="forum-create-modal__field">
+                    <label htmlFor="forum-description">Description</label>
+
+                    <textarea
+                      id="forum-description"
+                      value={newForum.description}
+                      onChange={(event) =>
+                        setNewForum({
+                          ...newForum,
+                          description: event.target.value,
+                        })
+                      }
+                      rows={4}
+                      placeholder="What will this forum be about?"
+                    />
+                  </div>
+
+                  <div className="forum-create-modal__grid">
+                    <div className="forum-create-modal__field">
+                      <label htmlFor="forum-subject">Subject</label>
+
+                      <select
+                        id="forum-subject"
+                        value={newForum.subject}
+                        onChange={(event) =>
+                          setNewForum({
+                            ...newForum,
+                            subject: event.target.value,
+                          })
+                        }
+                      >
+                        <option value="">Select subject</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Biology">Biology</option>
+                        <option value="Computer Science">
+                          Computer Science
+                        </option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    <div className="forum-create-modal__field">
+                      <label htmlFor="forum-level">Level</label>
+
+                      <input
+                        id="forum-level"
+                        type="text"
+                        value={newForum.level}
+                        onChange={(event) =>
+                          setNewForum({
+                            ...newForum,
+                            level: event.target.value,
+                          })
+                        }
+                        placeholder="e.g. IMO, EGMO, National Olympiad"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="forum-create-modal__field">
+                    <div className="forum-create-modal__label-row">
+                      <label>Tags</label>
+
+                      <span>{newForum.tags.length}/5</span>
+                    </div>
+
+                    <div className="forum-create-modal__tags">
+                      {newForum.tags.map((tag, index) => (
+                        <div
+                          key={index}
+                          className="forum-create-modal__tag-row"
+                        >
+                          <input
+                            type="text"
+                            value={tag}
+                            onChange={(event) =>
+                              handleTagChange(index, event.target.value)
+                            }
+                            placeholder={`Tag ${index + 1}`}
+                          />
+
+                          {newForum.tags.length > 1 && (
+                            <button
+                              type="button"
+                              className="forum-create-modal__remove-tag"
+                              onClick={() => removeTag(index)}
+                              aria-label={`Remove tag ${index + 1}`}
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {newForum.tags.length < 5 && (
+                      <button
+                        type="button"
+                        className="forum-create-modal__add-tag"
+                        onClick={addTag}
+                      >
+                        + Add tag
+                      </button>
+                    )}
+
+                    <small className="forum-create-modal__hint">
+                      Add up to 5 tags to help people discover your forum.
+                    </small>
+                  </div>
+
+                  <label className="forum-create-modal__privacy">
+                    <input
+                      type="checkbox"
+                      checked={newForum.is_private}
+                      onChange={(event) =>
+                        setNewForum({
+                          ...newForum,
+                          is_private: event.target.checked,
+                        })
+                      }
+                    />
+
+                    <span className="forum-create-modal__privacy-copy">
+                      <strong>Private forum</strong>
+
+                      <span>
+                        New members will need approval before joining.
+                      </span>
+                    </span>
+                  </label>
+                </div>
+
+                <div className="forum-create-modal__actions">
+                  <button
+                    type="button"
+                    className="forum-create-modal__cancel"
+                    onClick={() => setShowCreateForm(false)}
+                  >
+                    Cancel
+                  </button>
+
+                  <button type="submit" className="forum-create-modal__submit">
+                    Create Forum
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
 
         {/* Forum Count */}
@@ -1223,17 +1111,18 @@ const Forums = () => {
               Next
             </Button>
 
+            {/* Floating Create Forum Button */}
             <button
               type="button"
               className="forum-create-fab"
-              onClick={() => {
-                setShowCreateForm(true);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              aria-label="Create Forum"
+              onClick={() => setShowCreateForm(true)}
+              aria-label="Create New Forum"
+              title="Create New Forum"
             >
               <span className="forum-create-fab__label">Create Forum</span>
-              <span className="forum-create-fab__plus">+</span>
+              <span className="forum-create-fab__plus" aria-hidden="true">
+                +
+              </span>
             </button>
           </div>
         )}
