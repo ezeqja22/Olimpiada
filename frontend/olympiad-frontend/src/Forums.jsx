@@ -1110,20 +1110,6 @@ const Forums = () => {
             >
               Next
             </Button>
-
-            {/* Floating Create Forum Button */}
-            <button
-              type="button"
-              className="forum-create-fab"
-              onClick={() => setShowCreateForm(true)}
-              aria-label="Create New Forum"
-              title="Create New Forum"
-            >
-              <span className="forum-create-fab__label">Create Forum</span>
-              <span className="forum-create-fab__plus" aria-hidden="true">
-                +
-              </span>
-            </button>
           </div>
         )}
 
@@ -1147,6 +1133,22 @@ const Forums = () => {
             </p>
           </div>
         )}
+
+        {/* Floating Create Forum Button */}
+
+        <button
+          type="button"
+          className="forum-create-fab"
+          onClick={() => setShowCreateForm(true)}
+          aria-label="Create New Forum"
+          title="Create New Forum"
+        >
+          <span className="forum-create-fab__label">Create Forum</span>
+
+          <span className="forum-create-fab__plus" aria-hidden="true">
+            +
+          </span>
+        </button>
 
         {/* Invite Modal */}
         {showInviteModal && selectedForumId && (
