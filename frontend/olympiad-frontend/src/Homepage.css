@@ -189,7 +189,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--homepage-secondary, #764ba2);
+  background: var(--homepage-secondary, #2d7a5f);
   color: white;
   font-weight: 800;
 }

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { colors, spacing, typography, shadows } from "../designSystem";
+import { typography } from "../designSystem";
 import { getUserInitial } from "../utils";
 import NotificationBell from "./NotificationBell";
 import ForumsSidebar from "./ForumsSidebar";
 import { useSiteSettings } from "../hooks/useSiteSettings";
 import { useFeatureSettings } from "../hooks/useFeatureSettings";
 import { useAuth } from "../context/AuthContext";
+import "./Header.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
@@ -49,6 +50,21 @@ const getSubjectIcon = (subject) => {
   return "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760828151/other_subject_nkoxvo.svg";
 };
 
+const ChevronIcon = () => (
+  <svg
+    className="site-header-chevron"
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="m6 8 4 4 4-4" />
+  </svg>
+);
+
 function Header({ showHomeButton = false }) {
   const { currentUser, authLoading, logout } = useAuth();
 
@@ -80,15 +96,24 @@ function Header({ showHomeButton = false }) {
     isMobile && location.pathname.startsWith("/subject/");
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+    const mediaQuery = window.matchMedia("(max-width: 1020px)");
+
+    const updateMobileState = () => {
+      setIsMobile(mediaQuery.matches);
     };
 
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
+    updateMobileState();
+    mediaQuery.addEventListener("change", updateMobileState);
 
-    return () => window.removeEventListener("resize", checkMobile);
+    return () => {
+      mediaQuery.removeEventListener("change", updateMobileState);
+    };
   }, []);
+
+  useEffect(() => {
+    setShowSubjectDropdown(false);
+    setShowUserDropdown(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (siteSettings.site_name) {
@@ -173,7 +198,9 @@ function Header({ showHomeButton = false }) {
       fetchMyForums();
     }
 
-    setShowHamburgerMenu((prev) => !prev);
+    setShowHamburgerMenu((previous) => !previous);
+    setShowSubjectDropdown(false);
+    setShowUserDropdown(false);
   };
 
   const handleForumClick = (forumId) => {
@@ -190,17 +217,13 @@ function Header({ showHomeButton = false }) {
     setShowHamburgerMenu(false);
   };
 
-  const handleUserDropdownClose = () => {
-    setShowUserDropdown(false);
-  };
-
   const togglePin = (forumId) => {
-    setPinnedForums((prev) => {
-      const isPinned = prev.includes(forumId);
+    setPinnedForums((previous) => {
+      const isPinned = previous.includes(forumId);
 
       const newPinnedForums = isPinned
-        ? prev.filter((id) => id !== forumId)
-        : [...prev, forumId];
+        ? previous.filter((id) => id !== forumId)
+        : [...previous, forumId];
 
       localStorage.setItem("pinnedForums", JSON.stringify(newPinnedForums));
 
@@ -208,41 +231,41 @@ function Header({ showHomeButton = false }) {
     });
   };
 
+  const handleForumsNavigation = () => {
+    if (checkFeatureEnabled("forums_enabled")) {
+      navigate("/forums");
+      setShowSubjectDropdown(false);
+      setShowUserDropdown(false);
+      return;
+    }
+
+    showFeatureDisabledAlert("Forums");
+  };
+
   const renderAuthLoadingDesktop = () => (
-    <div
-      style={{
-        width: "150px",
-        height: "40px",
-        borderRadius: "999px",
-        backgroundColor: "rgba(255, 255, 255, 0.18)",
-      }}
-    />
+    <div className="site-header-auth-skeleton site-header-auth-skeleton--desktop" />
   );
 
   const renderAuthLoadingMobile = () => (
-    <div
-      style={{
-        width: "28px",
-        height: "28px",
-        borderRadius: "50%",
-        backgroundColor: "rgba(255, 255, 255, 0.18)",
-      }}
-    />
+    <div className="site-header-auth-skeleton site-header-auth-skeleton--mobile" />
   );
 
-  const renderUserAvatar = (size = 32, fontSize = typography.fontSize.sm) => {
+  const renderUserAvatar = (
+    size = 32,
+    fontSize = typography.fontSize.sm,
+    className = "",
+  ) => {
     if (!currentUser) return null;
 
     if (currentUser.profile_picture) {
       return (
         <img
           src={currentUser.profile_picture}
-          alt="Profile"
+          alt={`${currentUser.username}'s profile`}
+          className={`site-header-avatar ${className}`}
           style={{
             width: `${size}px`,
             height: `${size}px`,
-            borderRadius: "50%",
-            objectFit: "cover",
           }}
         />
       );
@@ -250,18 +273,13 @@ function Header({ showHomeButton = false }) {
 
     return (
       <div
+        className={`site-header-avatar-fallback ${className}`}
         style={{
           width: `${size}px`,
           height: `${size}px`,
-          backgroundColor: colors.secondary,
-          borderRadius: "50%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: colors.white,
           fontSize,
-          fontWeight: typography.fontWeight.bold,
         }}
+        aria-hidden="true"
       >
         {getUserInitial(currentUser.username)}
       </div>
@@ -273,57 +291,19 @@ function Header({ showHomeButton = false }) {
 
     return (
       <div
-        style={{
-          position: "absolute",
-          top: "100%",
-          right: mobile ? 0 : "auto",
-          left: mobile ? "auto" : 0,
-          backgroundColor: colors.white,
-          border: `1px solid ${colors.gray[300]}`,
-          borderRadius: "6px",
-          boxShadow: shadows.lg,
-          zIndex: 1000,
-          minWidth: mobile ? "150px" : "200px",
-          marginTop: spacing.xs,
-        }}
+        className={`site-header-dropdown site-header-subject-dropdown ${
+          mobile ? "site-header-dropdown--mobile" : ""
+        }`}
       >
         {SUBJECTS.map((subject) => (
           <button
             key={subject}
+            type="button"
+            className="site-header-dropdown-row"
             onClick={() => handleSubjectClick(subject)}
-            style={{
-              width: "100%",
-              padding: mobile ? "12px 16px" : `${spacing.md} ${spacing.md}`,
-              border: "none",
-              backgroundColor: "transparent",
-              color: mobile ? "#374151" : colors.dark,
-              textAlign: "left",
-              cursor: "pointer",
-              fontSize: mobile ? "14px" : typography.fontSize.base,
-              transition: "background-color 0.2s",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = mobile
-                ? "#f3f4f6"
-                : colors.gray[100];
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
           >
-            <img
-              src={getSubjectIcon(subject)}
-              alt={subject}
-              style={{
-                width: "20px",
-                height: "20px",
-                objectFit: "contain",
-              }}
-            />
-            {subject}
+            <img src={getSubjectIcon(subject)} alt="" aria-hidden="true" />
+            <span>{subject}</span>
           </button>
         ))}
       </div>
@@ -335,167 +315,62 @@ function Header({ showHomeButton = false }) {
 
     return (
       <div
-        style={{
-          position: "absolute",
-          top: "100%",
-          right: 0,
-          backgroundColor: colors.white,
-          border: `1px solid ${colors.gray[300]}`,
-          borderRadius: "6px",
-          boxShadow: shadows.lg,
-          zIndex: 1001,
-          minWidth: mobile ? "140px" : "200px",
-          marginTop: spacing.xs,
-        }}
+        className={`site-header-dropdown site-header-user-dropdown ${
+          mobile ? "site-header-user-dropdown--mobile" : ""
+        }`}
       >
-        <Link to="/profile" style={{ textDecoration: "none" }}>
-          <div
-            style={{
-              padding: mobile ? "8px 12px" : `${spacing.md} ${spacing.md}`,
-              color: mobile ? "#374151" : colors.dark,
-              cursor: "pointer",
-              transition: "background-color 0.2s",
-              borderBottom: `1px solid ${
-                mobile ? "#f3f4f6" : colors.gray[200]
-              }`,
-              display: "flex",
-              alignItems: "center",
-              gap: mobile ? "6px" : "8px",
-              fontSize: mobile ? "12px" : typography.fontSize.base,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = mobile
-                ? "#f3f4f6"
-                : colors.gray[100];
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-          >
-            <img
-              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Profile_Icon_Green_t3zoz5.svg"
-              alt="Profile"
-              style={{
-                width: mobile ? "14px" : "16px",
-                height: mobile ? "14px" : "16px",
-                objectFit: "contain",
-              }}
-            />
-            {mobile ? "Profile" : "My Profile"}
-          </div>
+        <Link
+          to="/profile"
+          className="site-header-dropdown-row"
+          onClick={() => setShowUserDropdown(false)}
+        >
+          <img
+            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Profile_Icon_Green_t3zoz5.svg"
+            alt=""
+            aria-hidden="true"
+          />
+          <span>My Profile</span>
         </Link>
 
-        <Link to="/settings" style={{ textDecoration: "none" }}>
-          <div
-            style={{
-              padding: mobile ? "8px 12px" : `${spacing.md} ${spacing.md}`,
-              color: mobile ? "#374151" : colors.dark,
-              cursor: "pointer",
-              transition: "background-color 0.2s",
-              borderBottom: `1px solid ${
-                mobile ? "#f3f4f6" : colors.gray[200]
-              }`,
-              display: "flex",
-              alignItems: "center",
-              gap: mobile ? "6px" : "8px",
-              fontSize: mobile ? "12px" : typography.fontSize.base,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = mobile
-                ? "#f3f4f6"
-                : colors.gray[100];
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-          >
-            <img
-              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
-              alt="Settings"
-              style={{
-                width: mobile ? "14px" : "16px",
-                height: mobile ? "14px" : "16px",
-                objectFit: "contain",
-              }}
-            />
-            Settings
-          </div>
+        <Link
+          to="/settings"
+          className="site-header-dropdown-row"
+          onClick={() => setShowUserDropdown(false)}
+        >
+          <img
+            src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
+            alt=""
+            aria-hidden="true"
+          />
+          <span>Settings</span>
         </Link>
 
         {(currentUser.role === "admin" || currentUser.role === "moderator") && (
-          <Link to="/admin" style={{ textDecoration: "none" }}>
-            <div
-              style={{
-                padding: mobile ? "8px 12px" : "12px 16px",
-                color: "#667eea",
-                cursor: "pointer",
-                fontSize: mobile ? "12px" : "14px",
-                borderBottom: `1px solid ${
-                  mobile ? "#f3f4f6" : colors.gray[200]
-                }`,
-                display: "flex",
-                alignItems: "center",
-                gap: mobile ? "6px" : "8px",
-                fontWeight: "500",
-                transition: "background-color 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = mobile
-                  ? "#f3f4f6"
-                  : "#f8f9fa";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }}
-            >
-              <img
-                src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
-                alt="Admin"
-                style={{
-                  width: mobile ? "14px" : "16px",
-                  height: mobile ? "14px" : "16px",
-                  objectFit: "contain",
-                }}
-              />
-              Admin Panel
-            </div>
+          <Link
+            to="/admin"
+            className="site-header-dropdown-row site-header-dropdown-row--admin"
+            onClick={() => setShowUserDropdown(false)}
+          >
+            <img
+              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811043/Settings_Icon_rzokwo.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span>Admin Panel</span>
           </Link>
         )}
 
         <button
+          type="button"
+          className="site-header-dropdown-row site-header-dropdown-row--danger"
           onClick={handleLogout}
-          style={{
-            width: "100%",
-            padding: mobile ? "8px 12px" : `${spacing.md} ${spacing.md}`,
-            border: "none",
-            backgroundColor: "transparent",
-            color: mobile ? "#dc2626" : colors.danger,
-            cursor: "pointer",
-            fontSize: mobile ? "12px" : typography.fontSize.base,
-            transition: "background-color 0.2s",
-            display: "flex",
-            alignItems: "center",
-            gap: mobile ? "6px" : spacing.sm,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = mobile
-              ? "#fef2f2"
-              : colors.gray[100];
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
         >
           <img
             src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760802149/LOG_OUT_RED_d1wwc3.svg"
-            alt="Logout"
-            style={{
-              width: mobile ? "14px" : "16px",
-              height: mobile ? "14px" : "16px",
-              objectFit: "contain",
-            }}
+            alt=""
+            aria-hidden="true"
           />
-          Logout
+          <span>Logout</span>
         </button>
       </div>
     );
@@ -508,28 +383,14 @@ function Header({ showHomeButton = false }) {
 
     if (!currentUser) {
       return (
-        <div style={{ display: "flex", gap: spacing.sm }}>
-          <Link
-            to="/login"
-            style={{
-              color: colors.white,
-              textDecoration: "none",
-              fontWeight: typography.fontWeight.medium,
-              padding: `${spacing.sm} ${spacing.md}`,
-              borderRadius: "6px",
-              transition: "background-color 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = colors.secondary;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-          >
+        <div className="site-header-desktop-auth-actions">
+          <Link to="/login" className="site-header-login-link">
             Login
           </Link>
 
-          <span
+          <button
+            type="button"
+            className="site-header-signup-button"
             onClick={() => {
               if (checkFeatureEnabled("registration_enabled")) {
                 navigate("/signup");
@@ -537,70 +398,34 @@ function Header({ showHomeButton = false }) {
                 showFeatureDisabledAlert("Registration");
               }
             }}
-            style={{
-              backgroundColor: colors.accent,
-              color: colors.white,
-              textDecoration: "none",
-              fontWeight: typography.fontWeight.medium,
-              padding: `${spacing.sm} ${spacing.md}`,
-              borderRadius: "6px",
-              transition: "background-color 0.2s",
-              cursor: "pointer",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#218838";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = colors.accent;
-            }}
           >
             Signup
-          </span>
+          </button>
         </div>
       );
     }
 
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
+      <div className="site-header-desktop-user-actions">
         <NotificationBell />
 
-        <div style={{ position: "relative" }}>
+        <div className="site-header-user-wrap">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowUserDropdown((prev) => !prev);
+            type="button"
+            className="site-header-user-trigger"
+            onClick={(event) => {
+              event.stopPropagation();
+              setShowUserDropdown((previous) => !previous);
+              setShowSubjectDropdown(false);
             }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: spacing.sm,
-              backgroundColor: "transparent",
-              border: "none",
-              color: colors.white,
-              cursor: "pointer",
-              padding: `${spacing.sm} ${spacing.md}`,
-              borderRadius: "6px",
-              transition: "background-color 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = colors.secondary;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
+            aria-expanded={showUserDropdown}
+            aria-haspopup="menu"
           >
-            {renderUserAvatar(32, typography.fontSize.sm)}
+            {renderUserAvatar(34, typography.fontSize.sm)}
 
-            <span
-              style={{
-                fontSize: typography.fontSize.base,
-                fontWeight: typography.fontWeight.medium,
-              }}
-            >
-              {currentUser.username}
-            </span>
+            <span className="site-header-username">{currentUser.username}</span>
 
-            <span style={{ fontSize: typography.fontSize.xs }}>▼</span>
+            <ChevronIcon />
           </button>
 
           {renderUserDropdown(false)}
@@ -616,360 +441,243 @@ function Header({ showHomeButton = false }) {
 
     if (!currentUser) {
       return (
-        <Link
-          to="/login"
-          style={{
-            color: "white",
-            textDecoration: "none",
-            fontSize: "11px",
-            fontWeight: "500",
-            padding: "4px 6px",
-            borderRadius: "4px",
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-          }}
-        >
+        <Link to="/login" className="site-header-mobile-login-link">
           Login
         </Link>
       );
     }
 
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "4px",
-          position: "relative",
-        }}
-      >
-        <NotificationBell />
+      <>
+        <div className="site-header-mobile-notification-wrap">
+          <NotificationBell />
+        </div>
 
-        <button
-          onClick={() => setShowUserDropdown((prev) => !prev)}
-          style={{
-            backgroundColor: "transparent",
-            border: "none",
-            color: "white",
-            cursor: "pointer",
-            padding: "4px",
-            borderRadius: "4px",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          {renderUserAvatar(24, "10px")}
-        </button>
+        <div className="site-header-user-wrap site-header-mobile-user-wrap">
+          <button
+            type="button"
+            className="site-header-mobile-profile-button"
+            onClick={() => {
+              setShowUserDropdown((previous) => !previous);
+              setShowSubjectDropdown(false);
+            }}
+            aria-label="Open profile menu"
+            aria-expanded={showUserDropdown}
+          >
+            {renderUserAvatar(30, "0.78rem", "site-header-mobile-avatar")}
+          </button>
 
-        {renderUserDropdown(true)}
-      </div>
+          {renderUserDropdown(true)}
+        </div>
+      </>
     );
   };
 
-  return (
-    <header
-      style={{
-        backgroundColor: colors.primary,
-        color: colors.white,
-        padding: isMobile
-          ? `${spacing.xs} ${spacing.sm}`
-          : `${spacing.md} ${spacing.xl}`,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        boxShadow: shadows.md,
-        position: "sticky",
-        top: 0,
-        zIndex: 1000,
-        minHeight: isMobile ? "50px" : "auto",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
-        {!authLoading && currentUser && !showHamburgerMenu && (
-          <button
-            onClick={handleHamburgerClick}
-            style={{
-              backgroundColor: "transparent",
-              border: "none",
-              color: colors.white,
-              cursor: "pointer",
-              padding: spacing.sm,
-              borderRadius: "4px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "3px",
-              transition: "background-color 0.2s",
-              zIndex: 1001,
-              position: "relative",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = colors.secondary;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-          >
-            <img
-              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
-              alt="Menu"
-              style={{
-                width: "20px",
-                height: "20px",
-                objectFit: "contain",
-              }}
-            />
-          </button>
-        )}
-
-        <Link
-          to="/homepage"
-          style={{ textDecoration: "none", color: "inherit" }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: isMobile ? "4px" : spacing.sm,
-              marginLeft: isMobile ? "4px" : spacing.lg,
-            }}
-          >
-            <img
-              src={
-                siteSettings.site_logo && siteSettings.site_logo.trim() !== ""
-                  ? siteSettings.site_logo
-                  : DEFAULT_LOGO
-              }
-              alt={siteSettings.site_name || "Olimpiada"}
-              style={{
-                height: isMobile ? "20px" : "32px",
-                width: "auto",
-                maxWidth: isMobile ? "80px" : "200px",
-                objectFit: "contain",
-              }}
-              onError={(e) => {
-                e.currentTarget.src = DEFAULT_LOGO;
-              }}
-            />
-
-            <h1
-              style={{
-                margin: 0,
-                fontSize: isMobile ? "16px" : typography.fontSize["2xl"],
-                fontWeight: typography.fontWeight.bold,
-                cursor: "pointer",
-                display: "block",
-              }}
-            >
-              {siteSettings.site_name || "Olimpiada"}
-            </h1>
-          </div>
-        </Link>
-      </div>
-
-      <nav
-        style={{
-          display: isMobile ? "none" : "flex",
-          alignItems: "center",
-          gap: spacing.md,
-        }}
-      >
-        {showHomeButton && (
-          <Link
-            to="/homepage"
-            style={{
-              color: colors.white,
-              textDecoration: "none",
-              fontWeight: typography.fontWeight.medium,
-              padding: `${spacing.sm} ${spacing.md}`,
-              borderRadius: "6px",
-              transition: "background-color 0.2s",
-              display: "flex",
-              alignItems: "center",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = colors.secondary;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-          >
-            <img
-              src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795078/Home_icon_gezrca.svg"
-              alt="Home"
-              style={{
-                height: "16px",
-                width: "16px",
-                objectFit: "contain",
-                marginRight: "6px",
-              }}
-            />
-            Home
-          </Link>
-        )}
-
-        <Link
-          to="/feed"
-          style={{
-            color: colors.white,
-            textDecoration: "none",
-            fontWeight: typography.fontWeight.medium,
-            padding: `${spacing.sm} ${spacing.md}`,
-            borderRadius: "6px",
-            transition: "background-color 0.2s",
-            display: "flex",
-            alignItems: "center",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.secondary;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-        >
-          Feed
-        </Link>
-
-        <div style={{ position: "relative" }}>
-          <span
-            onClick={() => setShowSubjectDropdown((prev) => !prev)}
-            style={{
-              backgroundColor: "transparent",
-              color: colors.white,
-              textDecoration: "none",
-              padding: `${spacing.sm} ${spacing.md}`,
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontWeight: typography.fontWeight.medium,
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-              transition: "background-color 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = colors.secondary;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-          >
-            Subject
-            <span style={{ fontSize: typography.fontSize.xs }}>▼</span>
-          </span>
-
-          {renderSubjectDropdown(false)}
-        </div>
-
-        <span
-          onClick={() => {
-            if (checkFeatureEnabled("forums_enabled")) {
-              navigate("/forums");
-            } else {
-              showFeatureDisabledAlert("Forums");
-            }
-          }}
-          style={{
-            color: colors.white,
-            textDecoration: "none",
-            fontWeight: typography.fontWeight.medium,
-            padding: `${spacing.sm} ${spacing.md}`,
-            borderRadius: "6px",
-            transition: "background-color 0.2s",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.secondary;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-        >
-          Forums
-        </span>
-
-        {renderDesktopAuthSection()}
-      </nav>
-
-      {isMobile && (
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          {!shouldHideFeedButton && (
-            <Link
-              to="/feed"
-              style={{
-                color: "white",
-                textDecoration: "none",
-                fontSize: "11px",
-                fontWeight: "500",
-                padding: "4px 6px",
-                borderRadius: "4px",
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-              }}
-            >
+  const mobileNavItems = [
+    !shouldHideFeedButton
+      ? {
+          key: "feed",
+          element: (
+            <Link to="/feed" className="site-header-mobile-nav-link">
               Feed
             </Link>
-          )}
-
-          {!shouldHideForumsButton && (
-            <Link
-              to="/forums"
-              style={{
-                color: "white",
-                textDecoration: "none",
-                fontSize: "11px",
-                fontWeight: "500",
-                padding: "4px 6px",
-                borderRadius: "4px",
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-              }}
-            >
-              Forums
-            </Link>
-          )}
-
-          {!shouldHideSubjectDropdown && (
-            <div style={{ position: "relative" }}>
+          ),
+        }
+      : null,
+    !shouldHideSubjectDropdown
+      ? {
+          key: "subject",
+          element: (
+            <div className="site-header-mobile-subject-wrap">
               <button
-                onClick={() => setShowSubjectDropdown((prev) => !prev)}
-                style={{
-                  color: "white",
-                  textDecoration: "none",
-                  fontSize: "11px",
-                  fontWeight: "500",
-                  padding: "4px 6px",
-                  borderRadius: "4px",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  border: "none",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "3px",
+                type="button"
+                className="site-header-mobile-nav-link site-header-mobile-nav-button"
+                onClick={() => {
+                  setShowSubjectDropdown((previous) => !previous);
+                  setShowUserDropdown(false);
                 }}
+                aria-expanded={showSubjectDropdown}
               >
                 Subject
-                <span style={{ fontSize: "9px" }}>▼</span>
+                <ChevronIcon />
               </button>
 
               {renderSubjectDropdown(true)}
             </div>
-          )}
+          ),
+        }
+      : null,
+    !shouldHideForumsButton
+      ? {
+          key: "forums",
+          element: (
+            <button
+              type="button"
+              className="site-header-mobile-nav-link site-header-mobile-nav-button"
+              onClick={handleForumsNavigation}
+            >
+              Forums
+            </button>
+          ),
+        }
+      : null,
+  ].filter(Boolean);
 
-          {renderMobileAuthSection()}
+  return (
+    <>
+      <header className="site-header">
+        <div className="site-header-desktop">
+          <div className="site-header-desktop-inner">
+            <div className="site-header-brand-area">
+              {!authLoading && currentUser && (
+                <button
+                  type="button"
+                  className="site-header-icon-button"
+                  onClick={handleHamburgerClick}
+                  aria-label="Open forums menu"
+                >
+                  <img
+                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                </button>
+              )}
+
+              <Link to="/homepage" className="site-header-brand-link">
+                <img
+                  src={
+                    siteSettings.site_logo &&
+                    siteSettings.site_logo.trim() !== ""
+                      ? siteSettings.site_logo
+                      : DEFAULT_LOGO
+                  }
+                  alt={siteSettings.site_name || "Olimpiada"}
+                  className="site-header-logo"
+                  onError={(event) => {
+                    event.currentTarget.src = DEFAULT_LOGO;
+                  }}
+                />
+
+                <span className="site-header-site-name">
+                  {siteSettings.site_name || "Olimpiada"}
+                </span>
+              </Link>
+            </div>
+
+            <nav className="site-header-desktop-nav">
+              {showHomeButton && (
+                <Link to="/homepage" className="site-header-nav-link">
+                  <img
+                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760795078/Home_icon_gezrca.svg"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  Home
+                </Link>
+              )}
+
+              <Link to="/feed" className="site-header-nav-link">
+                Feed
+              </Link>
+
+              <div className="site-header-subject-wrap">
+                <button
+                  type="button"
+                  className="site-header-nav-link site-header-nav-button"
+                  onClick={() => {
+                    setShowSubjectDropdown((previous) => !previous);
+                    setShowUserDropdown(false);
+                  }}
+                  aria-expanded={showSubjectDropdown}
+                >
+                  Subject
+                  <ChevronIcon />
+                </button>
+
+                {renderSubjectDropdown(false)}
+              </div>
+
+              <button
+                type="button"
+                className="site-header-nav-link site-header-nav-button"
+                onClick={handleForumsNavigation}
+              >
+                Forums
+              </button>
+
+              {renderDesktopAuthSection()}
+            </nav>
+          </div>
         </div>
-      )}
 
-      {showUserDropdown && (
-        <div
-          onClick={handleUserDropdownClose}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 999,
-          }}
-        />
-      )}
+        <div className="site-header-mobile">
+          <div className="site-header-mobile-top-row">
+            <div className="site-header-mobile-left-slot">
+              {!authLoading && currentUser && (
+                <button
+                  type="button"
+                  className="site-header-mobile-icon-button"
+                  onClick={handleHamburgerClick}
+                  aria-label="Open forums menu"
+                >
+                  <img
+                    src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1761040303/sanwich_icon_hlmeja.svg"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                </button>
+              )}
+            </div>
+
+            <Link to="/homepage" className="site-header-mobile-brand-link">
+              <img
+                src={
+                  siteSettings.site_logo && siteSettings.site_logo.trim() !== ""
+                    ? siteSettings.site_logo
+                    : DEFAULT_LOGO
+                }
+                alt={siteSettings.site_name || "Olimpiada"}
+                className="site-header-mobile-logo"
+                onError={(event) => {
+                  event.currentTarget.src = DEFAULT_LOGO;
+                }}
+              />
+
+              <span>{siteSettings.site_name || "Olimpiada"}</span>
+            </Link>
+
+            <div className="site-header-mobile-right-slot">
+              {renderMobileAuthSection()}
+            </div>
+          </div>
+
+          {mobileNavItems.length > 0 && (
+            <div
+              className="site-header-mobile-nav-row"
+              style={{
+                gridTemplateColumns: `repeat(${mobileNavItems.length}, minmax(0, 1fr))`,
+              }}
+            >
+              {mobileNavItems.map((item) => (
+                <React.Fragment key={item.key}>{item.element}</React.Fragment>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {(showSubjectDropdown || showUserDropdown) && (
+          <button
+            type="button"
+            className="site-header-dropdown-backdrop"
+            onClick={() => {
+              setShowSubjectDropdown(false);
+              setShowUserDropdown(false);
+            }}
+            aria-label="Close menu"
+          />
+        )}
+      </header>
 
       <ForumsSidebar
         open={showHamburgerMenu}
@@ -981,7 +689,7 @@ function Header({ showHomeButton = false }) {
         onForumClick={handleForumClick}
         onTogglePin={togglePin}
       />
-    </header>
+    </>
   );
 }
 

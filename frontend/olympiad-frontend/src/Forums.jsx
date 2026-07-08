@@ -1222,6 +1222,19 @@ const Forums = () => {
             >
               Next
             </Button>
+
+            <button
+              type="button"
+              className="forum-create-fab"
+              onClick={() => {
+                setShowCreateForm(true);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              aria-label="Create Forum"
+            >
+              <span className="forum-create-fab__label">Create Forum</span>
+              <span className="forum-create-fab__plus">+</span>
+            </button>
           </div>
         )}
 

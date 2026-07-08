@@ -1,0 +1,95 @@
+.forum-create-fab {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 1000;
+
+  width: 60px;
+  height: 60px;
+
+  border: none;
+  border-radius: 999px;
+  background: #1a4d3a;
+  color: white;
+
+  box-shadow: 0 10px 28px rgba(26, 77, 58, 0.3);
+
+  cursor: pointer;
+  overflow: hidden;
+
+  transition:
+    width 0.35s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* The + always stays on the right side */
+.forum-create-fab__plus {
+  position: absolute;
+  right: 0;
+
+  width: 60px;
+  height: 60px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1;
+
+  transition: transform 0.3s ease;
+}
+
+/* Hidden text */
+.forum-create-fab__label {
+  position: absolute;
+  right: 58px;
+
+  white-space: nowrap;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  opacity: 0;
+  transform: translateX(10px);
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.25s ease;
+}
+
+/* Unfold on desktop hover */
+@media (hover: hover) {
+  .forum-create-fab:hover {
+    width: 190px;
+    background: #163f31;
+    box-shadow: 0 14px 34px rgba(26, 77, 58, 0.38);
+  }
+
+  .forum-create-fab:hover .forum-create-fab__label {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .forum-create-fab:hover .forum-create-fab__plus {
+    transform: rotate(90deg);
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .forum-create-fab {
+    right: 20px;
+    bottom: 20px;
+
+    width: 56px;
+    height: 56px;
+  }
+
+  .forum-create-fab__plus {
+    width: 56px;
+    height: 56px;
+  }
+}
