@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 psycopg2
+psycopg[binary]>=3.2,<4
 sqlalchemy
 bcrypt==4.0.1
 pyjwt
