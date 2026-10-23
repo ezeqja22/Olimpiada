@@ -76,26 +76,29 @@ router = APIRouter()
 
 # Signed upload signature generator for Cloudinary
 @router.get("/cloudinary/signature")
-def get_cloudinary_signature(folder: str = "comments", upload_preset: str = None):
-    """Return timestamp and signature for signed uploads.
-    If upload_preset is provided, include it in the signature string.
-    """
+def get_cloudinary_signature(
+    _current_user: User = Depends(get_verified_user),
+):
+    """Sign uploads for the server-configured signed comments preset."""
     cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
     api_key = os.getenv("CLOUDINARY_API_KEY")
     api_secret = os.getenv("CLOUDINARY_API_SECRET")
+    upload_preset = os.getenv("CLOUDINARY_UPLOAD_PRESET")
     if not (cloud_name and api_key and api_secret):
         raise HTTPException(status_code=500, detail="Cloudinary credentials not configured")
+    if not upload_preset:
+        raise HTTPException(status_code=500, detail="Cloudinary upload preset not configured")
 
     timestamp = int(time.time())
+    folder = "comments"
 
     # Build the string to sign (alphabetically by parameter name)
-    params = []
-    if folder:
-        params.append(f"folder={folder}")
-    if upload_preset:
-        params.append(f"upload_preset={upload_preset}")
-    params.append(f"timestamp={timestamp}")
-    to_sign = "&".join(sorted(params)) + api_secret
+    params = {
+        "folder": folder,
+        "timestamp": timestamp,
+        "upload_preset": upload_preset,
+    }
+    to_sign = "&".join(f"{key}={params[key]}" for key in sorted(params)) + api_secret
 
     signature = hashlib.sha1(to_sign.encode("utf-8")).hexdigest()
 
