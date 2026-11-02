@@ -47,8 +47,8 @@ app = FastAPI()
 # Create database tables with error handling
 
 try:
-    models.Base.metadata.create_all(bind=engine)
-    print("Database tables created successfully")
+    # All schema changes must be applied explicitly with: alembic upgrade head
+    print("Database schema is managed by Alembic")
 except Exception as e:
     print(f"Warning: Could not create database tables: {e}")
     print("This is normal if the database is not available yet")
@@ -120,11 +120,29 @@ async def settings_middleware(request: Request, call_next):
         except Exception:
             pass
 
+# Strict server-side entitlement gate: frontend locking is display only.
+from phase1_gate import gate_request
+from database import SessionLocal
+
+@app.middleware("http")
+async def subscription_gate_middleware(request: Request, call_next):
+    with SessionLocal() as session:
+        denied = gate_request(request, session)
+    if denied is not None:
+        return denied
+    return await call_next(request)
+
 # Include routers only if they were imported successfully
 if auth_router:
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
 if admin_router:
     app.include_router(admin_router, tags=["admin"])
+from phase1_routes import router as phase1_router
+app.include_router(phase1_router)
+from phase2_routes import router as phase2_router
+app.include_router(phase2_router)
+from phase3_routes import router as phase3_router
+app.include_router(phase3_router)
 # Removed notification admin router
 
 # Public site info endpoint (no auth required)
@@ -142,6 +160,7 @@ async def get_site_info():
         feature_settings = settings_service.get_feature_settings() if settings_service else {}
         
         result = {
+            "ga4_measurement_id": (lambda row: row.value if row else "")(db.query(models.SystemSettings).filter(models.SystemSettings.key == "google_analytics_id").first()),
             "site_name": site_settings.get('name', 'Science Pioneers'),
             "site_description": site_settings.get('description', 'A platform for science enthusiasts'),
             "site_logo": site_settings.get('logo', ''),
@@ -165,6 +184,7 @@ async def get_site_info():
     except Exception as e:
         # Return defaults if settings service fails
         return {
+            "ga4_measurement_id": "",
             "site_name": "Science Pioneers",
             "site_description": "A platform for science enthusiasts",
             "site_logo": "",
@@ -220,6 +240,12 @@ async def startup_event():
         print("Starting background cleanup task...")
         asyncio.create_task(periodic_cleanup())
         print("Background cleanup task started successfully")
+        # Single-replica alternative to a paid/extra cron service.
+        # Leave disabled when a separate phase2_cron.py worker already runs.
+        from inline_scheduler import inline_scheduler_enabled, inline_scheduler_loop
+        if inline_scheduler_enabled():
+            asyncio.create_task(inline_scheduler_loop())
+            print("Optional inline weekly scheduler enabled")
     except Exception as e:
         print(f"ERROR starting background task: {e}")
         import traceback
@@ -231,6 +257,10 @@ async def periodic_cleanup():
         try:
             await asyncio.sleep(300)  # 5 minutes
             await cleanup_expired_users()
+            from phase1_jobs import anonymize_inactive_accounts, send_annual_finance_report
+            with SessionLocal() as db:
+                anonymize_inactive_accounts(db)
+                send_annual_finance_report(db)
         except Exception as e:
             print(f"ERROR in periodic_cleanup: {e}")
             import traceback

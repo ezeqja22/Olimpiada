@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./AdminLayout.css";
+import { AdminFinance } from "./AdminPhase1";
+import GA4Dashboard from "./GA4Dashboard";
 
 const AdminAnalytics = () => {
   const [analytics, setAnalytics] = useState(null);
@@ -609,6 +611,8 @@ const AdminAnalytics = () => {
         </div>
       </div>
 
+      <GA4Dashboard />
+      <AdminFinance />
       {/* System Health */}
       <div className="admin-card">
         <h2>System Health</h2>

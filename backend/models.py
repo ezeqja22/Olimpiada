@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, UniqueConstraint, Text, JSON
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, UniqueConstraint, Text, JSON, Date
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from database import Base
@@ -12,7 +12,8 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
-    role = Column(String, default="user")  # 'admin', 'moderator', 'user'
+    role = Column(String, default="student")  # 'admin', 'moderator', 'user'
+    preferred_language = Column(String(2), nullable=False, default="sq")
     bio = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     profile_picture = Column(String, nullable=True)
@@ -24,6 +25,11 @@ class User(Base):
     is_banned = Column(Boolean, default=False)
     banned_at = Column(DateTime, nullable=True)
     ban_reason = Column(String, nullable=True)
+    last_activity_at = Column(DateTime, nullable=True)
+    trial_used_at = Column(DateTime, nullable=True)
+    trial_expires_at = Column(DateTime, nullable=True)
+    subscription_plan = Column(String(20), default="free", nullable=False)
+    subscription_expires_at = Column(DateTime, nullable=True)
     # Session tracking fields
     last_login = Column(DateTime, nullable=True)
     login_attempts = Column(Integer, default=0)
@@ -166,6 +172,7 @@ class Forum(Base):
     level = Column(String, nullable=True)    # Level badge
     tags = Column(String, nullable=True)    # Up to 5 tags as comma-separated string
     is_approved = Column(Boolean, default=True)  # Forum approval status
+    required_plan = Column(String(20), nullable=False, default="basic")
     created_at = Column(DateTime, default=datetime.utcnow)
     last_activity = Column(DateTime, default=datetime.utcnow)
     
@@ -397,3 +404,243 @@ class PasswordResetToken(Base):
     used = Column(Boolean, default=False, nullable=False)
 
     user = relationship("User", back_populates="password_reset_tokens")
+
+# Phase 1: paid access, explicitly claimed trials and administrative finance.
+class UserSession(Base):
+    __tablename__ = "user_sessions"
+    id = Column(String(64), primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    last_activity_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    revoked_at = Column(DateTime, nullable=True)
+
+class PaymentSubmission(Base):
+    __tablename__ = "payment_submissions"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    plan = Column(String(20), nullable=False)
+    months = Column(Integer, nullable=False)
+    amount_all = Column(Integer, nullable=False)
+    receipt_public_id = Column(String, nullable=False)
+    status = Column(String(20), default="pending", nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    reviewed_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    reviewer_note = Column(Text, nullable=True)
+
+class TeacherSubject(Base):
+    __tablename__ = "teacher_subjects"
+    __table_args__ = (UniqueConstraint("teacher_id", "subject", name="uq_teacher_subject"),)
+    id = Column(Integer, primary_key=True)
+    teacher_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    subject = Column(String(100), nullable=False)
+
+class TutoringRequest(Base):
+    __tablename__ = "tutoring_requests"
+    id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    teacher_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    subject = Column(String(100), nullable=False)
+    message = Column(Text, nullable=False, default="")
+    status = Column(String(20), nullable=False, default="pending")
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    reviewed_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    admin_note = Column(Text, nullable=True)
+
+class LearningResource(Base):
+    __tablename__ = "learning_resources"
+    id = Column(Integer, primary_key=True)
+    kind = Column(String(20), nullable=False)
+    title = Column(String(250), nullable=False)
+    subject = Column(String(100), nullable=False, default="")
+    body = Column(Text, nullable=False, default="")
+    scheduled_at = Column(DateTime, nullable=True)
+
+class MonthlyExpense(Base):
+    __tablename__ = "monthly_expenses"
+    id = Column(Integer, primary_key=True)
+    year = Column(Integer, nullable=False)
+    month = Column(Integer, nullable=False)
+    category = Column(String(100), nullable=False)
+    description = Column(Text, nullable=False, default="")
+    amount_all = Column(Integer, nullable=False)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+class AnnualReportDelivery(Base):
+    __tablename__ = "annual_report_deliveries"
+    year = Column(Integer, primary_key=True)
+    sent_at = Column(DateTime, nullable=True)
+    status = Column(String(20), nullable=False, default="pending")
+
+
+# Phase 2: Weekly competition, scheduled coursework and protected library.
+class WeeklyChallenge(Base):
+    __tablename__ = "weekly_challenges"
+    id = Column(Integer, primary_key=True)
+    # The Monday local calendar date, unique even across daylight saving changes.
+    week_date = Column(String(10), nullable=False, unique=True)
+    problem_id = Column(Integer, ForeignKey("problems.id"), nullable=False)
+    starts_at = Column(DateTime, nullable=False)
+    closes_at = Column(DateTime, nullable=False)
+    official_solution = Column(Text, nullable=False, default="")
+    status = Column(String(20), nullable=False, default="scheduled")
+    published_at = Column(DateTime, nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+class WeeklySubmission(Base):
+    __tablename__ = "weekly_submissions"
+    __table_args__ = (UniqueConstraint("challenge_id", "student_id", name="uq_weekly_student"),)
+    id = Column(Integer, primary_key=True)
+    challenge_id = Column(Integer, ForeignKey("weekly_challenges.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    answer_text = Column(Text, nullable=False, default="")
+    file_key = Column(String(250), nullable=True)
+    status = Column(String(20), nullable=False, default="pending")
+    review_note = Column(Text, nullable=True)
+    reviewed_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    submitted_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+class CourseItem(Base):
+    __tablename__ = "course_items"
+    id = Column(Integer, primary_key=True)
+    forum_id = Column(Integer, ForeignKey("forums.id"), nullable=True)
+    kind = Column(String(20), nullable=False)  # material, homework, test
+    title = Column(String(250), nullable=False)
+    subject = Column(String(100), nullable=False)
+    instructions = Column(Text, nullable=False, default="")
+    body = Column(Text, nullable=False)
+    published_at = Column(DateTime, nullable=False)
+    due_at = Column(DateTime, nullable=True)
+    duration_minutes = Column(Integer, nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+class CourseAttempt(Base):
+    __tablename__ = "course_attempts"
+    __table_args__ = (UniqueConstraint("item_id", "student_id", name="uq_attempt_per_student_item"),)
+    id = Column(Integer, primary_key=True)
+    item_id = Column(Integer, ForeignKey("course_items.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    submitted_at = Column(DateTime, nullable=True)
+    answers = Column(Text, nullable=False, default="")
+    score = Column(Integer, nullable=True)
+    feedback = Column(Text, nullable=True)
+    graded_at = Column(DateTime, nullable=True)
+
+class LibraryDocument(Base):
+    __tablename__ = "library_documents"
+    id = Column(Integer, primary_key=True)
+    title = Column(String(250), nullable=False)
+    category = Column(String(30), nullable=False)
+    subject = Column(String(100), nullable=False)
+    level = Column(String(30), nullable=False)
+    olympiad = Column(String(100), nullable=True)
+    year = Column(Integer, nullable=True)
+    storage_key = Column(String(250), nullable=False)
+    page_count = Column(Integer, nullable=False)
+    uploaded_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class TeacherApplication(Base):
+    __tablename__ = "teacher_applications"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    first_name = Column(String(90), nullable=False)
+    last_name = Column(String(90), nullable=False)
+    birth_date = Column(Date, nullable=False)
+    bio = Column(Text, nullable=False)
+    subject = Column(String(100), nullable=False)
+    id_photo_key = Column(String(250), nullable=False)
+    portrait_key = Column(String(250), nullable=False)
+    status = Column(String(20), default="pending", nullable=False)
+    submitted_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    reviewed_by = Column(Integer, ForeignKey("users.id"))
+    reviewed_at = Column(DateTime)
+    review_note = Column(Text)
+
+class TeacherForumAssignment(Base):
+    __tablename__ = "teacher_forum_assignments"
+    __table_args__ = (UniqueConstraint("teacher_id","forum_id",name="uq_teacher_forum"),)
+    id = Column(Integer, primary_key=True)
+    teacher_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    forum_id = Column(Integer, ForeignKey("forums.id"), nullable=False)
+    assigned_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+class EmailTemplate(Base):
+    __tablename__ = "email_templates"
+    id = Column(Integer, primary_key=True)
+    key = Column(String(80), nullable=False, unique=True)
+    subject_sq = Column(String(250), nullable=False)
+    subject_en = Column(String(250), nullable=False)
+    body_sq = Column(Text, nullable=False)
+    body_en = Column(Text, nullable=False)
+    active = Column(Boolean, default=True, nullable=False)
+    updated_by = Column(Integer, ForeignKey("users.id"))
+
+class EmailDeliveryLog(Base):
+    __tablename__ = "email_delivery_logs"
+    id = Column(Integer, primary_key=True)
+    template_key = Column(String(80), nullable=False)
+    recipient_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    status = Column(String(20), nullable=False)
+    error_code = Column(String(60))
+    sent_at = Column(DateTime)
+
+class ParentStudentLink(Base):
+    __tablename__ = "parent_student_links"
+    __table_args__ = (UniqueConstraint("parent_id","student_id",name="uq_parent_student"),)
+    id = Column(Integer, primary_key=True)
+    parent_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    status = Column(String(20), default="pending", nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    reviewed_by = Column(Integer, ForeignKey("users.id"))
+
+class SupportTicket(Base):
+    __tablename__ = "support_tickets"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    name = Column(String(120), nullable=False)
+    email = Column(String(254), nullable=False)
+    category = Column(String(50), nullable=False)
+    subject = Column(String(200), nullable=False)
+    message = Column(Text, nullable=False)
+    status = Column(String(20), default="open", nullable=False)
+    admin_response = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+class FaqEntry(Base):
+    __tablename__ = "faq_entries"
+    id = Column(Integer, primary_key=True)
+    category = Column(String(60), nullable=False)
+    question_sq = Column(String(300), nullable=False)
+    answer_sq = Column(Text, nullable=False)
+    question_en = Column(String(300), nullable=False)
+    answer_en = Column(Text, nullable=False)
+    position = Column(Integer, default=0, nullable=False)
+    active = Column(Boolean, default=True, nullable=False)
+
+class SiteContentBlock(Base):
+    __tablename__ = "site_content_blocks"
+    key = Column(String(100), primary_key=True)
+    title_sq = Column(String(250), nullable=False)
+    title_en = Column(String(250), nullable=False)
+    subtitle_sq = Column(Text, nullable=False)
+    subtitle_en = Column(Text, nullable=False)
+    image_url = Column(Text)
+    button_url = Column(String(500))
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ContentEventDelivery(Base):
+    __tablename__="content_event_deliveries"
+    __table_args__=(UniqueConstraint("event_key","recipient_user_id",name="uq_content_event_user"),)
+    id=Column(Integer,primary_key=True)
+    event_key=Column(String(150),nullable=False)
+    recipient_user_id=Column(Integer,ForeignKey("users.id"),nullable=False)
+    created_at=Column(DateTime,default=datetime.utcnow,nullable=False)

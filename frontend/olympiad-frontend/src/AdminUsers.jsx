@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useToast } from "./components/ToastProvider";
+import { useAuth } from "./context/AuthContext";
 import "./AdminLayout.css";
 
 const AdminUsers = () => {
@@ -13,6 +14,8 @@ const AdminUsers = () => {
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({});
   const { showToast } = useToast();
+  const { currentUser: staffUser } = useAuth();
+  const canAssignRoles = staffUser?.role === "super_admin" || staffUser?.is_superuser === true;
   const [filters, setFilters] = useState({
     search: "",
     role: "",
@@ -253,22 +256,26 @@ const AdminUsers = () => {
                             });
                           }
                         }}
-                        disabled={user.role === "admin"}
+                        disabled={!canAssignRoles}
                         style={{
                           padding: "6px 12px",
                           borderRadius: "6px",
                           border: "2px solid #e9ecef",
                           backgroundColor:
-                            user.role === "admin" ? "#f8f9fa" : "white",
-                          color: user.role === "admin" ? "#6c757d" : "#495057",
+                            !canAssignRoles ? "#f8f9fa" : "white",
+                          color: !canAssignRoles ? "#6c757d" : "#495057",
                           fontSize: "0.8rem",
                           cursor:
-                            user.role === "admin" ? "not-allowed" : "pointer",
+                            !canAssignRoles ? "not-allowed" : "pointer",
                         }}
                       >
-                        <option value="user">User</option>
-                        <option value="moderator">Moderator</option>
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="reviewer">Reviewer</option>
                         <option value="admin">Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                        <option value="moderator">Moderator (legacy)</option>
+                        <option value="user">User (legacy)</option>
                       </select>
 
                       <button

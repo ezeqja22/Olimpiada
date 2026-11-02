@@ -22,7 +22,8 @@ class UserOut(BaseModel):
     email: EmailStr
     profile_picture: Optional[str] = None
     created_at: Optional[datetime] = None
-    role: Optional[str] = "user"
+    role: Optional[str] = "student"
+    is_superuser: bool = False
 
     class Config:
         from_attributes = True
@@ -205,6 +206,7 @@ class ForumUpdate(BaseModel):
     tags: Optional[str] = None
 
 class Forum(ForumBase):
+    required_plan: str = "basic"
     id: int
     creator_id: int
     created_at: datetime

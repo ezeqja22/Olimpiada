@@ -1,0 +1,13 @@
+.git
+.venv
+**/node_modules
+**/dist
+**/__pycache__
+**/*.pyc
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite*
+browser-evidence
+staging/.env.staging

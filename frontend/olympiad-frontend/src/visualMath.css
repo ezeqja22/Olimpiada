@@ -1,0 +1,9 @@
+.vme{border:1px solid #bed3c9;border-radius:12px;overflow:hidden;background:white;min-width:0;flex:1}
+.vme-toolbar{display:flex;flex-wrap:wrap;gap:4px;padding:9px;border-bottom:1px solid #e1ede8;background:#f5faf7}
+.vme-toolbar button{border:1px solid #d2e4da;background:white;border-radius:7px;padding:7px 10px;cursor:pointer;color:#1b6550;font-weight:700;font-size:14px}
+.vme-toolbar button:hover{background:#e4f4e9}
+.vme-canvas{padding:14px;min-height:160px;outline:0;line-height:1.8;font-size:16px;white-space:pre-wrap;overflow-wrap:anywhere}
+.vme-canvas:empty::before{content:attr(data-placeholder);color:#94a8a1}
+.vme-formula{display:inline-block;padding:1px 5px;background:#eaf5f0;border:1px solid #cde8db;border-radius:5px;vertical-align:middle;margin:0 2px;cursor:default}
+.vme-formula-tool{display:flex;gap:10px;padding:12px;align-items:end;flex-wrap:wrap}
+.vme-formula-tool label{flex:1;min-width:130px}
