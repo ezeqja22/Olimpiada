@@ -63,6 +63,30 @@ class Phase1Integration(unittest.TestCase):
             self.assertFalse(self.student.is_active)
             self.assertNotEqual(self.student.email, email)
 
+    def test_free_users_can_read_only_their_own_drafts(self):
+        owner = self.student
+        other = models.User(username="other_draft_reader", email="reader@example.org",
+                            password_hash="unused", role="student", is_verified=True)
+        self.db.add(other)
+        self.db.commit()
+        def draft(user):
+            return models.Draft(author_id=user.id, title="Unpublished problem",
+                                description="Private draft text", subject="Math")
+        own, foreign = draft(owner), draft(other)
+        self.db.add_all([own, foreign])
+        self.db.commit()
+        headers = self.headers(self.student_token)
+        url = "/auth/drafts"
+        listed = self.client.get(url, headers=headers)
+        self.assertEqual(listed.status_code, 200)
+        self.assertEqual([item["id"] for item in listed.json()], [own.id])
+        detail = self.client.get(f"{url}/{own.id}", headers=headers)
+        self.assertEqual(detail.status_code, 200)
+        self.assertEqual(detail.json()["description"], own.description)
+        self.assertEqual(self.client.get(f"{url}/{foreign.id}", headers=headers).status_code, 404)
+        self.assertEqual(self.client.get(f"{url}/{own.id}").status_code, 401)
+        self.assertEqual(self.client.delete(f"{url}/{own.id}", headers=headers).status_code, 402)
+
     def test_guest_can_only_discover(self):
         self.assertEqual(self.client.get("/public/forums").status_code, 200)
         self.assertEqual(self.client.get("/public/library").status_code, 200)
