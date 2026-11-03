@@ -46,6 +46,9 @@ def gate_request(request, db: Session):
         return None
     if path in ACCOUNT_PREFIXES or any(path.startswith(p + "/") for p in ACCOUNT_PREFIXES):
         return None
+    # The draft read handlers filter by the authenticated owner's ID.
+    if request.method == "GET" and re.fullmatch(r"/auth/drafts(?:/[0-9]+)?", path):
+        return None
     if not user.is_verified:
         return JSONResponse(status_code=403, content={"detail": "Verify your email before accessing paid content"})
     if path == "/auth/forums" and request.method == "POST" and not is_staff(user):
