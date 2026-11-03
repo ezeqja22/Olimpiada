@@ -1,10 +1,13 @@
 """API security and payment review tests against a local SQLite database."""
+import os
 import unittest
+from unittest.mock import patch
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 import models
 from database import SessionLocal, engine
-from auth.utils import create_jwt
+from auth.utils import create_jwt, hash_password
+from phase1_jobs import anonymize_inactive_accounts
 from main import app
 
 class Phase1Integration(unittest.TestCase):
@@ -35,6 +38,30 @@ class Phase1Integration(unittest.TestCase):
 
     def headers(self, token):
         return {"Authorization": "Bearer " + token}
+
+    def test_inactive_account_cleanup_requires_opt_in(self):
+        stale = datetime.utcnow() - timedelta(days=366)
+        self.student.created_at = self.student.last_activity_at = stale
+        self.student.password_hash = hash_password("ExamplePassword123!")
+        self.db.commit()
+        email = self.student.email
+        with patch.dict(os.environ):
+            os.environ.pop("ENABLE_INACTIVE_ACCOUNT_CLEANUP", None)
+            self.assertEqual(anonymize_inactive_accounts(self.db), 0)
+            response = self.client.post("/auth/login", json={
+                "email": email, "password": "ExamplePassword123!",
+            })
+            self.assertEqual(response.status_code, 200, response.text)
+            self.db.refresh(self.student)
+            self.assertTrue(self.student.is_active)
+
+            self.student.last_activity_at = self.student.last_login = stale
+            self.db.commit()
+            os.environ["ENABLE_INACTIVE_ACCOUNT_CLEANUP"] = "1"
+            self.assertEqual(anonymize_inactive_accounts(self.db), 1)
+            self.db.refresh(self.student)
+            self.assertFalse(self.student.is_active)
+            self.assertNotEqual(self.student.email, email)
 
     def test_guest_can_only_discover(self):
         self.assertEqual(self.client.get("/public/forums").status_code, 200)

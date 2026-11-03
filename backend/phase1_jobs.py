@@ -4,12 +4,16 @@ from sqlalchemy.orm import Session
 from models import User, UserSession, MonthlyExpense, AnnualReportDelivery
 from email_service import email_service
 from phase1_service import is_super_admin
+import os
 import secrets
 
 def anonymize_inactive_accounts(db: Session):
     """Purge personally identifying account fields; preserve FK-linked learning history.
     Re-registration with the same email/username becomes possible immediately.
     """
+    if os.getenv("ENABLE_INACTIVE_ACCOUNT_CLEANUP") != "1":
+        return 0
+
     now = datetime.utcnow()
     cutoff = now - timedelta(days=365)
     users = db.query(User).filter(
