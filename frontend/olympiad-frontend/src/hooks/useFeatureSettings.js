@@ -15,7 +15,7 @@ export const useFeatureSettings = () => {
   const fetchFeatureSettings = async () => {
     try {
       const response = await axios.get(
-        "sciencepioneers-production.up.railway.app/site-info",
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/site-info`,
       );
       setFeatureSettings(response.data);
     } catch (err) {
