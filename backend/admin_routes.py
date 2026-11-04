@@ -136,7 +136,6 @@ async def get_users(
         query = query.filter(User.role == role)
     
     if status == "active":
-        from sqlalchemy import or_
         query = query.filter(User.is_active == True, or_(User.is_banned == False, User.is_banned.is_(None)))
     elif status == "banned":
         query = query.filter(User.is_banned == True)

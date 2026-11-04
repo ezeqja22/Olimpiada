@@ -126,6 +126,21 @@ class Phase1Integration(unittest.TestCase):
         self.assertTrue(self.student.subscription_expires_at > datetime.utcnow() + timedelta(days=55))
         self.assertEqual(self.client.post(url,json={"approve":True},headers=self.headers(self.admin_token)).status_code, 409)
 
+    def test_admin_can_search_users_by_username_and_email(self):
+        url = "/admin/users"
+        for query in (self.student.username, self.student.email):
+            with self.subTest(query=query):
+                result = self.client.get(url, params={"search": query},
+                                         headers=self.headers(self.admin_token))
+                self.assertEqual(result.status_code, 200, result.text)
+                ids = [user["id"] for user in result.json()["users"]]
+                self.assertIn(self.student.id, ids)
+                self.assertNotIn(self.admin.id, ids)
+
+        denied = self.client.get(url, params={"search": self.student.email},
+                                 headers=self.headers(self.student_token))
+        self.assertEqual(denied.status_code, 403)
+
     def test_only_super_admin_assigns_roles(self):
         r = self.client.put("/admin/users/"+str(self.student.id),
                             json={"role":"teacher"}, headers=self.headers(self.admin_token))
