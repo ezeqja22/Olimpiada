@@ -28,7 +28,7 @@ export function AdminTeachers(){
  <button className="p1-btn">Cakto në klasë</button></form>}</section>)}</div>
  {rows.length===0&&<p className="p1-note">Nuk ka ende aplikime.</p>}{notice&&<p className="p1-note" role="status">{notice}</p>}</main>;
 }
-const KEYS=[["hero","Hero"],["competition","Gara / Olimpiadat"],["community","Komuniteti"],["library","Biblioteka"],["partner","Spark Partner"],["cta","Thirrja për regjistrim"]];
+const KEYS=[["hero","Hero"],["competition","Gara / Olimpiadat"],["community","Komuniteti"],["partner","Spark Partner"],["cta","Thirrja për regjistrim"]];
 export function AdminBranding(){
  const [blocks,setBlocks]=useState({}),[notice,setNotice]=useState(""),[uploading,setUploading]=useState("");
  useEffect(()=>{axios.get(api("/content")).then(r=>setBlocks(r.data)).catch(()=>{});},[]);

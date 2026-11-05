@@ -530,6 +530,7 @@ class CourseAttempt(Base):
     graded_at = Column(DateTime, nullable=True)
 
 class LibraryDocument(Base):
+    # Legacy schema mapping only; library endpoints and UI have been retired.
     __tablename__ = "library_documents"
     id = Column(Integer, primary_key=True)
     title = Column(String(250), nullable=False)

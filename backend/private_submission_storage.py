@@ -4,7 +4,7 @@ import os
 import uuid
 from fastapi import HTTPException
 from PIL import Image
-from private_pdf_storage import _use_s3, _local_root, _put_private_object
+from private_storage import _use_s3, _s3_client, _local_root, _put_private_object
 
 MAX_SUBMISSION_BYTES = 8 * 1024 * 1024
 MIME = {"application/pdf": "pdf", "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}

@@ -56,13 +56,6 @@ def public_forum_titles(db: Session = Depends(get_db)):
                  Forum.is_private.is_(False), Forum.is_approved.is_(True)
              ).order_by(Forum.created_at.desc()).limit(100).all()]
 
-@router.get("/public/library")
-def public_library_titles(db: Session = Depends(get_db)):
-    from models import LibraryDocument
-    docs = db.query(LibraryDocument).order_by(LibraryDocument.created_at.desc()).limit(200).all()
-    return [{"id": d.id, "title": d.title, "subject": d.subject, "level": d.level,
-             "category": d.category, "kind": "library", "locked": True} for d in docs]
-
 @router.get("/public/problem-of-week")
 def public_problem_of_week(db: Session = Depends(get_db)):
     from phase2_routes import active_week, safe_challenge

@@ -8,7 +8,7 @@ from datetime import datetime
 from PIL import Image, ImageOps
 from fastapi import HTTPException
 from models import EmailTemplate, EmailDeliveryLog, Notification, User
-from private_pdf_storage import _use_s3, _s3_client, _local_root, _put_private_object
+from private_storage import _use_s3, _s3_client, _local_root, _put_private_object
 from email_service import email_service
 
 TEMPLATE_DEFAULTS = {

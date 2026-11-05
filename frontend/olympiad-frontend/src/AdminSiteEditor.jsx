@@ -120,7 +120,7 @@ export default function AdminSiteEditor() {
       <nav className="site-editor__nav" aria-label="Seksionet e website-it">
         <label className="site-editor__hint" htmlFor="site-editor-search">Kërko një seksion</label>
         <input id="site-editor-search" value={filter} onChange={e=>setFilter(e.target.value)}
-          placeholder="p.sh. Mentorët, Biblioteka..." />
+          placeholder="p.sh. Mentorët, Forumet..." />
         {["Kreu","Faqet"].map(group => {
           const items = sections.filter(item=>item.group===group);
           if (!items.length) return null;

@@ -20,5 +20,4 @@ sendgrid
 cloudinary
 schedule
 google-auth>=2.0,<3
-pypdfium2>=4.30,<6
 boto3>=1.35,<2

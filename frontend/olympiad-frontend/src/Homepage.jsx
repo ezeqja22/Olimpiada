@@ -318,7 +318,6 @@ function Homepage() {
           <nav className="desktop-nav" aria-label="Main navigation">
             <Link to="/weekly" className="nav-link">{t("weekly")}</Link>
             <Link to="/forum-catalog" className="nav-link">{t("forums")}</Link>
-            <Link to="/library" className="nav-link">{t("library")}</Link>
             <div className="nav-dropdown-wrap">
               <button type="button" className="nav-link nav-button" onClick={openSubjectDropdown}
                 aria-expanded={showSubjectDropdown}>{t("more")} <ChevronDown size={15}/></button>
@@ -467,7 +466,6 @@ function Homepage() {
             <LanguageSwitch />
             <Link to="/weekly" className="mobile-nav-link">{t("weekly")}</Link>
             <Link to="/forum-catalog" className="mobile-nav-link">{t("forums")}</Link>
-            <Link to="/library" className="mobile-nav-link">{t("library")}</Link>
             <div className="mobile-subject-wrap">
               <button type="button" className="mobile-nav-link mobile-nav-button"
                 onClick={openSubjectDropdown} aria-expanded={showSubjectDropdown}>{t("more")} <ChevronDown size={14}/></button>
@@ -523,7 +521,6 @@ function Homepage() {
             {[
               {key:"home_feature_weekly",icon:"✦",title:t("weekly"),description:lang==="sq"?"Një problem i ri çdo javë dhe publikim i zgjidhjeve.":"A new challenge every week with published solutions.",to:"/weekly"},
               {key:"home_feature_forums",icon:"◈",title:t("forums"),description:lang==="sq"?"Diskuto ide dhe puno me mësues e nxënës të tjerë.":"Discuss ideas with teachers and peers.",to:"/forum-catalog"},
-              {key:"home_feature_library",icon:"▤",title:t("library"),description:t("libraryDesc"),to:"/library"},
               {key:"home_feature_courses",icon:"◷",title:t("courses"),description:lang==="sq"?"Teste të programuara dhe materiale të organizuara.":"Scheduled tests and structured study materials.",to:"/courses"},
               {key:"home_feature_support",icon:"☏",title:t("support"),description:lang==="sq"?"Ndihmë e shpejtë kur të duhet.":"Help when you need it.",to:"/support"}
             ].map(f=><article className="p3-feature-card" key={f.key}>
@@ -546,13 +543,6 @@ function Homepage() {
               <p className="p3-rich-inline"><RichInlineText text={copy("community","subtitle",t("heroDesc"))} /></p><Link to="/forum-catalog">{t("meet")} →</Link></div>
             {imageFor("community")?<img loading="lazy" decoding="async" src={imageFor("community")} alt={lang==="sq"?"Ekipi shqiptar në Olimpiadën Ndërkombëtare të Matematikës":"Albanian team at the International Mathematical Olympiad"}/>:
               <div className="p3-visual-fallback" aria-hidden="true">★</div>}
-          </div>
-          <div className="p3-visual-row p3-book-row">
-            {imageFor("library")?<img loading="lazy" decoding="async" src={imageFor("library")} alt={lang==="sq"?"Libri i olimpiadës së matematikës":"Mathematics olympiad booklet cover"}/>:
-              <div className="p3-visual-fallback" aria-hidden="true">▤</div>}
-            <div className="p3-visual-copy"><span className="p3-eyebrow">{lang==="sq"?"Biblioteka digjitale":"Digital library"}</span>
-              <h2><RichInlineText text={copy("library","title",t("libraryTitle"))} /></h2>
-              <p className="p3-rich-inline"><RichInlineText text={copy("library","subtitle",t("libraryDesc"))} /></p><Link to="/library">{t("library")} →</Link></div>
           </div>
           {teacherProfiles.length>0&&<section className="p3-mentors">
             <header className="p3-section-head p3-section-head--mentors">

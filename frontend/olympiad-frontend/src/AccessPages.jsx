@@ -12,23 +12,18 @@ function Header({ contentKey, title, description }) {
 }
 export function Explore() {
   const [forums, setForums] = useState([]);
-  const [library, setLibrary] = useState([]);
   const [weekly, setWeekly] = useState(null);
   const { currentUser } = useAuth();
   useEffect(() => {axios.get(API + "/public/forums").then(r=>setForums(r.data)).catch(()=>{});
-    axios.get(API + "/public/library").then(r=>setLibrary(r.data)).catch(()=>{});
     axios.get(API + "/public/problem-of-week").then(r=>setWeekly(r.data.problem)).catch(()=>{});
   },[]);
   const canForum = !!currentUser;
-  const canMaterial = !!currentUser;
   return <main className="p1-wrap">
-    <Header contentKey="page_explore" title="Eksploro Olimpiada" description="Zbulo problemen e javës, forumet dhe bibliotekën." />
+    <Header contentKey="page_explore" title="Eksploro Olimpiada" description="Zbulo problemen e javës dhe forumet." />
     <section className="p1-card p1-group"><div className="p1-row"><h2>Problema e Javës</h2><span className="p1-pill">FALAS</span></div>
     {weekly ? <><h3>{weekly.title}</h3><p style={{whiteSpace:"pre-wrap"}}>{weekly.description}</p><span className="p1-muted">{weekly.subject} · {weekly.level}</span></> : <p className="p1-muted">Problema e javës nuk është publikuar ende.</p>}</section>
     <div className="p1-row"><h2 className="p1-section-title">Forume publike</h2><Link className="p1-btn alt" to={canForum?"/forums":"/login"}>{canForum?"Hyr në forume":"Hyr në llogari"}</Link></div>
     <div className="p1-grid">{forums.length ? forums.map(f=><ContentItem key={f.id} title={f.title} subtitle={f.subject} url={canForum?"/forum/"+f.id:"/login"}/>) : <p className="p1-muted">Ende nuk ka forume publike.</p>}</div>
-    <div className="p1-row"><h2 className="p1-section-title">Biblioteka</h2><Link className="p1-btn alt" to={canMaterial?"/library":"/login"}>{canMaterial?"Hap bibliotekën":"Hyr në llogari"}</Link></div>
-    <div className="p1-grid">{library.length ? library.map(r=><ContentItem key={r.id} title={r.title} subtitle={r.subject} url={canMaterial?"/library":"/login"}/>) : <p className="p1-muted">Materialet do të publikohen së shpejti.</p>}</div>
   </main>;
 }
 export function Learning() {

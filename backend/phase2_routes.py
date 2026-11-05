@@ -10,12 +10,10 @@ from sqlalchemy.exc import IntegrityError
 from database import get_db
 from auth.dependencies import get_current_user, get_verified_user
 from models import (User, Problem, Forum, WeeklyChallenge, WeeklySubmission, TeacherApplication, TeacherForumAssignment,
-                    CourseItem, CourseAttempt, LibraryDocument, ForumMembership)
+                    CourseItem, CourseAttempt, ForumMembership)
 from phase1_service import require_staff, require_feature, is_staff
 from phase2_service import (weekly_bounds, is_teacher_or_staff,
                             run_weekly_transitions, can_enter_forum)
-from private_pdf_storage import (MAX_BYTES, validate_pdf, put_private_pdf, get_private_pdf,
-                                 render_watermarked_page)
 
 router = APIRouter(prefix="/core", tags=["phase2"])
 
@@ -44,14 +42,6 @@ class ItemCreate(BaseModel):
 
 class ItemSubmit(BaseModel):
     answers: str = Field(min_length=1, max_length=40000)
-
-class LibraryMeta(BaseModel):
-    title: str = Field(min_length=2, max_length=250)
-    category: str
-    subject: str = Field(min_length=2, max_length=100)
-    level: str
-    olympiad: str | None = Field(default=None, max_length=100)
-    year: int | None = Field(default=None, ge=1900, le=2100)
 
 def safe_challenge(challenge, db):
     if not challenge:
@@ -328,70 +318,3 @@ def submit_test(item_id: int, data: ItemSubmit, user: User = Depends(get_verifie
     attempt.submitted_at = now
     db.commit()
     return {"id": attempt.id, "submitted_at": attempt.submitted_at}
-
-@router.get("/library/catalog")
-def library_catalog(category: str = "", subject: str = "", level: str = "",
-                    db: Session = Depends(get_db)):
-    """Public: title/tags only; no file keys or page URL."""
-    q = db.query(LibraryDocument)
-    if category:
-        q = q.filter(LibraryDocument.category == category)
-    if subject:
-        q = q.filter(LibraryDocument.subject == subject)
-    if level:
-        q = q.filter(LibraryDocument.level == level)
-    return [{"id": d.id, "title": d.title, "category": d.category, "subject": d.subject,
-             "level": d.level, "olympiad": d.olympiad, "year": d.year,
-             "locked": True} for d in q.order_by(LibraryDocument.id.desc()).limit(300).all()]
-
-@router.post("/library/admin/upload")
-def library_upload(title: str = Form(...), category: str = Form(...),
-                   subject: str = Form(...), level: str = Form(...),
-                   olympiad: str = Form(""), year: int | None = Form(None),
-                   file: UploadFile = File(...),
-                   user: User = Depends(get_verified_user), db: Session = Depends(get_db)):
-    require_staff(user)
-    if category not in ("book", "booklet", "paper", "olympiad_scan"):
-        raise HTTPException(422, "Invalid library category")
-    if level not in ("school", "advanced") or not title.strip() or not subject.strip():
-        raise HTTPException(422, "Subject, title and level required")
-    if year is not None and not 1900 <= year <= 2100:
-        raise HTTPException(422, "Invalid year")
-    if file.content_type != "application/pdf":
-        raise HTTPException(415, "Only PDF documents are supported")
-    blob = file.file.read(MAX_BYTES + 1)
-    pages = validate_pdf(blob)
-    key = put_private_pdf(blob)
-    doc = LibraryDocument(title=title.strip()[:250], category=category, subject=subject.strip()[:100],
-                          level=level, olympiad=olympiad[:100] or None,
-                          year=year, storage_key=key, page_count=pages,
-                          uploaded_by=user.id)
-    db.add(doc)
-    db.commit()
-    return {"id": doc.id, "page_count": pages}
-
-@router.get("/library/{document_id}")
-def library_detail(document_id: int, user: User = Depends(get_verified_user), db: Session = Depends(get_db)):
-    require_feature(user, "material")
-    doc = db.get(LibraryDocument, document_id)
-    if not doc:
-        raise HTTPException(404, "Document not found")
-    return {"id": doc.id, "title": doc.title, "category": doc.category, "subject": doc.subject,
-            "level": doc.level, "olympiad": doc.olympiad, "year": doc.year,
-            "page_count": doc.page_count}
-
-@router.get("/library/{document_id}/pages/{page_number}")
-def library_page(document_id: int, page_number: int, user: User = Depends(get_verified_user),
-                 db: Session = Depends(get_db)):
-    require_feature(user, "material")
-    doc = db.get(LibraryDocument, document_id)
-    if not doc:
-        raise HTTPException(404, "Document not found")
-    if not 1 <= page_number <= doc.page_count:
-        raise HTTPException(404, "Page not found")
-    content = render_watermarked_page(get_private_pdf(doc.storage_key), page_number, user.username)
-    return Response(content=content, media_type="image/webp",
-                    headers={"Cache-Control": "private, no-store, max-age=0",
-                             "Content-Disposition": "inline",
-                             "X-Content-Type-Options": "nosniff",
-                             "X-Robots-Tag": "noindex, noarchive"})

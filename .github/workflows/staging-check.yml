@@ -86,7 +86,7 @@ jobs:
           python -c "from sqlalchemy import inspect; from database import engine; t=set(inspect(engine).get_table_names()); required={'users','forums','weekly_challenges','course_items','teacher_applications','support_tickets','faq_entries','email_templates'}; assert required.issubset(t),(required-t); print('Staging PostgreSQL schema ready')"
       - name: API smoke with migrated Postgres
         run: |
-          python -c "from fastapi.testclient import TestClient; from main import app; c=TestClient(app); assert c.get('/health').status_code==200; assert c.get('/experience/faq').status_code==200; assert c.get('/core/library/catalog').status_code==200; assert c.get('/access/plans').status_code==200; print('PostgreSQL API smoke passed')"
+          python -c "from fastapi.testclient import TestClient; from main import app; c=TestClient(app); assert c.get('/health').status_code==200; assert c.get('/experience/faq').status_code==200; assert c.get('/public/forums').status_code==200; assert c.get('/core/library/catalog').status_code==404; assert c.get('/access/plans').status_code==404; print('PostgreSQL API smoke passed')"
   historical-migration:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -161,10 +161,10 @@ jobs:
           docker compose -f staging/compose.yaml exec -T api python staging/smoke.py
           curl -fsS http://127.0.0.1:8001/health
           curl -fsS http://127.0.0.1:8001/access/plans > /dev/null
-          curl -fsS http://127.0.0.1:8001/core/library/catalog > /dev/null
+          curl -fsS http://127.0.0.1:8001/public/forums > /dev/null
           curl -fsS http://127.0.0.1:8001/experience/faq > /dev/null
           curl -fsS http://127.0.0.1:5174/homepage > /dev/null
-          docker compose -f staging/compose.yaml exec -T api python -c "from database import SessionLocal; from models import User,WeeklyChallenge,LibraryDocument; db=SessionLocal(); assert db.query(User).filter(User.email.like('demo-%@example.com')).count()==6; assert db.query(WeeklyChallenge).count()>=1; assert db.query(LibraryDocument).count()>=1; print('Isolated demo data and PostgreSQL: PASS')"
+          docker compose -f staging/compose.yaml exec -T api python -c "from database import SessionLocal; from models import User,WeeklyChallenge; db=SessionLocal(); assert db.query(User).filter(User.email.like('demo-%@example.com')).count()==6; assert db.query(WeeklyChallenge).count()>=1; print('Isolated demo data and PostgreSQL: PASS')"
       - name: Logs on failure
         if: failure()
         run: docker compose -f staging/compose.yaml logs --tail=100

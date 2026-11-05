@@ -6,7 +6,7 @@ import requests
 from PIL import Image
 from fastapi.testclient import TestClient
 from database import SessionLocal
-from models import User, Forum, LibraryDocument
+from models import User, Forum
 from main import app
 from auth.utils import create_jwt
 from email_service import email_service
@@ -25,12 +25,6 @@ assert catalog.status_code==200,catalog.text
 public=next(f for f in catalog.json() if not f["is_private"])
 assert public["accessible"] is True
 assert client.get("/auth/forums/"+str(public["id"]),headers=free_h).status_code==200
-docs=client.get("/core/library/catalog").json()
-assert docs, "Missing staging booklet"
-doc_id=docs[0]["id"]
-page=client.get(f"/core/library/{doc_id}/pages/1",headers=free_h)
-assert page.status_code==200,(page.status_code,page.text[:300])
-assert page.content.startswith(b"RIFF")
 assert client.get("/experience/admin/teachers",headers=free_h).status_code==403
 assert client.get("/experience/teacher/classes",headers=teacher_h).status_code==200
 
@@ -51,5 +45,5 @@ inbox=requests.get("http://mailpit:8025/api/v1/messages",timeout=5)
 assert inbox.status_code==200,inbox.status_code
 assert inbox.json().get("total",0)>=1, "No messages in Mailpit"
 
-print("PASS: account access, scoped teacher, protected PDF, branding upload, fake mail")
+print("PASS: account access, scoped teacher, branding upload, fake mail")
 db.close()

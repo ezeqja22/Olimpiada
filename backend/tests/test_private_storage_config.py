@@ -3,11 +3,19 @@ import os
 import unittest
 from unittest.mock import patch, MagicMock
 
-import private_pdf_storage as storage
+import private_storage as storage
 from inline_scheduler import inline_scheduler_enabled
 
 
 class PrivateS3CompatibilityTests(unittest.TestCase):
+    def test_submission_reads_use_shared_s3_client(self):
+        from io import BytesIO
+        from private_submission_storage import read_submission
+        with patch.dict(os.environ,{"S3_PRIVATE_BUCKET":"private-tests"}), patch("private_submission_storage._s3_client") as factory:
+            factory.return_value.get_object.return_value={"Body":BytesIO(b"private answer")}
+            self.assertEqual(read_submission("weekly/answer.pdf"),b"private answer")
+            factory.return_value.get_object.assert_called_once_with(Bucket="private-tests",Key="weekly/answer.pdf")
+
     def test_supabase_s3_upload_omits_unsupported_encryption_header(self):
         env = {
             "S3_PRIVATE_BUCKET": "olimpiada-private",
@@ -26,7 +34,7 @@ class PrivateS3CompatibilityTests(unittest.TestCase):
             "S3_ENDPOINT_URL": "https://s3.eu-central-1.amazonaws.com",
         }
         with patch.dict(os.environ, env), patch.object(storage, "_s3_client") as factory:
-            storage._put_private_object("library/example.pdf", b"%PDF-1.4", "application/pdf")
+            storage._put_private_object("weekly/example.pdf", b"%PDF-1.4", "application/pdf")
         kwargs = factory.return_value.put_object.call_args.kwargs
         self.assertEqual(kwargs["ServerSideEncryption"], "AES256")
 

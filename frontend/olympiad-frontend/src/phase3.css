@@ -113,7 +113,6 @@
 .p3-faq-entry .p3-rich-inline { white-space:pre-line; }
 .homepage-page :where(button,a,input,select,textarea):focus-visible { outline:3px solid #63c5e5; outline-offset:3px; }
 .p3-visual-row img { display:block; }
-.p3-visual-row.p3-book-row img { object-fit:contain; background:#edf4f8; padding:10px; }
 .p3-partner-section img { display:block; }
 @media (prefers-reduced-motion:reduce) {
   .homepage-page * { scroll-behavior:auto!important; transition-duration:0.01ms!important; animation-duration:0.01ms!important; }

@@ -23,7 +23,6 @@ import AdminContent from "./AdminContent";
 import AnalyticsConsent from "./AnalyticsConsent";
 import WeeklyPage, {AdminWeekly} from "./WeeklyPage";
 import CourseHub, {AdminCourses} from "./CourseHub";
-import {LibraryCatalog,LibraryViewer,LibraryAdmin} from "./LibraryPage";
 import ForumCatalogue from "./ForumCatalogue";
 import {TeacherApplicationPage,FAQPage,SupportPage,TeacherWorkspace} from "./ExperiencePages";
 import {AdminTeachers,AdminFAQ,AdminSupport,AdminParents} from "./AdminExperience";
@@ -73,8 +72,8 @@ function App() {
               <Route path="/homepage" element={<Homepage />} />
               <Route path="/pricing" element={<Navigate to="/explore" replace />} />
               <Route path="/explore" element={<Explore />} />
-              <Route path="/library" element={<LibraryCatalog />} />
-              <Route path="/library/:id" element={<LibraryViewer />} />
+              <Route path="/library" element={<Navigate to="/explore" replace />} />
+              <Route path="/library/:id" element={<Navigate to="/explore" replace />} />
               <Route path="/courses" element={<ProtectedRoute><CourseHub /></ProtectedRoute>} />
               <Route path="/weekly" element={<WeeklyPage />} />
               <Route path="/forum-catalog" element={<ForumCatalogue />} />
@@ -221,7 +220,7 @@ function App() {
                 <Route path="content" element={<AdminContent />} />
                 <Route path="weekly" element={<AdminWeekly />} />
                 <Route path="courses" element={<AdminCourses />} />
-                <Route path="library" element={<LibraryAdmin />} />
+                <Route path="library" element={<Navigate to="/admin/content" replace />} />
                 <Route path="teachers" element={<AdminTeachers />} />
                 <Route path="site-content" element={<AdminSiteEditor />} />
                 <Route path="branding" element={<AdminSiteEditor />} />

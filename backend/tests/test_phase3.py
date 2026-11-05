@@ -81,7 +81,7 @@ class Phase3Tests(unittest.TestCase):
                            headers=self.h(self.teacher)).status_code,403)
         self.assertEqual(self.client.get("/auth/problems/",headers=self.h(self.teacher)).status_code,403)
         self.assertEqual(self.client.get("/admin/users",headers=self.h(self.teacher)).status_code,403)
-        self.assertEqual(self.client.get("/core/library/catalog").status_code,200)
+        self.assertEqual(self.client.get("/core/library/catalog").status_code,404)
         self.assertEqual(self.client.get("/experience/teacher/classes",
                            headers=self.h(self.teacher)).status_code,200)
 

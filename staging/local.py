@@ -95,7 +95,7 @@ def check():
     from database import SessionLocal
     from models import User
     with TestClient(app) as client:
-        for route in ("/health", "/experience/faq", "/core/library/catalog"):
+        for route in ("/health", "/experience/faq"):
             response = client.get(route)
             if response.status_code != 200:
                 raise RuntimeError(f"{route} returned {response.status_code}: {response.text[:240]}")

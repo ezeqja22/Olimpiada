@@ -13,7 +13,7 @@ from phase1_service import require_staff, is_staff
 from phase2_service import can_enter_forum
 from phase3_service import (store_teacher_image,read_teacher_image,
     TEMPLATE_DEFAULTS,validate_template,enqueue_notice,render)
-from private_pdf_storage import _use_s3
+from private_storage import _use_s3
 from pydantic import ConfigDict
 
 router=APIRouter(prefix="/experience",tags=["phase3"])
@@ -243,7 +243,6 @@ def public_faq(db:Session=Depends(get_db)):
         defaults=[
           ("Problema e Javës","Si dërgoj një zgjidhje?","Hyr në llogari, hap Problemen e Javës dhe dërgo tekst ose fotografi/PDF.","Weekly problem","How do I submit?","Sign in and upload a text, photo or PDF solution."),
           ("Testet","Si funksionon kohëmatësi?","Testi nis me klikim dhe afati zbatohet në server.","Tests","How is time enforced?","The timer starts when you begin and is checked by the server."),
-          ("Biblioteka","A mund t'i shkarkoj librat?","Materialet lexohen në viewer nga përdoruesit e regjistruar.","Library","Can I download books?","Available content is accessible in the in-app reader.")
         ]
         return [{"id":-(i+1),"category":x[0],"question_sq":x[1],"answer_sq":x[2],
                  "question_en":x[4],"answer_en":x[5]} for i,x in enumerate(defaults)]
@@ -273,11 +272,11 @@ def edit_faq(id:int,data:FaqData,user:User=Depends(get_verified_user),db:Session
 # Registered page headers share the existing site_content_blocks table (no migration).
 CONTENT_KEYS={
     "hero","home_intro","home_feature_weekly","home_feature_forums",
-    "home_feature_library","home_feature_courses",
-    "home_feature_support","competition","community","library","home_mentors",
+    "home_feature_courses",
+    "home_feature_support","competition","community","home_mentors",
     "home_founders","home_founder_klevisa","home_founder_enio",
-    "partner","cta","page_explore","page_pricing","page_weekly",
-    "page_forums","page_library","page_courses",
+    "partner","cta","page_explore","page_weekly",
+    "page_forums","page_courses",
     "page_tutoring","page_faq","page_support","page_teacher_application"
 }
 @router.get("/content")
@@ -519,7 +518,7 @@ def upload_branding_image(file:UploadFile=File(...),user:User=Depends(get_verifi
     import os
     if os.getenv("STAGING_MODE") == "1":
         import secrets
-        from private_pdf_storage import _local_root
+        from private_storage import _local_root
         name = secrets.token_hex(16) + ".jpg"
         directory = _local_root() / "public-branding"
         directory.mkdir(parents=True, exist_ok=True)
@@ -551,7 +550,7 @@ def stage_branding_image(filename: str):
     prefix=filename.removesuffix(".jpg")
     if not filename.endswith(".jpg") or len(prefix) != 32 or any(x not in "0123456789abcdef" for x in prefix):
         raise HTTPException(404, "Not found")
-    from private_pdf_storage import _local_root
+    from private_storage import _local_root
     location=_local_root() / "public-branding" / filename
     if not location.is_file():
         raise HTTPException(404, "Not found")

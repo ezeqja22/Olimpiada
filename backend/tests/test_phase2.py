@@ -120,21 +120,18 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(r.json()["challenge"]["official_solution"],"CONFIDENTIAL_ANSWER_1")
         self.assertTrue(any(u["user_id"]==self.student.id for u in r.json()["challenge"]["winners"]))
 
-    def test_pdf_catalog_no_private_keys_and_reader_requires_login(self):
-        doc=models.LibraryDocument(title="Scan",category="olympiad_scan",subject="Mathematics",
-                                   level="advanced",olympiad="IMO",year=2026,
-                                   storage_key="library/private-123.pdf",page_count=1,uploaded_by=self.admin.id)
+    def test_library_endpoints_are_retired_for_guests_students_and_admins(self):
+        doc=models.LibraryDocument(title="Retained",category="book",subject="Math",
+            level="school",storage_key="library/retained.pdf",page_count=1,uploaded_by=self.admin.id)
         self.db.add(doc);self.db.commit()
-        r=self.client.get("/core/library/catalog")
-        self.assertEqual(r.status_code,200,r.text)
-        item=next(x for x in r.json() if x["id"]==doc.id)
-        self.assertNotIn("storage_key",item)
-        self.assertNotIn("page_count",item)
-        self.assertEqual(self.client.get("/core/library/"+str(doc.id)+"/pages/1").status_code,401)
-        from unittest.mock import patch
-        with patch("phase2_routes.get_private_pdf",return_value=b"fake-pdf"), patch("phase2_routes.render_watermarked_page",return_value=b"RIFFtest"):
-            page=self.client.get("/core/library/"+str(doc.id)+"/pages/1",headers=self.headers(self.student_token))
-            self.assertEqual(page.status_code,200,page.text)
+        for headers in ({},self.headers(self.student_token),self.headers(self.admin_token)):
+            for path in ("/public/library","/core/library/catalog",f"/core/library/{doc.id}",f"/core/library/{doc.id}/pages/1"):
+                response=self.client.get(path,headers=headers)
+                self.assertEqual(response.status_code,404,(path,response.text))
+            response=self.client.post("/core/library/admin/upload",headers=headers,
+                files={"file":("book.pdf",b"%PDF-1.4","application/pdf")})
+            self.assertEqual(response.status_code,404,response.text)
+        self.assertIsNotNone(self.db.get(models.LibraryDocument,doc.id))
 
     def test_timezone_dst(self):
         start,close=weekly_bounds(datetime(2026,3,23).date())
@@ -176,32 +173,6 @@ class CoreTests(unittest.TestCase):
             finally:
                 if before is None:os.environ.pop("PRIVATE_FILES_DIR",None)
                 else:os.environ["PRIVATE_FILES_DIR"]=before
-
-    def test_private_pdf_canvas_page_watermark(self):
-        from PIL import Image
-        from tempfile import TemporaryDirectory
-        from io import BytesIO
-        self.db.commit()
-        pdf=BytesIO();Image.new("RGB",(200,200),"white").save(pdf,format="PDF")
-        with TemporaryDirectory() as folder:
-            previous=os.environ.get("PRIVATE_FILES_DIR")
-            os.environ["PRIVATE_FILES_DIR"]=folder
-            try:
-                r=self.client.post("/core/library/admin/upload",
-                    data={"title":"Sample scan","category":"olympiad_scan","subject":"Mathematics","level":"advanced","year":"2026"},
-                    files={"file":("sample.pdf",pdf.getvalue(),"application/pdf")},
-                    headers=self.headers(self.admin_token))
-                self.assertEqual(r.status_code,200,r.text)
-                id=r.json()["id"]
-                page=self.client.get("/core/library/"+str(id)+"/pages/1",
-                    headers=self.headers(self.student_token))
-                self.assertEqual(page.status_code,200,page.text[:150] if page.status_code!=200 else "")
-                self.assertEqual(page.headers["content-type"],"image/webp")
-                self.assertTrue(page.content.startswith(b"RIFF"))
-                self.assertEqual(page.headers["cache-control"],"private, no-store, max-age=0")
-            finally:
-                if previous is None:os.environ.pop("PRIVATE_FILES_DIR",None)
-                else:os.environ["PRIVATE_FILES_DIR"]=previous
 
 if __name__=="__main__":
     unittest.main()

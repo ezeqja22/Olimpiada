@@ -90,7 +90,7 @@ class Phase1Integration(unittest.TestCase):
 
     def test_guest_can_only_discover(self):
         self.assertEqual(self.client.get("/public/forums").status_code, 200)
-        self.assertEqual(self.client.get("/public/library").status_code, 200)
+        self.assertEqual(self.client.get("/public/library").status_code, 404)
         self.assertEqual(self.client.get("/public/problem-of-week").status_code, 200)
         self.assertEqual(self.client.get("/auth/forums").status_code, 401)
         self.assertEqual(self.client.get("/admin/users").status_code, 401)

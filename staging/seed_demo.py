@@ -7,9 +7,9 @@ from PIL import Image, ImageDraw
 from database import SessionLocal
 from auth.utils import hash_password
 from models import (User,Forum,ForumMembership,TeacherApplication,TeacherForumAssignment,
-                    Problem,WeeklyChallenge,CourseItem,LibraryDocument)
+                    Problem,WeeklyChallenge,CourseItem)
 from phase2_service import current_week_date,weekly_bounds
-from private_pdf_storage import put_private_pdf, _local_root
+from private_storage import _local_root
 
 if os.getenv("STAGING_MODE") != "1":
     raise SystemExit("Refusing to seed a non-staging database")
@@ -96,16 +96,6 @@ with SessionLocal() as db:
                       instructions="Test 15 minuta",body="Zgjidh $x^2-5x+6=0$.",
                       published_at=now-timedelta(minutes=2),due_at=now+timedelta(days=5),
                       duration_minutes=15,created_by=created["admin"].id))
-    book=Image.new("RGB",(850,1100),"white")
-    brush=ImageDraw.Draw(book)
-    brush.text((65,120),"OLIMPIADA — DEMO BOOKLET",fill="black")
-    brush.text((65,180),"Staging only. Synthetic educational content.",fill="black")
-    brush.text((65,265),"Problem: Find all integer solutions of x^2 - 5x + 6 = 0.",fill="black")
-    pdf=io.BytesIO();book.save(pdf,format="PDF",resolution=110.0)
-    pdf_key=put_private_pdf(pdf.getvalue())
-    db.add(LibraryDocument(title="Booklet Demo",category="booklet",subject="Mathematics",
-                           level="school",year=2026,storage_key=pdf_key,page_count=1,
-                           uploaded_by=created["admin"].id))
     db.commit()
     print("Synthetic demo accounts created. Passwords are shown ONLY here:")
     for email,password in credentials:
