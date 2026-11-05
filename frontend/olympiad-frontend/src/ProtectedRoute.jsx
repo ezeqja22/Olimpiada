@@ -1,11 +1,10 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import AnimatedLoader from "./components/AnimatedLoader";
-import { LockedPreview } from "./AccessPages";
 import { useAuth } from "./context/AuthContext";
 
-function ProtectedRoute({ children, feature }) {
-  const { currentUser, authLoading, accessInfo } = useAuth();
+function ProtectedRoute({ children }) {
+  const { currentUser, authLoading } = useAuth();
   const location = useLocation();
 
   if (authLoading) {
@@ -30,9 +29,6 @@ function ProtectedRoute({ children, feature }) {
     );
   }
 
-  if (feature && !accessInfo?.features?.includes(feature)) {
-    return <LockedPreview feature={feature} />;
-  }
   return children;
 }
 

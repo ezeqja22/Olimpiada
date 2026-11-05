@@ -17,15 +17,14 @@ import Homepage from "./Homepage";
 import Feed from "./Feed";
 import CreateProblem from "./CreateProblem";
 import ProtectedRoute from "./ProtectedRoute";
-import { Pricing, Explore, Learning, Tutoring } from "./AccessPages";
-import { AdminPayments } from "./AdminPhase1";
+import { Explore, Learning, Tutoring } from "./AccessPages";
+import { AdminTutoring } from "./AdminPhase1";
 import AdminContent from "./AdminContent";
 import AnalyticsConsent from "./AnalyticsConsent";
 import WeeklyPage, {AdminWeekly} from "./WeeklyPage";
 import CourseHub, {AdminCourses} from "./CourseHub";
 import {LibraryCatalog,LibraryViewer,LibraryAdmin} from "./LibraryPage";
 import ForumCatalogue from "./ForumCatalogue";
-import AdminForumTiers from "./AdminForumTiers";
 import {TeacherApplicationPage,FAQPage,SupportPage,TeacherWorkspace} from "./ExperiencePages";
 import {AdminTeachers,AdminFAQ,AdminSupport,AdminParents} from "./AdminExperience";
 import AdminSiteEditor from "./AdminSiteEditor";
@@ -72,11 +71,11 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/homepage" element={<Homepage />} />
-              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/pricing" element={<Navigate to="/explore" replace />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/library" element={<LibraryCatalog />} />
               <Route path="/library/:id" element={<LibraryViewer />} />
-              <Route path="/courses" element={<ProtectedRoute feature="material"><CourseHub /></ProtectedRoute>} />
+              <Route path="/courses" element={<ProtectedRoute><CourseHub /></ProtectedRoute>} />
               <Route path="/weekly" element={<WeeklyPage />} />
               <Route path="/forum-catalog" element={<ForumCatalogue />} />
               <Route path="/teacher/apply" element={<TeacherApplicationPage />} />
@@ -89,7 +88,7 @@ function App() {
               <Route
                 path="/feed"
                 element={
-                  <ProtectedRoute feature="material">
+                  <ProtectedRoute>
                     <Feed />
                   </ProtectedRoute>
                 }
@@ -97,7 +96,7 @@ function App() {
               <Route
                 path="/create-problem"
                 element={
-                  <ProtectedRoute feature="material">
+                  <ProtectedRoute>
                     <CreateProblem />
                   </ProtectedRoute>
                 }
@@ -105,7 +104,7 @@ function App() {
               <Route
                 path="/problem/:id"
                 element={
-                  <ProtectedRoute feature="forum">
+                  <ProtectedRoute>
                     <ProblemDetail />
                   </ProtectedRoute>
                 }
@@ -138,7 +137,7 @@ function App() {
               <Route
                 path="/search"
                 element={
-                  <ProtectedRoute feature="material">
+                  <ProtectedRoute>
                     <SearchResults />
                   </ProtectedRoute>
                 }
@@ -146,7 +145,7 @@ function App() {
               <Route
                 path="/forums"
                 element={
-                  <ProtectedRoute feature="forum">
+                  <ProtectedRoute>
                     <Forums />
                   </ProtectedRoute>
                 }
@@ -154,7 +153,7 @@ function App() {
               <Route
                 path="/forum/:forumId"
                 element={
-                  <ProtectedRoute feature="forum">
+                  <ProtectedRoute>
                     <ForumDetail />
                   </ProtectedRoute>
                 }
@@ -162,7 +161,7 @@ function App() {
               <Route
                 path="/forum/:forumId/info"
                 element={
-                  <ProtectedRoute feature="forum">
+                  <ProtectedRoute>
                     <ForumDetail />
                   </ProtectedRoute>
                 }
@@ -170,7 +169,7 @@ function App() {
               <Route
                 path="/forum/:forumId/thread/:messageId"
                 element={
-                  <ProtectedRoute feature="forum">
+                  <ProtectedRoute>
                     <ThreadPage />
                   </ProtectedRoute>
                 }
@@ -178,7 +177,7 @@ function App() {
               <Route
                 path="/subject/:subject"
                 element={
-                  <ProtectedRoute feature="material">
+                  <ProtectedRoute>
                     <SubjectPage />
                   </ProtectedRoute>
                 }
@@ -218,12 +217,11 @@ function App() {
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="email" element={<AdminEmail />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="subscriptions" element={<AdminPayments />} />
+                <Route path="tutoring" element={<AdminTutoring />} />
                 <Route path="content" element={<AdminContent />} />
                 <Route path="weekly" element={<AdminWeekly />} />
                 <Route path="courses" element={<AdminCourses />} />
                 <Route path="library" element={<LibraryAdmin />} />
-                <Route path="forum-tiers" element={<AdminForumTiers />} />
                 <Route path="teachers" element={<AdminTeachers />} />
                 <Route path="site-content" element={<AdminSiteEditor />} />
                 <Route path="branding" element={<AdminSiteEditor />} />

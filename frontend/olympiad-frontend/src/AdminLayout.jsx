@@ -114,7 +114,6 @@ const AdminLayout = () => {
     {path:"/admin/faq",label:"FAQ",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg",adminOnly:false},
     {path:"/admin/support",label:"Technical Support",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg",adminOnly:false},
     {path:"/admin/parents",label:"Raporte Prindërish",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg",adminOnly:false},
-    {path: "/admin/forum-tiers",label: "Planet e Forumeve",icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
     {path: "/admin/weekly",label: "Problema e Javës", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
     {path: "/admin/courses",label: "Materiale & Teste", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
     {path: "/admin/library",label: "Biblioteka", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
@@ -125,8 +124,8 @@ const AdminLayout = () => {
       adminOnly: false,
     },
     {
-      path: "/admin/subscriptions",
-      label: "Abonimet & Pagesat",
+      path: "/admin/tutoring",
+      label: "Kërkesat 1-to-1",
       icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/Analytics_admin_panel_en0409.svg",
       adminOnly: false,
     },

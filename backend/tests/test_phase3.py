@@ -185,8 +185,6 @@ class Phase3Tests(unittest.TestCase):
 
 
     def test_paid_student_cannot_read_unassigned_private_classroom(self):
-        self.student.subscription_plan = "medium"
-        self.student.subscription_expires_at = datetime.utcnow() + timedelta(days=14)
         private_forum = Forum(title="Private class",description="Private",
                               creator_id=self.admin.id,is_private=True,
                               is_approved=True,required_plan="medium")
@@ -293,16 +291,15 @@ class Phase3Tests(unittest.TestCase):
         item_id=allowed.json()["id"]
         self.assertEqual(self.db.get(CourseItem,item_id).forum_id,self.a.id)
 
-    def test_scheduled_notices_respect_paid_forum_tiers_and_do_not_duplicate(self):
+    def test_scheduled_notices_respect_forum_bans_and_do_not_duplicate(self):
         from unittest.mock import patch
         from models import ForumMembership, ContentEventDelivery
         from phase3_jobs import send_due_learning_notices
-        self.student.subscription_plan="medium"
-        self.student.subscription_expires_at=datetime.utcnow()+timedelta(days=15)
         self.a.required_plan="premium"
-        self.db.add(ForumMembership(forum_id=self.a.id,user_id=self.student.id,
-                                    role="member",is_active=True,is_banned=False))
-        item=CourseItem(kind="homework",title="Premium-only homework",subject="Math",
+        member=ForumMembership(forum_id=self.a.id,user_id=self.student.id,
+                                    role="member",is_active=True,is_banned=True)
+        self.db.add(member)
+        item=CourseItem(kind="homework",title="Classroom homework",subject="Math",
                         instructions="Solve",body="Hidden prompt",
                         forum_id=self.a.id,created_by=self.admin.id,
                         published_at=datetime.utcnow()-timedelta(minutes=3))
@@ -313,7 +310,7 @@ class Phase3Tests(unittest.TestCase):
                 event_key="course:"+str(item.id),recipient_user_id=self.student.id).count()
             send_due_learning_notices(self.db)
             self.assertEqual(own(),0)
-            self.a.required_plan="medium"
+            member.is_banned=False
             self.db.commit()
             send_due_learning_notices(self.db)
             self.assertEqual(own(),1)
@@ -321,7 +318,7 @@ class Phase3Tests(unittest.TestCase):
             self.assertEqual(own(),1)
             relevant=[call for call in notice.call_args_list
                       if call.args[1].id==self.student.id and
-                      call.args[3].get("title")=="Premium-only homework"]
+                      call.args[3].get("title")=="Classroom homework"]
             self.assertEqual(len(relevant),1)
 
     def test_admin_can_hide_all_faq_without_default_entries_appearing(self):

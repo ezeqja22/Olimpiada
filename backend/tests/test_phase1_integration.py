@@ -1,4 +1,4 @@
-"""API security and payment review tests against a local SQLite database."""
+"""API security and account access tests against a local SQLite database."""
 import os
 import unittest
 from unittest.mock import patch
@@ -85,7 +85,8 @@ class Phase1Integration(unittest.TestCase):
         self.assertEqual(detail.json()["description"], own.description)
         self.assertEqual(self.client.get(f"{url}/{foreign.id}", headers=headers).status_code, 404)
         self.assertEqual(self.client.get(f"{url}/{own.id}").status_code, 401)
-        self.assertEqual(self.client.delete(f"{url}/{own.id}", headers=headers).status_code, 402)
+        self.assertEqual(self.client.delete(f"{url}/{foreign.id}", headers=headers).status_code, 404)
+        self.assertEqual(self.client.delete(f"{url}/{own.id}", headers=headers).status_code, 200)
 
     def test_guest_can_only_discover(self):
         self.assertEqual(self.client.get("/public/forums").status_code, 200)
@@ -94,37 +95,45 @@ class Phase1Integration(unittest.TestCase):
         self.assertEqual(self.client.get("/auth/forums").status_code, 401)
         self.assertEqual(self.client.get("/admin/users").status_code, 401)
 
-    def test_free_is_locked_trial_manual_only_once(self):
-        token = self.student_token
-        self.assertEqual(self.client.get("/auth/forums", headers=self.headers(token)).status_code, 402)
-        self.assertEqual(self.client.get("/auth/problems/", headers=self.headers(token)).status_code, 402)
-        start = self.client.post("/access/trial/start", headers=self.headers(token))
-        self.assertEqual(start.status_code, 200, start.text)
-        self.assertEqual(self.client.post("/access/trial/start", headers=self.headers(token)).status_code, 409)
-        self.assertEqual(self.client.get("/auth/forums", headers=self.headers(token)).status_code, 200)
+    def test_accounts_access_learning_without_subscription(self):
+        headers = self.headers(self.student_token)
+        for plan in ("free", "basic", "medium", "premium"):
+            self.student.subscription_plan = plan
+            self.student.subscription_expires_at = datetime.utcnow() - timedelta(days=1)
+            self.db.commit()
+            for path in ("/auth/forums", "/auth/problems/", "/access/resources", "/core/courses/items"):
+                with self.subTest(plan=plan,path=path):
+                    r=self.client.get(path,headers=headers)
+                    self.assertEqual(r.status_code,200,r.text)
+        access=self.client.get("/access/me",headers=headers).json()
+        self.assertNotIn("plan",access)
+        self.assertNotIn("subscription_expires_at",access)
+        self.assertEqual(set(access["features"]),{"forum","meet","material","test","tutoring"})
 
-    def test_basic_cannot_open_materials(self):
-        self.student.subscription_plan = "basic"
-        self.student.subscription_expires_at = datetime.utcnow() + timedelta(days=31)
-        self.db.commit()
-        self.assertEqual(self.client.get("/auth/forums", headers=self.headers(self.student_token)).status_code, 200)
-        self.assertEqual(self.client.get("/auth/problems/", headers=self.headers(self.student_token)).status_code, 402)
-        self.assertEqual(self.client.get("/access/resources", headers=self.headers(self.student_token)).status_code, 402)
-
-    def test_payment_review_only_once(self):
-        payment = models.PaymentSubmission(user_id=self.student.id,plan="medium",months=2,
-                                           amount_all=5000,receipt_public_id="private/test",
-                                           status="pending",created_at=datetime.utcnow())
-        self.db.add(payment)
-        self.db.commit()
-        url = "/access/admin/payments/" + str(payment.id) + "/review"
-        self.assertEqual(self.client.post(url, json={"approve":True},headers=self.headers(self.student_token)).status_code, 403)
-        r = self.client.post(url, json={"approve":True},headers=self.headers(self.admin_token))
-        self.assertEqual(r.status_code, 200, r.text)
+    def test_retired_billing_endpoints_do_not_mutate_accounts(self):
+        for token in (self.student_token,self.admin_token):
+            for method,path in (("GET","/access/plans"),("POST","/access/trial/start"),
+                ("POST","/access/payments"),("GET","/access/payments/mine"),
+                ("GET","/access/admin/payments"),("POST","/access/admin/payments/1/review"),
+                ("PUT","/core/forums/1/tier")):
+                r=self.client.request(method,path,headers=self.headers(token),json={"plan":"premium","approve":True})
+                self.assertEqual(r.status_code,404,(path,r.text))
         self.db.refresh(self.student)
-        self.assertEqual(self.student.subscription_plan, "medium")
-        self.assertTrue(self.student.subscription_expires_at > datetime.utcnow() + timedelta(days=55))
-        self.assertEqual(self.client.post(url,json={"approve":True},headers=self.headers(self.admin_token)).status_code, 409)
+        self.assertEqual(self.student.subscription_plan,"free")
+        self.assertIsNone(self.student.subscription_expires_at)
+        self.assertIsNone(self.student.trial_used_at)
+
+    def test_notifications_are_owner_only(self):
+        own=models.Notification(user_id=self.student.id,type="follow",title="Own",message="Own")
+        foreign=models.Notification(user_id=self.admin.id,type="follow",title="Private",message="Private")
+        self.db.add_all([own,foreign]); self.db.commit()
+        headers=self.headers(self.student_token)
+        listed=self.client.get("/auth/notifications",headers=headers)
+        self.assertEqual(listed.status_code,200,listed.text)
+        self.assertIn(own.id,[n["id"] for n in listed.json()])
+        self.assertNotIn(foreign.id,[n["id"] for n in listed.json()])
+        self.assertEqual(self.client.put(f"/auth/notifications/{foreign.id}/read",headers=headers).status_code,404)
+        self.assertEqual(self.client.put(f"/auth/notifications/{own.id}/read",headers=headers).status_code,200)
 
     def test_admin_can_search_users_by_username_and_email(self):
         url = "/admin/users"

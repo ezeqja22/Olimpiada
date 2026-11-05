@@ -1,8 +1,6 @@
-"""Subscription, manual bank-slip review, learning catalogue and admin finance API."""
-import io
-import os
+"""Account access, learning catalogue, tutoring and admin finance API."""
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from auth.utils import SECRET_KEY, create_jwt
@@ -11,25 +9,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from database import get_db
 from auth.dependencies import get_current_user, get_verified_user
-from models import (User, Forum, Problem, SystemSettings, PaymentSubmission,
-                    LearningResource, TeacherSubject, TutoringRequest, MonthlyExpense,
-                    AdminAction)
-from phase1_service import PLANS, add_months, effective_plan, has_feature, require_feature, require_staff, is_super_admin
-from PIL import Image
-import cloudinary
-import cloudinary.uploader
-import cloudinary.utils
+from models import (User, Forum, Problem, SystemSettings,
+                    LearningResource, TeacherSubject, TutoringRequest, MonthlyExpense)
+from phase1_service import LEARNING_FEATURES, has_feature, require_feature, require_staff, is_super_admin
 
 router = APIRouter(tags=["phase1"])
-MAX_RECEIPT_BYTES = 5 * 1024 * 1024
-
-class PaymentCreate(BaseModel):
-    plan: str
-    months: int = Field(ge=1, le=12)
-
-class ReviewDecision(BaseModel):
-    approve: bool
-    note: str = Field(default="", max_length=1000)
 
 class TeacherSubjectCreate(BaseModel):
     teacher_id: int
@@ -61,42 +45,9 @@ class ExpenseCreate(BaseModel):
 class WeeklyProblemSet(BaseModel):
     problem_id: int
 
-def payment_view(p, include_receipt=False):
-    result = dict(id=p.id, user_id=p.user_id, plan=p.plan, months=p.months,
-                  amount_all=p.amount_all, status=p.status, created_at=p.created_at,
-                  reviewed_at=p.reviewed_at, reviewer_note=p.reviewer_note)
-    if include_receipt and p.receipt_public_id:
-        if p.receipt_public_id.startswith("staging-receipt:"):
-            result["receipt_available"] = True
-        else:
-            result["receipt_url"] = cloudinary.utils.cloudinary_url(
-                p.receipt_public_id, resource_type="image", type="authenticated",
-                sign_url=True, secure=True, expires_at=int(datetime.utcnow().timestamp()) + 300
-            )[0]
-    return result
-
-@router.get("/access/plans")
-def get_plans():
-    return {"plans": PLANS, "trial_days_display": "1 month", "trial_automatic": False}
-
 @router.get("/access/me")
 def my_access(user: User = Depends(get_current_user)):
-    return {"role": user.role, "plan": effective_plan(user),
-            "trial_used": bool(user.trial_used_at), "trial_ends_at": user.trial_expires_at,
-            "subscription_plan": user.subscription_plan,
-            "subscription_expires_at": user.subscription_expires_at,
-            "features": [f for f in ["forum", "meet", "material", "test", "tutoring"] if has_feature(user, f)]}
-
-@router.post("/access/trial/start")
-def start_trial(user: User = Depends(get_verified_user), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user.id).with_for_update().one()
-    if user.trial_used_at or effective_plan(user) not in ("free",):
-        raise HTTPException(409, "Trial already claimed or subscription is active")
-    now = datetime.utcnow()
-    user.trial_used_at = now
-    user.trial_expires_at = add_months(now, 1)
-    db.commit()
-    return {"plan": "medium", "trial_ends_at": user.trial_expires_at}
+    return {"role": user.role, "features": [f for f in LEARNING_FEATURES if has_feature(user, f)]}
 
 @router.get("/public/forums")
 def public_forum_titles(db: Session = Depends(get_db)):
@@ -131,108 +82,6 @@ def set_weekly_problem(data: WeeklyProblemSet, user: User = Depends(get_current_
         db.add(SystemSettings(key="weekly_problem_id", value=str(data.problem_id)))
     db.commit()
     return {"problem_id": data.problem_id}
-
-@router.post("/access/payments")
-def submit_payment(plan: str, months: int, receipt: UploadFile = File(...),
-                   user: User = Depends(get_verified_user), db: Session = Depends(get_db)):
-    if plan not in PLANS or months < 1 or months > 12:
-        raise HTTPException(422, "Invalid plan or months (1-12)")
-    if receipt.content_type not in {"image/png", "image/jpeg", "image/webp"}:
-        raise HTTPException(415, "Receipt must be a PNG, JPG or WEBP image")
-    data = receipt.file.read(MAX_RECEIPT_BYTES + 1)
-    if len(data) > MAX_RECEIPT_BYTES or not data:
-        raise HTTPException(413, "Receipt must be under 5 MB")
-    try:
-        image = Image.open(io.BytesIO(data))
-        image.verify()
-    except Exception:
-        raise HTTPException(422, "Invalid image file")
-    if os.getenv("STAGING_MODE") == "1":
-        from private_pdf_storage import _local_root
-        import secrets
-        key = secrets.token_hex(16)
-        output = io.BytesIO()
-        Image.open(io.BytesIO(data)).convert("RGB").save(output, format="JPEG", quality=85)
-        folder = _local_root() / "receipts"
-        folder.mkdir(parents=True, exist_ok=True)
-        (folder / (key + ".jpg")).write_bytes(output.getvalue())
-        uploaded = {"public_id": "staging-receipt:" + key}
-    else:
-        if not (os.getenv("CLOUDINARY_CLOUD_NAME") and os.getenv("CLOUDINARY_API_KEY") and os.getenv("CLOUDINARY_API_SECRET")):
-            raise HTTPException(503, "Private receipt storage not configured")
-        try:
-            uploaded = cloudinary.uploader.upload(
-                data, resource_type="image", type="authenticated", folder="olimpiada/receipts",
-                use_filename=False, unique_filename=True, overwrite=False)
-        except Exception:
-            raise HTTPException(503, "Could not store receipt; try again")
-    payment = PaymentSubmission(user_id=user.id, plan=plan, months=months,
-                                amount_all=PLANS[plan]["monthly_all"] * months,
-                                receipt_public_id=uploaded["public_id"], status="pending")
-    db.add(payment)
-    db.commit()
-    db.refresh(payment)
-    return payment_view(payment)
-
-
-@router.get("/access/admin/payments/{payment_id}/receipt")
-def stage_receipt(payment_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Reviewer-only private image; never a public URL. Local staging storage only."""
-    require_staff(user)
-    if os.getenv("STAGING_MODE") != "1":
-        raise HTTPException(404, "Unavailable")
-    payment = db.get(PaymentSubmission, payment_id)
-    if not payment or not payment.receipt_public_id.startswith("staging-receipt:"):
-        raise HTTPException(404, "Receipt not found")
-    token = payment.receipt_public_id.removeprefix("staging-receipt:")
-    if len(token) != 32 or any(ch not in "0123456789abcdef" for ch in token):
-        raise HTTPException(404, "Receipt not found")
-    from private_pdf_storage import _local_root
-    from fastapi.responses import Response
-    path = _local_root() / "receipts" / (token + ".jpg")
-    if not path.is_file():
-        raise HTTPException(404, "Receipt not found")
-    return Response(content=path.read_bytes(), media_type="image/jpeg",
-                    headers={"Cache-Control": "private, no-store",
-                             "X-Content-Type-Options": "nosniff"})
-
-@router.get("/access/payments/mine")
-def my_payments(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return [payment_view(p) for p in db.query(PaymentSubmission).filter(
-        PaymentSubmission.user_id == user.id).order_by(PaymentSubmission.created_at.desc()).all()]
-
-@router.get("/access/admin/payments")
-def review_queue(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    require_staff(user)
-    payments = db.query(PaymentSubmission).order_by(PaymentSubmission.created_at.desc()).limit(250).all()
-    return [payment_view(p, include_receipt=True) for p in payments]
-
-@router.post("/access/admin/payments/{payment_id}/review")
-def review_payment(payment_id: int, data: ReviewDecision, user: User = Depends(get_current_user),
-                   db: Session = Depends(get_db)):
-    require_staff(user)
-    payment = db.query(PaymentSubmission).filter(PaymentSubmission.id == payment_id).with_for_update().first()
-    if not payment:
-        raise HTTPException(404, "Payment not found")
-    if payment.status != "pending":
-        raise HTTPException(409, "Payment has already been reviewed")
-    customer = db.query(User).filter(User.id == payment.user_id).with_for_update().first()
-    if not customer:
-        raise HTTPException(404, "Student not found")
-    now = datetime.utcnow()
-    payment.status = "approved" if data.approve else "rejected"
-    payment.reviewed_by = user.id
-    payment.reviewed_at = now
-    payment.reviewer_note = data.note
-    if data.approve:
-        start = max(now, customer.subscription_expires_at or now) if customer.subscription_plan == payment.plan else now
-        customer.subscription_plan = payment.plan
-        customer.subscription_expires_at = add_months(start, payment.months)
-    db.add(AdminAction(admin_id=user.id, action_type="payment_review",
-                       target_id=payment.id, target_type="payment",
-                       details=f"{payment.status}; plan={payment.plan}; months={payment.months}"))
-    db.commit()
-    return payment_view(payment)
 
 @router.get("/access/teachers")
 def list_teachers(subject: str = "", db: Session = Depends(get_db)):

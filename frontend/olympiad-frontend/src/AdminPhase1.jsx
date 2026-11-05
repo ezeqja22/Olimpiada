@@ -3,32 +3,17 @@ import axios from "axios";
 import "./phase1.css";
 const API=process.env.REACT_APP_API_URL||"http://127.0.0.1:8000";
 const headers=()=>({Authorization:"Bearer "+localStorage.getItem("token")});
-export function AdminPayments(){
- const [rows,setRows]=useState([]),[tutoring,setTutoring]=useState([]),[feedback,setFeedback]=useState("");
- const reload=()=>{axios.get(API+"/access/admin/payments",{headers:headers()}).then(r=>setRows(r.data)).catch(()=>setFeedback("Nuk u lexuan mandatet."));
- axios.get(API+"/access/admin/tutoring",{headers:headers()}).then(r=>setTutoring(r.data)).catch(()=>{});};
+export function AdminTutoring(){
+ const [tutoring,setTutoring]=useState([]),[feedback,setFeedback]=useState("");
+ const reload=()=>axios.get(API+"/access/admin/tutoring",{headers:headers()}).then(r=>setTutoring(r.data)).catch(()=>setFeedback("Nuk u lexuan kërkesat."));
  useEffect(reload,[]);
- const openStageReceipt=async(id)=>{
-  try{
-   const response=await axios.get(API+"/access/admin/payments/"+id+"/receipt",
-     {headers:headers(),responseType:"blob"});
-   const link=URL.createObjectURL(response.data);
-   const tab=window.open(link,"_blank","noopener,noreferrer");
-   if(!tab){const a=document.createElement("a");a.href=link;a.download="staging-mandat-"+id+".jpg";a.click();}
-   setTimeout(()=>URL.revokeObjectURL(link),120000);
-  }catch(e){setFeedback("Mandati privat nuk u hap.");}
- };
- const decide=async(id,approve,isTutoring)=>{const note=window.prompt("Shënim për vendimin (opsional):","");if(note===null)return;
- try{await axios.post(API+(isTutoring?"/access/admin/tutoring/":"/access/admin/payments/")+id+"/review",{approve,note},{headers:headers()});setFeedback("Vendimi u ruajt.");reload();}catch(e){setFeedback(e.response?.data?.detail||"Operacioni dështoi.");}};
+ const decide=async(id,approve)=>{const note=window.prompt("Shënim për vendimin (opsional):","");if(note===null)return;
+ try{await axios.post(API+"/access/admin/tutoring/"+id+"/review",{approve,note},{headers:headers()});setFeedback("Vendimi u ruajt.");reload();}catch(e){setFeedback(e.response?.data?.detail||"Operacioni dështoi.");}};
  return <main className="admin-page p1-wrap" style={{maxWidth:"none",margin:"0 auto"}}>
- <h1>Abonimet dhe kërkesat</h1><p className="p1-muted">Miratimi i mandatit aktivizon abonimin. Fotoja e mandatit është private dhe lidhja e saj skadon.</p>
+ <h1>Kërkesat 1-to-1</h1>
  {feedback&&<p className="p1-note" role="status">{feedback}</p>}
- <h2 className="p1-section-title">Mandatet</h2><div className="p1-table-wrap"><table className="p1-table"><thead><tr><th>Student ID</th><th>Plani</th><th>Muaj</th><th>ALL</th><th>Statusi</th><th>Mandati</th><th>Vendim</th></tr></thead>
- <tbody>{rows.map(p=><tr key={p.id}><td>{p.user_id}</td><td>{p.plan}</td><td>{p.months}</td><td>{p.amount_all}</td><td>{p.status}</td><td>{p.receipt_url&&<a href={p.receipt_url} target="_blank" rel="noreferrer">Shiko</a>}
- {p.receipt_available&&<button className="p1-btn alt" type="button" onClick={()=>openStageReceipt(p.id)}>Shiko (stage)</button>}</td>
- <td>{p.status==="pending"&&<div className="p1-row"><button className="p1-btn" onClick={()=>decide(p.id,true,false)}>Approve</button><button className="p1-btn alt" onClick={()=>decide(p.id,false,false)}>Reject</button></div>}</td></tr>)}</tbody></table></div>
  <h2 className="p1-section-title">Kërkesat 1-to-1</h2><div className="p1-table-wrap"><table className="p1-table"><thead><tr><th>Student ID</th><th>Teacher ID</th><th>Lënda</th><th>Mesazhi</th><th>Statusi</th><th>Vendim</th></tr></thead>
- <tbody>{tutoring.map(t=><tr key={t.id}><td>{t.student_id}</td><td>{t.teacher_id}</td><td>{t.subject}</td><td>{t.message}</td><td>{t.status}</td><td>{t.status==="pending"&&<div className="p1-row"><button className="p1-btn" onClick={()=>decide(t.id,true,true)}>Approve</button><button className="p1-btn alt" onClick={()=>decide(t.id,false,true)}>Reject</button></div>}</td></tr>)}</tbody></table></div>
+ <tbody>{tutoring.map(t=><tr key={t.id}><td>{t.student_id}</td><td>{t.teacher_id}</td><td>{t.subject}</td><td>{t.message}</td><td>{t.status}</td><td>{t.status==="pending"&&<div className="p1-row"><button className="p1-btn" onClick={()=>decide(t.id,true)}>Approve</button><button className="p1-btn alt" onClick={()=>decide(t.id,false)}>Reject</button></div>}</td></tr>)}</tbody></table></div>
  </main>;
 }
 export function AdminFinance(){

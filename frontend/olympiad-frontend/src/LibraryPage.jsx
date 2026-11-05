@@ -11,9 +11,9 @@ const categories={book:"Libra",booklet:"Booklet",paper:"Teza",olympiad_scan:"Oli
 export function LibraryCatalog(){
  const [docs,setDocs]=useState([]),[error,setError]=useState("");
  const [filter,setFilter]=useState({category:"",subject:"",level:""});
- const {accessInfo}=useAuth();const allowed=accessInfo?.features?.includes("material");
+ const {currentUser}=useAuth();const allowed=!!currentUser;
  useEffect(()=>{axios.get(API+"/core/library/catalog",{params:filter}).then(r=>setDocs(r.data)).catch(()=>setError("Biblioteka nuk u ngarkua."));},[filter.category,filter.subject,filter.level]);
- return <main className="p1-wrap"><SitePageIntro contentKey="page_library" kicker="Arkivi digjital" title="Biblioteka Olimpike" subtitle="Libra, booklet-e, teza dhe skanime të olimpiadave. Titujt janë publikë; leximi kërkon abonim Medium ose Premium." />
+ return <main className="p1-wrap"><SitePageIntro contentKey="page_library" kicker="Arkivi digjital" title="Biblioteka Olimpike" subtitle="Libra, booklet-e, teza dhe skanime të olimpiadave. Titujt janë publikë; hyr në llogari për të lexuar." />
  <div className="p1-grid" style={{marginBottom:20}}>
  <label>Kategoria<select className="p1-select" value={filter.category} onChange={e=>setFilter({...filter,category:e.target.value})}><option value="">Të gjitha</option>{Object.entries(categories).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
  <label>Lënda<input className="p1-input" placeholder="Mathematics, Physics..." value={filter.subject} onChange={e=>setFilter({...filter,subject:e.target.value})}/></label>
@@ -21,13 +21,13 @@ export function LibraryCatalog(){
  </div>{error&&<p className="p1-alert">{error}</p>}
  <div className="p1-grid">{docs.map(d=><article className="p1-card" key={d.id}><div className="p1-row"><span className="p1-pill">{categories[d.category]}</span>{!allowed&&<LockKeyhole size={18}/>}</div>
  <h2>{d.title}</h2><p className="p1-muted">{d.subject} · {d.level==="school"?"Shkollor":"I Avancuar"} · {d.olympiad||""} · {d.year||""}</p>
- <Link className="p1-btn" to={allowed?"/library/"+d.id:"/pricing"}>{allowed?"Lexo online":"Zhblloko për lexim"}</Link></article>)}</div>
+ <Link className="p1-btn" to={allowed?"/library/"+d.id:"/login"}>{allowed?"Lexo online":"Hyr për të lexuar"}</Link></article>)}</div>
  {!docs.length&&!error&&<p className="p1-note">Nuk ka dokumente në këtë kategori.</p>}
  <p className="p1-note">Leximi bëhet faqe pas faqeje, me watermark personal. Nuk ofrohet shkarkimi i PDF-së; screenshot-et nuk mund të ndalohen plotësisht nga një website.</p></main>;
 }
 export function LibraryViewer(){
- const {id}=useParams(),{accessInfo}=useAuth();const [doc,setDoc]=useState(null),[page,setPage]=useState(1),[error,setError]=useState("");const canvas=useRef(null);
- const allowed=accessInfo?.features?.includes("material");
+ const {id}=useParams(),{currentUser}=useAuth();const [doc,setDoc]=useState(null),[page,setPage]=useState(1),[error,setError]=useState("");const canvas=useRef(null);
+ const allowed=!!currentUser;
  useEffect(()=>{if(!allowed)return;axios.get(API+"/core/library/"+id,{headers:headers()}).then(r=>setDoc(r.data)).catch(()=>setError("Aksesi u refuzua ose dokumenti nuk ekziston."));},[id,allowed]);
  useEffect(()=>{
   if(!doc||!allowed)return;
@@ -41,7 +41,7 @@ export function LibraryViewer(){
   }).catch(()=>{if(!cancelled)setError("Nuk u lexua faqja.");});
   return()=>{cancelled=true;controller.abort();};
  },[id,page,doc,allowed]);
- if(!allowed)return <main className="p1-wrap p1-card"><LockKeyhole/> <h2>Lexim vetëm për abonentët</h2><Link to="/pricing" className="p1-btn">Shiko planet</Link></main>;
+ if(!allowed)return <main className="p1-wrap p1-card"><LockKeyhole/> <h2>Hyr në llogari për të lexuar</h2><Link to="/login" className="p1-btn">Hyr në llogari</Link></main>;
  return <main className="p1-wrap"><Link to="/library">← Biblioteka</Link>
  <h1 className="p1-brand">{doc?.title||"Lexuesi privat"}</h1><p className="p1-muted">Lexim online me watermark personal. Fotografi të ekranit nuk mund të ndalohen plotësisht.</p>
  {doc&&<div className="p1-row p1-card"><button className="p1-btn alt" disabled={page<=1} onClick={()=>setPage(p=>p-1)}>Mbrapa</button>

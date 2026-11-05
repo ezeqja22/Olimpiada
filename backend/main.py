@@ -120,12 +120,12 @@ async def settings_middleware(request: Request, call_next):
         except Exception:
             pass
 
-# Strict server-side entitlement gate: frontend locking is display only.
+# Keep authentication and assigned-teacher restrictions separate from resource handlers.
 from phase1_gate import gate_request
 from database import SessionLocal
 
 @app.middleware("http")
-async def subscription_gate_middleware(request: Request, call_next):
+async def account_access_middleware(request: Request, call_next):
     with SessionLocal() as session:
         denied = gate_request(request, session)
     if denied is not None:

@@ -21,7 +21,7 @@ export default function AdminContent(){
  {message&&<p className="p1-note" role="status">{typeof message==="string"?message:JSON.stringify(message)}</p>}
  <div className="p1-grid two">
   <section className="p1-card"><h2>Problema e Javës (publike)</h2>
-   <p className="p1-muted">Përdor ID-në e një problemi ekzistues. Teksti i këtij problemi bëhet publik pa abonim.</p>
+   <p className="p1-muted">Përdor ID-në e një problemi ekzistues. Teksti i këtij problemi bëhet publik.</p>
    <form className="p1-form" onSubmit={e=>{e.preventDefault();call("/access/admin/problem-of-week",{problem_id:Number(weekly)});}}>
     <label>ID e problemit<input className="p1-input" type="number" min="1" required value={weekly} onChange={e=>setWeekly(e.target.value)}/></label>
     <button className="p1-btn" type="submit">Publiko Problemën e Javës</button>
@@ -37,14 +37,14 @@ export default function AdminContent(){
   </section>
  </div>
  <section className="p1-card p1-group"><h2>Materiale, teste dhe Google Meet</h2>
-   <p className="p1-muted">Vetëm abonentët Medium/Premium shohin tekstin dhe lidhjet e kësaj përmbajtjeje.</p>
+   <p className="p1-muted">Përdoruesit e regjistruar shohin tekstin dhe lidhjet e kësaj përmbajtjeje.</p>
    <form className="p1-form" onSubmit={e=>{e.preventDefault();call("/access/admin/resources",{...resource,scheduled_at:resource.scheduled_at||null});}}>
     <label>Lloji<select className="p1-select" value={resource.kind} onChange={e=>setResource({...resource,kind:e.target.value})}><option value="material">Material</option><option value="test">Test</option><option value="meet">Google Meet</option></select></label>
     <label>Titulli<input className="p1-input" value={resource.title} required onChange={e=>setResource({...resource,title:e.target.value})}/></label>
     <label>Lënda<input className="p1-input" value={resource.subject} onChange={e=>setResource({...resource,subject:e.target.value})}/></label>
     <label>Data/orari (opsional)<input className="p1-input" type="datetime-local" value={resource.scheduled_at} onChange={e=>setResource({...resource,scheduled_at:e.target.value})}/></label>
     <label>Teksti, materiali ose lidhja Google Meet<textarea rows="6" className="p1-input" value={resource.body} onChange={e=>setResource({...resource,body:e.target.value})}/></label>
-    <button className="p1-btn" type="submit">Publiko për abonentët</button>
+    <button className="p1-btn" type="submit">Publiko</button>
    </form>
  </section></main>;
 }

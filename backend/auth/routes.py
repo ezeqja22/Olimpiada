@@ -2623,8 +2623,6 @@ def create_forum(
     db: Session = Depends(get_db)
 ):
     """Create a new forum"""
-    if not is_teacher_or_staff(current_user):
-        raise HTTPException(status_code=403, detail="Only teachers/admins can create forums")
     # Get forum settings from database
     from models import SystemSettings
     forum_settings = db.query(SystemSettings).filter(
@@ -2705,8 +2703,6 @@ def update_forum(
     forum = db.query(Forum).filter(Forum.id == forum_id).first()
     if not forum:
         raise HTTPException(status_code=404, detail="Forum not found")
-    if not is_teacher_or_staff(current_user):
-        raise HTTPException(status_code=403, detail="Only teachers/admins can edit forums")
 
     # Check if user is the creator or admin/moderator
     if forum.creator_id != current_user.id and current_user.role not in ['admin', 'moderator', 'reviewer', 'super_admin']:
@@ -3149,10 +3145,6 @@ def send_message(
             raise HTTPException(status_code=403, detail="Must be a member to send messages")
     
     if not is_teacher_or_staff(current_user):
-        if message.message_type not in ("text", "problem"):
-            raise HTTPException(status_code=403, detail="Students may post comments or their own tasks only")
-        if message.attachment_url or message.attachment_type or message.attachment_name:
-            raise HTTPException(status_code=403, detail="Only teachers/admins can attach materials")
         if message.message_type == "problem":
             task = db.get(Problem, message.problem_id) if message.problem_id else None
             if not task or task.forum_id != forum_id or task.author_id != current_user.id:

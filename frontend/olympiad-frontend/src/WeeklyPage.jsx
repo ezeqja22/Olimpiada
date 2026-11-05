@@ -17,7 +17,7 @@ export default function WeeklyPage(){
    await axios.post(API+"/core/weekly/"+challenge.id+"/submit-file",form,{headers:hdr()});}
   else{await axios.post(API+"/core/weekly/"+challenge.id+"/submit",{answer},{headers:hdr()});}
   setNotice("Zgjidhja u dërgua për shqyrtim. Faleminderit!");setAnswer("");setFile(null);}catch(e){setNotice(e.response?.data?.detail||"Dërgimi dështoi.");}};
- return <main className="p1-wrap"><SitePageIntro contentKey="page_weekly" kicker="Sfida javore · Falas" title="Problema e Javës" subtitle="Çdo të hënë në 08:00 publikohet problemi i ri. Të dielën në 20:00 dalin fituesit dhe zgjidhja zyrtare." actionTo="/pricing" actionLabel="Programet tona" />
+ return <main className="p1-wrap"><SitePageIntro contentKey="page_weekly" kicker="Sfida javore · Falas" title="Problema e Javës" subtitle="Çdo të hënë në 08:00 publikohet problemi i ri. Të dielën në 20:00 dalin fituesit dhe zgjidhja zyrtare." actionTo="/explore" actionLabel="Eksploro" />
  {!challenge?<section className="p1-card">Problema nuk është publikuar ende. Publikimi bëhet të hënën në 08:00.</section>:<div className="p1-rows">
   <section className="p1-card"><span className="p1-pill">Java e {challenge.week_date}</span><h2>{challenge.problem.title}</h2><div className="p1-muted">Mbyllet: {clock(challenge.closes_at)} • Statusi: {challenge.status}</div><div style={{marginTop:16}}><MathRenderer text={challenge.problem.description}/></div></section>
   {challenge.status==="open"&&<section className="p1-card"><h2>Dërgo zgjidhjen tënde</h2><p className="p1-muted">Një zgjidhje për çdo nxënës. Administratori e miraton ose refuzon.</p>

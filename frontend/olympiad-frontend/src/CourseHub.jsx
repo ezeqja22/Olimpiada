@@ -10,7 +10,7 @@ const toUTC=local=>new Date(local).toISOString().slice(0,19);
 const readUTC=s=>new Date(s+"Z").toLocaleString("sq-AL",{timeZone:"Europe/Tirane"});
 export default function CourseHub(){
  const [items,setItems]=useState([]),[notice,setNotice]=useState(""),[active,setActive]=useState(null),[attempt,setAttempt]=useState(null),[answer,setAnswer]=useState(""),[now,setNow]=useState(Date.now());
- useEffect(()=>{axios.get(API+"/core/courses/items",{headers:hdr()}).then(r=>setItems(r.data)).catch(()=>setNotice("Për të hyrë në materiale kërkohet abonim Medium ose Premium."));},[]);
+ useEffect(()=>{axios.get(API+"/core/courses/items",{headers:hdr()}).then(r=>setItems(r.data)).catch(()=>setNotice("Materialet nuk u ngarkuan."));},[]);
  useEffect(()=>{const n=window.setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(n);},[]);
  const open=async item=>{setNotice("");setActive(item);setAnswer("");setAttempt(null);
    if(item.kind==="test"){try{const r=await axios.post(API+"/core/courses/items/"+item.id+"/start",{}, {headers:hdr()});setAttempt(r.data);setActive({...item,body:r.data.body});}catch(e){setNotice(e.response?.data?.detail||"Testi nuk mund të fillojë.");}}};
@@ -29,7 +29,7 @@ export default function CourseHub(){
  {item.kind==="material"?<button className="p1-btn" onClick={()=>setActive(item)}>Lexo materialin</button>:<button className="p1-btn" onClick={()=>open(item)}>{item.kind==="test"?"Fillo testin":"Hap detyrën"}</button>}
  </article>)}</div>
  {!items.length&&!notice&&<p className="p1-note">Nuk ka përmbajtje të publikuar.</p>}
- <Link to="/pricing" className="p1-muted">Shiko planet e abonimit</Link></main>;
+</main>;
 }
 export function AdminCourses(){
  const [classes,setClasses]=useState([]);

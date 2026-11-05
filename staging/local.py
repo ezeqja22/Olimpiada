@@ -65,7 +65,7 @@ def migrate_legacy_demo_addresses():
     from models import User
     changed = 0
     with SessionLocal() as db:
-        for short in ("admin", "free", "basic", "medium", "premium", "teacher"):
+        for short in ("admin", "free", "student", "member", "other", "teacher"):
             old = f"demo-{short}@olimpiada.test"
             new = f"demo-{short}@example.com"
             existing = db.query(User).filter(User.email == old).one_or_none()
@@ -95,7 +95,7 @@ def check():
     from database import SessionLocal
     from models import User
     with TestClient(app) as client:
-        for route in ("/health", "/access/plans", "/experience/faq", "/core/library/catalog"):
+        for route in ("/health", "/experience/faq", "/core/library/catalog"):
             response = client.get(route)
             if response.status_code != 200:
                 raise RuntimeError(f"{route} returned {response.status_code}: {response.text[:240]}")
@@ -145,7 +145,7 @@ def reset_demo_passwords():
 
     passwords = []
     with SessionLocal() as db:
-        for short in ("admin", "free", "basic", "medium", "premium", "teacher"):
+        for short in ("admin", "free", "student", "member", "other", "teacher"):
             email = f"demo-{short}@example.com"
             account = db.query(User).filter(User.email == email).one_or_none()
             if account is None:

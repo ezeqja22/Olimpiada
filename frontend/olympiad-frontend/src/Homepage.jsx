@@ -319,7 +319,6 @@ function Homepage() {
             <Link to="/weekly" className="nav-link">{t("weekly")}</Link>
             <Link to="/forum-catalog" className="nav-link">{t("forums")}</Link>
             <Link to="/library" className="nav-link">{t("library")}</Link>
-            <Link to="/pricing" className="nav-link">{t("plans")}</Link>
             <div className="nav-dropdown-wrap">
               <button type="button" className="nav-link nav-button" onClick={openSubjectDropdown}
                 aria-expanded={showSubjectDropdown}>{t("more")} <ChevronDown size={15}/></button>
@@ -469,7 +468,6 @@ function Homepage() {
             <Link to="/weekly" className="mobile-nav-link">{t("weekly")}</Link>
             <Link to="/forum-catalog" className="mobile-nav-link">{t("forums")}</Link>
             <Link to="/library" className="mobile-nav-link">{t("library")}</Link>
-            <Link to="/pricing" className="mobile-nav-link">{t("plans")}</Link>
             <div className="mobile-subject-wrap">
               <button type="button" className="mobile-nav-link mobile-nav-button"
                 onClick={openSubjectDropdown} aria-expanded={showSubjectDropdown}>{t("more")} <ChevronDown size={14}/></button>
@@ -527,7 +525,6 @@ function Homepage() {
               {key:"home_feature_forums",icon:"◈",title:t("forums"),description:lang==="sq"?"Diskuto ide dhe puno me mësues e nxënës të tjerë.":"Discuss ideas with teachers and peers.",to:"/forum-catalog"},
               {key:"home_feature_library",icon:"▤",title:t("library"),description:t("libraryDesc"),to:"/library"},
               {key:"home_feature_courses",icon:"◷",title:t("courses"),description:lang==="sq"?"Teste të programuara dhe materiale të organizuara.":"Scheduled tests and structured study materials.",to:"/courses"},
-              {key:"home_feature_plans",icon:"◎",title:t("plans"),description:lang==="sq"?"Zgjidh nivelin e përgatitjes që të duhet.":"Choose the right level for your studies.",to:"/pricing"},
               {key:"home_feature_support",icon:"☏",title:t("support"),description:lang==="sq"?"Ndihmë e shpejtë kur të duhet.":"Help when you need it.",to:"/support"}
             ].map(f=><article className="p3-feature-card" key={f.key}>
               {imageFor(f.key) && <img className="p3-feature-card__image" loading="lazy" decoding="async" src={imageFor(f.key)} alt="" />}
@@ -586,8 +583,8 @@ function Homepage() {
           <section className="p3-final-cta" style={imageFor("cta")?{backgroundImage:`linear-gradient(90deg,rgba(7,36,56,.94),rgba(7,36,56,.54)),url("${imageFor("cta")}")`}:undefined}>
             <span className="p3-eyebrow">Olimpiada.al</span>
             <h2><RichInlineText text={copy("cta","title",lang==="sq"?"Gati për sfidën tjetër?":"Ready for your next challenge?")} /></h2>
-            <p className="p3-rich-inline"><RichInlineText text={copy("cta","subtitle",lang==="sq"?"Fillo me Problemen e Javës ose zgjidh planin që të përshtatet.":"Start with the Problem of the Week or choose your subscription.")} /></p>
-            <Link to={contentBlocks.cta?.button_url||"/pricing"} className="p1-btn">{lang==="sq"?"Fillo tani":"Get started"} →</Link>
+            <p className="p3-rich-inline"><RichInlineText text={copy("cta","subtitle",lang==="sq"?"Fillo me Problemen e Javës dhe eksploro materialet.":"Start with the Problem of the Week and explore learning resources.")} /></p>
+            <Link to={contentBlocks.cta?.button_url||"/explore"} className="p1-btn">{lang==="sq"?"Fillo tani":"Get started"} →</Link>
           </section>
         </section>
         <AboutFounders />

@@ -5,7 +5,7 @@ const Context=createContext(null);
 const TEXT={
  sq:{
   more:"Më shumë",feed:"Komuniteti",subjects:"Lëndët",profile:"Profili im",family:"Prindër & Raporte",settings:"Cilësimet",admin:"Paneli Admin",logout:"Dil",
-  home:"Kreu",explore:"Eksploro",plans:"Abonimet",weekly:"Problema e Javës",library:"Biblioteka",
+  home:"Kreu",explore:"Eksploro",weekly:"Problema e Javës",library:"Biblioteka",
   courses:"Materiale & Teste",forums:"Forumet",login:"Hyr",signup:"Regjistrohu",support:"Suport",faq:"Pyetje të shpeshta",
   apply:"Bëhu mësues",teacher:"Paneli i Mësuesit",discover:"Zbulo platformën",learn:"Mëso më shumë",
   heroLabel:"Mëso. Zgjidh. Shkëlqe.",heroTitle:"Problemet e mëdha fillojnë me kuriozitet.",
@@ -18,7 +18,7 @@ const TEXT={
  },
  en:{
   more:"More",feed:"Community",subjects:"Subjects",profile:"My Profile",family:"Parents & Reports",settings:"Settings",admin:"Admin Panel",logout:"Log out",
-  home:"Home",explore:"Explore",plans:"Subscriptions",weekly:"Problem of the Week",library:"Library",
+  home:"Home",explore:"Explore",weekly:"Problem of the Week",library:"Library",
   courses:"Materials & Tests",forums:"Forums",login:"Log in",signup:"Sign up",support:"Support",faq:"FAQ",
   apply:"Become a teacher",teacher:"Teacher workspace",discover:"Explore platform",learn:"Learn more",
   heroLabel:"Learn. Solve. Excel.",heroTitle:"Big ideas start with curiosity.",

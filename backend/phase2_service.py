@@ -1,12 +1,11 @@
-"""Plan-sensitive forum access and timezone-correct weekly-challenge transitions."""
+"""Membership-based forum access and timezone-correct weekly-challenge transitions."""
 from datetime import datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
 from fastapi import HTTPException
 from models import ForumMembership, WeeklyChallenge, TeacherForumAssignment, TeacherApplication
-from phase1_service import effective_plan, is_staff
+from phase1_service import is_staff
 
 TIRANA = ZoneInfo("Europe/Tirane")
-PLAN_LEVELS = {"basic": 1, "medium": 2, "premium": 3, "staff": 4}
 
 def is_teacher_or_staff(user):
     return user is not None and (user.role == "teacher" or is_staff(user))
@@ -25,10 +24,6 @@ def can_enter_forum(user, forum, db):
     if user.role == "teacher":
         application = db.query(TeacherApplication).filter_by(user_id=user.id,status="approved").first()
         return bool(application and db.query(TeacherForumAssignment).filter_by(teacher_id=user.id,forum_id=forum.id).first())
-    plan = effective_plan(user)
-    required = (forum.required_plan or "basic").lower()
-    if PLAN_LEVELS.get(plan, 0) < PLAN_LEVELS.get(required, 999):
-        return False
     if not forum.is_approved:
         return False
     if forum.is_private:
@@ -40,7 +35,7 @@ def can_enter_forum(user, forum, db):
 
 def require_forum(user, forum, db):
     if not can_enter_forum(user, forum, db):
-        raise HTTPException(status_code=403, detail="Forum membership or appropriate subscription required")
+        raise HTTPException(status_code=403, detail="Forum membership required")
     return forum
 
 def weekly_bounds(monday_date):

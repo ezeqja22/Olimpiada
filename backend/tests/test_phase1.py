@@ -1,56 +1,25 @@
-"""Low-level access checks with no external email, payment, storage or web services."""
+"""Account access must be independent of legacy billing metadata."""
 import unittest
-from datetime import datetime, timedelta
 from types import SimpleNamespace
-from phase1_service import add_months, effective_plan, has_feature, PLANS
+from datetime import datetime, timedelta
+from phase1_service import has_feature, LEARNING_FEATURES, require_staff
+from fastapi import HTTPException
 
-def user(role="student", plan="free", expires=None, trial=None, is_superuser=False):
-    return SimpleNamespace(role=role, subscription_plan=plan,
-                           subscription_expires_at=expires, trial_expires_at=trial,
-                           is_superuser=is_superuser)
+class AccountAccessTests(unittest.TestCase):
+    def test_all_legacy_tiers_and_expirations_have_equal_access(self):
+        for plan in ("free", "basic", "medium", "premium", "unknown"):
+            for days in (-30, 30):
+                u = SimpleNamespace(role="student", is_superuser=False, is_active=True,
+                    is_banned=False, subscription_plan=plan,
+                    subscription_expires_at=datetime.utcnow()+timedelta(days=days),
+                    trial_expires_at=None)
+                for feature in LEARNING_FEATURES:
+                    with self.subTest(plan=plan,days=days,feature=feature):
+                        self.assertTrue(has_feature(u,feature))
+                with self.assertRaises(HTTPException): require_staff(u)
 
-class SubscriptionTests(unittest.TestCase):
-    def test_guest_and_free_denied(self):
-        self.assertEqual(effective_plan(None), "guest")
-        self.assertFalse(has_feature(None, "forum"))
-        self.assertFalse(has_feature(user(), "forum"))
-        self.assertFalse(has_feature(user(), "material"))
-
-    def test_basic_access(self):
-        u = user(plan="basic", expires=datetime.utcnow() + timedelta(days=7))
-        self.assertTrue(has_feature(u, "forum"))
-        self.assertFalse(has_feature(u, "material"))
-        self.assertFalse(has_feature(u, "tutoring"))
-
-    def test_medium_access(self):
-        u = user(plan="medium", expires=datetime.utcnow() + timedelta(days=7))
-        self.assertTrue(has_feature(u, "forum"))
-        self.assertTrue(has_feature(u, "test"))
-        self.assertFalse(has_feature(u, "tutoring"))
-
-    def test_premium_access(self):
-        u = user(plan="premium", expires=datetime.utcnow() + timedelta(days=7))
-        self.assertTrue(has_feature(u, "tutoring"))
-
-    def test_expired_subscription_denied(self):
-        u = user(plan="premium", expires=datetime.utcnow() - timedelta(seconds=1))
-        self.assertEqual(effective_plan(u), "free")
-
-    def test_trial_medium_once_claimed(self):
-        u = user(trial=datetime.utcnow() + timedelta(days=12))
-        self.assertEqual(effective_plan(u), "medium")
-        self.assertFalse(has_feature(u, "tutoring"))
-
-    def test_staff_role_and_super_admin(self):
-        self.assertTrue(has_feature(user(role="reviewer"), "tutoring"))
-        self.assertTrue(has_feature(user(role="super_admin"), "tutoring"))
-        self.assertTrue(has_feature(user(is_superuser=True), "tutoring"))
-
-    def test_pricing(self):
-        self.assertEqual(PLANS["basic"]["monthly_all"], 1000)
-        self.assertEqual(PLANS["medium"]["monthly_all"], 2500)
-        self.assertEqual(PLANS["premium"]["monthly_all"], 2500)
-
-    def test_month_arithmetic(self):
-        self.assertEqual(add_months(datetime(2026, 1, 31), 1), datetime(2026, 2, 28))
-        self.assertEqual(add_months(datetime(2024, 1, 31), 1), datetime(2024, 2, 29))
+    def test_guest_disabled_and_banned_accounts_have_no_features(self):
+        for u in (None, SimpleNamespace(is_active=False,is_banned=False),
+                  SimpleNamespace(is_active=True,is_banned=True)):
+            for feature in LEARNING_FEATURES:
+                self.assertFalse(has_feature(u,feature))

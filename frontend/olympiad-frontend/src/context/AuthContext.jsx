@@ -11,7 +11,6 @@ const header = token => ({ Authorization: "Bearer " + token });
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [accessInfo, setAccessInfo] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const lastInteraction = useRef(Date.now());
   const lastRefresh = useRef(Date.now());
@@ -19,37 +18,27 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem("token");
     localStorage.removeItem("token");
     setCurrentUser(null);
-    setAccessInfo(null);
     if (token) {
       axios.post(API_URL + "/access/session/logout", {}, { headers: header(token) }).catch(() => {});
     }
   }, []);
-  const refreshAccess = useCallback(async () => {
-    const token = localStorage.getItem("token");
-    if (!token) { setAccessInfo(null); return null; }
-    const response = await axios.get(API_URL + "/access/me", { headers: header(token) });
-    setAccessInfo(response.data);
-    return response.data;
-  }, []);
   const refreshUser = useCallback(async () => {
     const token = localStorage.getItem("token");
-    if (!token) { setCurrentUser(null);setAccessInfo(null);setAuthLoading(false);return null; }
+    if (!token) { setCurrentUser(null);setAuthLoading(false);return null; }
     setAuthLoading(true);
     try {
       const user = await axios.get(API_URL + "/auth/me", { headers: header(token) });
       setCurrentUser(user.data);
-      await refreshAccess();
       lastRefresh.current = Date.now();
       return user.data;
     } catch (error) {
       localStorage.removeItem("token");
       setCurrentUser(null);
-      setAccessInfo(null);
       return null;
     } finally {
       setAuthLoading(false);
     }
-  }, [refreshAccess]);
+  }, []);
   const loginWithToken = useCallback(async token => {
     lastInteraction.current = Date.now();
     lastRefresh.current = Date.now();
@@ -85,7 +74,7 @@ export function AuthProvider({ children }) {
     const timer = window.setInterval(tick, 30000);
     const onVisibility = () => { if (document.visibilityState === "visible") tick(); };
     const onStorage = e => {
-      if (e.key === "token" && !e.newValue) { setCurrentUser(null);setAccessInfo(null); }
+      if (e.key === "token" && !e.newValue) { setCurrentUser(null); }
       if (e.key === "token" && e.newValue) refreshUser();
     };
     document.addEventListener("visibilitychange", onVisibility);
@@ -98,9 +87,9 @@ export function AuthProvider({ children }) {
     };
   }, [logout, refreshUser]);
   const value = useMemo(() => ({
-    currentUser, setCurrentUser, accessInfo, authLoading,
-    isAuthenticated: !!currentUser, refreshUser, refreshAccess, loginWithToken, logout,
-  }), [currentUser, accessInfo, authLoading, refreshUser, refreshAccess, loginWithToken, logout]);
+    currentUser, setCurrentUser, authLoading,
+    isAuthenticated: !!currentUser, refreshUser, loginWithToken, logout,
+  }), [currentUser, authLoading, refreshUser, loginWithToken, logout]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 export function useAuth() {

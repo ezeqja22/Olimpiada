@@ -185,7 +185,7 @@ export default function AdminSiteEditor() {
               </>}
               {section.link && <label>
                 Lidhja e butonit
-                <input value={current.button_url} placeholder="/pricing" maxLength={500}
+                <input value={current.button_url} placeholder="/explore" maxLength={500}
                   onChange={e=>change("button_url",e.target.value)} />
                 <span className="site-editor__hint">Vetëm lidhje të brendshme që fillojnë me /.</span>
               </label>}

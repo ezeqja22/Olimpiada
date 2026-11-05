@@ -1,4 +1,4 @@
-"""Phase 2 regression tests: user plan tiers, test timing and weekly embargo."""
+"""Phase 2 regression tests: membership, test timing and weekly embargo."""
 import unittest
 from datetime import datetime, timedelta
 from tempfile import TemporaryDirectory
@@ -40,32 +40,39 @@ class CoreTests(unittest.TestCase):
     def headers(self,token):
         return {"Authorization":"Bearer "+token}
 
-    def test_premium_forum_locked_for_basic_and_unlocked_for_premium(self):
-        self.student.subscription_plan="basic"
-        self.student.subscription_expires_at=datetime.utcnow()+timedelta(days=3)
-        forum=models.Forum(title="Paid premium",description="Only premium",creator_id=self.admin.id,
+    def test_forum_access_uses_membership_and_bans_not_tiers(self):
+        forum=models.Forum(title="Forum",description="Discussion",creator_id=self.admin.id,
                            is_private=False,is_approved=True,required_plan="premium")
         self.db.add(forum);self.db.commit()
-        catalog=self.client.get("/core/forums/catalog",headers=self.headers(self.student_token))
-        self.assertEqual(catalog.status_code,200,catalog.text)
-        self.assertFalse(next(f for f in catalog.json() if f["id"]==forum.id)["accessible"])
-        r=self.client.get("/auth/forums/"+str(forum.id),headers=self.headers(self.student_token))
-        self.assertEqual(r.status_code,403,r.text)
-        self.student.subscription_plan="premium"
-        self.db.commit()
-        r=self.client.get("/auth/forums/"+str(forum.id),headers=self.headers(self.student_token))
-        self.assertEqual(r.status_code,200,r.text)
+        headers=self.headers(self.student_token)
+        catalog=self.client.get("/core/forums/catalog",headers=headers)
+        row=next(f for f in catalog.json() if f["id"]==forum.id)
+        self.assertTrue(row["accessible"])
+        self.assertNotIn("required_plan",row)
+        url="/auth/forums/"+str(forum.id)
+        self.assertEqual(self.client.get(url,headers=headers).status_code,200)
+        forum.is_private=True; self.db.commit()
+        self.assertEqual(self.client.get(url,headers=headers).status_code,403)
+        member=models.ForumMembership(forum_id=forum.id,user_id=self.student.id,
+                                      role="member",is_active=True,is_banned=False)
+        self.db.add(member);self.db.commit()
+        self.assertEqual(self.client.get(url,headers=headers).status_code,200)
+        member.is_banned=True;self.db.commit()
+        self.assertEqual(self.client.get(url,headers=headers).status_code,403)
 
-    def test_student_cannot_create_forum(self):
-        self.student.subscription_plan="basic"
-        self.student.subscription_expires_at=datetime.utcnow()+timedelta(days=15)
-        payload={"title":"Unauthorized forum","description":"x","is_private":False}
-        r=self.client.post("/auth/forums",json=payload,headers=self.headers(self.student_token))
+    def test_student_can_create_and_edit_own_forum_like_master(self):
+        headers=self.headers(self.student_token)
+        r=self.client.post("/auth/forums",json={"title":"Student forum","description":"Discussion","is_private":False},headers=headers)
+        self.assertEqual(r.status_code,200,r.text)
+        fid=r.json()["id"]
+        r=self.client.put(f"/auth/forums/{fid}",json={"title":"Updated title"},headers=headers)
+        self.assertEqual(r.status_code,200,r.text)
+        other=models.Forum(title="Other owner",description="Private",creator_id=self.admin.id,is_private=False,is_approved=True)
+        self.db.add(other);self.db.commit()
+        r=self.client.put(f"/auth/forums/{other.id}",json={"title":"Not mine"},headers=headers)
         self.assertEqual(r.status_code,403,r.text)
 
     def test_scheduled_test_content_hidden_until_start(self):
-        self.student.subscription_plan="medium"
-        self.student.subscription_expires_at=datetime.utcnow()+timedelta(days=15)
         now=datetime.utcnow()
         item=models.CourseItem(kind="test",title="Exam",subject="Mathematics",instructions="Timer",
                                body="SECRET_EXAM_42",published_at=now-timedelta(minutes=1),
@@ -113,7 +120,7 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(r.json()["challenge"]["official_solution"],"CONFIDENTIAL_ANSWER_1")
         self.assertTrue(any(u["user_id"]==self.student.id for u in r.json()["challenge"]["winners"]))
 
-    def test_pdf_catalog_no_private_keys_and_page_requires_subscription(self):
+    def test_pdf_catalog_no_private_keys_and_reader_requires_login(self):
         doc=models.LibraryDocument(title="Scan",category="olympiad_scan",subject="Mathematics",
                                    level="advanced",olympiad="IMO",year=2026,
                                    storage_key="library/private-123.pdf",page_count=1,uploaded_by=self.admin.id)
@@ -124,8 +131,10 @@ class CoreTests(unittest.TestCase):
         self.assertNotIn("storage_key",item)
         self.assertNotIn("page_count",item)
         self.assertEqual(self.client.get("/core/library/"+str(doc.id)+"/pages/1").status_code,401)
-        self.assertEqual(self.client.get("/core/library/"+str(doc.id)+"/pages/1",
-                         headers=self.headers(self.student_token)).status_code,402)
+        from unittest.mock import patch
+        with patch("phase2_routes.get_private_pdf",return_value=b"fake-pdf"), patch("phase2_routes.render_watermarked_page",return_value=b"RIFFtest"):
+            page=self.client.get("/core/library/"+str(doc.id)+"/pages/1",headers=self.headers(self.student_token))
+            self.assertEqual(page.status_code,200,page.text)
 
     def test_timezone_dst(self):
         start,close=weekly_bounds(datetime(2026,3,23).date())
@@ -172,8 +181,6 @@ class CoreTests(unittest.TestCase):
         from PIL import Image
         from tempfile import TemporaryDirectory
         from io import BytesIO
-        self.student.subscription_plan="medium"
-        self.student.subscription_expires_at=datetime.utcnow()+timedelta(days=10)
         self.db.commit()
         pdf=BytesIO();Image.new("RGB",(200,200),"white").save(pdf,format="PDF")
         with TemporaryDirectory() as folder:

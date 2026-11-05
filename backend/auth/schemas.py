@@ -206,7 +206,6 @@ class ForumUpdate(BaseModel):
     tags: Optional[str] = None
 
 class Forum(ForumBase):
-    required_plan: str = "basic"
     id: int
     creator_id: int
     created_at: datetime

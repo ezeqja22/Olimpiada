@@ -57,7 +57,7 @@ export function SupportPage(){
     setForm({...form,subject:"",message:""});}
   catch(e){setNotice(e.response?.data?.detail||"Dërgimi dështoi.");}finally{setBusy(false);}};
  return <main className="p1-wrap p3-body"><PageTitle contentKey="page_support" kicker="Support" title={lang==="sq"?"Jemi këtu për të ndihmuar":"How can we help?"}
- subtitle={lang==="sq"?"Na shkruaj për probleme teknike, abonimet ose materialet.":"Contact us about technical issues, subscriptions or learning resources."}/>
+ subtitle={lang==="sq"?"Na shkruaj për probleme teknike ose materialet.":"Contact us about technical issues or learning resources."}/>
  <div className="p1-grid two"><form className="p1-card p3-form" onSubmit={submit}>
  <label>{lang==="sq"?"Emri":"Name"}<input className="p1-input" minLength={2} required value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label>
  <label>Email<input className="p1-input" type="email" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>
@@ -67,7 +67,7 @@ export function SupportPage(){
  <button className="p1-btn" disabled={busy}>{busy?"Duke dërguar...":lang==="sq"?"Dërgo kërkesën":"Send request"}</button>
  {notice&&<p className="p1-note" role="status">{notice}</p>}
  </form><aside className="p3-side-help"><h2>{lang==="sq"?"Përgjigje të shpejta":"Quick answers"}</h2>
- <p>{lang==="sq"?"Shumica e pyetjeve për abonimet, forumet dhe testet janë shpjeguar te FAQ.":"Common questions about subscriptions and tests are answered in our FAQ."}</p>
+ <p>{lang==="sq"?"Shumica e pyetjeve për forumet dhe testet janë shpjeguar te FAQ.":"Common questions about forums and tests are answered in our FAQ."}</p>
  <Link className="p1-btn alt" to="/faq">FAQ →</Link></aside></div></main>;
 }
 export function TeacherWorkspace(){

@@ -17,9 +17,9 @@ if os.getenv("STAGING_MODE") != "1":
 users = [
     ("admin", "admin"),
     ("free", "student"),
-    ("basic", "student"),
-    ("medium", "student"),
-    ("premium", "student"),
+    ("student", "student"),
+    ("member", "student"),
+    ("other", "student"),
     ("teacher", "teacher")
 ]
 with SessionLocal() as db:
@@ -36,29 +36,26 @@ with SessionLocal() as db:
                      password_hash=hash_password(password),role=role,
                      is_active=True,is_verified=True,is_banned=False,
                      preferred_language="sq")
-        if short in ("basic","medium","premium"):
-            account.subscription_plan=short
-            account.subscription_expires_at=now+timedelta(days=40)
         db.add(account)
         db.flush()
         created[short]=account
         credentials.append((account.email,password))
     db.commit()
 
-    basic=Forum(title="Forumi i Ushtrimeve Basic",description="Komente dhe ushtrime për Basic",
-                creator_id=created["admin"].id,subject="Matematikë",required_plan="basic",
+    exercises=Forum(title="Forumi i Ushtrimeve",description="Komente dhe ushtrime",
+                creator_id=created["admin"].id,subject="Matematikë",
                 is_private=False,is_approved=True)
-    medium=Forum(title="Klasa e Algjebrës",description="Forum i mësuesit për abonentët Medium",
-                 creator_id=created["admin"].id,subject="Matematikë",required_plan="medium",
+    algebra=Forum(title="Klasa e Algjebrës",description="Forum i mësuesit",
+                 creator_id=created["admin"].id,subject="Matematikë",
                  is_private=False,is_approved=True)
-    premium=Forum(title="Klasa Premium",description="Për abonentët Premium",
-                  creator_id=created["admin"].id,subject="Matematikë",required_plan="premium",
+    geometry=Forum(title="Klasa e Gjeometrisë",description="Diskutime për gjeometrinë",
+                  creator_id=created["admin"].id,subject="Matematikë",
                   is_private=False,is_approved=True)
-    db.add_all([basic,medium,premium])
+    db.add_all([exercises,algebra,geometry])
     db.flush()
-    db.add(ForumMembership(forum_id=medium.id,user_id=created["teacher"].id,
+    db.add(ForumMembership(forum_id=algebra.id,user_id=created["teacher"].id,
                            role="member",is_active=True,is_banned=False))
-    db.add(TeacherForumAssignment(teacher_id=created["teacher"].id,forum_id=medium.id,
+    db.add(TeacherForumAssignment(teacher_id=created["teacher"].id,forum_id=algebra.id,
                                   assigned_by=created["admin"].id,created_at=now))
 
     doc_img=Image.new("RGB",(640,400),"#ebf5f8")

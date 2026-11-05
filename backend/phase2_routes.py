@@ -11,7 +11,7 @@ from database import get_db
 from auth.dependencies import get_current_user, get_verified_user
 from models import (User, Problem, Forum, WeeklyChallenge, WeeklySubmission, TeacherApplication, TeacherForumAssignment,
                     CourseItem, CourseAttempt, LibraryDocument, ForumMembership)
-from phase1_service import require_staff, require_feature, effective_plan, is_staff
+from phase1_service import require_staff, require_feature, is_staff
 from phase2_service import (weekly_bounds, is_teacher_or_staff,
                             run_weekly_transitions, can_enter_forum)
 from private_pdf_storage import (MAX_BYTES, validate_pdf, put_private_pdf, get_private_pdf,
@@ -52,9 +52,6 @@ class LibraryMeta(BaseModel):
     level: str
     olympiad: str | None = Field(default=None, max_length=100)
     year: int | None = Field(default=None, ge=1900, le=2100)
-
-class ForumTier(BaseModel):
-    required_plan: str
 
 def safe_challenge(challenge, db):
     if not challenge:
@@ -214,25 +211,11 @@ def review_submission(submission_id: int, data: WeeklyReview,
 def forum_catalog(user: User = Depends(get_verified_user), db: Session = Depends(get_db)):
     """All forums are discoverable, but content never accompanies catalogue entries."""
     return [{"id": f.id, "title": f.title, "subject": f.subject,
-             "is_private": f.is_private, "required_plan": f.required_plan,
+             "is_private": f.is_private,
              "accessible": can_enter_forum(user, f, db)}
             for f in db.query(Forum).filter(Forum.is_approved.is_(True))
             .order_by(Forum.created_at.desc()).limit(500).all()
             if user.role != "teacher" or can_enter_forum(user,f,db)]
-
-@router.put("/forums/{forum_id}/tier")
-def update_forum_tier(forum_id: int, data: ForumTier, user: User = Depends(get_verified_user),
-                      db: Session = Depends(get_db)):
-    if user.role not in ("admin","super_admin") and not user.is_superuser:
-        raise HTTPException(403, "Admin role required")
-    if data.required_plan not in ("basic", "medium", "premium"):
-        raise HTTPException(422, "Invalid forum plan")
-    forum = db.get(Forum, forum_id)
-    if not forum:
-        raise HTTPException(404, "Forum not found")
-    forum.required_plan = data.required_plan
-    db.commit()
-    return {"id": forum.id, "required_plan": forum.required_plan}
 
 def serialize_item(item, include_body=True):
     return {"id": item.id, "kind": item.kind, "title": item.title,
@@ -270,8 +253,6 @@ def course_items(user: User = Depends(get_verified_user), db: Session = Depends(
         if not approved: raise HTTPException(403,"Teacher approval required")
         assigned=db.query(TeacherForumAssignment.forum_id).filter_by(teacher_id=user.id).all()
         q=q.filter(CourseItem.forum_id.in_([x[0] for x in assigned]))
-    if not is_teacher_or_staff(user):
-        q = q.filter(CourseItem.kind != "test") if not __import__("phase1_service").has_feature(user,"test") else q
     visible = []
     for item in q.order_by(CourseItem.published_at.desc()).limit(300).all():
         if item.forum_id and not can_enter_forum(user, db.get(Forum, item.forum_id), db):

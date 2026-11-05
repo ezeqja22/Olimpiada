@@ -9,7 +9,7 @@ from auth.dependencies import get_current_user, get_verified_user
 from models import (User, TeacherApplication, TeacherForumAssignment, Forum, TeacherSubject,
     SupportTicket, FaqEntry, SiteContentBlock, EmailTemplate, EmailDeliveryLog, ParentStudentLink,
     CourseItem, CourseAttempt, Notification, ContentEventDelivery)
-from phase1_service import require_staff, is_staff, effective_plan
+from phase1_service import require_staff, is_staff
 from phase2_service import can_enter_forum
 from phase3_service import (store_teacher_image,read_teacher_image,
     TEMPLATE_DEFAULTS,validate_template,enqueue_notice,render)
@@ -241,11 +241,9 @@ def public_faq(db:Session=Depends(get_db)):
     has_records = db.query(FaqEntry.id).first() is not None
     if not entries and not has_records:
         defaults=[
-          ("Abonimet","Si aktivizohet një abonim?","Zgjidh një plan, ngarko mandatin dhe prit verifikimin.","Subscriptions","How do I activate a subscription?","Choose a plan, upload your receipt and await approval."),
-          ("Abonimet","Si funksionon prova falas?","Shtyp 'Aktivizo Free Trial' në faqen e planeve. Nuk aktivizohet automatikisht.","Subscriptions","How does the free trial work?","Click Activate Free Trial on the pricing page. It never starts automatically."),
           ("Problema e Javës","Si dërgoj një zgjidhje?","Hyr në llogari, hap Problemen e Javës dhe dërgo tekst ose fotografi/PDF.","Weekly problem","How do I submit?","Sign in and upload a text, photo or PDF solution."),
           ("Testet","Si funksionon kohëmatësi?","Testi nis me klikim dhe afati zbatohet në server.","Tests","How is time enforced?","The timer starts when you begin and is checked by the server."),
-          ("Biblioteka","A mund t'i shkarkoj librat?","Materialet lexohen në viewer nga abonentët e autorizuar.","Library","Can I download books?","Available content is accessible in the in-app reader.")
+          ("Biblioteka","A mund t'i shkarkoj librat?","Materialet lexohen në viewer nga përdoruesit e regjistruar.","Library","Can I download books?","Available content is accessible in the in-app reader.")
         ]
         return [{"id":-(i+1),"category":x[0],"question_sq":x[1],"answer_sq":x[2],
                  "question_en":x[4],"answer_en":x[5]} for i,x in enumerate(defaults)]
@@ -275,7 +273,7 @@ def edit_faq(id:int,data:FaqData,user:User=Depends(get_verified_user),db:Session
 # Registered page headers share the existing site_content_blocks table (no migration).
 CONTENT_KEYS={
     "hero","home_intro","home_feature_weekly","home_feature_forums",
-    "home_feature_library","home_feature_courses","home_feature_plans",
+    "home_feature_library","home_feature_courses",
     "home_feature_support","competition","community","library","home_mentors",
     "home_founders","home_founder_klevisa","home_founder_enio",
     "partner","cta","page_explore","page_pricing","page_weekly",
