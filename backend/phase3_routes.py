@@ -1,6 +1,6 @@
 """Phase 3 teacher, support, FAQ, email-template, notification and branding routes."""
 from datetime import date, datetime, timedelta
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Response
+from fastapi import APIRouter, Depends, Form, HTTPException
 from pydantic import BaseModel, Field, EmailStr
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -11,15 +11,14 @@ from models import (User, TeacherApplication, TeacherForumAssignment, Forum, Tea
     CourseItem, CourseAttempt, Notification, ContentEventDelivery)
 from phase1_service import require_staff, is_staff
 from phase2_service import can_enter_forum
-from phase3_service import (store_teacher_image,read_teacher_image,
+from phase3_service import (
     TEMPLATE_DEFAULTS,validate_template,enqueue_notice,render)
-from private_storage import _use_s3
 from pydantic import ConfigDict
 
 router=APIRouter(prefix="/experience",tags=["phase3"])
 
 def require_admin(user):
-    # Reviewer is authorized for payment review but cannot manage teacher IDs,
+    # Reviewers cannot manage teacher applications,
     # parent reports, branding, support or email broadcast.
     if user.role not in ("admin", "super_admin") and not user.is_superuser:
         raise HTTPException(403, "Admin role required")
@@ -86,11 +85,18 @@ def set_language(data:LanguageChoice,user:User=Depends(get_current_user),
     db.commit()
     return {"language":user.preferred_language}
 
+class TeacherApplicationData(BaseModel):
+    first_name: str = Field(min_length=2, max_length=90)
+    last_name: str = Field(min_length=2, max_length=90)
+    birth_date: date
+    bio: str = Field(min_length=25, max_length=6000)
+    subject: str = Field(min_length=2, max_length=100)
+
 @router.post("/teacher/apply")
-def teacher_apply(first_name: str = Form(...),last_name: str = Form(...),
-                  birth_date: date = Form(...),bio: str = Form(...),subject: str = Form(...),
-                  id_photo: UploadFile = File(...),portrait: UploadFile = File(...),
-                  user: User = Depends(get_verified_user),db: Session = Depends(get_db)):
+def teacher_apply(data: TeacherApplicationData,
+                  user: User = Depends(get_verified_user), db: Session = Depends(get_db)):
+    first_name, last_name, birth_date, bio, subject = (
+        data.first_name, data.last_name, data.birth_date, data.bio, data.subject)
     if user.role not in ("student","user"):
         raise HTTPException(403,"Only student accounts can apply")
     if birth_date >= date.today() or len(bio.strip())<25:
@@ -100,13 +106,9 @@ def teacher_apply(first_name: str = Form(...),last_name: str = Form(...),
     existing=db.query(TeacherApplication).filter_by(user_id=user.id).first()
     if existing:
         raise HTTPException(409,"Teacher application already submitted")
-    id_data=id_photo.file.read(5*1024*1024+1)
-    portrait_data=portrait.file.read(5*1024*1024+1)
-    id_key=store_teacher_image(id_data,id_photo.content_type,"id")
-    portrait_key=store_teacher_image(portrait_data,portrait.content_type,"portrait")
     request=TeacherApplication(user_id=user.id,first_name=first_name.strip()[:90],
         last_name=last_name.strip()[:90],birth_date=birth_date,bio=bio.strip()[:6000],
-        subject=subject.strip()[:100],id_photo_key=id_key,portrait_key=portrait_key,
+        subject=subject.strip()[:100],id_photo_key="",portrait_key="",
         status="pending",submitted_at=datetime.utcnow())
     db.add(request);db.commit()
     return {"id":request.id,"status":"pending"}
@@ -124,17 +126,6 @@ def teacher_queue(user: User = Depends(get_verified_user),db: Session = Depends(
              "subject":a.subject,"status":a.status,"submitted_at":a.submitted_at,
              "review_note":a.review_note}
              for a in db.query(TeacherApplication).order_by(TeacherApplication.submitted_at.desc()).limit(150).all()]
-
-@router.get("/admin/teachers/{app_id}/image/{kind}")
-def view_application_image(app_id:int,kind:str,user:User=Depends(get_verified_user),
-                            db:Session=Depends(get_db)):
-    require_admin(user)
-    a=db.get(TeacherApplication,app_id)
-    if not a or kind not in ("id","portrait"):
-        raise HTTPException(404,"Image not found")
-    key=a.id_photo_key if kind=="id" else a.portrait_key
-    return Response(content=read_teacher_image(key),media_type="image/jpeg",
-                    headers={"Cache-Control":"private, no-store"})
 
 @router.post("/admin/teachers/{app_id}/review")
 def review_teacher(app_id:int,data:Decision,user:User=Depends(get_verified_user),
@@ -290,19 +281,13 @@ def public_content(db:Session=Depends(get_db)):
 def edit_content(key:str,data:BlockData,user:User=Depends(get_verified_user),db:Session=Depends(get_db)):
     require_admin(user)
     if key not in CONTENT_KEYS:raise HTTPException(422,"Unknown section")
-    # Allow uploaded HTTP images only on the isolated, loopback staging API.
-    # HTTPS and safe root-relative image paths are permitted for production.
-    import os
     image = data.image_url.strip()
     safe_relative = image.startswith("/") and not image.startswith("//") and chr(92) not in image
     from urllib.parse import urlsplit
     parts = urlsplit(image)
     safe_https = parts.scheme == "https" and bool(parts.netloc) and not parts.username and not parts.password
-    staging_origin = os.getenv("STAGING_PUBLIC_API_URL", "http://127.0.0.1:8001").rstrip("/")
-    stage_url = staging_origin + "/experience/staging/branding/"
-    safe_stage = os.getenv("STAGING_MODE") == "1" and image.startswith(stage_url) and not parts.fragment
-    if image and not (safe_relative or safe_https or safe_stage):
-        raise HTTPException(422,"Image must use HTTPS, a local path, or the isolated staging upload")
+    if image and not (safe_relative or safe_https):
+        raise HTTPException(422,"Image must use HTTPS or a local path")
     link = data.button_url.strip()
     if link and (not link.startswith("/") or link.startswith("//") or chr(92) in link):
         raise HTTPException(422,"Buttons must link to internal pages")
@@ -494,70 +479,6 @@ def teacher_course_list(user:User=Depends(get_verified_user),db:Session=Depends(
             for i in db.query(CourseItem).filter(CourseItem.forum_id.in_([v[0] for v in assignments])).all()]
 
 
-@router.post("/admin/branding/upload")
-def upload_branding_image(file:UploadFile=File(...),user:User=Depends(get_verified_user)):
-    require_admin(user)
-    from phase3_service import store_teacher_image
-    import io
-    from PIL import Image,ImageOps
-    import cloudinary.uploader
-    from fastapi import HTTPException
-    if file.content_type not in ("image/jpeg","image/png","image/webp"):
-        raise HTTPException(415,"JPG/PNG/WEBP images only")
-    raw=file.file.read(6*1024*1024)
-    if len(raw)>5*1024*1024:
-        raise HTTPException(413,"Images must be under 5MB")
-    try:
-        img=Image.open(io.BytesIO(raw));img.verify()
-        img=ImageOps.exif_transpose(Image.open(io.BytesIO(raw)))
-        img.thumbnail((2000,2000))
-        out=io.BytesIO();img.convert("RGB").save(out,"JPEG",quality=84)
-        payload=out.getvalue()
-    except Exception:
-        raise HTTPException(422,"Invalid image")
-    import os
-    if os.getenv("STAGING_MODE") == "1":
-        import secrets
-        from private_storage import _local_root
-        name = secrets.token_hex(16) + ".jpg"
-        directory = _local_root() / "public-branding"
-        directory.mkdir(parents=True, exist_ok=True)
-        (directory / name).write_bytes(payload)
-        return {"url": os.getenv("STAGING_PUBLIC_API_URL","http://localhost:8001") +
-                       "/experience/staging/branding/" + name}
-    if not all(os.getenv(k) for k in ("CLOUDINARY_CLOUD_NAME","CLOUDINARY_API_KEY","CLOUDINARY_API_SECRET")):
-        raise HTTPException(503,"Cloudinary not configured")
-    try:
-        cloudinary.config(
-            cloud_name=os.environ["CLOUDINARY_CLOUD_NAME"],
-            api_key=os.environ["CLOUDINARY_API_KEY"],
-            api_secret=os.environ["CLOUDINARY_API_SECRET"],
-            secure=True,
-        )
-        uploaded=cloudinary.uploader.upload(payload,folder="olimpiada/branding",resource_type="image",
-                                             use_filename=False,unique_filename=True,overwrite=False)
-        return {"url":uploaded["secure_url"]}
-    except Exception:
-        raise HTTPException(503,"Unable to upload image")
-
-
-@router.get("/staging/branding/{filename}")
-def stage_branding_image(filename: str):
-    """Public images in isolated stage only; never expose ID or document storage."""
-    import os
-    if os.getenv("STAGING_MODE") != "1":
-        raise HTTPException(404, "Not found")
-    prefix=filename.removesuffix(".jpg")
-    if not filename.endswith(".jpg") or len(prefix) != 32 or any(x not in "0123456789abcdef" for x in prefix):
-        raise HTTPException(404, "Not found")
-    from private_storage import _local_root
-    location=_local_root() / "public-branding" / filename
-    if not location.is_file():
-        raise HTTPException(404, "Not found")
-    return Response(content=location.read_bytes(), media_type="image/jpeg",
-                    headers={"Cache-Control":"public, max-age=3600",
-                             "X-Content-Type-Options":"nosniff"})
-
 class TemplateDispatch(BaseModel):
     recipient_user_ids: list[int] = Field(min_length=1,max_length=25)
     fields: dict[str,str] = Field(default_factory=dict)
@@ -588,16 +509,9 @@ def send_selected_template(key:str,data:TemplateDispatch,user:User=Depends(get_v
 
 @router.get("/teachers")
 def public_teacher_directory(db:Session=Depends(get_db)):
-    """Only vetted professional profiles; never expose application identity documents."""
+    """Only admin-approved teacher profiles are public."""
     profiles=db.query(TeacherApplication).filter_by(status="approved").order_by(
         TeacherApplication.id.desc()).limit(24).all()
     return [{"user_id":a.user_id,"first_name":a.first_name,
              "last_name":a.last_name,"subject":a.subject,"bio":a.bio[:450]}
             for a in profiles if db.get(User,a.user_id) and db.get(User,a.user_id).role=="teacher"]
-
-@router.get("/teachers/{user_id}/portrait")
-def approved_teacher_photo(user_id:int,db:Session=Depends(get_db)):
-    request=db.query(TeacherApplication).filter_by(user_id=user_id,status="approved").first()
-    if not request:raise HTTPException(404,"Teacher not found")
-    return Response(content=read_teacher_image(request.portrait_key),media_type="image/jpeg",
-                    headers={"Cache-Control":"public, max-age=3600"})

@@ -12,13 +12,8 @@ export function AdminTeachers(){
  useEffect(()=>{load();axios.get(API+"/core/forums/catalog",{headers:headers()}).then(r=>setForums(r.data)).catch(()=>{});},[]);
  const review=async(id,approve)=>{try{await axios.post(api("/admin/teachers/"+id+"/review"),{approve,note:""},{headers:headers()});load();}catch(e){setNotice(e.response?.data?.detail||"Nuk u ruajt vendimi.");}};
  const assign=async(e,id)=>{e.preventDefault();try{await axios.post(api("/admin/teacher-assignments"),{teacher_id:Number(forms[id]?.teacher_id||id),forum_id:Number(forms[id]?.forum_id)},{headers:headers()});setNotice("Mësuesi u caktua në forum.");}catch(e){setNotice(e.response?.data?.detail||"Caktimi dështoi.");}};
- const view=async(id,kind)=>{const tab=window.open("about:blank","_blank");
- try{const r=await axios.get(api("/admin/teachers/"+id+"/image/"+kind),{responseType:"blob",headers:headers()});
- const url=URL.createObjectURL(r.data);if(tab){tab.location.href=url;setTimeout(()=>URL.revokeObjectURL(url),120000);}
- else{const a=document.createElement("a");a.href=url;a.download="teacher-review.jpg";a.click();setTimeout(()=>URL.revokeObjectURL(url),120000);}}
- catch(e){if(tab)tab.close();setNotice("Fotografia nuk u hap.");}};
- return <main className="p1-wrap" style={{maxWidth:"none"}}><h1>Mësuesit & Verifikimi</h1><p className="p1-muted">Foto e ID-së është private. Vetëm pas aprovimit mund t'i caktohet një klasë mësuesit.</p>
- <div className="p1-rows">{rows.map(r=><section className="p1-card" key={r.id}><div className="p1-row"><div><h2>{r.first_name} {r.last_name}</h2><p>{r.subject} · {r.status} · Data e lindjes: {r.birth_date}</p></div><div className="p1-row"><button className="p1-btn alt" onClick={()=>view(r.id,"portrait")}>Foto profesionale</button><button className="p1-btn alt" onClick={()=>view(r.id,"id")}>ID (private)</button></div></div>
+ return <main className="p1-wrap" style={{maxWidth:"none"}}><h1>Mësuesit & Verifikimi</h1><p className="p1-muted">Aplikimet shqyrtohen manualisht. Vetëm pas aprovimit mund t'i caktohet një klasë mësuesit.</p>
+ <div className="p1-rows">{rows.map(r=><section className="p1-card" key={r.id}><div className="p1-row"><div><h2>{r.first_name} {r.last_name}</h2><p>{r.subject} · {r.status} · Data e lindjes: {r.birth_date}</p></div></div>
  <p style={{whiteSpace:"pre-wrap"}}>{r.bio}</p>
  {r.status==="pending"&&<div className="p1-row"><button className="p1-btn" onClick={()=>review(r.id,true)}>Aprovo</button><button className="p1-btn alt" onClick={()=>review(r.id,false)}>Refuzo</button></div>}
  {r.status==="approved"&&<form className="p1-row p3-assignment" onSubmit={e=>assign(e,r.user_id)}>
@@ -30,19 +25,13 @@ export function AdminTeachers(){
 }
 const KEYS=[["hero","Hero"],["competition","Gara / Olimpiadat"],["community","Komuniteti"],["partner","Spark Partner"],["cta","Thirrja për regjistrim"]];
 export function AdminBranding(){
- const [blocks,setBlocks]=useState({}),[notice,setNotice]=useState(""),[uploading,setUploading]=useState("");
+ const [blocks,setBlocks]=useState({}),[notice,setNotice]=useState("");
  useEffect(()=>{axios.get(api("/content")).then(r=>setBlocks(r.data)).catch(()=>{});},[]);
  const set=(key,field,value)=>setBlocks(prev=>({...prev,[key]:{...blank,...prev[key],[field]:value}}));
  const save=async key=>{try{await axios.put(api("/admin/content/"+key),{...blank,...blocks[key]},{headers:headers()});setNotice("Seksioni "+key+" u ruajt.");}catch(e){setNotice(e.response?.data?.detail||"Ruajtja dështoi.");}};
- const upload=async(key,file)=>{if(!file)return;setUploading(key);setNotice("");try{const body=new FormData();body.append("file",file);
- const r=await axios.post(api("/admin/branding/upload"),body,{headers:headers()});
- set(key,"image_url",r.data.url);setNotice("Foto u ngarkua. Kliko Ruaj seksionin për ta publikuar.");}
- catch(e){setNotice(e.response?.data?.detail||"Ngarkimi dështoi. Kontrollo Cloudinary.");}finally{setUploading("");}};
- return <main className="p1-wrap" style={{maxWidth:"none"}}><h1>Branding & Bannerat</h1><p className="p1-muted">Çdo seksion ka titull e përshkrim në shqip dhe anglisht, foto dhe link. Ngarkimi optimizohet në backend.</p>
+ return <main className="p1-wrap" style={{maxWidth:"none"}}><h1>Branding & Bannerat</h1><p className="p1-muted">Çdo seksion ka titull e përshkrim në shqip dhe anglisht, foto dhe link.</p>
  <div className="p1-grid two">{KEYS.map(([key,name])=><section className="p1-card p3-form" key={key}><div className="p1-row"><h2>{name}</h2><span className="p1-pill">{key}</span></div>
  {blocks[key]?.image_url&&<img src={blocks[key].image_url} alt="" className="p3-preview"/>}
- <label>Foto (JPG/PNG/WEBP)<input className="p1-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>upload(key,e.target.files?.[0])}/></label>
- {uploading===key&&<span>Duke ngarkuar...</span>}
  <label>Image URL HTTPS<input className="p1-input" value={blocks[key]?.image_url||""} onChange={e=>set(key,"image_url",e.target.value)}/></label>
  {["title_sq","title_en","subtitle_sq","subtitle_en","button_url"].map(f=><label key={f}>{f}<input className="p1-input" value={blocks[key]?.[f]||""} onChange={e=>set(key,f,e.target.value)}/></label>)}
  <button className="p1-btn" onClick={()=>save(key)}>Ruaj seksionin</button></section>)}</div>
@@ -52,7 +41,7 @@ const FAQBLANK={category:"General",question_sq:"",answer_sq:"",question_en:"",an
 export function AdminFAQ(){
  const [rows,setRows]=useState([]),[form,setForm]=useState(FAQBLANK),[editing,setEditing]=useState(null),[notice,setNotice]=useState("");
  const load=()=>axios.get(api("/admin/faq"),{headers:headers()}).then(r=>setRows(r.data)).catch(()=>{});
- useEffect(load,[]);
+ useEffect(()=>{load();},[]);
  const save=async e=>{e.preventDefault();try{await axios({method:editing?"put":"post",url:api("/admin/faq"+(editing?"/"+editing:"")),data:form,headers:headers()});setNotice("FAQ u ruajt.");setForm(FAQBLANK);setEditing(null);load();}catch(e){setNotice("Ruajtja dështoi.");}};
  return <main className="p1-wrap" style={{maxWidth:"none"}}><h1>FAQ & Pyetjet</h1>
  <div className="p1-grid two"><form className="p1-card p3-form" onSubmit={save}><h2>{editing?"Ndrysho pyetjen":"Shto pyetje"}</h2>
@@ -66,7 +55,7 @@ export function AdminFAQ(){
 export function AdminSupport(){
  const [tickets,setTickets]=useState([]),[replies,setReplies]=useState({}),[notice,setNotice]=useState("");
  const load=()=>axios.get(api("/admin/tickets"),{headers:headers()}).then(r=>setTickets(r.data)).catch(()=>{});
- useEffect(load,[]);
+ useEffect(()=>{load();},[]);
  const mark=async (id,status)=>{try{
  const r=await axios.put(api("/admin/tickets/"+id),{status,response:replies[id]??""},{headers:headers()});
  setNotice(r.data.email_delivered===false?"Statusi u ruajt, por email-i nuk u dorëzua.":"Statusi dhe përgjigjja u ruajtën.");load();}
@@ -84,7 +73,7 @@ export function AdminTemplates(){
  const [rows,setRows]=useState([]),[editing,setEditing]=useState(null),[form,setForm]=useState({}),[notice,setNotice]=useState("");
  const [recipients,setRecipients]=useState(""),[dispatchFields,setDispatchFields]=useState("{}");
  const load=()=>axios.get(api("/admin/templates"),{headers:headers()}).then(r=>setRows(r.data)).catch(()=>{});
- useEffect(load,[]);
+ useEffect(()=>{load();},[]);
  const save=async e=>{e.preventDefault();try{await axios.put(api("/admin/templates/"+form.key),form,{headers:headers()});setNotice("Template u ruajt.");setEditing(null);load();}catch(e){setNotice(e.response?.data?.detail||"Ruajtja dështoi.");}};
  return <section className="p1-card p1-group"><h2>Email Template Builder</h2>
  <p className="p1-muted">Template të personalizueshme sipas llojit të njoftimit. Placeholders: {"{{name}}, {{title}}, {{child_name}}, {{forum_name}}, {{result}}, {{link}}"}.</p>
@@ -107,7 +96,7 @@ export function AdminParents(){
  const [parent,setParent]=useState(""),[student,setStudent]=useState(""),[link,setLink]=useState(""),[report,setReport]=useState(""),[notice,setNotice]=useState("");
  const [links,setLinks]=useState([]);
  const load=()=>axios.get(api("/admin/parent-links"),{headers:headers()}).then(r=>setLinks(r.data)).catch(()=>{});
- useEffect(load,[]);
+ useEffect(()=>{load();},[]);
  const connect=async e=>{e.preventDefault();try{await axios.post(api("/admin/parent-links"),{parent_id:Number(parent),student_id:Number(student)},{headers:headers()});setNotice("Ftesa u krijua. Kërkon miratimin e prindit dhe nxënësit.");load();}catch(e){setNotice(e.response?.data?.detail||"Krijimi dështoi.");}};
  const send=async e=>{e.preventDefault();const f=new FormData();f.append("report",report);try{const r=await axios.post(api("/admin/parent-reports/"+link),f,{headers:headers()});setNotice(r.data.delivered?"Raporti u dërgua.":"Raporti u ruajt në njoftimet e prindit; email-i nuk u dorëzua.");}catch(e){setNotice(e.response?.data?.detail||"Lidhja duhet konfirmuar.");}};
  return <main className="p1-wrap" style={{maxWidth:"none"}}><h1>Raportet për Prindërit</h1><p className="p1-muted">Raportet private kërkojnë dy miratime: nga prindi dhe nga nxënësi.</p>

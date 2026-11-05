@@ -28,7 +28,6 @@ export default function AdminSiteEditor() {
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState(null);
   const section = SITE_SECTIONS.find(item => item.key === selected) || SITE_SECTIONS[0];
   const current = normalized(drafts[selected] || stored[selected]);
@@ -52,7 +51,7 @@ export default function AdminSiteEditor() {
     setStatus(null);
   };
   const navigateSection = (key) => {
-    if (busy || uploading) return;
+    if (busy) return;
     if (dirty) {
       if (!window.confirm("Ke ndryshime të paruajtura. Vazhdo pa i ruajtur?")) return;
       setDrafts(prev=>{const next={...prev};delete next[selected];return next;});
@@ -76,27 +75,6 @@ export default function AdminSiteEditor() {
       setStatus({error:true,text:errorText(e)});
     } finally {
       setBusy(false);
-    }
-  };
-  const upload = async file => {
-    if (!file) return;
-    if (!["image/jpeg","image/png","image/webp"].includes(file.type) || file.size > 5*1024*1024) {
-      setStatus({error:true,text:"Lejohen foto JPG, PNG ose WEBP deri në 5 MB."});
-      return;
-    }
-    setUploading(true);setStatus(null);
-    try {
-      const body = new FormData();
-      body.append("file",file);
-      const response = await axios.post(ENDPOINT + "/admin/branding/upload",body,{
-        headers:{Authorization:"Bearer " + localStorage.getItem("token")}
-      });
-      change("image_url",response.data.url);
-      setStatus({text:"Fotoja u ngarkua. Kliko «Ruaj ndryshimet» për ta shfaqur në website."});
-    } catch (e) {
-      setStatus({error:true,text:errorText(e)});
-    } finally {
-      setUploading(false);
     }
   };
   const restore = () => {
@@ -168,10 +146,7 @@ export default function AdminSiteEditor() {
               {section.image && <>
                 <div className="site-editor__media">
                   <label>
-                    Fotografia e seksionit
-                    <input type="file" accept="image/jpeg,image/png,image/webp"
-                      disabled={uploading || busy} onChange={e=>{upload(e.target.files?.[0]); e.target.value="";}} />
-                    <span className="site-editor__hint">JPG, PNG ose WEBP · maksimumi 5 MB · ruhet e optimizuar.</span>
+                    Lidhja e fotografisë (HTTPS)
                     <input type="url" placeholder="https://..." value={current.image_url}
                       onChange={e=>change("image_url",e.target.value)}/>
                   </label>
@@ -196,10 +171,10 @@ export default function AdminSiteEditor() {
               {subtitle && <p><RichInlineText text={subtitle} /></p>}
             </div>
             <div className="site-editor__actions">
-              <button className="site-editor__save" type="submit" disabled={busy || uploading || !dirty}>
-                {busy?"Duke ruajtur...":uploading?"Duke ngarkuar foton...":"Ruaj ndryshimet"}
+              <button className="site-editor__save" type="submit" disabled={busy || !dirty}>
+                {busy?"Duke ruajtur...":"Ruaj ndryshimet"}
               </button>
-              <button type="button" className="site-editor__secondary" disabled={busy || uploading}
+              <button type="button" className="site-editor__secondary" disabled={busy}
                 onClick={restore}>Rikthe parazgjedhjet</button>
               {hasContent && <span className="site-editor__hint">Ky seksion ka ndryshime të ruajtura.</span>}
             </div>

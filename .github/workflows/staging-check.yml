@@ -1,7 +1,7 @@
 name: Staging PostgreSQL verification
 on:
   push:
-    branches: [staging-validation]
+    branches: [staging-validation, release/olimpiada-all-changes-2026-11-02]
   workflow_dispatch:
 permissions:
   contents: read
@@ -160,7 +160,7 @@ jobs:
           docker compose -f staging/compose.yaml exec -T api python staging/seed_demo.py > /dev/null
           docker compose -f staging/compose.yaml exec -T api python staging/smoke.py
           curl -fsS http://127.0.0.1:8001/health
-          curl -fsS http://127.0.0.1:8001/access/plans > /dev/null
+          test "$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8001/access/plans)" = "404"
           curl -fsS http://127.0.0.1:8001/public/forums > /dev/null
           curl -fsS http://127.0.0.1:8001/experience/faq > /dev/null
           curl -fsS http://127.0.0.1:5174/homepage > /dev/null

@@ -1,14 +1,9 @@
-"""Teacher-vetting file storage, safe email-template rendering and notification outbox."""
-import io
+"""Safe email-template rendering and notification outbox."""
 import html
-import os
 import re
-import secrets
 from datetime import datetime
-from PIL import Image, ImageOps
 from fastapi import HTTPException
 from models import EmailTemplate, EmailDeliveryLog, Notification, User
-from private_storage import _use_s3, _s3_client, _local_root, _put_private_object
 from email_service import email_service
 
 TEMPLATE_DEFAULTS = {
@@ -72,43 +67,3 @@ def enqueue_notice(db, user, template_key, data):
                             error_code=None if sent else "DELIVERY_UNAVAILABLE",
                             sent_at=datetime.utcnow() if sent else None))
     return sent
-
-def store_teacher_image(blob, mime, purpose):
-    if len(blob)>5*1024*1024 or not blob or mime not in ("image/jpeg","image/png","image/webp"):
-        raise HTTPException(422,"JPG/PNG/WEBP image up to 5MB required")
-    try:
-        img=Image.open(io.BytesIO(blob))
-        img.verify()
-        img=Image.open(io.BytesIO(blob))
-        img=ImageOps.exif_transpose(img)
-        img.thumbnail((1800,1800))
-        img=img.convert("RGB")
-        out=io.BytesIO()
-        img.save(out,format="JPEG",quality=83,exif=b"")
-        sanitized=out.getvalue()
-    except Exception:
-        raise HTTPException(422,"Invalid image")
-    key="teacher-review/"+purpose+"-"+secrets.token_hex(18)+".jpg"
-    if _use_s3():
-        try:
-            _put_private_object(key, sanitized, "image/jpeg")
-        except Exception:
-            raise HTTPException(503,"Private storage unavailable")
-    else:
-        path=_local_root()/key
-        path.parent.mkdir(parents=True,exist_ok=True)
-        with path.open("xb") as f:f.write(sanitized)
-    return key
-
-def read_teacher_image(key):
-    if not key.startswith("teacher-review/") or "/" in key[len("teacher-review/"):]:
-        raise HTTPException(404,"Image not found")
-    if _use_s3():
-        try:
-            return _s3_client().get_object(Bucket=os.environ["S3_PRIVATE_BUCKET"],Key=key)["Body"].read(6*1024*1024)
-        except Exception:
-            raise HTTPException(503,"Private storage unavailable")
-    path=_local_root()/key
-    if not path.is_file():
-        raise HTTPException(404,"Image not found")
-    return path.read_bytes()

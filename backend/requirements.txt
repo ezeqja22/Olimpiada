@@ -20,4 +20,3 @@ sendgrid
 cloudinary
 schedule
 google-auth>=2.0,<3
-boto3>=1.35,<2

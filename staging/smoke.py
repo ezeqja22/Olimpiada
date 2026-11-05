@@ -1,9 +1,7 @@
 """Exhaustive synthetic staging smoke: run only inside a staging API container."""
-import io
 import os
 import sys
 import requests
-from PIL import Image
 from fastapi.testclient import TestClient
 from database import SessionLocal
 from models import User, Forum
@@ -28,16 +26,6 @@ assert client.get("/auth/forums/"+str(public["id"]),headers=free_h).status_code=
 assert client.get("/experience/admin/teachers",headers=free_h).status_code==403
 assert client.get("/experience/teacher/classes",headers=teacher_h).status_code==200
 
-img=io.BytesIO()
-Image.new("RGB",(320,180),color="#e4f4fa").save(img,format="JPEG")
-photo=img.getvalue()
-branding=client.post("/experience/admin/branding/upload",
-                     files={"file":("synthetic.jpg",photo,"image/jpeg")},headers=admin_h)
-assert branding.status_code==200,branding.text
-from urllib.parse import urlparse
-brand_path=urlparse(branding.json()["url"]).path
-assert client.get(brand_path).status_code==200,brand_path
-
 result=email_service.send_notification_email("demo-test@example.com",
              "Synthetic staging notice","Captured only in Mailpit")
 assert result, "Mailpit staging email not captured"
@@ -45,5 +33,5 @@ inbox=requests.get("http://mailpit:8025/api/v1/messages",timeout=5)
 assert inbox.status_code==200,inbox.status_code
 assert inbox.json().get("total",0)>=1, "No messages in Mailpit"
 
-print("PASS: account access, scoped teacher, branding upload, fake mail")
+print("PASS: account access, scoped teacher, fake mail")
 db.close()

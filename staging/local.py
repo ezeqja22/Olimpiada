@@ -14,7 +14,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 STATE = ROOT / "staging" / ".local-state"
 DATABASE = STATE / "olimpiada-local.sqlite3"
-PRIVATE = STATE / "private-files"
 CREDENTIALS = STATE / "secret.json"
 BACKEND = ROOT / "backend"
 FRONTEND = ROOT / "frontend" / "olympiad-frontend"
@@ -22,7 +21,6 @@ FRONTEND = ROOT / "frontend" / "olympiad-frontend"
 
 def configure():
     STATE.mkdir(parents=True, exist_ok=True)
-    PRIVATE.mkdir(parents=True, exist_ok=True)
     if not CREDENTIALS.exists():
         # Local-only secret; never copied to GitHub or the staging website.
         with CREDENTIALS.open("x", encoding="utf-8") as handle:
@@ -34,7 +32,6 @@ def configure():
         "DATABASE_URL": "sqlite:///" + DATABASE.as_posix(),
         "SECRET_KEY": secret,
         "STAGING_MODE": "1",
-        "PRIVATE_FILES_DIR": str(PRIVATE),
         "STAGING_PUBLIC_API_URL": "http://127.0.0.1:8001",
         "FRONTEND_ORIGINS": "http://127.0.0.1:5174,http://localhost:5174",
         "REACT_APP_API_URL": "http://127.0.0.1:8001",
@@ -49,9 +46,6 @@ def configure():
         "CLOUDINARY_API_KEY": "",
         "CLOUDINARY_API_SECRET": "",
         "CLOUDINARY_CLOUD_NAME": "",
-        "S3_PRIVATE_BUCKET": "",
-        "S3_ACCESS_KEY_ID": "",
-        "S3_SECRET_ACCESS_KEY": "",
     })
     sys.path.insert(0, str(BACKEND))
     os.chdir(ROOT)

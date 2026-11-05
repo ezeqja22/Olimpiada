@@ -1,8 +1,6 @@
 """Phase 3 integration: teacher onboarding, classroom isolation, support and family consent."""
-import io,os,unittest
+import unittest
 from datetime import datetime,timedelta
-from tempfile import TemporaryDirectory
-from PIL import Image
 from fastapi.testclient import TestClient
 from database import SessionLocal,engine
 from main import app
@@ -10,24 +8,12 @@ from auth.utils import create_jwt
 from models import (Base,User,Forum,TeacherApplication,TeacherForumAssignment,
                     ParentStudentLink,SupportTicket,EmailTemplate,CourseItem,Notification)
 
-def picture():
-    b=io.BytesIO();Image.new("RGB",(40,40),(235,235,230)).save(b,"JPEG");return b.getvalue()
-
 class Phase3Tests(unittest.TestCase):
     seq=0
     @classmethod
     def setUpClass(cls):
         Base.metadata.create_all(bind=engine)
         cls.client=TestClient(app)
-        cls.storage=TemporaryDirectory()
-        cls.oldstorage=os.environ.get("PRIVATE_FILES_DIR")
-        os.environ.pop("S3_PRIVATE_BUCKET",None)
-        os.environ["PRIVATE_FILES_DIR"]=cls.storage.name
-    @classmethod
-    def tearDownClass(cls):
-        cls.storage.cleanup()
-        if cls.oldstorage is None:os.environ.pop("PRIVATE_FILES_DIR",None)
-        else:os.environ["PRIVATE_FILES_DIR"]=cls.oldstorage
     def setUp(self):
         Phase3Tests.seq+=1
         i=Phase3Tests.seq
@@ -52,9 +38,7 @@ class Phase3Tests(unittest.TestCase):
     def apply(self):
         data={"first_name":"Math","last_name":"Teacher","birth_date":"1994-05-07",
               "subject":"Mathematics","bio":"I have taught olympiad mathematics to pupils for many years."}
-        files={"id_photo":("id.jpg",picture(),"image/jpeg"),
-               "portrait":("portrait.jpg",picture(),"image/jpeg")}
-        return self.client.post("/experience/teacher/apply",data=data,files=files,headers=self.h(self.teacher))
+        return self.client.post("/experience/teacher/apply",json=data,headers=self.h(self.teacher))
 
     def test_application_pending_then_admin_approval_and_class_isolation(self):
         r=self.apply();self.assertEqual(r.status_code,200,r.text)
@@ -64,9 +48,10 @@ class Phase3Tests(unittest.TestCase):
         self.assertEqual(self.client.get("/experience/admin/teachers",
                            headers=self.h(self.teacher)).status_code,403)
         self.assertEqual(self.client.get("/experience/admin/teachers/"+str(app_id)+"/image/id",
-                           headers=self.h(self.teacher)).status_code,403)
+                           headers=self.h(self.teacher)).status_code,404)
         self.assertEqual(self.client.get("/experience/admin/teachers/"+str(app_id)+"/image/id",
-                           headers=self.h(self.admin)).status_code,200)
+                           headers=self.h(self.admin)).status_code,404)
+        self.assertEqual(self.db.get(TeacherApplication,app_id).id_photo_key, "")
         r=self.client.post("/experience/admin/teachers/"+str(app_id)+"/review",
                            json={"approve":True},headers=self.h(self.admin))
         self.assertEqual(r.status_code,200,r.text)
@@ -109,21 +94,10 @@ class Phase3Tests(unittest.TestCase):
         attempt = {**payload,"button_url":"//bad.example"}
         self.assertEqual(self.client.put(endpoint,json=attempt,
                          headers=self.h(self.admin)).status_code,422)
-        with patch.dict(os.environ,{"STAGING_MODE":"1",
-                                   "STAGING_PUBLIC_API_URL":"http://127.0.0.1:8001"}):
-            uploaded=self.client.post("/experience/admin/branding/upload",
-                                      files={"file":("test.jpg",picture(),"image/jpeg")},
-                                      headers=self.h(self.admin))
-            self.assertEqual(uploaded.status_code,200,uploaded.text)
-            local_url=uploaded.json()["url"]
-            self.assertTrue(local_url.startswith("http://127.0.0.1:8001/experience/staging/branding/"))
-            image_saved=self.client.put(endpoint,json={**payload,"image_url":local_url},
-                                         headers=self.h(self.admin))
-            self.assertEqual(image_saved.status_code,200,image_saved.text)
-            from urllib.parse import urlparse
-            loaded=self.client.get(urlparse(local_url).path)
-            self.assertEqual(loaded.status_code,200)
-            self.assertEqual(loaded.headers["content-type"],"image/jpeg")
+        image_saved=self.client.put(endpoint,json={**payload,"image_url":"https://example.org/image.jpg"},headers=self.h(self.admin))
+        self.assertEqual(image_saved.status_code,200,image_saved.text)
+        self.assertEqual(self.client.post("/experience/admin/branding/upload",headers=self.h(self.admin)).status_code,404)
+        self.assertEqual(self.client.get("/experience/teachers/1/portrait").status_code,404)
 
     def test_student_cannot_become_teacher_by_submitting(self):
         self.assertEqual(self.apply().status_code,200)

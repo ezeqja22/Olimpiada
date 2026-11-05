@@ -560,8 +560,6 @@ function Homepage() {
               </Link>
             </header>
             <div className="p3-feature-grid">{teacherProfiles.slice(0,3).map(person=><article className="p3-mentor-card" key={person.user_id}>
-              <img decoding="async" src={API_URL+"/experience/teachers/"+person.user_id+"/portrait"}
-                   loading="lazy" alt={person.first_name+" "+person.last_name}/>
               <div><span className="p3-eyebrow">{person.subject}</span><h3>{person.first_name} {person.last_name}</h3>
                 <p className="p3-rich-inline"><RichInlineText text={person.bio} /></p></div></article>)}</div>
           </section>}

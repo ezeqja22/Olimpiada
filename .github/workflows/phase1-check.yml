@@ -40,5 +40,7 @@ jobs:
           cache-dependency-path: frontend/olympiad-frontend/package-lock.json
       - run: npm ci
         working-directory: frontend/olympiad-frontend
+      - run: npx vitest run
+        working-directory: frontend/olympiad-frontend
       - run: npm run build
         working-directory: frontend/olympiad-frontend

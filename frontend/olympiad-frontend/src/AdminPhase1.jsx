@@ -6,7 +6,7 @@ const headers=()=>({Authorization:"Bearer "+localStorage.getItem("token")});
 export function AdminTutoring(){
  const [tutoring,setTutoring]=useState([]),[feedback,setFeedback]=useState("");
  const reload=()=>axios.get(API+"/access/admin/tutoring",{headers:headers()}).then(r=>setTutoring(r.data)).catch(()=>setFeedback("Nuk u lexuan kërkesat."));
- useEffect(reload,[]);
+ useEffect(()=>{reload();},[]);
  const decide=async(id,approve)=>{const note=window.prompt("Shënim për vendimin (opsional):","");if(note===null)return;
  try{await axios.post(API+"/access/admin/tutoring/"+id+"/review",{approve,note},{headers:headers()});setFeedback("Vendimi u ruajt.");reload();}catch(e){setFeedback(e.response?.data?.detail||"Operacioni dështoi.");}};
  return <main className="admin-page p1-wrap" style={{maxWidth:"none",margin:"0 auto"}}>
@@ -20,7 +20,7 @@ export function AdminFinance(){
  const year=new Date().getFullYear();
  const [selectedYear,setYear]=useState(year),[data,setData]=useState({expenses:[],total_all:0}),[form,setForm]=useState({year,month:new Date().getMonth()+1,category:"Platforma",description:"",amount_all:0}),[notice,setNotice]=useState("");
  const reload=()=>axios.get(API+"/access/admin/expenses?year="+selectedYear,{headers:headers()}).then(r=>setData(r.data)).catch(()=>setNotice("Nuk u lexuan shpenzimet."));
- useEffect(reload,[selectedYear]);
+ useEffect(()=>{reload();},[selectedYear]);
  const submit=async e=>{e.preventDefault();try{await axios.post(API+"/access/admin/expenses",form,{headers:headers()});setNotice("Shpenzimi u ruajt.");reload();}catch(e){setNotice("Ruajtja dështoi.");}};
  return <section className="p1-card p1-group"><div className="p1-row"><div><h2>Shpenzimet Mujore</h2><p className="p1-muted">Raporti i vitit të kaluar dërgohet automatikisht te Super Adminët në janar.</p></div>
  <label>Viti <input className="p1-input" type="number" min="2020" max="2100" value={selectedYear} onChange={e=>setYear(Number(e.target.value))}/></label></div>

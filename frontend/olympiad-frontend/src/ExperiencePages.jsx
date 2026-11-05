@@ -13,11 +13,9 @@ function PageTitle({contentKey,kicker,title,subtitle}){return contentKey?<SitePa
 export function TeacherApplicationPage(){
  const {currentUser}=useAuth(),{lang}=useLanguage();
  const [form,setForm]=useState({first_name:"",last_name:"",birth_date:"",subject:"Mathematics",bio:""});
- const [idPhoto,setIdPhoto]=useState(null),[portrait,setPortrait]=useState(null),[state,setState]=useState(null),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false);
+ const [state,setState]=useState(null),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false);
  useEffect(()=>{if(currentUser)axios.get(API+"/experience/teacher/me",{headers:headers()}).then(r=>setState(r.data)).catch(()=>{});},[currentUser]);
- const submit=async e=>{e.preventDefault();setBusy(true);setNotice("");const data=new FormData();
- Object.entries(form).forEach(([k,v])=>data.append(k,v));data.append("id_photo",idPhoto);data.append("portrait",portrait);
- try{const r=await axios.post(API+"/experience/teacher/apply",data,{headers:headers()});setState(r.data);setNotice(lang==="sq"?"Aplikimi u dërgua për verifikim.":"Your application awaits approval.");}
+ const submit=async e=>{e.preventDefault();setBusy(true);setNotice(""); try{const r=await axios.post(API+"/experience/teacher/apply",form,{headers:headers()});setState(r.data);setNotice(lang==="sq"?"Aplikimi u dërgua për verifikim.":"Your application awaits approval.");}
  catch(e){setNotice(typeof e.response?.data?.detail==="string"?e.response.data.detail:"Dërgimi dështoi.");}
  finally{setBusy(false);}};
  return <main className="p1-wrap p3-body"><PageTitle contentKey="page_teacher_application" kicker={lang==="sq"?"Bashkohu me ekipin":"Join the team"} title={lang==="sq"?"Apliko si mësues":"Apply as a teacher"}
@@ -31,10 +29,7 @@ export function TeacherApplicationPage(){
  <label>Email i verifikuar<input className="p1-input" value={currentUser.email||""} disabled/></label>
  <label>Lënda<input className="p1-input" required value={form.subject} onChange={e=>setForm({...form,subject:e.target.value})}/></label>
  <label>Eksperienca dhe bio<textarea className="p1-input" minLength={25} rows={6} required value={form.bio} onChange={e=>setForm({...form,bio:e.target.value})}/></label>
- <div className="p1-grid two"><label>Foto e dokumentit të identifikimit <small>(private, për verifikim)</small><input className="p1-input" required type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>setIdPhoto(e.target.files?.[0])}/></label>
- <label>Foto profesionale<input className="p1-input" required type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>setPortrait(e.target.files?.[0])}/></label></div>
- <p className="p1-muted">Fotografia e ID-së ruhet privatisht dhe mund të shihet vetëm nga personat e autorizuar për verifikim. Mos dërgo të dhëna të tjera personale në bio.</p>
- <button className="p1-btn" disabled={busy||!idPhoto||!portrait}>{busy?"Duke dërguar...":"Dërgo aplikimin"}</button></form>}
+ <button className="p1-btn" disabled={busy}>{busy?"Duke dërguar...":"Dërgo aplikimin"}</button></form>}
  {notice&&<p role="status" className="p1-note">{notice}</p>}</main>;
 }
 export function FAQPage(){

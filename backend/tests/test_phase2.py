@@ -140,39 +140,9 @@ class CoreTests(unittest.TestCase):
         self.assertEqual((close-start).total_seconds()/3600,157)
 
 
-    def test_weekly_attachment_is_private(self):
-        from PIL import Image
-        from tempfile import TemporaryDirectory
-        from io import BytesIO
-        now=datetime.utcnow()
-        p=models.Problem(title="Attachment challenge",description="Show work",
-                         author_id=self.admin.id,subject="Mathematics")
-        self.db.add(p);self.db.flush()
-        w=models.WeeklyChallenge(week_date="2033-05-02",problem_id=p.id,
-                                starts_at=now-timedelta(hours=1),
-                                closes_at=now+timedelta(hours=4),
-                                official_solution="Private answer",status="open",
-                                created_by=self.admin.id)
-        self.db.add(w);self.db.commit()
-        img=BytesIO();Image.new("RGB",(16,16),"white").save(img,format="PNG")
-        with TemporaryDirectory() as folder:
-            before=os.environ.get("PRIVATE_FILES_DIR")
-            os.environ["PRIVATE_FILES_DIR"]=folder
-            try:
-                r=self.client.post("/core/weekly/"+str(w.id)+"/submit-file",
-                    data={"answer":"Attached"},files={"file":("solution.png",img.getvalue(),"image/png")},
-                    headers=self.headers(self.student_token))
-                self.assertEqual(r.status_code,200,r.text)
-                attachment="/core/weekly/admin/submissions/"+str(r.json()["id"])+"/attachment"
-                denied=self.client.get(attachment,headers=self.headers(self.student_token))
-                self.assertEqual(denied.status_code,403,denied.text)
-                allowed=self.client.get(attachment,headers=self.headers(self.admin_token))
-                self.assertEqual(allowed.status_code,200,allowed.text[:100])
-                self.assertEqual(allowed.headers["content-type"],"image/png")
-                self.assertEqual(self.client.get(attachment).status_code,401)
-            finally:
-                if before is None:os.environ.pop("PRIVATE_FILES_DIR",None)
-                else:os.environ["PRIVATE_FILES_DIR"]=before
+    def test_retired_attachment_endpoints_are_absent(self):
+        self.assertEqual(self.client.post("/core/weekly/1/submit-file",headers=self.headers(self.student_token)).status_code,404)
+        self.assertEqual(self.client.get("/core/weekly/admin/submissions/1/attachment",headers=self.headers(self.admin_token)).status_code,404)
 
 if __name__=="__main__":
     unittest.main()

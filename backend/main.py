@@ -63,13 +63,7 @@ default_origins = [
 env_origins = os.getenv("FRONTEND_ORIGINS", "").strip()
 allowed_origins = [o.strip() for o in env_origins.split(",") if o.strip()] or default_origins
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
-)
+
 
 # Health check endpoint (before middleware)
 @app.get("/health")
@@ -131,6 +125,15 @@ async def account_access_middleware(request: Request, call_next):
     if denied is not None:
         return denied
     return await call_next(request)
+
+# CORS wraps access guards so denied requests remain readable by the frontend.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
+)
 
 # Include routers only if they were imported successfully
 if auth_router:

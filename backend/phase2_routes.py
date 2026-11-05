@@ -1,9 +1,6 @@
 """Phase 2 APIs. Private content is authorization-gated at every read and write."""
 from datetime import date, datetime, timedelta
-import io
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from private_submission_storage import put_submission, read_submission, attachment_type, MAX_SUBMISSION_BYTES
-from fastapi.responses import Response
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -129,54 +126,13 @@ def submit_weekly(challenge_id: int, data: WeeklyAnswer, user: User = Depends(ge
     return {"id": s.id, "status": "pending"}
 
 
-@router.post("/weekly/{challenge_id}/submit-file")
-def submit_weekly_file(challenge_id: int, answer: str = Form(""),
-                       file: UploadFile = File(...), user: User = Depends(get_verified_user),
-                       db: Session = Depends(get_db)):
-    """Student can upload a private written/scanned solution rather than plain text."""
-    challenge = db.get(WeeklyChallenge, challenge_id)
-    now = datetime.utcnow()
-    if not challenge or challenge.status != "open" or not (challenge.starts_at <= now < challenge.closes_at):
-        raise HTTPException(409, "Weekly submissions are closed")
-    if len(answer) > 20000:
-        raise HTTPException(422, "Answer is too long")
-    if db.query(WeeklySubmission).filter_by(challenge_id=challenge_id, student_id=user.id).first():
-        raise HTTPException(409, "Only one submission per student")
-    blob = file.file.read(MAX_SUBMISSION_BYTES + 1)
-    key = put_submission(blob, file.content_type)
-    submission = WeeklySubmission(challenge_id=challenge_id, student_id=user.id,
-                                  answer_text=answer, file_key=key,
-                                  submitted_at=now, status="pending")
-    db.add(submission)
-    try:
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(409, "Already submitted")
-    return {"id": submission.id, "status": "pending"}
-
-@router.get("/weekly/admin/submissions/{submission_id}/attachment")
-def review_attachment(submission_id: int, user: User = Depends(get_verified_user),
-                      db: Session = Depends(get_db)):
-    require_staff(user)
-    submission = db.get(WeeklySubmission, submission_id)
-    if not submission or not submission.file_key:
-        raise HTTPException(404, "Attachment not found")
-    mime = attachment_type(submission.file_key)
-    raw = read_submission(submission.file_key)
-    return Response(content=raw, media_type=mime,
-                    headers={"Content-Disposition": 'attachment; filename="olimpiada-solution.' +
-                             submission.file_key.rsplit(".", 1)[-1] + '"',
-                             "Cache-Control": "private, no-store",
-                             "X-Content-Type-Options": "nosniff"})
-
 @router.get("/weekly/admin/{challenge_id}/submissions")
 def submissions(challenge_id: int, user: User = Depends(get_verified_user),
                 db: Session = Depends(get_db)):
     require_staff(user)
     return [{"id": s.id, "student_id": s.student_id, "answer": s.answer_text,
              "status": s.status, "review_note": s.review_note,
-             "has_attachment": bool(s.file_key), "submitted_at": s.submitted_at}
+             "submitted_at": s.submitted_at}
             for s in db.query(WeeklySubmission).filter_by(challenge_id=challenge_id)
             .order_by(WeeklySubmission.submitted_at).all()]
 
