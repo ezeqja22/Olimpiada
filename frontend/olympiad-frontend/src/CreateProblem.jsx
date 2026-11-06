@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import MathEditor from "./MathEditor";
+import VisualMathEditor from "./components/VisualMathEditor";
 import "./MathEditor.css";
 import Layout from "./components/Layout";
 import Card from "./components/Card";
@@ -587,45 +588,12 @@ function CreateProblem() {
               </label>
 
               <div style={{ position: "relative" }}>
-                <textarea
-                  ref={descriptionRef}
-                  name="description"
+                <VisualMathEditor
                   value={formData.description}
-                  onChange={handleChange}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                  required
-                  rows={isMobile ? "7" : "8"}
-                  placeholder="Describe the problem in detail..."
-                  style={{
-                    ...inputStyle,
-                    width: "100%",
-                    resize: "vertical",
-                    minHeight: "170px",
-                    fontFamily: "inherit",
-                    lineHeight: "1.55",
-                    paddingRight: isMobile ? spacing.md : "130px",
-                  }}
+                  onChange={(description) => setFormData((prev) => ({ ...prev, description }))}
+                  placeholder="Shkruaj problemin dhe shto formulat vizualisht..."
+                  minHeight={180}
                 />
-
-                <button
-                  type="button"
-                  onClick={() => openMathEditor("description")}
-                  style={{
-                    ...mathButtonStyle,
-                    position: isMobile ? "static" : "absolute",
-                    top: spacing.sm,
-                    right: spacing.sm,
-                    marginTop: isMobile ? spacing.sm : 0,
-                    width: isMobile ? "100%" : "auto",
-                  }}
-                  title="Insert LaTeX formula"
-                  onMouseEnter={handleMathButtonEnter}
-                  onMouseLeave={handleMathButtonLeave}
-                >
-                  <span style={{ fontSize: "16px", fontWeight: "800" }}>∑</span>
-                  <span>Formula</span>
-                </button>
               </div>
 
               <p
@@ -637,8 +605,7 @@ function CreateProblem() {
                   lineHeight: 1.5,
                 }}
               >
-                Tip: use <strong>$...$</strong> for inline math, for example{" "}
-                <code style={codeStyle}>$x^2 + y^2 = z^2$</code>
+                Përdor panelin e editorit për të vendosur formula pa shkruar LaTeX.
               </p>
             </div>
 
