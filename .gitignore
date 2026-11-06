@@ -31,3 +31,6 @@ Thumbs.db
 
 uploads/
 backend/uploads/
+# Isolated local staging (never commit demo identities, files, DB or keys)
+staging/.local-state/
+staging/*.sqlite3

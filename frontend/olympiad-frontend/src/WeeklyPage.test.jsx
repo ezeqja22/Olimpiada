@@ -1,0 +1,22 @@
+import React from "react";
+import {test, expect, vi} from "vitest";
+import {render, screen, fireEvent, waitFor} from "@testing-library/react";
+import {MemoryRouter} from "react-router-dom";
+import axios from "axios";
+import WeeklyPage from "./WeeklyPage";
+vi.mock("axios",()=>({default:{get:vi.fn(),post:vi.fn()}}));
+vi.mock("./context/AuthContext",()=>({useAuth:()=>({currentUser:{id:1}})}));
+vi.mock("./components/SitePageIntro",()=>({default:()=>null}));
+vi.mock("./MathRenderer",()=>({default:({text})=><span>{text}</span>}));
+test("weekly text submission works without uploads and leaving the page is safe",async()=>{
+ axios.get.mockResolvedValue({data:{challenge:{id:7,status:"open",week_date:"2026-11-02",problem:{title:"Test problem",description:"Find x"}}}});
+ axios.post.mockResolvedValue({data:{status:"pending"}});
+ const view=render(<MemoryRouter><WeeklyPage/></MemoryRouter>);
+ const answer=await screen.findByRole("textbox");
+ expect(view.container.querySelector('input[type="file"]')).toBeNull();
+ fireEvent.change(answer,{target:{value:"My reasoned solution"}});
+ fireEvent.click(screen.getByRole("button",{name:"Dërgo zgjidhjen"}));
+ await waitFor(()=>expect(axios.post).toHaveBeenCalledWith(expect.stringContaining("/core/weekly/7/submit"),{answer:"My reasoned solution"},expect.any(Object)));
+ await screen.findByRole("status");
+ expect(()=>view.unmount()).not.toThrow();
+});

@@ -6,7 +6,7 @@ from auth.dependencies import get_current_user
 
 def require_admin(current_user: User = Depends(get_current_user)) -> User:
     """Require admin role to access admin endpoints"""
-    if current_user.role != 'admin':
+    if current_user.role not in ['admin', 'super_admin'] and not current_user.is_superuser:
         raise HTTPException(
             status_code=403,
             detail="Admin access required"
@@ -15,7 +15,7 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
 
 def require_moderator(current_user: User = Depends(get_current_user)) -> User:
     """Require moderator or admin role to access moderation endpoints"""
-    if current_user.role not in ['admin', 'moderator']:
+    if current_user.role not in ['admin', 'moderator', 'reviewer', 'super_admin']:
         raise HTTPException(
             status_code=403,
             detail="Moderator access required"
@@ -24,7 +24,7 @@ def require_moderator(current_user: User = Depends(get_current_user)) -> User:
 
 def require_admin_or_moderator(current_user: User = Depends(get_current_user)) -> User:
     """Require admin or moderator role"""
-    if current_user.role not in ['admin', 'moderator']:
+    if current_user.role not in ['admin', 'moderator', 'reviewer', 'super_admin']:
         raise HTTPException(
             status_code=403,
             detail="Admin or moderator access required"

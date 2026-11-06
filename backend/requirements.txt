@@ -19,3 +19,4 @@ requests
 sendgrid
 cloudinary
 schedule
+google-auth>=2.0,<3

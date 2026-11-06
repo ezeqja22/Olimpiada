@@ -2077,16 +2077,18 @@ function UserProfile() {
                         </div>
                       </div>
 
-                      <p
-                        style={{
-                          color: "#666",
-                          margin: "0 0 15px 0",
-                          whiteSpace: "pre-wrap",
-                        }}
-                      >
-                        {renderMathContent(draft.description.substring(0, 150))}
-                        ...
-                      </p>
+                      {draft.description.length > 150 ? (
+                        <details style={{ marginBottom: 15 }}>
+                          <summary style={{ cursor: "pointer" }}>Read full draft</summary>
+                          <p style={{ whiteSpace: "pre-wrap" }}>
+                            {renderMathContent(draft.description)}
+                          </p>
+                        </details>
+                      ) : (
+                        <p style={{ color: "#666", marginBottom: 15, whiteSpace: "pre-wrap" }}>
+                          {renderMathContent(draft.description)}
+                        </p>
+                      )}
 
                       <div
                         style={{

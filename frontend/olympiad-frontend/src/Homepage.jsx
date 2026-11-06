@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   ChevronDown,
+  ArrowUpRight,
   LogOut,
   Menu,
   Settings,
@@ -18,6 +19,9 @@ import { useToast } from "./components/ToastProvider";
 import AboutFounders from "./components/AboutFounders";
 import ForumsSidebar from "./components/ForumsSidebar";
 import "./Homepage.css";
+import "./phase3.css";
+import RichInlineText from "./components/RichInlineText";
+import {useLanguage,LanguageSwitch} from "./context/LanguageContext";
 import biologySubjectIcon from "./assets/Biology_subject_pcxmoa.svg";
 import chemistrySubjectIcon from "./assets/chemistry_subject_r4n7jq.svg";
 import computerEngineeringSubjectIcon from "./assets/computer_engineering_subject_u2m2ze.svg";
@@ -84,6 +88,15 @@ const getSubjectIcon = (subject) => {
 };
 
 function Homepage() {
+  const {lang,t}=useLanguage();
+  const [contentBlocks,setContentBlocks]=useState({});
+  const [teacherProfiles,setTeacherProfiles]=useState([]);
+  const copy=(key,field,fallback)=>contentBlocks[key]?.[field+"_"+lang]||fallback;
+  const imageFor=(key)=>contentBlocks?.[key]?.image_url||"";
+  useEffect(()=>{
+     axios.get(API_URL+"/experience/content").then(r=>setContentBlocks(r.data && typeof r.data==="object" ? r.data : {})).catch(()=>{});
+     axios.get(API_URL+"/experience/teachers").then(r=>setTeacherProfiles(Array.isArray(r.data) ? r.data : [])).catch(()=>{});
+  },[]);
   const [currentUser, setCurrentUser] = useState(null);
   const [showSubjectDropdown, setShowSubjectDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -92,7 +105,9 @@ function Homepage() {
   const [loadingForums, setLoadingForums] = useState(false);
   const [pinnedForums, setPinnedForums] = useState(() => {
     const saved = localStorage.getItem("pinnedForums");
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+    try { const parsed=JSON.parse(saved); return Array.isArray(parsed) ? parsed : []; }
+    catch { return []; }
   });
 
   const navigate = useNavigate();
@@ -301,47 +316,27 @@ function Homepage() {
           </div>
 
           <nav className="desktop-nav" aria-label="Main navigation">
-            <Link to="/feed" className="nav-link">
-              Feed
-            </Link>
-
+            <Link to="/weekly" className="nav-link">{t("weekly")}</Link>
+            <Link to="/forum-catalog" className="nav-link">{t("forums")}</Link>
             <div className="nav-dropdown-wrap">
-              <button
-                className="nav-link nav-button"
-                onClick={openSubjectDropdown}
-                aria-expanded={showSubjectDropdown}
-              >
-                Subjects <ChevronDown size={15} />
-              </button>
-
-              {showSubjectDropdown && (
-                <div className="header-dropdown subject-dropdown">
-                  {subjects.map((subject) => (
-                    <button
-                      key={subject}
-                      className="dropdown-row"
-                      onClick={() => handleSubjectClick(subject)}
-                    >
-                      <img
-                        src={getSubjectIcon(subject)}
-                        alt=""
-                        aria-hidden="true"
-                      />
-                      <span>{subject}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+              <button type="button" className="nav-link nav-button" onClick={openSubjectDropdown}
+                aria-expanded={showSubjectDropdown}>{t("more")} <ChevronDown size={15}/></button>
+              {showSubjectDropdown && <div className="header-dropdown subject-dropdown p3-more-dropdown">
+                {[
+                  ["/explore",t("explore")],["/courses",t("courses")],
+                  ["/feed",t("feed")],["/faq",t("faq")],
+                  ["/support",t("support")],["/teacher/apply",t("apply")]
+                ].map(([url,title])=><Link key={url} className="dropdown-row" to={url} onClick={closeDropdowns}>{title}</Link>)}
+                {currentUser?.role==="teacher"&&<Link className="dropdown-row" to="/teacher/workspace" onClick={closeDropdowns}>{t("teacher")}</Link>}
+                <div className="p3-dropdown-separator">{t("subjects")}</div>
+                {subjects.map(subject=><button key={subject} type="button" className="dropdown-row"
+                    onClick={()=>handleSubjectClick(subject)}>{subject}</button>)}
+              </div>}
             </div>
-
-            <Link to="/forums" className="nav-link">
-              Forums
-            </Link>
-
             {!currentUser ? (
               <div className="desktop-auth-actions">
                 <Link to="/login" className="nav-link">
-                  Login
+                  {t("login")}
                 </Link>
                 <button
                   className="signup-button"
@@ -353,7 +348,7 @@ function Homepage() {
                     }
                   }}
                 >
-                  Sign up
+                  {t("signup")}
                 </button>
               </div>
             ) : (
@@ -393,6 +388,7 @@ function Homepage() {
                 </div>
               </div>
             )}
+            <LanguageSwitch />
           </nav>
         </div>
 
@@ -467,42 +463,24 @@ function Homepage() {
           </div>
 
           <nav className="mobile-nav-row" aria-label="Mobile navigation">
-            <Link to="/feed" className="mobile-nav-link">
-              Feed
-            </Link>
-
+            <LanguageSwitch />
+            <Link to="/weekly" className="mobile-nav-link">{t("weekly")}</Link>
+            <Link to="/forum-catalog" className="mobile-nav-link">{t("forums")}</Link>
             <div className="mobile-subject-wrap">
-              <button
-                className="mobile-nav-link mobile-nav-button"
-                onClick={openSubjectDropdown}
-                aria-expanded={showSubjectDropdown}
-              >
-                Subjects <ChevronDown size={14} />
-              </button>
-
-              {showSubjectDropdown && (
-                <div className="header-dropdown mobile-subject-dropdown">
-                  {subjects.map((subject) => (
-                    <button
-                      key={subject}
-                      className="dropdown-row"
-                      onClick={() => handleSubjectClick(subject)}
-                    >
-                      <img
-                        src={getSubjectIcon(subject)}
-                        alt=""
-                        aria-hidden="true"
-                      />
-                      <span>{subject}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+              <button type="button" className="mobile-nav-link mobile-nav-button"
+                onClick={openSubjectDropdown} aria-expanded={showSubjectDropdown}>{t("more")} <ChevronDown size={14}/></button>
+              {showSubjectDropdown&&<div className="header-dropdown mobile-subject-dropdown">
+                {[
+                  ["/explore",t("explore")],["/courses",t("courses")],
+                  ["/feed",t("feed")],["/faq",t("faq")],
+                  ["/support",t("support")],["/teacher/apply",t("apply")]
+                ].map(([url,title])=><Link key={url} to={url} className="dropdown-row" onClick={closeDropdowns}>{title}</Link>)}
+                {currentUser?.role==="teacher"&&<Link className="dropdown-row" to="/teacher/workspace" onClick={closeDropdowns}>{t("teacher")}</Link>}
+                <div className="p3-dropdown-separator">{t("subjects")}</div>
+                {subjects.map(subject=><button key={subject} type="button" className="dropdown-row"
+                  onClick={()=>handleSubjectClick(subject)}>{subject}</button>)}
+              </div>}
             </div>
-
-            <Link to="/forums" className="mobile-nav-link">
-              Forums
-            </Link>
           </nav>
         </div>
       </header>
@@ -510,54 +488,96 @@ function Homepage() {
       <main>
         <section className="homepage-hero">
           <div className="homepage-hero-inner">
-            <p className="hero-kicker">Learn. Solve. Grow.</p>
-            <h1>Welcome to {siteName}</h1>
-            <p className="hero-description">
-              {siteSettings.site_description ||
-                "Master the art of problem-solving through challenging olympiad problems. Join a community of passionate learners and sharpen your analytical skills."}
-            </p>
-
-            <div className="hero-actions">
-              <Link to="/feed" className="hero-button hero-button-primary">
-                Explore Problems
-              </Link>
-              <Link
-                to="/create-problem?from=/homepage"
-                className="hero-button hero-button-secondary"
-              >
-                Create Problem
-              </Link>
+            <div className="p3-hero-copy">
+              <p className="hero-kicker">{t("heroLabel")}</p>
+              <h1><RichInlineText text={copy("hero","title",t("heroTitle"))} /></h1>
+              <p className="hero-description p3-rich-inline"><RichInlineText text={copy("hero","subtitle",t("heroDesc"))} /></p>
+              <div className="hero-actions">
+                <Link to="/explore" className="hero-button hero-button-primary">{t("start")}</Link>
+                <Link to="/weekly" className="hero-button hero-button-secondary">{t("weekly")} →</Link>
+              </div>
+            </div>
+            <div className="p3-hero-image">
+              {imageFor("hero")?<img src={imageFor("hero")} fetchPriority="high" decoding="async" alt={lang==="sq"?"Nxënës duke zgjidhur detyra në një olimpiadë":"Student solving problems at a mathematics olympiad"} />:
+              <div className="p3-hero-placeholder" aria-hidden="true"><span>∞</span></div>}
+              <div className="p3-photo-caption">✦ {t("heroLabel")}</div>
             </div>
           </div>
         </section>
-
-        <section className="homepage-features" aria-labelledby="features-title">
-          <div className="section-shell">
-            <div className="section-heading">
-              <span>Why Olimpiada.al</span>
-              <h2 id="features-title">Why choose {siteName}?</h2>
+        <section className="p3-home-shell">
+          <header className="p3-section-head p3-section-head--intro">
+            <div className="p3-section-heading-copy">
+              <span className="p3-eyebrow p3-section-label"><span className="p3-label-dot" aria-hidden="true" />{lang==="sq"?"Olimpiada.al · Hapësira jote":"Olimpiada.al · Your space"}</span>
+              <h2><RichInlineText text={copy("home_intro","title",t("popular"))} /></h2>
             </div>
-
-            <div className="feature-grid">
-              {featureCards.map((feature) => (
-                <article className="feature-card" key={feature.title}>
-                  <div className="feature-icon-wrap">
-                    <img src={feature.icon} alt="" aria-hidden="true" />
-                  </div>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.description}</p>
-                </article>
-              ))}
+            <div className="p3-intro-aside">
+              <p className="p3-section-summary p3-rich-inline"><RichInlineText text={copy("home_intro","subtitle",lang==="sq"
+                ?"Nga Problema e Javës te forumet, materialet dhe testet: gjej mjetet që të ndihmojnë të përparosh."
+                :"From the Problem of the Week to forums, lessons and tests: find the tools to take your next step.")} /></p>
+              {imageFor("home_intro") && <img className="p3-section-thumb" loading="lazy" src={imageFor("home_intro")} alt="Olimpiada" />}
             </div>
+          </header>
+          <div className="p3-feature-grid">
+            {[
+              {key:"home_feature_weekly",icon:"✦",title:t("weekly"),description:lang==="sq"?"Një problem i ri çdo javë dhe publikim i zgjidhjeve.":"A new challenge every week with published solutions.",to:"/weekly"},
+              {key:"home_feature_forums",icon:"◈",title:t("forums"),description:lang==="sq"?"Diskuto ide dhe puno me mësues e nxënës të tjerë.":"Discuss ideas with teachers and peers.",to:"/forum-catalog"},
+              {key:"home_feature_courses",icon:"◷",title:t("courses"),description:lang==="sq"?"Teste të programuara dhe materiale të organizuara.":"Scheduled tests and structured study materials.",to:"/courses"},
+              {key:"home_feature_support",icon:"☏",title:t("support"),description:lang==="sq"?"Ndihmë e shpejtë kur të duhet.":"Help when you need it.",to:"/support"}
+            ].map(f=><article className="p3-feature-card" key={f.key}>
+              {imageFor(f.key) && <img className="p3-feature-card__image" loading="lazy" decoding="async" src={imageFor(f.key)} alt="" />}
+              <span aria-hidden="true">{f.icon}</span>
+              <h3><RichInlineText text={copy(f.key,"title",f.title)} /></h3>
+              <p className="p3-rich-inline"><RichInlineText text={copy(f.key,"subtitle",f.description)} /></p>
+              <Link className="p3-feature-card__action" to={f.to}>{t("learn")} →</Link></article>)}
           </div>
+          <div className="p3-visual-row">
+            {imageFor("competition")?<img loading="lazy" decoding="async" src={imageFor("competition")} alt={lang==="sq"?"Salla e garës gjatë një olimpiade matematike":"Mathematics olympiad competition hall"}/>:
+              <div className="p3-visual-fallback" aria-hidden="true">✧</div>}
+            <div className="p3-visual-copy"><span className="p3-eyebrow">{lang==="sq"?"Fryma e olimpiadës":"Olympiad spirit"}</span>
+              <h2><RichInlineText text={copy("competition","title",t("competition"))} /></h2>
+              <p className="p3-rich-inline"><RichInlineText text={copy("competition","subtitle",t("competitionDesc"))} /></p><Link to="/weekly">{t("discover")} →</Link></div>
+          </div>
+          <div className="p3-visual-row reverse">
+            <div className="p3-visual-copy"><span className="p3-eyebrow">{lang==="sq"?"Komuniteti ynë":"Our community"}</span>
+              <h2><RichInlineText text={copy("community","title",t("community"))} /></h2>
+              <p className="p3-rich-inline"><RichInlineText text={copy("community","subtitle",t("heroDesc"))} /></p><Link to="/forum-catalog">{t("meet")} →</Link></div>
+            {imageFor("community")?<img loading="lazy" decoding="async" src={imageFor("community")} alt={lang==="sq"?"Ekipi shqiptar në Olimpiadën Ndërkombëtare të Matematikës":"Albanian team at the International Mathematical Olympiad"}/>:
+              <div className="p3-visual-fallback" aria-hidden="true">★</div>}
+          </div>
+          {teacherProfiles.length>0&&<section className="p3-mentors">
+            <header className="p3-section-head p3-section-head--mentors">
+              <div className="p3-section-heading-copy">
+                <span className="p3-eyebrow p3-section-label"><span className="p3-label-dot" aria-hidden="true" />{lang==="sq"?"Mentorët tanë":"Meet your mentors"}</span>
+                <h2><RichInlineText text={copy("home_mentors","title",lang==="sq"?"Përparimi yt nis me mentorin e duhur.":"Your next breakthrough starts with the right mentor.")} /></h2>
+                <p className="p3-section-summary p3-rich-inline"><RichInlineText text={copy("home_mentors","subtitle",lang==="sq"
+                  ?"Mëso hap pas hapi, sqaro pyetjet dhe përgatitu më mirë me udhëzim individual."
+                  :"Ask better questions, build confidence and make progress with one-to-one guidance.")} /></p>
+                {imageFor("home_mentors")&&<img className="p3-mentor-accent" src={imageFor("home_mentors")} loading="lazy" alt="" />}
+              </div>
+              <Link to="/tutoring" className="p3-mentor-action">
+                {lang==="sq"?"Shiko seancat individuale":"Explore one-to-one sessions"}
+                <ArrowUpRight size={18} aria-hidden="true" />
+              </Link>
+            </header>
+            <div className="p3-feature-grid">{teacherProfiles.slice(0,3).map(person=><article className="p3-mentor-card" key={person.user_id}>
+              <div><span className="p3-eyebrow">{person.subject}</span><h3>{person.first_name} {person.last_name}</h3>
+                <p className="p3-rich-inline"><RichInlineText text={person.bio} /></p></div></article>)}</div>
+          </section>}
+          <div className="p3-partner-section">
+            <div><span>{t("partner")}</span><h3><RichInlineText text={copy("partner","title","Spark Education")} /></h3>
+              <p className="p3-rich-inline"><RichInlineText text={copy("partner","subtitle",lang==="sq"?"Bashkë për më shumë mundësi në matematikë dhe shkenca.":"Building new opportunities in mathematics and science.")} /></p></div>
+            {imageFor("partner")?<img loading="lazy" decoding="async" src={imageFor("partner")} alt="Logoja e SPARK Education" />:<div className="p3-spark-wordmark">SPARK</div>}
+          </div>
+          <section className="p3-final-cta" style={imageFor("cta")?{backgroundImage:`linear-gradient(90deg,rgba(7,36,56,.94),rgba(7,36,56,.54)),url("${imageFor("cta")}")`}:undefined}>
+            <span className="p3-eyebrow">Olimpiada.al</span>
+            <h2><RichInlineText text={copy("cta","title",lang==="sq"?"Gati për sfidën tjetër?":"Ready for your next challenge?")} /></h2>
+            <p className="p3-rich-inline"><RichInlineText text={copy("cta","subtitle",lang==="sq"?"Fillo me Problemen e Javës dhe eksploro materialet.":"Start with the Problem of the Week and explore learning resources.")} /></p>
+            <Link to={contentBlocks.cta?.button_url||"/explore"} className="p1-btn">{lang==="sq"?"Fillo tani":"Get started"} →</Link>
+          </section>
         </section>
-
         <AboutFounders />
-        <div style={{ textAlign: "center", padding: "28px 20px 44px" }}>
-          <Link to="/faq" style={{ color: "#166d55", fontWeight: 750 }}>Help &amp; FAQ</Link>
-          <span aria-hidden="true" style={{ margin: "0 14px", color: "#8aafa3" }}>·</span>
-          <Link to="/support" style={{ color: "#166d55", fontWeight: 750 }}>Contact Support</Link>
-        </div>
+        <footer className="p3-footer"><span>© {new Date().getFullYear()} Olimpiada.al · {t("allRights")}</span>
+          <div><Link to="/faq">{t("faq")}</Link><Link to="/support">{t("contact")}</Link><Link to="/teacher/apply">{t("apply")}</Link></div></footer>
       </main>
 
       {(showSubjectDropdown || showUserDropdown) && (
@@ -583,32 +603,35 @@ function Homepage() {
 }
 
 function UserDropdown({ currentUser, onLogout, onClose, mobile = false }) {
+  const {t}=useLanguage();
   return (
     <div className={`header-dropdown user-dropdown ${mobile ? "mobile" : ""}`}>
       <Link to="/profile" className="dropdown-row" onClick={onClose}>
         <UserRound size={17} />
-        <span>My Profile</span>
+        <span>{t("profile")}</span>
       </Link>
+
+      <Link to="/family" className="dropdown-row" onClick={onClose}><UserRound size={17} /><span>{t("family")}</span></Link>
 
       <Link to="/settings" className="dropdown-row" onClick={onClose}>
         <Settings size={17} />
-        <span>Settings</span>
+        <span>{t("settings")}</span>
       </Link>
 
-      {currentUser && ["admin", "moderator"].includes(currentUser.role) && (
+      {currentUser && ["admin", "moderator", "reviewer", "super_admin"].includes(currentUser.role) && (
         <Link
           to="/admin"
           className="dropdown-row dropdown-row-admin"
           onClick={onClose}
         >
           <ShieldCheck size={17} />
-          <span>Admin Panel</span>
+          <span>{t("admin")}</span>
         </Link>
       )}
 
       <button className="dropdown-row dropdown-row-danger" onClick={onLogout}>
         <LogOut size={17} />
-        <span>Logout</span>
+        <span>{t("logout")}</span>
       </button>
     </div>
   );

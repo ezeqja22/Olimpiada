@@ -1,0 +1,4 @@
+staging/*.sh text eol=lf
+staging/*.py text eol=lf
+staging/*.yaml text eol=lf
+staging/*.cmd text eol=crlf

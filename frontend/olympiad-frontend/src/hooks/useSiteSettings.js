@@ -20,7 +20,7 @@ export const useSiteSettings = () => {
 
   const fetchSiteSettings = async () => {
     try {
-      const response = await axios.get('sciencepioneers-production.up.railway.app/site-info');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/site-info`);
       setSiteSettings(response.data);
     } catch (err) {
       console.error('Error fetching site settings:', err);
