@@ -92,7 +92,7 @@ export function FAQPage() {
 export function SupportPage() {
   const [language, setLanguage] = useHelpLanguage();
   const { currentUser } = useAuth();
-  const [form, setForm] = useState({ name: "", email: "", category: "technical", subject: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", category: "technical", subject: "", message: "", website: "" });
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [isError, setIsError] = useState(false);
@@ -125,6 +125,11 @@ export function SupportPage() {
           description={language === "sq" ? "Na shkruaj për probleme teknike ose pyetje rreth platformës." : "Contact us about technical issues or questions about the platform."} />
         <div className="help-columns">
           <form className="help-card help-form" onSubmit={submit}>
+            <div className="help-honeypot" aria-hidden="true">
+              <label htmlFor="support-website">Website (leave blank)</label>
+              <input id="support-website" name="website" autoComplete="off" tabIndex={-1}
+                value={form.website} onChange={(e) => update("website", e.target.value)} />
+            </div>
             <label>{language === "sq" ? "Emri" : "Name"}<input required minLength={2} maxLength={120} autoComplete="name" value={form.name} onChange={(e) => update("name", e.target.value)} /></label>
             <label>Email<input required type="email" maxLength={254} autoComplete="email" value={form.email} onChange={(e) => update("email", e.target.value)} /></label>
             <label>{language === "sq" ? "Kategoria" : "Category"}<select value={form.category} onChange={(e) => update("category", e.target.value)}>

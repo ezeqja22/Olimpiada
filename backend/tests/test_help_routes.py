@@ -106,10 +106,49 @@ class HelpRoutesTests(unittest.TestCase):
         self.assertEqual(len(self.client.get("/experience/admin/tickets").json()), 1)
 
     def test_per_email_limit_and_input_validation(self):
-        for _ in range(3):
-            self.assertEqual(self.client.post("/experience/support/tickets", json=TICKET).status_code, 201)
-        self.assertEqual(self.client.post("/experience/support/tickets", json=TICKET).status_code, 429)
+        for i in range(3):
+            unique_ticket = {**TICKET, "subject": f"Login fails attempt {i}",
+                             "message": f"I cannot use the login button today. Attempt {i}."}
+            self.assertEqual(self.client.post("/experience/support/tickets", json=unique_ticket).status_code, 201)
+        limited = self.client.post("/experience/support/tickets", json={
+            **TICKET, "subject": "Another issue", "message": "My navigation is broken today."
+        })
+        self.assertEqual(limited.status_code, 429)
+        self.assertEqual(limited.headers.get("Retry-After"), "3600")
         self.assertEqual(self.client.post("/experience/support/tickets", json={**TICKET, "message": "short"}).status_code, 422)
+
+    def test_rejects_honeypot_filled_by_form_bots(self):
+        response = self.client.post("/experience/support/tickets", json={**TICKET, "website": "https://spam.example"})
+        self.assertEqual(response.status_code, 422)
+        with self.Session() as db:
+            self.assertEqual(db.query(SupportTicket).count(), 0)
+
+    def test_identical_message_cannot_bypass_limit_with_rotated_emails(self):
+        for i in range(2):
+            response = self.client.post("/experience/support/tickets", json={
+                **TICKET, "email": f"different{i}@example.com"
+            })
+            self.assertEqual(response.status_code, 201)
+        blocked = self.client.post("/experience/support/tickets", json={
+            **TICKET, "email": "third@example.com"
+        })
+        self.assertEqual(blocked.status_code, 429)
+        with self.Session() as db:
+            self.assertEqual(db.query(SupportTicket).count(), 2)
+
+    def test_global_limit_cannot_be_bypassed_by_rotating_email_and_message(self):
+        with patch("help_routes.MAX_GLOBAL_TICKETS_HOURLY", 3):
+            for i in range(3):
+                response = self.client.post("/experience/support/tickets", json={
+                    **TICKET, "email": f"global{i}@example.com", "subject": f"Issue number {i}",
+                    "message": f"I am reporting a unique issue number {i}."
+                })
+                self.assertEqual(response.status_code, 201)
+            blocked = self.client.post("/experience/support/tickets", json={
+                **TICKET, "email": "global4@example.com", "subject": "Issue number 4",
+                "message": "I am reporting a unique issue number 4."
+            })
+        self.assertEqual(blocked.status_code, 429)
 
     def test_reply_email_is_escaped_and_not_duplicated(self):
         ticket_id = self.client.post("/experience/support/tickets", json=TICKET).json()["ticket_id"]

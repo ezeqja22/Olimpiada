@@ -35,11 +35,12 @@ test("FAQ with no reviewed entries links to support", async () => {
 test("Support form sends a ticket and acknowledges its ID", async () => {
   axios.post.mockResolvedValue({ data: { ticket_id: 17, status: "open" } });
   render(<MemoryRouter><SupportPage /></MemoryRouter>);
+  expect(document.querySelector("#support-website").tabIndex).toBe(-1);
   fireEvent.change(screen.getByLabelText("Emri"), { target: { value: "Sample User" } });
   fireEvent.change(screen.getByLabelText("Email"), { target: { value: "sample@example.com" } });
   fireEvent.change(screen.getByLabelText("Subjekti"), { target: { value: "Login issue" } });
   fireEvent.change(screen.getByLabelText("Mesazhi"), { target: { value: "Please help me log in." } });
   fireEvent.click(screen.getByRole("button", { name: "Dërgo kërkesën" }));
-  await waitFor(() => expect(axios.post).toHaveBeenCalledWith(expect.stringContaining("/experience/support/tickets"), expect.objectContaining({ email: "sample@example.com" })));
+  await waitFor(() => expect(axios.post).toHaveBeenCalledWith(expect.stringContaining("/experience/support/tickets"), expect.objectContaining({ email: "sample@example.com", website: "" })));
   expect(await screen.findByRole("status")).toHaveTextContent("#17");
 });

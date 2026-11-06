@@ -4,6 +4,7 @@ from html import escape
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr, Field, field_validator
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from auth.dependencies import get_verified_user
@@ -13,6 +14,15 @@ from models import Notification, User
 
 
 router = APIRouter(prefix="/experience", tags=["help"])
+
+# DB-backed limits apply across all Railway workers/instances, without Redis or
+# a new table. They are a first line of defense, not a replacement for an edge
+# rate limit or a managed bot challenge if the public site grows.
+MAX_EMAIL_TICKETS_HOURLY = 3
+MAX_IDENTICAL_TICKETS_HOURLY = 2
+MAX_GLOBAL_TICKETS_HOURLY = 60
+RATE_WINDOW = timedelta(hours=1)
+RATE_LIMIT_HEADERS = {"Retry-After": "3600"}
 
 # The six entries shipped by Alembic 77f26f3 advertise paid plans or features
 # that were not enabled in Stage 1. Hide the EXACT seed text until an admin
@@ -58,6 +68,8 @@ class TicketNew(BaseModel):
     category: str = Field(default="general", min_length=2, max_length=50)
     subject: str = Field(min_length=4, max_length=200)
     message: str = Field(min_length=12, max_length=5000)
+    # Honeypot: hidden from people, but commonly filled by generic form bots.
+    website: str = Field(default="", max_length=200)
 
     @field_validator("name", "category", "subject", "message", mode="before")
     @classmethod
@@ -116,14 +128,33 @@ def edit_faq(entry_id: int, data: FaqData, _admin: User = Depends(require_admin)
 
 @router.post("/support/tickets", status_code=201)
 def submit_ticket(data: TicketNew, db: Session = Depends(get_db)):
-    # Per-email throttling supplements (but does not replace) edge-level IP rate limits.
+    if data.website.strip():
+        raise HTTPException(status_code=422, detail="Invalid submission")
+
+    # Serialize the limit checks and insert on Postgres to avoid simultaneous
+    # submissions racing past the limit on different API instances. SQLite's
+    # isolated in-memory test database does not support advisory locks.
+    if db.get_bind().dialect.name == "postgresql":
+        db.execute(text("SELECT pg_advisory_xact_lock(704276041)"))
+
     email = str(data.email).lower()
-    since = datetime.utcnow() - timedelta(hours=1)
-    count = db.query(SupportTicket).filter(
+    since = datetime.utcnow() - RATE_WINDOW
+    hourly = db.query(SupportTicket).filter(SupportTicket.created_at >= since)
+    if hourly.count() >= MAX_GLOBAL_TICKETS_HOURLY:
+        raise HTTPException(429, "Support is receiving too many requests. Try later.", headers=RATE_LIMIT_HEADERS)
+
+    email_count = hourly.filter(
         SupportTicket.email == email, SupportTicket.created_at >= since
     ).count()
-    if count >= 3:
-        raise HTTPException(429, "Too many requests. Try later.")
+    if email_count >= MAX_EMAIL_TICKETS_HOURLY:
+        raise HTTPException(429, "Too many requests. Try later.", headers=RATE_LIMIT_HEADERS)
+
+    # Stop a single automated message being re-submitted with rotated emails.
+    identical_count = hourly.filter(
+        SupportTicket.subject == data.subject, SupportTicket.message == data.message
+    ).count()
+    if identical_count >= MAX_IDENTICAL_TICKETS_HOURLY:
+        raise HTTPException(429, "Duplicate requests detected. Try later.", headers=RATE_LIMIT_HEADERS)
 
     ticket = SupportTicket(
         name=data.name, email=email, category=data.category,

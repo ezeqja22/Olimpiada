@@ -25,6 +25,7 @@
 .help-form input:not([type="checkbox"]), .help-form select, .help-form textarea { display:block; width:100%; box-sizing:border-box; border:1px solid #bdd5ca; border-radius:9px; background:white; padding:12px; color:#153e34; font:inherit; }
 .help-form textarea { resize:vertical; min-height:90px; }.help-form input:focus, .help-form textarea:focus, .help-form select:focus { outline:2px solid #56b58c; outline-offset:1px; }
 .help-form .help-button { justify-self:start; }
+.help-honeypot { position:absolute; inset:auto auto auto -10000px; width:1px; height:1px; overflow:hidden; pointer-events:none; }
 .help-aside { padding:32px; background:linear-gradient(146deg,#103f3a,#176f5d); color:#fff; border-radius:18px; min-height:270px; }
 .help-aside .help-eyebrow { color:#a1e2c6; }.help-aside h2 { color:white; font-size:1.65rem; margin:18px 0 12px; line-height:1.22; }
 .help-aside p { line-height:1.75; color:#d2ebe1; }.help-aside a { color:white; font-weight:750; text-underline-offset:4px; }
