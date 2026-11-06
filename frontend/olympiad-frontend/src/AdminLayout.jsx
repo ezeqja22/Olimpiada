@@ -110,6 +110,18 @@ const AdminLayout = () => {
       adminOnly: true,
     },
     {
+      path: "/admin/faq",
+      label: "FAQ",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811439/Settings_admin_panel_cpayja.svg",
+      adminOnly: true,
+    },
+    {
+      path: "/admin/support",
+      label: "Support",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811297/Email_admin_panel_zjmkz7.svg",
+      adminOnly: true,
+    },
+    {
       path: "/admin/analytics",
       label: "Analytics",
       icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/Analytics_admin_panel_en0409.svg",

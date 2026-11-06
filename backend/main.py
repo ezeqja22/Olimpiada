@@ -129,6 +129,10 @@ if admin_router:
     app.include_router(admin_router, tags=["admin"])
 # Removed notification admin router
 
+# Stage 2 help routes map existing migrated tables and never create/alter them.
+from help_routes import router as help_router
+app.include_router(help_router)
+
 # Public site info endpoint (no auth required)
 @app.get("/site-info")
 async def get_site_info():

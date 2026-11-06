@@ -553,6 +553,11 @@ function Homepage() {
         </section>
 
         <AboutFounders />
+        <div style={{ textAlign: "center", padding: "28px 20px 44px" }}>
+          <Link to="/faq" style={{ color: "#166d55", fontWeight: 750 }}>Help &amp; FAQ</Link>
+          <span aria-hidden="true" style={{ margin: "0 14px", color: "#8aafa3" }}>·</span>
+          <Link to="/support" style={{ color: "#166d55", fontWeight: 750 }}>Contact Support</Link>
+        </div>
       </main>
 
       {(showSubjectDropdown || showUserDropdown) && (

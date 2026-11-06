@@ -40,6 +40,8 @@ import AdminAnalytics from "./AdminAnalytics";
 import ForgotPassword from "./ForgotPassword";
 import ToastProvider from "./components/ToastProvider";
 import ConfirmProvider from "./components/ConfirmProvider";
+import { FAQPage, SupportPage } from "./HelpPages";
+import { AdminFAQ, AdminSupport } from "./AdminHelp";
 
 function App() {
   // Removed WebSocket functionality
@@ -56,6 +58,8 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/homepage" element={<Homepage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/support" element={<SupportPage />} />
               <Route
                 path="/feed"
                 element={
@@ -188,6 +192,8 @@ function App() {
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="email" element={<AdminEmail />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="faq" element={<AdminFAQ />} />
+                <Route path="support" element={<AdminSupport />} />
               </Route>
             </Routes>
           </ConfirmProvider>

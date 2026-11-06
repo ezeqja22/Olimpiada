@@ -521,6 +521,10 @@ function Header({ showHomeButton = false }) {
           ),
         }
       : null,
+    {
+      key: "help",
+      element: <Link to="/faq" className="site-header-mobile-nav-link">Help</Link>,
+    },
   ].filter(Boolean);
 
   return (
@@ -605,6 +609,8 @@ function Header({ showHomeButton = false }) {
               >
                 Forums
               </button>
+
+              <Link to="/faq" className="site-header-nav-link">Help</Link>
 
               {renderDesktopAuthSection()}
             </nav>
