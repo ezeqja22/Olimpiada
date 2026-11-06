@@ -40,20 +40,9 @@ import AdminAnalytics from "./AdminAnalytics";
 import ForgotPassword from "./ForgotPassword";
 import ToastProvider from "./components/ToastProvider";
 import ConfirmProvider from "./components/ConfirmProvider";
-import Stage1EditorDemo from "./Stage1EditorDemo";
 
 function App() {
   // Removed WebSocket functionality
-
-  // Temporary PR-preview-only route. Render outside AuthProvider so the
-  // editor can be tested without a backend request or a login session.
-  const previewHost = /^science-pioneers-[a-z0-9]{9}-enio-zeqjas-projects\.vercel\.app$/;
-  if (
-    window.location.pathname === "/stage1-editor-demo" &&
-    (import.meta.env.DEV || previewHost.test(window.location.hostname))
-  ) {
-    return <Stage1EditorDemo />;
-  }
 
   return (
     <Router>
