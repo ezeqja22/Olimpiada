@@ -1,0 +1,68 @@
+name: Phase 3 browser smoke
+on:
+  push:
+    branches: [phase-3-ux-management, staging-validation, release/olimpiada-all-changes-2026-11-02]
+    paths:
+      - "frontend/**"
+      - "backend/**"
+      - "tests/browser_smoke.py"
+      - ".github/workflows/phase3-browser-smoke.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      DATABASE_URL: sqlite:///./phase3-browser-test.db
+      SECRET_KEY: synthetic-browser-smoke-secret-never-use-in-production
+      FRONTEND_ORIGINS: http://127.0.0.1:5173,http://localhost:5173
+      REACT_APP_API_URL: http://127.0.0.1:8000
+      PYTHONPATH: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/olympiad-frontend/package-lock.json
+      - name: Install backend + Playwright
+        run: |
+          python -m pip install -r backend/requirements.txt httpx playwright
+          python -m playwright install --with-deps chromium
+      - name: Install frontend
+        run: npm ci
+        working-directory: frontend/olympiad-frontend
+      - name: Start isolated test backend and frontend
+        run: |
+          mkdir -p browser-evidence
+          python -c "import models; from database import engine; models.Base.metadata.create_all(bind=engine)"
+          uvicorn main:app --app-dir backend --host 127.0.0.1 --port 8000 > browser-evidence/backend.log 2>&1 &
+          echo $! > browser-evidence/backend.pid
+          (cd frontend/olympiad-frontend && npm run dev -- --host 127.0.0.1 --port 5173) > browser-evidence/frontend.log 2>&1 &
+          echo $! > browser-evidence/frontend.pid
+          for i in $(seq 1 50); do
+            if curl -fsS http://127.0.0.1:8000/health >/dev/null && curl -fsS http://127.0.0.1:5173/homepage >/dev/null; then
+              echo "Local preview is ready"; exit 0
+            fi
+            sleep 2
+          done
+          tail -n 100 browser-evidence/backend.log
+          tail -n 100 browser-evidence/frontend.log
+          exit 1
+      - name: Visual and functional browser checks
+        run: python tests/browser_smoke.py
+      - name: Upload non-sensitive screenshots and diagnostic logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase3-browser-evidence
+          path: |
+            browser-evidence/*.png
+            browser-evidence/*.txt
+            browser-evidence/*.log
+          retention-days: 7

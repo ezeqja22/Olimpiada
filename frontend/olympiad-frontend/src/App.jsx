@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect } from "react";
 import { AuthProvider } from "./context/AuthContext";
+import {LanguageProvider} from "./context/LanguageContext";
 import {
   BrowserRouter as Router,
   Routes,
@@ -16,6 +17,17 @@ import Homepage from "./Homepage";
 import Feed from "./Feed";
 import CreateProblem from "./CreateProblem";
 import ProtectedRoute from "./ProtectedRoute";
+import { Explore, Learning, Tutoring } from "./AccessPages";
+import { AdminTutoring } from "./AdminPhase1";
+import AdminContent from "./AdminContent";
+import AnalyticsConsent from "./AnalyticsConsent";
+import WeeklyPage, {AdminWeekly} from "./WeeklyPage";
+import CourseHub, {AdminCourses} from "./CourseHub";
+import ForumCatalogue from "./ForumCatalogue";
+import { TeacherApplicationPage, TeacherWorkspace } from "./ExperiencePages";
+import { AdminTeachers, AdminParents } from "./AdminExperience";
+import AdminSiteEditor from "./AdminSiteEditor";
+import FamilyPage from "./FamilyPage";
 import ProblemDetail from "./ProblemDetail";
 import UserProfile from "./UserProfile";
 import PublicUserProfile from "./PublicUserProfile";
@@ -48,7 +60,9 @@ function App() {
 
   return (
     <Router>
+      <LanguageProvider>
       <AuthProvider>
+        <AnalyticsConsent />
         <ToastProvider>
           <ConfirmProvider>
             <Routes>
@@ -58,8 +72,20 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/homepage" element={<Homepage />} />
+              <Route path="/pricing" element={<Navigate to="/explore" replace />} />
+              <Route path="/explore" element={<Explore />} />
+              <Route path="/library" element={<Navigate to="/explore" replace />} />
+              <Route path="/library/:id" element={<Navigate to="/explore" replace />} />
+              <Route path="/courses" element={<ProtectedRoute><CourseHub /></ProtectedRoute>} />
+              <Route path="/weekly" element={<WeeklyPage />} />
+              <Route path="/forum-catalog" element={<ForumCatalogue />} />
+              <Route path="/teacher/apply" element={<TeacherApplicationPage />} />
+              <Route path="/teacher/workspace" element={<ProtectedRoute><TeacherWorkspace /></ProtectedRoute>} />
               <Route path="/faq" element={<FAQPage />} />
               <Route path="/support" element={<SupportPage />} />
+              <Route path="/family" element={<ProtectedRoute><FamilyPage /></ProtectedRoute>} />
+              <Route path="/teacher/courses" element={<ProtectedRoute><AdminCourses /></ProtectedRoute>} />
+              <Route path="/tutoring" element={<ProtectedRoute><Tutoring /></ProtectedRoute>} />
               <Route
                 path="/feed"
                 element={
@@ -192,13 +218,23 @@ function App() {
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="email" element={<AdminEmail />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="tutoring" element={<AdminTutoring />} />
+                <Route path="content" element={<AdminContent />} />
+                <Route path="weekly" element={<AdminWeekly />} />
+                <Route path="courses" element={<AdminCourses />} />
+                <Route path="library" element={<Navigate to="/admin/content" replace />} />
+                <Route path="teachers" element={<AdminTeachers />} />
+                <Route path="site-content" element={<AdminSiteEditor />} />
+                <Route path="branding" element={<AdminSiteEditor />} />
                 <Route path="faq" element={<AdminFAQ />} />
                 <Route path="support" element={<AdminSupport />} />
+                <Route path="parents" element={<AdminParents />} />
               </Route>
             </Routes>
           </ConfirmProvider>
         </ToastProvider>
       </AuthProvider>
+      </LanguageProvider>
     </Router>
   );
 }

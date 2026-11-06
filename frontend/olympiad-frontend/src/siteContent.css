@@ -1,0 +1,69 @@
+/* Site-content editing and public page headings; scoped to avoid legacy admin overrides. */
+.site-page-intro {
+  display:flex; justify-content:space-between; align-items:center; gap:clamp(24px,4vw,46px);
+  padding:26px 0 30px; margin:0 0 26px; border-bottom:1px solid #e1ebf0;
+  background:transparent!important; color:#163c50!important; box-shadow:none!important;
+}
+.site-page-intro__copy {flex:1; min-width:0;}
+.site-page-intro__kicker {display:block; font-size:.74rem; text-transform:uppercase; letter-spacing:.14em; font-weight:800; color:#1880a3;}
+.site-page-intro h1 {font-size:clamp(1.9rem,3.6vw,3.05rem);line-height:1.1;letter-spacing:-.05em;margin:10px 0 12px;color:#11384e!important;overflow-wrap:anywhere;}
+.site-page-intro p {font-size:1.02rem;line-height:1.72;max-width:750px;margin:0;color:#66808e!important;white-space:pre-line;overflow-wrap:anywhere;}
+.site-page-intro__photo {flex:0 1 310px;max-width:32%;aspect-ratio:1.56;border:1px solid #d7e5ec;border-radius:17px;overflow:hidden;box-shadow:0 12px 28px #0e506616;background:#eef6fa;}
+.site-page-intro__photo img {display:block;width:100%;height:100%;object-fit:cover;}
+.site-page-intro__action {display:inline-flex;margin-top:16px;padding:10px 17px;border:1px solid #b7dce7;border-radius:10px;color:#146e8c!important;background:white;text-decoration:none;font-weight:700;}
+.site-page-intro__action:hover {background:#e9f6fb;}
+.site-page-intro__action:focus-visible {outline:3px solid #62c8ea;outline-offset:2px;}
+
+.site-editor {max-width:1450px;margin:0 auto;padding:10px 0 55px;color:#163949;}
+.site-editor__title {margin:0;font-size:clamp(1.65rem,3vw,2.3rem);letter-spacing:-.045em;color:#123a52;}
+.site-editor__lede {color:#718594;max-width:800px;line-height:1.65;margin:7px 0 27px;}
+.site-editor__layout {display:grid;grid-template-columns:minmax(225px,285px) minmax(0,1fr);gap:24px;align-items:start;}
+.site-editor__nav {position:sticky;top:12px;padding:18px;background:#f6fafc;border:1px solid #deebf1;border-radius:16px;max-height:calc(100vh - 40px);overflow-y:auto;}
+.site-editor__nav input {width:100%;border-radius:10px;padding:12px;background:white;border:1px solid #cadde5;color:#193b49;font:inherit;}
+.site-editor__nav-section {margin:20px 0 8px;font-size:.73rem;letter-spacing:.13em;text-transform:uppercase;color:#7794a2;font-weight:800;}
+.site-editor__item {width:100%;text-align:left;padding:11px 12px;border-radius:9px;border:1px solid transparent;background:transparent;color:#244b60;font:650 .93rem/1.4 inherit;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:7px;}
+.site-editor__item:hover {background:#eaf5fa;}
+.site-editor__item[aria-current="true"] {color:#086c91;background:#e3f4fa;border-color:#bbdcea;}
+.site-editor__modified-dot {width:7px;height:7px;flex:none;border-radius:50%;background:#3995b7;}
+.site-editor__workspace {min-width:0;display:grid;gap:18px;}
+.site-editor__panel {background:white;border:1px solid #e0ebf0;border-radius:18px;padding:clamp(18px,3vw,29px);box-shadow:0 10px 35px #0a3b5409;}
+.site-editor__top {display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+.site-editor__top h2 {color:#163e53;margin:0;font-size:1.45rem;letter-spacing:-.028em;}
+.site-editor__meta {font-size:.81rem;color:#79929f;margin-top:5px;}
+.site-editor__language {display:flex;align-items:center;gap:6px;border:1px solid #d4e3eb;border-radius:11px;background:#f5fafc;padding:4px;}
+.site-editor__language button {padding:8px 13px;border-radius:8px;background:transparent;border:0;color:#617987;font-weight:750;cursor:pointer;}
+.site-editor__language button[aria-pressed="true"] {background:white;color:#136b8d;box-shadow:0 2px 8px #123c5817;}
+.site-editor__fields {display:grid;gap:17px;margin-top:24px;}
+.site-editor__fields label {display:grid;gap:7px;color:#31546a;font-size:.88rem;font-weight:750;}
+.site-editor__fields input,.site-editor__fields textarea {width:100%;border:1px solid #cbdde7;border-radius:11px;padding:12px 13px;background:#fff;color:#14394c;font:inherit;font-weight:400;line-height:1.45;resize:vertical;}
+.site-editor__fields input:focus,.site-editor__fields textarea:focus,.site-editor__nav input:focus {outline:3px solid #c0e8f6;border-color:#4eafcc;}
+.site-editor__hint {font-weight:400;font-size:.8rem;line-height:1.5;color:#718897;}
+.site-editor__media {display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,240px);gap:17px;align-items:center;}
+.site-editor__media-preview {background:#f0f6f9;border-radius:12px;border:1px dashed #bed3dd;min-height:140px;display:grid;place-items:center;overflow:hidden;color:#8399a5;}
+.site-editor__media-preview img {width:100%;max-height:215px;object-fit:contain;display:block;}
+.site-editor__preview {background:linear-gradient(135deg,#f6fbfd,#eef6fa);border:1px solid #deecf2;border-radius:14px;padding:21px 24px;margin-top:22px;}
+.site-editor__preview-label {color:#15799d;font-size:.72rem;letter-spacing:.11em;text-transform:uppercase;font-weight:800;}
+.site-editor__preview h3 {font-size:clamp(1.25rem,2.6vw,1.75rem);letter-spacing:-.035em;color:#113d55;margin:11px 0 8px;overflow-wrap:anywhere;}
+.site-editor__preview p {color:#557887;line-height:1.6;white-space:pre-line;margin:0;}
+.site-editor__actions {display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:19px;}
+.site-editor__save {padding:12px 22px;border-radius:10px;background:#12648e;color:white;border:0;font:750 .94rem inherit;cursor:pointer;}
+.site-editor__save:hover {background:#0c5073;}
+.site-editor__save:disabled {opacity:.55;cursor:not-allowed;}
+.site-editor__secondary {padding:10px 16px;border-radius:10px;border:1px solid #c5dce7;background:white;color:#295568;font:700 .9rem inherit;cursor:pointer;text-decoration:none;}
+.site-editor__secondary:hover {background:#eff7fb;}
+.site-editor__status {font-size:.87rem;color:#526f7e;}
+.site-editor__status[role="alert"] {color:#a12e38;}
+.site-editor__status[data-success="true"] {color:#196a67;}
+.site-editor :where(button,a,input,textarea):focus-visible {outline:3px solid #6cc9e8;outline-offset:2px;}
+@media(max-width:860px) {
+ .site-editor__layout {grid-template-columns:1fr;}
+ .site-editor__nav {position:static;max-height:260px;}
+ .site-page-intro__photo {flex-basis:200px;}
+}
+@media(max-width:560px) {
+ .site-page-intro {flex-direction:column;align-items:stretch;}
+ .site-page-intro__photo {flex:auto;max-width:100%;width:100%;aspect-ratio:2;}
+ .site-editor__media {grid-template-columns:1fr;}
+ .site-editor__media-preview {min-height:120px;}
+ .site-editor__panel {padding:16px;}
+}

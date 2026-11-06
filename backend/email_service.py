@@ -195,6 +195,8 @@ class EmailService:
     
     def _send_verification_email_smtp(self, to_email: str, username: str, verification_code: str, html_content: str) -> bool:
         """Fallback SMTP method for sending verification email"""
+        if os.getenv("STAGING_MODE") == "1":
+            return self._staging_email(to_email, "Olimpiada - Email Verification", html_content)
         try:
             # Validate SMTP settings before attempting connection
             if not self.sender_email or not self.sender_password or not self.smtp_server:
@@ -284,8 +286,26 @@ class EmailService:
     # Removed refresh_settings method - using environment variables now
     
     # Resend API implementation
+    def _staging_email(self, to_email, subject, body):
+        """Send test messages to the local Mailpit inbox only."""
+        if self.smtp_server != "mailpit" or self.smtp_port != 1025:
+            return False
+        try:
+            message = MIMEMultipart("alternative")
+            message["Subject"] = subject
+            message["From"] = "Olimpiada Staging <staging@olimpiada.test>"
+            message["To"] = to_email
+            message.attach(MIMEText(body, "html", "utf-8"))
+            with smtplib.SMTP("mailpit", 1025, timeout=6) as server:
+                server.send_message(message)
+            return True
+        except Exception:
+            return False
+
     def send_email_via_resend_api(self, to_email: str, subject: str, html_content: str) -> bool:
         """Send email using Resend REST API"""
+        if os.getenv("STAGING_MODE") == "1":
+            return False
         try:
             if not self.resend_api_key:
                 print("DEBUG: Resend API key not configured")
@@ -357,6 +377,8 @@ class EmailService:
     
     def _send_notification_email_smtp(self, to_email: str, subject: str, html_content: str) -> bool:
         """Fallback SMTP method for sending notification email"""
+        if os.getenv("STAGING_MODE") == "1":
+            return self._staging_email(to_email, subject, html_content)
         try:
             # Validate SMTP settings before attempting connection
             if not self.sender_email or not self.sender_password or not self.smtp_server:

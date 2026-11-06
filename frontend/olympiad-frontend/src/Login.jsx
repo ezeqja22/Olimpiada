@@ -51,7 +51,19 @@ function Login() {
 
       navigate(safeRedirect, { replace: true });
     } catch (err) {
-      const errorMessage = err.response?.data?.detail || err.message;
+      const detail = err.response?.data?.detail;
+      // FastAPI validation errors are arrays of objects; never render [object Object].
+      const errorMessage =
+        typeof detail === "string"
+          ? detail
+          : Array.isArray(detail)
+            ? detail.map((issue) =>
+                typeof issue?.msg === "string" ? issue.msg : "Invalid input"
+              ).join("; ")
+            : detail && typeof detail === "object"
+              ? (typeof detail.message === "string" ? detail.message
+                  : typeof detail.code === "string" ? detail.code : "Request failed")
+              : err.message || "Request failed";
 
       if (err.response?.status === 503) {
         showToast(

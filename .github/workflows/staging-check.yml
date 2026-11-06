@@ -1,0 +1,182 @@
+name: Staging PostgreSQL verification
+on:
+  push:
+    branches: [staging-validation, release/olimpiada-all-changes-2026-11-02]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: sqlite:///./staging-regression.db
+      SECRET_KEY: synthetic-ci-regression-only
+      PYTHONPATH: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/olympiad-frontend/package-lock.json
+      - run: pip install -r backend/requirements.txt httpx
+      - run: python -m unittest discover -s backend/tests -p "test_*.py" -v
+      - run: npm ci && npm run build && npx vitest run src/components/RichInlineText.test.jsx src/components/SitePageIntro.test.jsx src/AdminSiteEditor.test.jsx
+        working-directory: frontend/olympiad-frontend
+  windows-local-no-docker:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: "x64"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Windows backend dependencies
+        run: python -m pip install -r backend/requirements.txt httpx
+      - name: Initialize and verify Docker-free staging
+        run: |
+          python staging/local.py init
+          python staging/local.py check
+      - name: Build no-Docker frontend
+        working-directory: frontend/olympiad-frontend
+        run: |
+          npm ci
+          npm run build
+  postgresql-migration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: stage_ci
+          POSTGRES_PASSWORD: stage_ci_pass
+          POSTGRES_DB: stage_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U stage_ci -d stage_ci"
+          --health-interval 4s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+psycopg://stage_ci:stage_ci_pass@localhost:5432/stage_ci
+      SECRET_KEY: ephemeral-staging-ci-secret-not-production
+      PYTHONPATH: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install backend
+        run: pip install -r backend/requirements.txt httpx
+      - name: Bootstrap isolated fresh PostgreSQL schema
+        run: python staging/bootstrap.py
+      - name: Verify single head and required tables
+        run: |
+          alembic current
+          python -c "from sqlalchemy import inspect; from database import engine; t=set(inspect(engine).get_table_names()); required={'users','forums','weekly_challenges','course_items','teacher_applications','support_tickets','faq_entries','email_templates'}; assert required.issubset(t),(required-t); print('Staging PostgreSQL schema ready')"
+      - name: API smoke with migrated Postgres
+        run: |
+          python -c "from fastapi.testclient import TestClient; from main import app; c=TestClient(app); assert c.get('/health').status_code==200; assert c.get('/experience/faq').status_code==200; assert c.get('/public/forums').status_code==200; assert c.get('/core/library/catalog').status_code==404; assert c.get('/access/plans').status_code==404; print('PostgreSQL API smoke passed')"
+  historical-migration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: historical_ci
+          POSTGRES_PASSWORD: historical_ci_pass
+          POSTGRES_DB: historical_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U historical_ci -d historical_ci"
+          --health-interval 4s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+psycopg://historical_ci:historical_ci_pass@localhost:5432/historical_ci
+      SECRET_KEY: synthetic-migration-only-secret
+      PYTHONPATH: backend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r backend/requirements.txt httpx
+      - name: Create legacy master schema to mimic production structure
+        run: |
+          mkdir -p /tmp/olimpiada-legacy
+          git show origin/master:backend/models.py > /tmp/olimpiada-legacy/models.py
+          PYTHONPATH=/tmp/olimpiada-legacy:backend python -c "from models import Base; from database import engine; Base.metadata.create_all(bind=engine)"
+      - name: Mark historical revision then apply Phase 1-3 migrations
+        run: |
+          alembic stamp f0035977060e
+          alembic upgrade head
+      - name: Validate upgraded Postgres structure
+        run: |
+          alembic current
+          python -c "from sqlalchemy import inspect; from database import engine; t=set(inspect(engine).get_table_names()); required={'users','forums','teacher_applications','faq_entries','course_attempts'}; assert required.issubset(t),(required-t); print('Historical upgrade passed')"
+  docker-staging-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      STAGING_DB_PASSWORD: synthetic_docker_ci_password
+      STAGING_SECRET_KEY: synthetic_docker_ci_secret_do_not_use_in_production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify staging DB credentials agree across services
+        run: |
+          docker compose -f staging/compose.yaml config --format json > /tmp/staging-compose.json
+          python - <<'PY'
+          import json
+          from urllib.parse import urlsplit
+          data=json.load(open('/tmp/staging-compose.json'))
+          dbpw=data['services']['db']['environment']['POSTGRES_PASSWORD']
+          pgpw=data['services']['migrate']['environment']['PGPASSWORD']
+          assert pgpw==dbpw, 'DB and migrate passwords differ'
+          dsn = urlsplit(data['services']['migrate']['environment']['DATABASE_URL'])
+          assert dsn.hostname=='db'
+          assert dsn.username==data['services']['db']['environment']['POSTGRES_USER'], 'PostgreSQL username differs from API login'
+          assert dsn.path.lstrip('/')==data['services']['db']['environment']['POSTGRES_DB'], 'PostgreSQL database name differs from API database'
+          print('Docker staging credentials match (values not printed)')
+          PY
+      - name: Build and start isolated staging services
+        run: docker compose -f staging/compose.yaml up -d --build
+      - name: Verify migrations, synthetic accounts and HTTP routes
+        run: |
+          docker compose -f staging/compose.yaml exec -T api python staging/seed_demo.py > /dev/null
+          docker compose -f staging/compose.yaml exec -T api python staging/smoke.py
+          curl -fsS http://127.0.0.1:8001/health
+          test "$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8001/access/plans)" = "404"
+          curl -fsS http://127.0.0.1:8001/public/forums > /dev/null
+          curl -fsS http://127.0.0.1:8001/experience/faq > /dev/null
+          curl -fsS http://127.0.0.1:5174/homepage > /dev/null
+          docker compose -f staging/compose.yaml exec -T api python -c "from database import SessionLocal; from models import User,WeeklyChallenge; db=SessionLocal(); assert db.query(User).filter(User.email.like('demo-%@example.com')).count()==6; assert db.query(WeeklyChallenge).count()>=1; print('Isolated demo data and PostgreSQL: PASS')"
+      - name: Logs on failure
+        if: failure()
+        run: docker compose -f staging/compose.yaml logs --tail=100
+      - name: Stop isolated stage
+        if: always()
+        run: docker compose -f staging/compose.yaml down -v
+  staging-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Docker Compose without production secrets
+        env:
+          STAGING_DB_PASSWORD: synthetic_composer_test_only
+          STAGING_SECRET_KEY: synthetic_composer_test_only
+        run: docker compose -f staging/compose.yaml config --quiet

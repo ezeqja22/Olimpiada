@@ -231,3 +231,15 @@
     font-size: 0.88rem;
   }
 }
+
+/* Optional Admin-managed team photo without altering existing founder cards. */
+.about-founders-header .about-founders-accent {
+  display:block;
+  width:min(360px,100%);
+  max-height:210px;
+  object-fit:cover;
+  border-radius:16px;
+  margin:18px auto 0;
+  border:1px solid #dce8ef;
+}
+.about-founders-section a {color:#176f9e;text-underline-offset:3px;}

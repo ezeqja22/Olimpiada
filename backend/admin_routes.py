@@ -136,7 +136,6 @@ async def get_users(
         query = query.filter(User.role == role)
     
     if status == "active":
-        from sqlalchemy import or_
         query = query.filter(User.is_active == True, or_(User.is_banned == False, User.is_banned.is_(None)))
     elif status == "banned":
         query = query.filter(User.is_banned == True)
@@ -268,11 +267,19 @@ async def update_user(
         raise HTTPException(status_code=404, detail="User not found")
     
     # Prevent admins from modifying other admins
-    if user.role == 'admin' and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Cannot modify other admin accounts")
+    from phase1_service import is_super_admin
+    if user.role in ('admin', 'super_admin') and current_user.id != user_id and not is_super_admin(current_user):
+        raise HTTPException(status_code=403, detail="Cannot modify another admin account")
     
     # Update fields
     if user_update.role is not None:
+        from phase1_service import is_super_admin
+        # Keep legacy user/moderator roles assignable alongside the new records.
+        allowed_roles = {"user", "student", "teacher", "moderator", "reviewer", "admin", "super_admin"}
+        if not is_super_admin(current_user):
+            raise HTTPException(status_code=403, detail="Only Super Admin may assign roles")
+        if user_update.role not in allowed_roles:
+            raise HTTPException(status_code=422, detail="Invalid role")
         user.role = user_update.role
     
     if user_update.is_active is not None:

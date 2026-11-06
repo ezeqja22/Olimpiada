@@ -52,7 +52,7 @@ const AdminLayout = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!["admin", "moderator"].includes(response.data.role)) {
+      if (!["admin", "moderator", "reviewer", "super_admin"].includes(response.data.role)) {
         navigate("/", { replace: true });
         return;
       }
@@ -109,6 +109,25 @@ const AdminLayout = () => {
       icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811297/Email_admin_panel_zjmkz7.svg",
       adminOnly: true,
     },
+    {path:"/admin/teachers",label:"Aplikimet e Mësuesve",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811353/Users_Hirstory_admin_panel_eqvfdf.svg",adminOnly:false},
+    {path:"/admin/site-content",label:"Përmbajtja e Website-it",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811439/Settings_admin_panel_cpayja.svg",adminOnly:true},
+    {path:"/admin/faq",label:"FAQ",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg",adminOnly:false},
+    {path:"/admin/support",label:"Technical Support",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg",adminOnly:false},
+    {path:"/admin/parents",label:"Raporte Prindërish",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg",adminOnly:false},
+    {path: "/admin/weekly",label: "Problema e Javës", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
+    {path: "/admin/courses",label: "Materiale & Teste", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
+    {
+      path: "/admin/content",
+      label: "Përmbajtja & Profesorët",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",
+      adminOnly: false,
+    },
+    {
+      path: "/admin/tutoring",
+      label: "Kërkesat 1-to-1",
+      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/Analytics_admin_panel_en0409.svg",
+      adminOnly: false,
+    },
     {
       path: "/admin/faq",
       label: "FAQ",
@@ -130,7 +149,7 @@ const AdminLayout = () => {
   ];
 
   const filteredMenuItems = menuItems.filter(
-    (item) => !item.adminOnly || currentUser?.role === "admin",
+    (item) => !item.adminOnly || ["admin", "super_admin"].includes(currentUser?.role),
   );
 
   const isActiveRoute = (path) => {
