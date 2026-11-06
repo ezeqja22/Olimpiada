@@ -1,0 +1,15 @@
+.vme { flex: 1; min-width: 0; overflow: hidden; border: 1px solid #bed3c9; border-radius: 12px; background: white; }
+.vme-toolbar { display: flex; flex-wrap: wrap; gap: 4px; padding: 9px; border-bottom: 1px solid #e1ede8; background: #f5faf7; }
+.vme-toolbar button { padding: 7px 10px; border: 1px solid #d2e4da; border-radius: 7px; background: white; color: #1b6550; font-size: 14px; font-weight: 700; cursor: pointer; }
+.vme-toolbar button:hover, .vme-toolbar button:focus-visible { background: #e4f4e9; }
+.vme-canvas { padding: 14px; min-height: 160px; outline: 0; line-height: 1.8; font-size: 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.vme-canvas:focus-visible { box-shadow: inset 0 0 0 2px #2b8467; }
+.vme-canvas:empty::before { content: attr(data-placeholder); color: #94a8a1; }
+.vme-formula { display: inline-block; margin: 0 2px; padding: 1px 5px; border: 1px solid #cde8db; border-radius: 5px; background: #eaf5f0; vertical-align: middle; cursor: default; }
+.vme-formula-tool { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; padding: 12px; }
+.vme-formula-tool label { flex: 1; min-width: 130px; color: #244337; font-size: 13px; font-weight: 600; }
+.vme-formula-tool input { box-sizing: border-box; display: block; width: 100%; margin-top: 5px; padding: 9px; border: 1px solid #c0d4c9; border-radius: 6px; font: inherit; }
+.vme-insert { padding: 10px 14px; border: 0; border-radius: 7px; background: #1c7053; color: white; font-weight: 700; cursor: pointer; }
+.vme-hint { margin: 5px 12px 10px; color: #5d7568; font-size: 12px; }
+.vme-error { margin: 8px 12px; color: #a22; font-size: 13px; }
+@media (max-width: 640px) { .vme-toolbar button { padding: 7px 8px; } .vme-formula-tool label { min-width: 110px; } }

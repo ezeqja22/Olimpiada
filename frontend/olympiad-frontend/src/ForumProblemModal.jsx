@@ -11,6 +11,7 @@ import {
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import MathEditor from "./MathEditor";
+import VisualMathEditor from "./components/VisualMathEditor";
 import "./MathEditor.css";
 import { useToast } from "./components/ToastProvider";
 import "./forumModern.css";
@@ -513,59 +514,11 @@ const ForumProblemModal = ({ isOpen, onClose, forumId, onProblemCreated }) => {
                   Description *
                 </label>
                 <div style={{ display: "flex", gap: spacing.sm }}>
-                  <textarea
-                    name="description"
+                  <VisualMathEditor
                     value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Describe the problem in detail..."
-                    required
-                    rows={6}
-                    style={{
-                      flex: 1,
-                      padding: spacing.sm,
-                      border: `1px solid ${colors.gray[300]}`,
-                      borderRadius: borderRadius.md,
-                      fontSize: typography.fontSize.base,
-                      outline: "none",
-                      resize: "vertical",
-                      fontFamily: "inherit",
-                    }}
+                    onChange={(description) => setFormData((prev) => ({ ...prev, description }))}
+                    minHeight={150}
                   />
-                  <button
-                    type="button"
-                    onClick={() => openMathEditor("description")}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      padding: "12px 16px",
-                      background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-                      color: "white",
-                      border: "none",
-                      borderRadius: "999px",
-                      cursor: "pointer",
-                      fontSize: "14px",
-                      fontWeight: "700",
-                      whiteSpace: "nowrap",
-                      alignSelf: "flex-start",
-                      boxShadow: `0 6px 16px ${colors.primary}35`,
-                      transition: "all 0.2s ease",
-                    }}
-                    title="Insert LaTeX formula"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-1px)";
-                      e.currentTarget.style.boxShadow = `0 8px 20px ${colors.primary}45`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = `0 6px 16px ${colors.primary}35`;
-                    }}
-                  >
-                    <span style={{ fontSize: "17px", fontWeight: "800" }}>
-                      ∑
-                    </span>
-                    <span>Add formula</span>
-                  </button>
                 </div>
               </div>
 
