@@ -14,6 +14,7 @@ import EmptyState from "./components/feed/EmptyState";
 import PaginationControls from "./components/feed/PaginationControls";
 import FloatingCreateButton from "./components/feed/FloatingCreateButton";
 import "./Feed.css";
+import "./phase3-design.css";
 import { useToast } from "./components/ToastProvider";
 
 function Feed() {
