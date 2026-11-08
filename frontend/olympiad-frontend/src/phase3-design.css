@@ -1,0 +1,369 @@
+/* Phase 3 / Stage A — shared visual language for the homepage and Problems.
+   Scoped deliberately: later stages will migrate other routes, not overwrite them.
+   SPARK blue is the existing site fallback; it is not asserted to be the official brand palette. */
+:root {
+  --ol-green: #1a4d3a;
+  --ol-purple: #7254a3;
+  --ol-blue: #1d7cc6;
+  --ol-ink: #192c24;
+  --ol-muted: #5d7065;
+  --ol-border: #dce6df;
+  --ol3-canvas: #f6f8f5;
+  --ol3-paper: #ffffff;
+  --ol3-line: #d9e4dc;
+  --ol3-radius: 14px;
+  --ol3-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.homepage-page,
+.feed-page {
+  font-family: var(--ol3-font);
+  color: var(--ol-ink);
+}
+.homepage-page {
+  background: var(--ol3-canvas) !important;
+}
+.homepage-page .homepage-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: min(780px, calc(100svh - 76px));
+  padding: clamp(52px, 6.5vw, 94px) clamp(18px, 4vw, 64px);
+  background: var(--ol-green) !important;
+}
+.homepage-page .homepage-hero-inner {
+  width: min(1220px, 100%);
+  max-width: 1220px;
+  grid-template-columns: minmax(0, 1.12fr) minmax(320px, .88fr);
+  gap: clamp(36px, 5vw, 88px);
+}
+.homepage-page .p3-hero-copy h1 {
+  max-width: 17ch;
+  font-size: clamp(2.85rem, 4.6vw, 5.25rem) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -.058em;
+  text-wrap: balance;
+}
+.homepage-page .p3-hero-copy .hero-kicker {
+  font-size: .78rem;
+  font-weight: 750;
+  letter-spacing: .12em;
+  color: #cbe8d8 !important;
+}
+.homepage-page .p3-hero-copy .hero-description {
+  max-width: 57ch;
+  color: #dfebe1 !important;
+  font-size: clamp(1rem, 1.5vw, 1.16rem);
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+.homepage-page .p3-hero-copy .hero-actions {
+  gap: 12px;
+  margin-top: 32px;
+}
+.homepage-page .p3-hero-copy .hero-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border-radius: 8px !important;
+  padding: 12px 22px !important;
+  font-weight: 700 !important;
+  text-decoration: none;
+  transition: background-color 160ms ease, transform 160ms ease, border-color 160ms ease;
+}
+.homepage-page .p3-hero-copy .hero-button:hover { transform: translateY(-2px); }
+.homepage-page .p3-hero-copy .hero-button:active { transform: translateY(0); }
+.homepage-page .p3-hero-copy .hero-button-primary {
+  color: #153c2c;
+  background: #fff;
+  border: 1px solid #fff;
+}
+.homepage-page .p3-hero-copy .hero-button-primary:hover { background: #e7f0e9; }
+.homepage-page .p3-hero-copy .hero-button-secondary {
+  color: #fff;
+  border: 1px solid #adc5b4;
+  background: transparent;
+}
+.homepage-page .p3-hero-copy .hero-button-secondary:hover { background: #ffffff12; }
+.homepage-page .p3-hero-image {
+  min-height: 0;
+  width: 100%;
+  max-width: 510px;
+  justify-self: end;
+}
+.homepage-page .p3-hero-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1.17;
+  object-fit: cover;
+  border-radius: var(--ol3-radius);
+  box-shadow: 0 22px 54px #091e1660;
+}
+.homepage-page .p3-photo-caption {
+  left: 18px;
+  bottom: 18px;
+  font-size: .75rem;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--ol-green);
+}
+/* A truthful mathematical illustration replaces the generic infinity placeholder
+   only when the site editor has not supplied an actual hero image. */
+.ol3-math-card {
+  width: 100%;
+  aspect-ratio: 1.12;
+  min-height: 350px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: clamp(22px, 3vw, 36px);
+  background: #fcfdf9;
+  border: 1px solid #d7e5d8;
+  border-radius: 16px;
+  color: #193c2c;
+  box-shadow: 0 22px 54px #091e1660;
+}
+.ol3-math-card__head,
+.ol3-math-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.ol3-math-card__head {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ol3-line);
+}
+.ol3-math-card__eyebrow,
+.ol3-math-card__foot {
+  font-size: .73rem;
+  font-weight: 750;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.ol3-math-card__head span:last-child {
+  font-size: 1.6rem;
+  color: var(--ol-purple);
+}
+.ol3-math-card__body {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.ol3-math-card__equation {
+  color: var(--ol-green);
+  font-size: clamp(1.5rem, 2.7vw, 2.45rem);
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -.055em;
+  white-space: nowrap;
+}
+.ol3-math-card__diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.ol3-math-card__foot {
+  color: #667c6e;
+  border-top: 1px solid var(--ol3-line);
+  padding-top: 16px;
+}
+.ol3-math-card__foot span:last-child { color: var(--ol-blue); font-size: 1rem; }
+.homepage-page .p3-home-shell {
+  width: min(1220px, 100%);
+  padding: clamp(60px, 7vw, 96px) clamp(20px, 3vw, 32px);
+}
+.homepage-page .p3-section-head {
+  border-bottom: 1px solid var(--ol3-line);
+  color: var(--ol-ink) !important;
+}
+.homepage-page .p3-section-head::after {
+  width: 76px;
+  height: 2px;
+  background: var(--ol-purple);
+}
+.homepage-page .p3-section-head h2,
+.homepage-page .p3-visual-copy h2 {
+  color: var(--ol-ink);
+  font-weight: 740;
+  letter-spacing: -.045em;
+  text-wrap: balance;
+}
+.homepage-page .p3-section-head .p3-section-label,
+.homepage-page .p3-eyebrow {
+  color: var(--ol-purple) !important;
+}
+.homepage-page .p3-label-dot { border-color: var(--ol-purple); }
+.homepage-page .p3-section-summary,
+.homepage-page .p3-visual-copy p {
+  color: var(--ol-muted);
+  line-height: 1.7;
+}
+.homepage-page .p3-feature-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.homepage-page .p3-feature-card {
+  min-height: 232px;
+  padding: 24px;
+  gap: 14px;
+  border: 1px solid var(--ol3-line);
+  background: var(--ol3-paper);
+  border-radius: 12px;
+  box-shadow: none;
+  color: var(--ol-ink) !important;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+.homepage-page .p3-feature-card:hover,
+.homepage-page .p3-feature-card:focus-within {
+  transform: translateY(-2px);
+  border-color: #b8cdc0;
+  box-shadow: 0 12px 26px #1a4d3a12;
+}
+.homepage-page .p3-feature-card h3 { color: var(--ol-ink); line-height: 1.35; }
+.homepage-page .p3-feature-card p { color: var(--ol-muted); font-size: .92rem; }
+.homepage-page .p3-feature-card > span:first-of-type {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #edf4ef;
+  color: var(--ol-green);
+  font-size: 1.4rem;
+}
+.homepage-page .p3-feature-card:nth-child(2) > span:first-of-type { background: #f0eaf6; color: var(--ol-purple); }
+.homepage-page .p3-feature-card:nth-child(3) > span:first-of-type { background: #e8f2fa; color: var(--ol-blue); }
+.homepage-page .p3-feature-card__action,
+.homepage-page .p3-visual-copy a { color: var(--ol-green); font-weight: 750; }
+.homepage-page .p3-feature-card__action:hover,
+.homepage-page .p3-visual-copy a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.homepage-page .p3-visual-row { margin-top: clamp(76px, 9vw, 128px); }
+.homepage-page .p3-visual-row img,
+.homepage-page .p3-visual-fallback { border-radius: 12px; box-shadow: none; }
+.homepage-page .p3-visual-fallback {
+  background: #dfece3;
+  color: #648575;
+  border: 1px solid var(--ol3-line);
+}
+.homepage-page .p3-partner-section {
+  border: 1px solid #dae8ef;
+  border-radius: 12px;
+  background: #edf5fa;
+  box-shadow: none;
+}
+.homepage-page .p3-partner-section h3 { color: #173e55; }
+.homepage-page .p3-partner-section span { color: #225d92; }
+.homepage-page .p3-final-cta {
+  background-color: #204e3d;
+  border-radius: 12px;
+  padding: clamp(36px, 5.5vw, 64px);
+}
+.homepage-page .p3-final-cta .p3-eyebrow { color: #cdb4e8 !important; }
+.homepage-page .p3-final-cta h2 { color: #fff; text-wrap: balance; }
+.homepage-page .p3-final-cta p { color: #dfebe3; }
+.homepage-page .p3-final-cta .p1-btn { background: #fff; color: var(--ol-green); border-color: #fff; }
+.homepage-page .p3-footer { background: #143d2d; color: #d3e3d7; }
+.homepage-page .p3-footer a { color: #eef6f0; }
+/* Problems: editorial introduction, then tools and real problems rather than stacked
+   gradient cards with nested boxes. */
+.feed-page {
+  max-width: 1100px;
+  padding: 24px clamp(12px, 2.4vw, 28px) 128px;
+}
+.feed-page .feed-mini-banner {
+  padding: clamp(24px, 3vw, 38px);
+  margin-bottom: 24px;
+  background: #edf3ee;
+  border: 1px solid #dbe7dd;
+  border-left: 4px solid var(--ol-purple);
+  border-radius: 12px;
+  box-shadow: none;
+}
+.feed-page .feed-mini-title {
+  color: var(--ol-green);
+  font-weight: 750;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  letter-spacing: -.045em;
+  text-wrap: balance;
+}
+.feed-page .feed-mini-kicker,
+.feed-page .feed-mini-kicker-dot { color: var(--ol-purple); }
+.feed-page .feed-mini-kicker-dot { background: var(--ol-purple); box-shadow: none; }
+.feed-page .feed-mini-subtitle { color: var(--ol-muted); max-width: 56ch; }
+.feed-page .feed-mini-stats { gap: 12px; }
+.feed-page .feed-mini-stat {
+  min-width: 90px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid var(--ol3-line);
+  border-radius: 9px;
+  box-shadow: none;
+}
+.feed-page .feed-mini-stat-value { color: var(--ol-green); font-size: 1.15rem; font-weight: 800; }
+.feed-page .feed-mini-stat-label { color: #66766d; letter-spacing: .06em; }
+.feed-page .feed-search-shell,
+.feed-page .feed-tabs-card {
+  background: var(--ol3-paper);
+  border: 1px solid var(--ol3-line);
+  border-radius: 10px;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.feed-page .feed-tabs-card { padding: 8px; }
+.feed-page .feed-tabs { border-radius: 7px; background: #eff4ef; }
+.feed-page .feed-tab-button { border-radius: 6px; color: #455b4d; font-weight: 700; }
+.feed-page .feed-tab-button.active {
+  background: var(--ol-green);
+  box-shadow: none;
+}
+.feed-page .feed-count strong { color: var(--ol-green); }
+.feed-page .problem-card {
+  border: 1px solid var(--ol3-line) !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+.feed-page .problem-card:hover { border-color: #b5cbb9 !important; box-shadow: 0 8px 24px #1a4d3a0f !important; }
+.homepage-page :where(a,button,input,textarea,select):focus-visible,
+.feed-page :where(a,button,input,textarea,select):focus-visible {
+  outline: 3px solid var(--ol-purple);
+  outline-offset: 3px;
+}
+@media (max-width: 1070px) {
+  .homepage-page .p3-feature-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 900px) {
+  .homepage-page .homepage-hero { min-height: 0; padding: 52px 20px 60px; }
+  .homepage-page .homepage-hero-inner { grid-template-columns: minmax(0,1fr); gap: 40px; }
+  .homepage-page .p3-hero-image { max-width: 560px; justify-self: stretch; }
+  .homepage-page .p3-hero-copy h1 { max-width: 18ch; }
+  .ol3-math-card { aspect-ratio: 1.45; }
+}
+@media (max-width: 640px) {
+  .homepage-page .p3-home-shell { padding: 56px 16px; }
+  .homepage-page .p3-feature-grid { grid-template-columns: minmax(0,1fr); }
+  .homepage-page .p3-feature-card { min-height: 0; }
+  .homepage-page .p3-hero-copy h1 { font-size: clamp(2.45rem, 9.5vw, 3.3rem) !important; }
+  .homepage-page .p3-hero-copy .hero-actions a { width: 100%; }
+  .homepage-page .p3-section-head { grid-template-columns: 1fr; }
+  .ol3-math-card { min-height: 0; aspect-ratio: 1.08; padding: 22px; }
+  .ol3-math-card__equation { font-size: clamp(1.25rem, 5vw, 1.8rem); }
+  .feed-page .feed-mini-banner { flex-direction: column; align-items: stretch; }
+  .feed-page .feed-mini-stats { width: 100%; }
+  .feed-page .feed-mini-stat { flex: 1; min-width: 0; }
+  .feed-page .feed-tabs-card { flex-direction: column; align-items: stretch; }
+}
+@media (max-width: 360px) {
+  .ol3-math-card { aspect-ratio: auto; min-height: 290px; }
+  .ol3-math-card__body { grid-template-columns: 1fr; }
+  .ol3-math-card__diagram { max-height: 150px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .homepage-page .p3-hero-copy .hero-button,
+  .homepage-page .p3-feature-card { transition: none; }
+  .homepage-page .p3-hero-copy .hero-button:hover,
+  .homepage-page .p3-feature-card:hover { transform: none; }
+}
