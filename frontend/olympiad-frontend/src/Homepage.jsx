@@ -21,6 +21,7 @@ import Header from "./components/Header";
 import ForumsSidebar from "./components/ForumsSidebar";
 import "./Homepage.css";
 import "./phase3.css";
+import "./phase3-design.css";
 import RichInlineText from "./components/RichInlineText";
 import {useLanguage,LanguageSwitch} from "./context/LanguageContext";
 import biologySubjectIcon from "./assets/Biology_subject_pcxmoa.svg";
@@ -305,9 +306,44 @@ function Homepage() {
               </div>
             </div>
             <div className="p3-hero-image">
-              {imageFor("hero")?<img src={imageFor("hero")} fetchPriority="high" decoding="async" alt={lang==="sq"?"Nxënës duke zgjidhur detyra në një olimpiadë":"Student solving problems at a mathematics olympiad"} />:
-              <div className="p3-hero-placeholder" aria-hidden="true"><span>∞</span></div>}
-              <div className="p3-photo-caption">✦ {t("heroLabel")}</div>
+              {imageFor("hero") ? (
+                <>
+                  <img
+                    src={imageFor("hero")}
+                    fetchPriority="high"
+                    decoding="async"
+                    alt={lang === "sq" ? "Nxënës duke zgjidhur detyra në një olimpiadë" : "Student solving problems at a mathematics olympiad"}
+                  />
+                  <div className="p3-photo-caption">✦ {t("heroLabel")}</div>
+                </>
+              ) : (
+                <div
+                  className="ol3-math-card"
+                  role="img"
+                  aria-label={lang === "sq"
+                    ? "Shembull i teoremës së Pitagorës: trekëndësh kënddrejtë me brinjë 3, 4 dhe 5."
+                    : "Illustration of the Pythagorean theorem: a right triangle with sides 3, 4, and 5."}
+                >
+                  <div className="ol3-math-card__head">
+                    <span className="ol3-math-card__eyebrow">{lang === "sq" ? "Mendo matematikisht" : "Mathematical thinking"}</span>
+                    <span aria-hidden="true">∑</span>
+                  </div>
+                  <div className="ol3-math-card__body">
+                    <div className="ol3-math-card__equation" aria-hidden="true">3² + 4² = 5²</div>
+                    <svg className="ol3-math-card__diagram" viewBox="0 0 220 190" aria-hidden="true" focusable="false">
+                      <path d="M32 150 L32 36 L184 150 Z" fill="#edf4ef" stroke="#1a4d3a" strokeWidth="3" strokeLinejoin="round"/>
+                      <path d="M32 130 H52 V150" fill="none" stroke="#7254a3" strokeWidth="3"/>
+                      <text x="14" y="99" fill="#7254a3" fontSize="18" fontWeight="700">3</text>
+                      <text x="104" y="177" fill="#1a4d3a" fontSize="18" fontWeight="700">4</text>
+                      <text x="116" y="82" fill="#1d7cc6" fontSize="18" fontWeight="700">5</text>
+                    </svg>
+                  </div>
+                  <div className="ol3-math-card__foot">
+                    <span>{lang === "sq" ? "Eksploro · Zgjidh · Diskuto" : "Explore · Solve · Discuss"}</span>
+                    <span aria-hidden="true">∴</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
