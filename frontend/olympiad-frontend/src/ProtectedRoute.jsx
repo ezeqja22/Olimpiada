@@ -1,3 +1,4 @@
+import {loginIntent} from "./navigation";
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import AnimatedLoader from "./components/AnimatedLoader";
@@ -22,9 +23,7 @@ function ProtectedRoute({ children }) {
       <Navigate
         to="/login"
         replace
-        state={{
-          redirectTo: location.pathname + location.search,
-        }}
+        state={loginIntent(location.pathname + location.search + location.hash)}
       />
     );
   }

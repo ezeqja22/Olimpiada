@@ -39,6 +39,9 @@ function CreateProblem() {
   const [showMathEditor, setShowMathEditor] = useState(false);
   const [mathEditorTarget, setMathEditorTarget] = useState(null);
   const [savingDraft, setSavingDraft] = useState(false);
+  const [savedDraftId,setSavedDraftId]=useState(()=>new URLSearchParams(location.search).get("draft"));
+  const savedSnapshot=useRef(null);
+  const allowLeave=useRef(false);
   const [cursorIndex, setCursorIndex] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -67,7 +70,7 @@ function CreateProblem() {
     if (subjectParam) {
       setFormData((prev) => ({
         ...prev,
-        subject: subjectParam,
+        subject: ["Mathematics","Physics","Chemistry","Biology","Computer Science","Other"].find(s=>s.toLowerCase().replace(/\s+/g,"-")===subjectParam.toLowerCase().replace(/\s+/g,"-"))||subjectParam,
       }));
     }
 
@@ -76,6 +79,15 @@ function CreateProblem() {
     }
   }, [location]);
 
+  const snapshot = JSON.stringify({formData,tags});
+  useEffect(()=>{if(savedSnapshot.current===null)savedSnapshot.current=snapshot;},[snapshot]);
+  useEffect(()=>{
+    const dirty=()=>!allowLeave.current&&(snapshot!==savedSnapshot.current||images.length>0);
+    const before=e=>{if(dirty()){e.preventDefault();e.returnValue=""}};
+    const link=e=>{const a=e.target.closest?.('a[href]');if(!a||a.target==='_blank'||e.ctrlKey||e.metaKey||!dirty())return;if(!window.confirm('You have unsaved changes. Leave this page?')){e.preventDefault();e.stopPropagation();}};
+    window.addEventListener('beforeunload',before);document.addEventListener('click',link,true);
+    return()=>{window.removeEventListener('beforeunload',before);document.removeEventListener('click',link,true)};
+  },[snapshot,images]);
   const loadDraft = async (draftId) => {
     try {
       const token = localStorage.getItem("token");
@@ -90,6 +102,8 @@ function CreateProblem() {
       });
 
       const draft = response.data;
+      setSavedDraftId(draft.id);
+      savedSnapshot.current=JSON.stringify({formData:{title:draft.title||"",description:draft.description||"",subject:draft.subject||"",level:draft.level||"",year:draft.year?String(draft.year):""},tags:draft.tags?.split(",").map(t=>t.trim()).filter(Boolean)||[""]});
 
       setFormData({
         title: draft.title || "",
@@ -125,14 +139,14 @@ function CreateProblem() {
     const searchParams = new URLSearchParams(location.search);
     const from = searchParams.get("from");
 
-    if (from) {
+    if (from?.startsWith("/") && !from.startsWith("//") && !from.includes("\\")) {
       return from;
     }
 
     const subject = searchParams.get("subject");
 
     if (subject) {
-      return `/subject/${encodeURIComponent(subject)}`;
+      return `/subject/${encodeURIComponent(subject.toLowerCase().replace(/\s+/g,"-"))}`;
     }
 
     return "/feed";
@@ -264,6 +278,7 @@ function CreateProblem() {
   };
 
   const handleSaveDraft = async () => {
+    if (savingDraft) return;
     if (
       !formData.title.trim() ||
       !formData.description.trim() ||
@@ -295,11 +310,13 @@ function CreateProblem() {
         tags: tags.filter((tag) => tag.trim()).join(", "),
       };
 
-      await axios.post(`${API_URL}/auth/drafts`, draftData, {
+      const response = await axios({method:savedDraftId?"put":"post",url:`${API_URL}/auth/drafts${savedDraftId?"/"+savedDraftId:""}`,data:draftData,
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      showToast("Draft saved successfully!", "success");
+      setSavedDraftId(response.data.id);
+      savedSnapshot.current=snapshot;
+      showToast(images.length ? "Text draft saved. Selected images remain here for publishing; drafts do not store image files. Keep this page open or attach them again when reopening." : "Draft saved successfully!", images.length?"warning":"success");
     } catch (error) {
       console.error("Error saving draft:", error);
       showToast(
@@ -381,7 +398,7 @@ function CreateProblem() {
       }
 
       const urlParams = new URLSearchParams(location.search);
-      const draftId = urlParams.get("draft");
+      const draftId = savedDraftId;
 
       if (draftId) {
         try {
@@ -402,6 +419,7 @@ function CreateProblem() {
         showToast("Problem created successfully!", "success");
       }
 
+      allowLeave.current=true;
       navigate(getRedirectPath());
     } catch (error) {
       showToast(
@@ -541,7 +559,7 @@ function CreateProblem() {
             }}
           >
             <div style={fieldGroupStyle}>
-              <label style={labelStyle}>
+              <label htmlFor="problem-title" style={labelStyle}>
                 Title <span style={{ color: colors.danger }}>*</span>
               </label>
 
@@ -555,7 +573,7 @@ function CreateProblem() {
                 <input
                   ref={titleRef}
                   type="text"
-                  name="title"
+                  id="problem-title" name="title"
                   value={formData.title}
                   onChange={handleChange}
                   onFocus={handleInputFocus}
@@ -617,12 +635,12 @@ function CreateProblem() {
               }}
             >
               <div style={fieldGroupStyle}>
-                <label style={labelStyle}>
+                <label htmlFor="problem-subject" style={labelStyle}>
                   Subject <span style={{ color: colors.danger }}>*</span>
                 </label>
 
                 <select
-                  name="subject"
+                  id="problem-subject" name="subject"
                   value={formData.subject}
                   onChange={handleChange}
                   onFocus={handleInputFocus}
@@ -645,11 +663,11 @@ function CreateProblem() {
               </div>
 
               <div style={fieldGroupStyle}>
-                <label style={labelStyle}>Level</label>
+                <label htmlFor="problem-level" style={labelStyle}>Level</label>
 
                 <input
                   type="text"
-                  name="level"
+                  id="problem-level" name="level"
                   value={formData.level}
                   onChange={handleChange}
                   onFocus={handleInputFocus}
@@ -663,11 +681,11 @@ function CreateProblem() {
               </div>
 
               <div style={fieldGroupStyle}>
-                <label style={labelStyle}>Year</label>
+                <label htmlFor="problem-year" style={labelStyle}>Year</label>
 
                 <input
                   type="number"
-                  name="year"
+                  id="problem-year" name="year"
                   value={formData.year}
                   onChange={handleChange}
                   onFocus={handleInputFocus}

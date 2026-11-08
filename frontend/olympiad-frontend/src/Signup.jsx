@@ -109,7 +109,7 @@ function Signup() {
 
           <form onSubmit={handleSignup}>
             <div style={{ marginBottom: spacing.lg }}>
-              <label
+              <label htmlFor="signup-0"
                 style={{
                   display: "block",
                   marginBottom: spacing.sm,
@@ -120,7 +120,7 @@ function Signup() {
               >
                 Username
               </label>
-              <input
+              <input id="signup-0" name="signup-0"
                 type="text"
                 placeholder="Choose a username"
                 value={username}
@@ -142,7 +142,7 @@ function Signup() {
             </div>
 
             <div style={{ marginBottom: spacing.lg }}>
-              <label
+              <label htmlFor="signup-1"
                 style={{
                   display: "block",
                   marginBottom: spacing.sm,
@@ -153,8 +153,8 @@ function Signup() {
               >
                 Email
               </label>
-              <input
-                type="email"
+              <input id="signup-1" name="signup-1"
+                type="email" autoComplete="email" spellCheck={false}
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -175,7 +175,7 @@ function Signup() {
             </div>
 
             <div style={{ marginBottom: spacing.xl }}>
-              <label
+              <label htmlFor="signup-2"
                 style={{
                   display: "block",
                   marginBottom: spacing.sm,
@@ -188,8 +188,8 @@ function Signup() {
               </label>
               {/* Add wrapper div for password field */}
               <div style={{ position: "relative" }}>
-                <input
-                  type={showPassword ? "text" : "password"}
+                <input id="signup-2" name="signup-2"
+                  type={showPassword ? "text" : "password"} autoComplete="new-password"
                   placeholder="Create a password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -211,7 +211,7 @@ function Signup() {
                   }
                 />
                 {/* Add custom eye icon */}
-                <span
+                <button type="button" aria-label={showPassword?"Hide password":"Show password"}
                   onClick={() => setShowPassword(!showPassword)}
                   style={{
                     cursor: "pointer",
@@ -238,7 +238,7 @@ function Signup() {
                       objectFit: "contain",
                     }}
                   />
-                </span>
+                </button>
               </div>
             </div>
 
@@ -256,7 +256,7 @@ function Signup() {
               </h3>
 
               <div style={{ marginBottom: spacing.md }}>
-                <label
+                <label htmlFor="signup-3"
                   style={{
                     display: "flex",
                     alignItems: "flex-start",
@@ -267,7 +267,7 @@ function Signup() {
                     transition: "background-color 0.2s ease",
                   }}
                 >
-                  <input
+                  <input id="signup-3" name="signup-3"
                     type="checkbox"
                     checked={emailNotifications}
                     onChange={(e) => setEmailNotifications(e.target.checked)}
@@ -303,7 +303,7 @@ function Signup() {
               </div>
 
               <div style={{ marginBottom: spacing.md }}>
-                <label
+                <label htmlFor="signup-4"
                   style={{
                     display: "flex",
                     alignItems: "flex-start",
@@ -314,7 +314,7 @@ function Signup() {
                     transition: "background-color 0.2s ease",
                   }}
                 >
-                  <input
+                  <input id="signup-4" name="signup-4"
                     type="checkbox"
                     checked={marketingEmails}
                     onChange={(e) => setMarketingEmails(e.target.checked)}

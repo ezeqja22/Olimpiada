@@ -13,6 +13,7 @@ function SearchBar({
   onAdvancedSearch = null, // Callback for advanced local filtering
 }) {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
+  useEffect(()=>setSearchQuery(initialQuery),[initialQuery]);
   const [showAdvancedModal, setShowAdvancedModal] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();

@@ -199,8 +199,8 @@ function ResetPassword() {
 
                     <form onSubmit={handleResetPassword}>
                         <div style={inputGroupStyle}>
-                            <label style={labelStyle}>New Password</label>
-                            <input
+                            <label htmlFor="resetpassword-0" style={labelStyle}>New Password</label>
+                            <input id="resetpassword-0" name="resetpassword-0"
                                 type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
@@ -218,8 +218,8 @@ function ResetPassword() {
                         </div>
 
                         <div style={inputGroupStyle}>
-                            <label style={labelStyle}>Confirm New Password</label>
-                            <input
+                            <label htmlFor="resetpassword-1" style={labelStyle}>Confirm New Password</label>
+                            <input id="resetpassword-1" name="resetpassword-1"
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}

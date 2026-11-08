@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from "react";
 import axios from "axios";
+import AdminUserSelect from "./components/AdminUserSelect";
 import "./phase1.css";
 import "./phase3.css";
 const API=process.env.REACT_APP_API_URL||"http://127.0.0.1:8000";
@@ -100,8 +101,8 @@ export function AdminParents(){
  const connect=async e=>{e.preventDefault();try{await axios.post(api("/admin/parent-links"),{parent_id:Number(parent),student_id:Number(student)},{headers:headers()});setNotice("Ftesa u krijua. Kërkon miratimin e prindit dhe nxënësit.");load();}catch(e){setNotice(e.response?.data?.detail||"Krijimi dështoi.");}};
  const send=async e=>{e.preventDefault();const f=new FormData();f.append("report",report);try{const r=await axios.post(api("/admin/parent-reports/"+link),f,{headers:headers()});setNotice(r.data.delivered?"Raporti u dërgua.":"Raporti u ruajt në njoftimet e prindit; email-i nuk u dorëzua.");}catch(e){setNotice(e.response?.data?.detail||"Lidhja duhet konfirmuar.");}};
  return <main className="p1-wrap" style={{maxWidth:"none"}}><h1>Raportet për Prindërit</h1><p className="p1-muted">Raportet private kërkojnë dy miratime: nga prindi dhe nga nxënësi.</p>
- <div className="p1-grid two"><form className="p1-card p3-form" onSubmit={connect}><h2>Lidh prindin dhe nxënësin</h2><label>Parent user ID<input className="p1-input" type="number" min="1" required value={parent} onChange={e=>setParent(e.target.value)}/></label><label>Student user ID<input className="p1-input" type="number" min="1" required value={student} onChange={e=>setStudent(e.target.value)}/></label><button className="p1-btn">Krijo lidhjen</button></form>
- <form className="p1-card p3-form" onSubmit={send}><h2>Dërgo raport progresi</h2><label>Approved link ID<input required type="number" min="1" className="p1-input" value={link} onChange={e=>setLink(e.target.value)}/></label><label>Raporti<textarea className="p1-input" minLength={10} required rows={6} value={report} onChange={e=>setReport(e.target.value)}/></label><button className="p1-btn">Dërgo raportin</button></form></div>
+ <div className="p1-grid two"><form className="p1-card p3-form" onSubmit={connect}><h2>Lidh prindin dhe nxënësin</h2><AdminUserSelect label="Parent" value={parent} onChange={setParent}/><AdminUserSelect label="Student" value={student} onChange={setStudent}/><button className="p1-btn">Krijo lidhjen</button></form>
+ <form className="p1-card p3-form" onSubmit={send}><h2>Dërgo raport progresi</h2><label>Approved family link<select required className="p1-select" value={link} onChange={e=>setLink(e.target.value)}><option value="">Choose an approved link</option>{links.filter(l=>l.status==="approved").map(l=><option key={l.id} value={l.id}>Parent #{l.parent_id} · Student #{l.student_id}</option>)}</select></label><label>Raporti<textarea className="p1-input" minLength={10} required rows={6} value={report} onChange={e=>setReport(e.target.value)}/></label><button className="p1-btn">Dërgo raportin</button></form></div>
  <section className="p1-card p1-group"><h2>Lidhjet & Miratimi</h2>{links.map(l=><div className="p3-assignment-row" key={l.id}><span>#{l.id}: Parent {l.parent_id} · Student {l.student_id} — {l.status}</span>{l.status==="approved"&&<button className="p1-btn alt" onClick={()=>setLink(String(l.id))}>Përdor për raport</button>}</div>)}</section>
  {notice&&<p className="p1-note">{notice}</p>}</main>;
 }

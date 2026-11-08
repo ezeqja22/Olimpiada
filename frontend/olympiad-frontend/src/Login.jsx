@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import {loginDestination} from "./navigation";
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -20,7 +21,7 @@ function Login() {
 
   const { loginWithToken } = useAuth();
   const { showToast } = useToast();
-  const redirectTo = location.state?.redirectTo || "/homepage";
+  const redirectTo = loginDestination(location.state);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -44,12 +45,13 @@ function Login() {
         throw new Error("No token returned from login");
       }
 
-      await loginWithToken(token);
+      const user = await loginWithToken(token);
+      if (!user) throw new Error("Your session could not be verified. Please try again.");
 
       const safeRedirect =
         redirectTo && redirectTo !== "/login" ? redirectTo : "/homepage";
 
-      navigate(safeRedirect, { replace: true });
+      navigate(safeRedirect, { replace: true, state: null });
     } catch (err) {
       const detail = err.response?.data?.detail;
       // FastAPI validation errors are arrays of objects; never render [object Object].
@@ -142,7 +144,7 @@ function Login() {
 
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: spacing.lg }}>
-              <label
+              <label htmlFor="login-0"
                 style={{
                   display: "block",
                   marginBottom: spacing.sm,
@@ -154,8 +156,8 @@ function Login() {
                 Email
               </label>
 
-              <input
-                type="email"
+              <input id="login-0" name="login-0"
+                type="email" autoComplete="email" spellCheck={false}
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -178,7 +180,7 @@ function Login() {
             </div>
 
             <div style={{ marginBottom: spacing.xl }}>
-              <label
+              <label htmlFor="login-1"
                 style={{
                   display: "block",
                   marginBottom: spacing.sm,
@@ -191,8 +193,8 @@ function Login() {
               </label>
 
               <div style={{ position: "relative" }}>
-                <input
-                  type={showPassword ? "text" : "password"}
+                <input id="login-1" name="login-1"
+                  type={showPassword ? "text" : "password"} autoComplete="current-password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -216,7 +218,7 @@ function Login() {
                   }
                 />
 
-                <span
+                <button type="button" aria-label={showPassword?"Hide password":"Show password"}
                   onClick={() => {
                     if (!isSubmitting) {
                       setShowPassword((prev) => !prev);
@@ -248,7 +250,7 @@ function Login() {
                       objectFit: "contain",
                     }}
                   />
-                </span>
+                </button>
               </div>
             </div>
 

@@ -15,7 +15,8 @@ const BackButton = ({
     const handleBack = () => {
         // Always use the fallback path to ensure consistent navigation
         // This prevents issues with browser history getting confused after navigation
-        navigate(fallbackPath);
+        if (window.history.state?.idx > 0) navigate(-1);
+        else navigate(fallbackPath);
     };
 
     const defaultStyle = {
@@ -31,7 +32,7 @@ const BackButton = ({
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.medium,
         textDecoration: "none",
-        transition: "all 0.2s ease",
+        transition: "background-color 0.2s ease, color 0.2s ease",
         ...style
     };
 

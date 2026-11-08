@@ -632,10 +632,10 @@ const AdminAnalytics = () => {
             }}
           >
             <h3 style={{ margin: "0 0 10px 0", color: "#28a745" }}>
-              System Online
+              Service health not monitored
             </h3>
             <p style={{ margin: 0, color: "#6c757d" }}>
-              All services operational
+              This page does not verify service availability.
             </p>
           </div>
 
@@ -677,7 +677,7 @@ const AdminAnalytics = () => {
           >
             <h3 style={{ margin: "0 0 10px 0", color: "#6f42c1" }}>Uptime</h3>
             <p style={{ margin: 0, color: "#6c757d" }}>
-              {analytics?.uptime || "99.9%"}
+              {"Not measured"}
             </p>
           </div>
         </div>

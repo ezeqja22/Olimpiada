@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import BackButton from "./components/BackButton";
 import { useToast } from "./components/ToastProvider";
@@ -114,8 +114,10 @@ const EmailVerification = () => {
     }
   };
 
+  if (!email) return <main id="main-content" className="p1-wrap"><h1>Verify your email</h1><p>Sign in or register first so we can identify the account to verify.</p><Link to="/login" state={null}>Log in</Link> · <Link to="/signup">Sign up</Link></main>;
+
   if (success) {
-    return (
+  return (
       <div
         style={{
           display: "flex",

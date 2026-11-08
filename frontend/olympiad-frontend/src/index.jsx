@@ -1,3 +1,9 @@
+import axios from "axios";
+// Bound stalled reads without shortening existing upload/write timeouts.
+axios.interceptors.request.use(config => {
+  if ((!config.method || config.method.toLowerCase() === "get") && !config.timeout) config.timeout = 15000;
+  return config;
+});
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';

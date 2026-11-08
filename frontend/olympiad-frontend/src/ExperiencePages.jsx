@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from "react";
 import axios from "axios";
+import {loginIntent} from "./navigation";
 import {Link} from "react-router-dom";
 import {useAuth} from "./context/AuthContext";
 import {useLanguage} from "./context/LanguageContext";
@@ -20,7 +21,7 @@ export function TeacherApplicationPage(){
  finally{setBusy(false);}};
  return <main className="p1-wrap p3-body"><PageTitle contentKey="page_teacher_application" kicker={lang==="sq"?"Bashkohu me ekipin":"Join the team"} title={lang==="sq"?"Apliko si mësues":"Apply as a teacher"}
  subtitle={lang==="sq"?"Aplikimet shqyrtohen nga administratori. Deri në miratim, nuk ke akses mësuesi.":"Applications are manually reviewed before teacher access is granted."}/>
- {!currentUser?<div className="p1-card"><Link to="/signup">Regjistrohu</Link> ose <Link to="/login">hyr në llogari</Link> për të aplikuar.</div>:
+ {!currentUser?<div className="p1-card"><Link to="/signup">Regjistrohu</Link> ose <Link to="/login" state={loginIntent("/teacher/apply")}>hyr në llogari</Link> për të aplikuar.</div>:
  state&&state.status!=="not_applied"?<div className="p1-card"><h2>Statusi: {state.status}</h2><p className="p1-muted">{state.review_note||"Aplikimi yt është regjistruar."}</p></div>:
  <form className="p3-form p1-card" onSubmit={submit}>
  <div className="p1-grid two"><label>Emri<input className="p1-input" required value={form.first_name} onChange={e=>setForm({...form,first_name:e.target.value})}/></label>
@@ -67,14 +68,16 @@ export function SupportPage(){
 }
 export function TeacherWorkspace(){
  const {lang}=useLanguage(),[classes,setClasses]=useState([]),[items,setItems]=useState([]),[form,setForm]=useState({forum_id:"",title:"",meet_url:"",starts_at:""}),[notice,setNotice]=useState(""),[chosen,setChosen]=useState(null),[answers,setAnswers]=useState([]),[grade,setGrade]=useState({});
- useEffect(()=>{axios.get(API+"/experience/teacher/classes",{headers:headers()}).then(r=>setClasses(r.data)).catch(()=>{});
- axios.get(API+"/experience/teacher/courses",{headers:headers()}).then(r=>setItems(r.data)).catch(()=>{});},[]);
- const open=async id=>{setChosen(id);try{const r=await axios.get(API+"/experience/teacher/courses/"+id+"/submissions",{headers:headers()});setAnswers(r.data);}catch(e){setNotice("Nuk u lexuan dorëzimet.");}};
- const saveGrade=async id=>{try{await axios.post(API+"/experience/teacher/submissions/"+id+"/grade",{score:Number(grade[id]?.score||0),feedback:grade[id]?.feedback||""},{headers:headers()});setNotice("Vlerësimi u ruajt.");await open(chosen);}catch(e){setNotice("Vlerësimi nuk u ruajt.");}};
+ const [loading,setLoading]=useState(true),[loadError,setLoadError]=useState(false),[saving,setSaving]=useState(null);
+ const reload=()=>{setLoading(true);setLoadError(false);Promise.all([axios.get(API+"/experience/teacher/classes",{headers:headers()}),axios.get(API+"/experience/teacher/courses",{headers:headers()})]).then(([c,i])=>{setClasses(c.data);setItems(i.data)}).catch(()=>setLoadError(true)).finally(()=>setLoading(false))};
+ useEffect(()=>{reload()},[]);
+ const open=async id=>{setChosen(id);try{const r=await axios.get(API+"/experience/teacher/courses/"+id+"/submissions",{headers:headers()});setAnswers(r.data);setGrade(Object.fromEntries(r.data.map(a=>[a.attempt_id,{score:a.score??0,feedback:a.feedback??""}])));}catch(e){setNotice("Nuk u lexuan dorëzimet.");}};
+ const saveGrade=async id=>{if(saving!==null)return;setSaving(id);try{await axios.post(API+"/experience/teacher/submissions/"+id+"/grade",{score:Number(grade[id]?.score||0),feedback:grade[id]?.feedback||""},{headers:headers()});setNotice("Vlerësimi u ruajt.");await open(chosen);}catch(e){setNotice("Vlerësimi nuk u ruajt.");}finally{setSaving(null)}};
  const meeting=async e=>{e.preventDefault();try{await axios.post(API+"/experience/teacher/meetings",{...form,forum_id:Number(form.forum_id),starts_at:new Date(form.starts_at).toISOString().slice(0,19)},{headers:headers()});setNotice("Takimi u publikua.");}catch(e){setNotice(e.response?.data?.detail||"Takimi nuk u publikua.");}};
  return <main className="p1-wrap p3-body"><PageTitle kicker="Teacher workspace" title={lang==="sq"?"Klasat e mia":"My classes"} subtitle={lang==="sq"?"Vetëm forumet ku të ka caktuar administratori.":"Only classes assigned by an administrator."}/>
  <div className="p1-grid">{classes.map(c=><Link className="p1-card p3-class-card" to={"/forum/"+c.id} key={c.id}><strong>{c.title}</strong><small>{c.subject}</small><span>Hap klasën →</span></Link>)}</div>
- {!classes.length&&<p className="p1-note">Nuk të është caktuar ende një klasë.</p>}
+ {loading&&<p role="status">Loading workspace…</p>}{loadError&&<p role="alert">Could not load the workspace. <button onClick={reload}>Retry</button></p>}
+ {!loading&&!loadError&&!classes.length&&<p className="p1-note">Nuk të është caktuar ende një klasë.</p>}
  <div className="p1-grid two p1-group"><form className="p1-card p3-form" onSubmit={meeting}>
  <h2>Krijo takim Google Meet</h2><label>Forumi<select className="p1-select" required value={form.forum_id} onChange={e=>setForm({...form,forum_id:e.target.value})}><option value="">Zgjidh klasën</option>{classes.map(c=><option value={c.id} key={c.id}>{c.title}</option>)}</select></label>
  <label>Titulli<input className="p1-input" required value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/></label>
@@ -86,6 +89,6 @@ export function TeacherWorkspace(){
  {chosen&&<section className="p1-card"><h2>Dorëzimet e klasës</h2>{answers.map(a=><article key={a.attempt_id} className="p3-grade"><p><b>Student #{a.student_id}</b>: {a.answers}</p>
  <label>Score /100<input className="p1-input" type="number" min="0" max="100" value={grade[a.attempt_id]?.score??a.score??0} onChange={e=>setGrade({...grade,[a.attempt_id]:{...grade[a.attempt_id],score:e.target.value}})}/></label>
  <label>Feedback<textarea className="p1-input" value={grade[a.attempt_id]?.feedback??a.feedback??""} onChange={e=>setGrade({...grade,[a.attempt_id]:{...grade[a.attempt_id],feedback:e.target.value}})}/></label>
- <button className="p1-btn" onClick={()=>saveGrade(a.attempt_id)}>Ruaj vlerësimin</button></article>)}</section>}
+ <button className="p1-btn" disabled={saving!==null} onClick={()=>saveGrade(a.attempt_id)}>Ruaj vlerësimin</button></article>)}</section>}
  {notice&&<p className="p1-note" role="status">{notice}</p>}</main>;
 }
