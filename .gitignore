@@ -34,3 +34,8 @@ backend/uploads/
 # Isolated local staging (never commit demo identities, files, DB or keys)
 staging/.local-state/
 staging/*.sqlite3
+
+# UX verification output (never application data)
+staging/.playwright-cli/
+backend/.test-*/
+ux-*.sqlite3

@@ -1,0 +1,58 @@
+Route,Component at audit,Access,Implementation disposition
+/,Navigate → /homepage,Public redirect,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/signup,Signup.jsx,Public,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/login,Login.jsx,Public,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/forgot-password,ForgotPassword.jsx,Public,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/reset-password,ResetPassword.jsx,Public; token required,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/homepage,Homepage.jsx,Public,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/pricing,Navigate → /explore,Public redirect,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/explore,AccessPages.jsx · Explore,Public,Shared shell; scheduled weekly reader; canonical forum and learning links.
+/library,Navigate → /explore,Public redirect,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/library/:id,Navigate → /explore,Public redirect,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/courses,CourseHub.jsx,Signed in,"Protected shared shell; explicit test start, submission and own feedback."
+/weekly,WeeklyPage.jsx,Public; sign in to submit,"Shared shell, loading/error/retry."
+/forum-catalog,ForumCatalogue.jsx,Public shell; data requires sign in,Redirect to canonical /forums; original interface and public discovery preserved.
+/teacher/apply,ExperiencePages.jsx · TeacherApplicationPage,Public introduction; signed-in form,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/teacher/workspace,ExperiencePages.jsx · TeacherWorkspace,Signed in; teacher/class operations enforced by API,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/faq,HelpPages.jsx · FAQPage,Public,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/support,HelpPages.jsx · SupportPage,Public,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/family,FamilyPage.jsx,Signed in; consent-dependent data,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/teacher/courses,CourseHub.jsx · AdminCourses,Signed in at router; API controls publishing,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/tutoring,AccessPages.jsx · Tutoring,Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/feed,Feed.jsx,Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/create-problem,CreateProblem.jsx,Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/problem/:id,ProblemDetail.jsx,Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/profile,UserProfile.jsx,Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/profile/:username,PublicUserProfile.jsx,Signed in despite component name,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/user/:username,PublicUserProfile.jsx,Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/verify-email,EmailVerification.jsx,Public; email passed in router state,Shared shell; guidance when no recipient context exists.
+/search,SearchResults.jsx,Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/forums,Forums.jsx,Signed in,Public discovery when signed out; original community implementation when signed in.
+/forum/:forumId,ForumDetail.jsx,Signed in; membership/roles enforced by API,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/forum/:forumId/info,ForumDetail.jsx again,Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/forum/:forumId/thread/:messageId,ThreadPage.jsx,Signed in; forum API permissions,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/subject/:subject,SubjectPage.jsx,Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/settings,Settings.jsx,Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/followers/:userId,components/FollowersFollowing.jsx (followers),Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/following/:userId,components/FollowersFollowing.jsx (following),Signed in,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin,AdminLayout.jsx → AdminDashboard.jsx,Staff layout gate: admin/moderator/reviewer/super_admin,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/users,AdminUsers.jsx,Staff layout; API action permissions,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/forums,AdminForums.jsx,Staff layout; API action permissions,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/reports,AdminReports.jsx,Staff layout; API action permissions,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/user-history,AdminUserHistory.jsx,Staff layout; API action permissions,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/settings,AdminSettings.jsx,Staff layout; menu admin/super_admin; backend permissions,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/email,AdminEmail.jsx,Staff layout; menu admin/super_admin; backend permissions,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/analytics,AdminAnalytics.jsx,Staff layout; backend permissions per section,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/tutoring,AdminPhase1.jsx · AdminTutoring,Staff layout; API require_staff,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/content,AdminContent.jsx,Staff layout; API require_staff,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/weekly,WeeklyPage.jsx · AdminWeekly,Staff layout; backend permissions,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/courses,CourseHub.jsx · AdminCourses,Staff layout; API teacher/admin publisher permissions,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/library,Navigate → /admin/content inside AdminLayout,Staff gate before redirect,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/teachers,AdminExperience.jsx · AdminTeachers,Staff layout; API review/assignment permissions,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/site-content,AdminSiteEditor.jsx,"Admin/super_admin/is_superuser component gate, plus layout",Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/branding,AdminSiteEditor.jsx again,Same as site-content,Redirect to /admin/site-content.
+/admin/faq,AdminHelp.jsx · AdminFAQ,Staff layout; API permission; duplicate menu items,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/support,AdminHelp.jsx · AdminSupport,Staff layout; API permission; duplicate menu items,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/admin/parents,AdminExperience.jsx · AdminParents,Staff layout; API consent/report permissions,Retained route and existing access policy; shared navigation applies where the page uses Layout/Header.
+/learning-resources,Learning (previously unrouted),Authenticated,"New explicit reader for preserved legacy resources, linked from authoring and learning."
+*,None,Public,Useful not-found page with shared header and recovery links.

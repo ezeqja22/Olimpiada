@@ -1,0 +1,30 @@
+### Result
+[{"width":320,"menuVisible":true,"overflow":false,"escape":true,"focus":true},{"width":360,"menuVisible":true,"overflow":false,"escape":true,"focus":true},{"width":390,"menuVisible":true,"overflow":false,"escape":true,"focus":true},{"width":768,"menuVisible":true,"overflow":false,"escape":true,"focus":true},{"width":1440,"menuVisible":true,"overflow":false,"escape":true,"focus":true},{"route":"/forums","actual":"/forums","headers":1,"title":"Forumet dhe diskutimet"},{"route":"/forum-catalog","actual":"/forums","headers":1,"title":"Forumet dhe diskutimet"},{"route":"/explore","actual":"/explore","headers":1,"title":"Eksploro Olimpiada"},{"route":"/weekly","actual":"/weekly","headers":1,"title":"Problema e Javës"},{"route":"/faq","actual":"/faq","headers":1,"title":"Pyetje të shpeshta"},{"route":"/support","actual":"/support","headers":1,"title":"Jemi këtu për të ndihmuar"},{"route":"/teacher/apply","actual":"/teacher/apply","headers":1,"title":"Apliko si mësues"},{"route":"/missing-test-route","actual":"/missing-test-route","headers":1,"title":"Page not found"},{"route":"/verify-email","actual":"/verify-email","headers":1,"title":"Verify your email"}]
+### Ran Playwright code
+```js
+await (async page => {
+ const results=[];
+ for(const width of [320,360,390,768,1440]){
+  await page.setViewportSize({width,height:900});await page.goto('http://127.0.0.1:5178/homepage');
+  await page.getByRole('button',{name:'☰ Menu'}).click();
+  const menu=page.locator('#ol-menu');await menu.waitFor({state:'visible'});
+  const geometry=await menu.boundingBox();
+  results.push({width,menuVisible:geometry.x>=0&&geometry.x+geometry.width<=width+1,overflow:await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)});
+  await page.screenshot({path:'.local-state/screenshots/home-menu-'+width+'.png'});
+  await page.keyboard.press('Escape');
+  results[results.length-1].escape=await menu.count()===0;
+  results[results.length-1].focus=await page.getByRole('button',{name:'☰ Menu'}).evaluate(e=>e===document.activeElement);
+ }
+ for(const route of ['/forums','/forum-catalog','/explore','/weekly','/faq','/support','/teacher/apply','/missing-test-route','/verify-email']){
+  await page.goto('http://127.0.0.1:5178'+route);await page.locator('h1').first().waitFor();
+  results.push({route,actual:new URL(page.url()).pathname,headers:await page.locator('.ol-nav').count(),title:await page.locator('h1').first().innerText()});
+ }
+ return results;
+}
+)(page);
+```
+### Page
+- Page URL: http://127.0.0.1:5178/verify-email
+- Page Title: Verify your email · Olimpiada
+### Events
+- New console entries: .playwright-cli\console-2026-11-08T01-40-10-736Z.log#L54-L67

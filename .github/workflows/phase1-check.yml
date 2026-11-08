@@ -22,7 +22,16 @@ jobs:
         env:
           DATABASE_URL: sqlite:///./ux-ci.sqlite3
           SECRET_KEY: test-ci-secret-not-for-production
-        run: alembic heads
+        run: |
+          python - <<'PY'
+          from alembic.config import Config
+          from alembic.script import ScriptDirectory
+          config = Config()
+          config.set_main_option("script_location", "alembic")
+          heads = ScriptDirectory.from_config(config).get_heads()
+          assert len(heads) == 1, heads
+          print("Migration head:", heads[0])
+          PY
       - name: Phase 1 unit tests
         env:
           DATABASE_URL: sqlite:///./ux-ci.sqlite3
