@@ -15,20 +15,22 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install backend dependencies
-        run: pip install -r backend/requirements.txt httpx
+        run: pip install -r backend/requirements.txt httpx pytest
       - name: Check Python source
         run: python -m compileall -q backend
       - name: Verify migration heads
         env:
-          DATABASE_URL: sqlite:///./phase1-test.db
+          DATABASE_URL: sqlite:///./ux-ci.sqlite3
           SECRET_KEY: test-ci-secret-not-for-production
         run: alembic heads
       - name: Phase 1 unit tests
         env:
-          DATABASE_URL: sqlite:///./phase1-test.db
+          DATABASE_URL: sqlite:///./ux-ci.sqlite3
           SECRET_KEY: test-ci-secret-not-for-production
           PYTHONPATH: backend
-        run: python -m unittest discover -s backend/tests -p "test_*.py" -v
+          UX_ISOLATED_TESTS: "1"
+          STAGING_MODE: "1"
+        run: python -m pytest backend/tests -q
   frontend:
     runs-on: ubuntu-latest
     steps:

@@ -7,7 +7,8 @@ from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconn
 from fastapi.middleware.cors import CORSMiddleware # pyright: ignore[reportMissingImports]
 from fastapi.responses import JSONResponse
 import models
-from database import engine, get_db
+from database import engine, get_db, SessionLocal
+from starlette.concurrency import run_in_threadpool
 from sqlalchemy import text
 # Import routers with error handling for production
 try:
@@ -69,48 +70,27 @@ async def health_check():
     """Simple health check endpoint"""
     return {"status": "healthy", "service": "sciencepioneers-backend"}
 
-# Settings middleware
+# Read restrictions in a short-lived session, outside the downstream request.
+def disabled_feature(path):
+    feature = next((name for name in ("forums", "problems")
+                    if path.startswith("/" + name)), None)
+    if not feature or not get_settings_service:
+        return None
+    with SessionLocal() as db:
+        return feature if not get_settings_service(db).is_feature_enabled(feature) else None
+
 @app.middleware("http")
 async def settings_middleware(request: Request, call_next):
-    """Apply settings-based restrictions"""
     try:
-        # Skip middleware for health check and site-info
-        if request.url.path in ["/health", "/admin/settings/site-info"]:
-            response = await call_next(request)
-            return response
-            
-        db = next(get_db())
-        settings_service = get_settings_service(db) if get_settings_service else None
-        
-        
-        # Check feature toggles
-        if settings_service and request.url.path.startswith("/forums") and not settings_service.is_feature_enabled("forums"):
-            return JSONResponse(
-                status_code=404,
-                content={"message": "Forums are currently disabled"}
-            )
-        
-        if settings_service and request.url.path.startswith("/problems") and not settings_service.is_feature_enabled("problems"):
-            return JSONResponse(
-                status_code=404,
-                content={"message": "Problems are currently disabled"}
-            )
-        
-        response = await call_next(request)
-        return response
-        
-    except Exception as e:
-        print(f"ERROR in settings_middleware: {e}")
-        import traceback
-        traceback.print_exc()
-        response = await call_next(request)
-        return response
-    finally:
-        try:
-            # Ensure DB session is closed to avoid pool exhaustion
-            db.close()
-        except Exception:
-            pass
+        disabled = await run_in_threadpool(disabled_feature, request.url.path)
+    except Exception:
+        # Preserve the existing fail-open settings behavior, but never replay a request.
+        import logging
+        logging.getLogger(__name__).exception("Could not read feature settings")
+        disabled = None
+    if disabled:
+        return JSONResponse(status_code=404, content={"message": f"{disabled.title()} are currently disabled"})
+    return await call_next(request)
 
 # Register CORS after application middleware so even rejected requests
 # receive the appropriate CORS headers for allowed frontend origins.
@@ -141,10 +121,9 @@ app.include_router(help_router)
 
 # Public site info endpoint (no auth required)
 @app.get("/site-info")
-async def get_site_info():
+def get_site_info(db: Session = Depends(get_db)):
     """Get public site information (no auth required)"""
     try:
-        db = next(get_db())
         settings_service = get_settings_service(db) if get_settings_service else None
         site_settings = settings_service.get_site_settings() if settings_service else {}
         
@@ -204,10 +183,10 @@ def require_staff_user(current_user: User):
     return current_user
 
 # Auto-cleanup function
-async def cleanup_expired_users():
+def cleanup_expired_users():
     """Clean up unverified users older than 1 hour"""
     from database import get_db
-    db = next(get_db())
+    db = SessionLocal()
     try:
         cutoff_time = datetime.utcnow() - timedelta(minutes=15)  # 15 minutes expiry
         expired_users = db.query(User).filter(
@@ -245,16 +224,20 @@ async def startup_event():
         import traceback
         traceback.print_exc()
 
+def run_cleanup_cycle():
+    """Keep the existing unverified-user cleanup; do not activate previously broken jobs.
+
+    Account anonymization/annual emails remain the responsibility of the explicit
+    phase1_cron worker. Repairing a NameError must not silently enable those effects.
+    """
+    cleanup_expired_users()
+
 async def periodic_cleanup():
     """Run cleanup every 5 minutes"""
     while True:
         try:
             await asyncio.sleep(300)  # 5 minutes
-            await cleanup_expired_users()
-            from phase1_jobs import anonymize_inactive_accounts, send_annual_finance_report
-            with SessionLocal() as db:
-                anonymize_inactive_accounts(db)
-                send_annual_finance_report(db)
+            await asyncio.to_thread(run_cleanup_cycle)
         except Exception as e:
             print(f"ERROR in periodic_cleanup: {e}")
             import traceback
@@ -265,14 +248,13 @@ def read_root():
     return {"message": "Hello, Science Pioneers with PostgreSQL!"}
 
 @app.get("/test-settings")
-async def test_settings_simple(current_user: User = Depends(get_current_user)):
+def test_settings_simple(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     require_staff_user(current_user)
     """Simple test endpoint without authentication"""
     try:
         from database import get_db
         from models import SystemSettings
         
-        db = next(get_db())
         settings = db.query(SystemSettings).filter(
             SystemSettings.key.in_([
                 'site_name', 'site_description', 'maintenance_mode', 
@@ -310,14 +292,13 @@ async def test_settings_simple(current_user: User = Depends(get_current_user)):
         }
 
 @app.get("/get-settings")
-async def get_all_settings(current_user: User = Depends(get_current_user)):
+def get_all_settings(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     require_staff_user(current_user)
     """Get all settings without authentication"""
     try:
         from database import get_db
         from models import SystemSettings
         
-        db = next(get_db())
         all_settings = db.query(SystemSettings).all()
         
         # Organize settings by category
@@ -430,9 +411,10 @@ async def get_all_settings(current_user: User = Depends(get_current_user)):
         }
 
 @app.post("/save-settings")
-async def save_settings_simple(
+def save_settings_simple(
     settings_data: dict,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     require_staff_user(current_user)
     """Simple save endpoint without authentication"""
@@ -440,7 +422,6 @@ async def save_settings_simple(
         from database import get_db
         from models import SystemSettings
         
-        db = next(get_db())
         # Handle both direct settings and nested settings
         if 'settings' in settings_data:
             settings = settings_data.get('settings', {})

@@ -23,7 +23,7 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: frontend/olympiad-frontend/package-lock.json
-      - run: pip install -r backend/requirements.txt httpx
+      - run: pip install -r backend/requirements.txt httpx pytest
       - run: python -m unittest discover -s backend/tests -p "test_*.py" -v
       - run: npm ci && npm run build && npx vitest run src/components/RichInlineText.test.jsx src/components/SitePageIntro.test.jsx src/AdminSiteEditor.test.jsx
         working-directory: frontend/olympiad-frontend
@@ -40,7 +40,7 @@ jobs:
         with:
           node-version: "22"
       - name: Install Windows backend dependencies
-        run: python -m pip install -r backend/requirements.txt httpx
+        run: python -m pip install -r backend/requirements.txt httpx pytest
       - name: Initialize and verify Docker-free staging
         run: |
           python staging/local.py init
@@ -77,7 +77,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install backend
-        run: pip install -r backend/requirements.txt httpx
+        run: pip install -r backend/requirements.txt httpx pytest
       - name: Bootstrap isolated fresh PostgreSQL schema
         run: python staging/bootstrap.py
       - name: Verify single head and required tables
@@ -115,7 +115,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r backend/requirements.txt httpx
+      - run: pip install -r backend/requirements.txt httpx pytest
       - name: Create legacy master schema to mimic production structure
         run: |
           mkdir -p /tmp/olimpiada-legacy

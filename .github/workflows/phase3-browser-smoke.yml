@@ -32,7 +32,7 @@ jobs:
           cache-dependency-path: frontend/olympiad-frontend/package-lock.json
       - name: Install backend + Playwright
         run: |
-          python -m pip install -r backend/requirements.txt httpx playwright
+          python -m pip install -r backend/requirements.txt httpx pytest playwright
           python -m playwright install --with-deps chromium
       - name: Install frontend
         run: npm ci
