@@ -1,31 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import {useLanguage} from "./context/LanguageContext";
+import SitePageIntro from "./components/SitePageIntro";
 import Layout from "./components/Layout";
 import { useAuth } from "./context/AuthContext";
 import "./HelpPages.css";
 
 const API = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
-function useHelpLanguage() {
-  const [language, setLanguage] = useState(() =>
-    window.localStorage.getItem("olimpiada-help-language") === "en" ? "en" : "sq",
-  );
-  const chooseLanguage = (value) => {
-    setLanguage(value);
-    window.localStorage.setItem("olimpiada-help-language", value);
-  };
-  return [language, chooseLanguage];
-}
+function useHelpLanguage(){const {lang,setLang}=useLanguage();return [lang,setLang];}
 
 function Intro({ eyebrow, title, description, language, onLanguage }) {
   return (
     <div className="help-intro">
-      <div>
-        <span className="help-eyebrow">{eyebrow}</span>
-        <h1>{title}</h1>
-        <p>{description}</p>
-      </div>
+      <SitePageIntro contentKey={eyebrow.includes("FAQ")?"page_faq":"page_support"} kicker={eyebrow} title={title} subtitle={description}/>
       <div className="help-languages" aria-label="Page language">
         <button type="button" aria-pressed={language === "sq"} onClick={() => onLanguage("sq")}>SQ</button>
         <button type="button" aria-pressed={language === "en"} onClick={() => onLanguage("en")}>EN</button>
@@ -44,15 +33,16 @@ export function FAQPage() {
   const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [retry,setRetry]=useState(0);
 
   useEffect(() => {
-    let active = true;
+    let active = true;setLoading(true);setError(false);
     axios.get(`${API}/experience/faq`)
       .then(({ data }) => { if (active) setItems(data); })
       .catch(() => { if (active) setError(true); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, []);
+  }, [retry]);
 
   return (
     <Layout maxWidth="1040px">
@@ -61,6 +51,7 @@ export function FAQPage() {
           title={language === "sq" ? "Pyetje të shpeshta" : "Frequently asked questions"}
           description={language === "sq" ? "Përgjigje për platformën dhe komunitetin tonë." : "Answers about our platform and community."} />
         {loading && <p className="help-info" role="status">{language === "sq" ? "Duke ngarkuar…" : "Loading…"}</p>}
+        {error && <button type="button" onClick={()=>setRetry(x=>x+1)}>Retry / Provo përsëri</button>}
         {error && <p className="help-info help-error" role="alert">{language === "sq" ? "Pyetjet nuk u ngarkuan. Provo përsëri më vonë." : "Could not load questions. Please try again later."}</p>}
         {!loading && !error && items.length === 0 && (
           <p className="help-info">{language === "sq" ? "Po përditësojmë përgjigjet. Ndërkohë, mund të na shkruash drejtpërdrejt." : "We're updating our answers. You can contact us directly in the meantime."}</p>

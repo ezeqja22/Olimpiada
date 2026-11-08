@@ -3,12 +3,12 @@ import schedule
 import time
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from database import get_db
+from database import SessionLocal
 from models import User
 
 def cleanup_expired_users():
     """Clean up unverified users older than 1 hour"""
-    db = next(get_db())
+    db = SessionLocal()
     try:
         cutoff_time = datetime.utcnow() - timedelta(hours=1)
         expired_users = db.query(User).filter(

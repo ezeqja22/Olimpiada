@@ -169,7 +169,7 @@ function ForgotPassword() {
 
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: spacing.lg, textAlign: "left" }}>
-                <label
+                <label htmlFor="forgotpassword-0"
                   style={{
                     display: "block",
                     marginBottom: spacing.sm,
@@ -179,7 +179,7 @@ function ForgotPassword() {
                 >
                   Email Address
                 </label>
-                <input
+                <input id="forgotpassword-0" name="forgotpassword-0"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

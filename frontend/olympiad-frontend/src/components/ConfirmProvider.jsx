@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
 import "./Confirm.css";
+import {useDialogFocus} from "../hooks/useDialogFocus";
 
 const ConfirmContext = createContext(null);
 
@@ -37,6 +38,8 @@ function ConfirmProvider({ children }) {
     setDialog(null);
   };
 
+  const modalRef = useDialogFocus(!!dialog, () => closeDialog(false));
+
   return (
     <ConfirmContext.Provider value={{ confirm }}>
       {children}
@@ -44,14 +47,14 @@ function ConfirmProvider({ children }) {
       {dialog && (
         <div className="confirm-overlay" onClick={() => closeDialog(false)}>
           <div
-            className="confirm-modal"
+            className="confirm-modal" ref={modalRef} role="alertdialog" aria-modal="true" aria-labelledby="confirmation-title" aria-describedby="confirmation-description" tabIndex={-1}
             onClick={(event) => event.stopPropagation()}
           >
             <div className={`confirm-icon confirm-${dialog.variant}`}>!</div>
 
             <div className="confirm-content">
-              <h3>{dialog.title}</h3>
-              <p>{dialog.message}</p>
+              <h3 id="confirmation-title">{dialog.title}</h3>
+              <p id="confirmation-description">{dialog.message}</p>
             </div>
 
             <div className="confirm-actions">

@@ -1,0 +1,142 @@
+/* Shared foundations for Phase 1/2 surfaces, not a global visual rewrite.
+   Blue is the existing SPARK wordmark fallback, not a claimed official palette. */
+:root {
+  --ol-green: #1a4d3a;
+  --ol-purple: #704795;
+  --ol-blue: #1d7cc6;
+  --ol-ink: #182c24;
+  --ol-muted: #55635b;
+  --ol-border: #dce4de;
+  --ol-surface: #fff;
+  --ol-radius: 8px;
+  --ol-space: 8px;
+}
+.p1-wrap {
+  color: var(--ol-ink);
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+  margin: 32px auto;
+  padding: 0 24px;
+}
+.p1-wrap h1 {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.p1-wrap h2 {
+  font-size: 1.3rem;
+  line-height: 1.3;
+}
+.p1-muted {
+  color: var(--ol-muted);
+}
+.p1-card {
+  border-color: var(--ol-border);
+  border-radius: var(--ol-radius);
+  box-shadow: none;
+}
+.p1-grid {
+  gap: 24px;
+}
+.p1-input,
+.p1-select {
+  min-height: 44px;
+  border: 1px solid #aab8af;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: white;
+  color: var(--ol-ink);
+}
+.p1-btn {
+  background: var(--ol-green);
+  border: 1px solid var(--ol-green);
+  min-height: 44px;
+  border-radius: 6px;
+  font:
+    600 1rem/1.4 system-ui,
+    sans-serif;
+  box-shadow: none;
+  transition:
+    background-color 120ms ease,
+    transform 120ms ease;
+}
+.p1-btn:hover {
+  background: #103b2b;
+}
+.p1-btn:active {
+  transform: translateY(1px);
+}
+.p1-btn.alt {
+  background: white;
+  color: var(--ol-green);
+  border-color: var(--ol-border);
+}
+.p1-btn.alt:hover {
+  background: #edf4ef;
+}
+.p1-pill {
+  background: #f1ebf6;
+  color: var(--ol-purple);
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+.p1-wrap :focus-visible,
+.help-page :focus-visible {
+  outline: 3px solid var(--ol-purple);
+  outline-offset: 3px;
+}
+.p1-wrap .p1-row {
+  flex-wrap: wrap;
+}
+.p1-wrap textarea {
+  width: 100%;
+  resize: vertical;
+}
+.p1-wrap label {
+  min-width: 0;
+}
+.p1-wrap button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.homepage-page .homepage-hero {
+  background: var(--ol-green);
+}
+.p3-hero-placeholder {
+  background: #235e49;
+  box-shadow: none;
+}
+.p3-hero-image::before,
+.p3-hero-image::after {
+  display: none;
+}
+.p3-hero-copy .hero-kicker {
+  color: #d9e8de !important;
+}
+.p3-hero-copy .hero-description {
+  color: #e3ede7 !important;
+}
+@media (max-width: 600px) {
+  .p1-wrap {
+    padding: 0 16px;
+    margin: 24px auto;
+  }
+  .p1-card {
+    padding: 16px;
+  }
+  .p1-grid,
+  .p1-grid.two {
+    grid-template-columns: 1fr;
+  }
+  .p1-row > label {
+    width: 100%;
+  }
+  .p1-btn {
+    white-space: normal;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .p1-btn {
+    transition: none;
+  }
+}

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import {loginIntent} from "./navigation";
 import "./AdminLayout.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
@@ -44,7 +45,7 @@ const AdminLayout = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        navigate("/login", { replace: true });
+        navigate("/login", { replace: true, state: loginIntent(location.pathname+location.search+location.hash) });
         return;
       }
 
@@ -60,7 +61,7 @@ const AdminLayout = () => {
       setCurrentUser(response.data);
     } catch (error) {
       console.error("Error fetching current user:", error);
-      navigate("/login", { replace: true });
+      navigate("/login", { replace: true, state: loginIntent(location.pathname+location.search+location.hash) });
     } finally {
       setLoading(false);
     }
@@ -111,8 +112,6 @@ const AdminLayout = () => {
     },
     {path:"/admin/teachers",label:"Aplikimet e Mësuesve",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811353/Users_Hirstory_admin_panel_eqvfdf.svg",adminOnly:false},
     {path:"/admin/site-content",label:"Përmbajtja e Website-it",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811439/Settings_admin_panel_cpayja.svg",adminOnly:true},
-    {path:"/admin/faq",label:"FAQ",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg",adminOnly:false},
-    {path:"/admin/support",label:"Technical Support",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg",adminOnly:false},
     {path:"/admin/parents",label:"Raporte Prindërish",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg",adminOnly:false},
     {path: "/admin/weekly",label: "Problema e Javës", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
     {path: "/admin/courses",label: "Materiale & Teste", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
@@ -132,13 +131,13 @@ const AdminLayout = () => {
       path: "/admin/faq",
       label: "FAQ",
       icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811439/Settings_admin_panel_cpayja.svg",
-      adminOnly: true,
+      adminOnly: false,
     },
     {
       path: "/admin/support",
       label: "Support",
       icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811297/Email_admin_panel_zjmkz7.svg",
-      adminOnly: true,
+      adminOnly: false,
     },
     {
       path: "/admin/analytics",
@@ -252,7 +251,7 @@ const AdminLayout = () => {
             <div className="admin-header-copy">
               <h1>Admin Panel</h1>
               <span className="user-role">
-                {currentUser.role === "admin" ? "👑 Admin" : "🛡️ Moderator"}
+                {currentUser.role.replaceAll("_", " ")}
               </span>
             </div>
           </div>

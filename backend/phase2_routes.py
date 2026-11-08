@@ -192,6 +192,7 @@ def course_items(user: User = Depends(get_verified_user), db: Session = Depends(
     now = datetime.utcnow()
     q = db.query(CourseItem).filter(CourseItem.published_at <= now)
     visible = []
+    attempts = {a.item_id:a for a in db.query(CourseAttempt).filter_by(student_id=user.id).all()}
     for item in q.order_by(CourseItem.published_at.desc()).limit(300).all():
         if item.forum_id and not can_enter_forum(user, db.get(Forum, item.forum_id), db):
             continue
@@ -199,6 +200,10 @@ def course_items(user: User = Depends(get_verified_user), db: Session = Depends(
         # badge alone must not reveal another author's timed test before start.
         can_preview_test = is_staff(user) or item.created_by == user.id
         visible.append(serialize_item(item, include_body=(item.kind != "test" or can_preview_test)))
+        attempt = attempts.get(item.id)
+        visible[-1]["my_attempt"] = ({"id": attempt.id, "started_at": attempt.started_at,
+            "submitted_at": attempt.submitted_at, "score": attempt.score,
+            "feedback": attempt.feedback, "graded_at": attempt.graded_at} if attempt else None)
         if len(visible) >= 200:
             break
     return visible

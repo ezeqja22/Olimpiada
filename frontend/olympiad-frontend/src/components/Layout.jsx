@@ -24,7 +24,7 @@ function Layout({ children, showHomeButton = false, maxWidth = "1200px", backgro
             flexDirection: "column"
         }}>
             <Header showHomeButton={showHomeButton} />
-            <main style={{
+            <main id="main-content" tabIndex={-1} style={{
                 flex: 1,
                 padding: isFullWidth ? "0" : (isMobile ? "4px" : spacing.xl),
                 maxWidth: isFullWidth ? "none" : maxWidth,

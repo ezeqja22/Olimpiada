@@ -698,7 +698,7 @@ function SubjectPage() {
 
           {!searchQuery && (
             <Link
-              to={`/create-problem?from=/subject/${encodeURIComponent(
+              to={`/create-problem?subject=${encodeURIComponent(subjectName)}&from=/subject/${encodeURIComponent(
                 subject,
               )}`}
             >
@@ -855,7 +855,7 @@ function SubjectPage() {
                       pointerEvents: "none",
                     }}
                   >
-                    {renderMathContent(problem.title)}
+                    <Link to={`/problem/${problem.id}?from=subject&subject=${encodeURIComponent(subject)}`} onClick={e=>e.stopPropagation()} style={{color:"inherit"}}>{renderMathContent(problem.title)}</Link>
                   </h3>
 
                   <div

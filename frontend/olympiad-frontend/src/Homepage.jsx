@@ -17,6 +17,7 @@ import { useFeatureSettings } from "./hooks/useFeatureSettings";
 import { useAuth } from "./context/AuthContext";
 import { useToast } from "./components/ToastProvider";
 import AboutFounders from "./components/AboutFounders";
+import Header from "./components/Header";
 import ForumsSidebar from "./components/ForumsSidebar";
 import "./Homepage.css";
 import "./phase3.css";
@@ -289,203 +290,9 @@ function Homepage() {
 
   return (
     <div className="homepage-page">
-      <header className="homepage-header">
-        <div className="desktop-header-inner">
-          <div className="desktop-brand-area">
-            {currentUser && (
-              <button
-                className="header-icon-button"
-                onClick={handleHamburgerClick}
-                aria-label="Open my forums"
-              >
-                <Menu size={22} />
-              </button>
-            )}
+      <Header />
 
-            <Link to="/homepage" className="homepage-brand-link">
-              <img
-                src={siteLogo}
-                alt={`${siteName} logo`}
-                className="homepage-logo"
-                onError={(event) => {
-                  event.currentTarget.src = olimpiadaLogo;
-                }}
-              />
-              <span className="homepage-site-name">{siteName}</span>
-            </Link>
-          </div>
-
-          <nav className="desktop-nav" aria-label="Main navigation">
-            <Link to="/weekly" className="nav-link">{t("weekly")}</Link>
-            <Link to="/forum-catalog" className="nav-link">{t("forums")}</Link>
-            <div className="nav-dropdown-wrap">
-              <button type="button" className="nav-link nav-button" onClick={openSubjectDropdown}
-                aria-expanded={showSubjectDropdown}>{t("more")} <ChevronDown size={15}/></button>
-              {showSubjectDropdown && <div className="header-dropdown subject-dropdown p3-more-dropdown">
-                {[
-                  ["/explore",t("explore")],["/courses",t("courses")],
-                  ["/feed",t("feed")],["/faq",t("faq")],
-                  ["/support",t("support")],["/teacher/apply",t("apply")]
-                ].map(([url,title])=><Link key={url} className="dropdown-row" to={url} onClick={closeDropdowns}>{title}</Link>)}
-                {currentUser?.role==="teacher"&&<Link className="dropdown-row" to="/teacher/workspace" onClick={closeDropdowns}>{t("teacher")}</Link>}
-                <div className="p3-dropdown-separator">{t("subjects")}</div>
-                {subjects.map(subject=><button key={subject} type="button" className="dropdown-row"
-                    onClick={()=>handleSubjectClick(subject)}>{subject}</button>)}
-              </div>}
-            </div>
-            {!currentUser ? (
-              <div className="desktop-auth-actions">
-                <Link to="/login" className="nav-link">
-                  {t("login")}
-                </Link>
-                <button
-                  className="signup-button"
-                  onClick={() => {
-                    if (checkFeatureEnabled("registration_enabled")) {
-                      navigate("/signup");
-                    } else {
-                      showFeatureDisabledAlert("Registration");
-                    }
-                  }}
-                >
-                  {t("signup")}
-                </button>
-              </div>
-            ) : (
-              <div className="desktop-user-actions">
-                <NotificationBell />
-
-                <div className="nav-dropdown-wrap">
-                  <button
-                    className="user-menu-trigger"
-                    onClick={openUserDropdown}
-                    aria-expanded={showUserDropdown}
-                  >
-                    {currentUser.profile_picture ? (
-                      <img
-                        src={currentUser.profile_picture}
-                        alt=""
-                        className="header-avatar"
-                      />
-                    ) : (
-                      <span className="header-avatar-fallback">
-                        {getUserInitial(currentUser.username)}
-                      </span>
-                    )}
-                    <span className="header-username">
-                      {currentUser.username}
-                    </span>
-                    <ChevronDown size={14} />
-                  </button>
-
-                  {showUserDropdown && (
-                    <UserDropdown
-                      currentUser={currentUser}
-                      onLogout={handleLogout}
-                      onClose={() => setShowUserDropdown(false)}
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-            <LanguageSwitch />
-          </nav>
-        </div>
-
-        <div className="mobile-header">
-          <div className="mobile-top-row">
-            <div className="mobile-left-slot">
-              {currentUser && (
-                <button
-                  className="mobile-icon-button"
-                  onClick={handleHamburgerClick}
-                  aria-label="Open my forums"
-                >
-                  <Menu size={21} />
-                </button>
-              )}
-            </div>
-
-            <Link to="/homepage" className="mobile-brand-link">
-              <img
-                src={siteLogo}
-                alt={`${siteName} logo`}
-                className="mobile-logo"
-                onError={(event) => {
-                  event.currentTarget.src = olimpiadaLogo;
-                }}
-              />
-              <span>{siteName}</span>
-            </Link>
-
-            <div className="mobile-right-slot">
-              {currentUser ? (
-                <>
-                  <div className="mobile-notification-wrap">
-                    <NotificationBell />
-                  </div>
-                  <div className="mobile-user-wrap">
-                    <button
-                      className="mobile-profile-button"
-                      onClick={openUserDropdown}
-                      aria-label="Open account menu"
-                      aria-expanded={showUserDropdown}
-                    >
-                      {currentUser.profile_picture ? (
-                        <img
-                          src={currentUser.profile_picture}
-                          alt=""
-                          className="mobile-avatar"
-                        />
-                      ) : (
-                        <span className="mobile-avatar-fallback">
-                          {getUserInitial(currentUser.username)}
-                        </span>
-                      )}
-                    </button>
-
-                    {showUserDropdown && (
-                      <UserDropdown
-                        currentUser={currentUser}
-                        onLogout={handleLogout}
-                        onClose={() => setShowUserDropdown(false)}
-                        mobile
-                      />
-                    )}
-                  </div>
-                </>
-              ) : (
-                <Link to="/login" className="mobile-login-link">
-                  Login
-                </Link>
-              )}
-            </div>
-          </div>
-
-          <nav className="mobile-nav-row" aria-label="Mobile navigation">
-            <LanguageSwitch />
-            <Link to="/weekly" className="mobile-nav-link">{t("weekly")}</Link>
-            <Link to="/forum-catalog" className="mobile-nav-link">{t("forums")}</Link>
-            <div className="mobile-subject-wrap">
-              <button type="button" className="mobile-nav-link mobile-nav-button"
-                onClick={openSubjectDropdown} aria-expanded={showSubjectDropdown}>{t("more")} <ChevronDown size={14}/></button>
-              {showSubjectDropdown&&<div className="header-dropdown mobile-subject-dropdown">
-                {[
-                  ["/explore",t("explore")],["/courses",t("courses")],
-                  ["/feed",t("feed")],["/faq",t("faq")],
-                  ["/support",t("support")],["/teacher/apply",t("apply")]
-                ].map(([url,title])=><Link key={url} to={url} className="dropdown-row" onClick={closeDropdowns}>{title}</Link>)}
-                {currentUser?.role==="teacher"&&<Link className="dropdown-row" to="/teacher/workspace" onClick={closeDropdowns}>{t("teacher")}</Link>}
-                <div className="p3-dropdown-separator">{t("subjects")}</div>
-                {subjects.map(subject=><button key={subject} type="button" className="dropdown-row"
-                  onClick={()=>handleSubjectClick(subject)}>{subject}</button>)}
-              </div>}
-            </div>
-          </nav>
-        </div>
-      </header>
-
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <section className="homepage-hero">
           <div className="homepage-hero-inner">
             <div className="p3-hero-copy">
@@ -520,7 +327,7 @@ function Homepage() {
           <div className="p3-feature-grid">
             {[
               {key:"home_feature_weekly",icon:"✦",title:t("weekly"),description:lang==="sq"?"Një problem i ri çdo javë dhe publikim i zgjidhjeve.":"A new challenge every week with published solutions.",to:"/weekly"},
-              {key:"home_feature_forums",icon:"◈",title:t("forums"),description:lang==="sq"?"Diskuto ide dhe puno me mësues e nxënës të tjerë.":"Discuss ideas with teachers and peers.",to:"/forum-catalog"},
+              {key:"home_feature_forums",icon:"◈",title:t("forums"),description:lang==="sq"?"Diskuto ide dhe puno me mësues e nxënës të tjerë.":"Discuss ideas with teachers and peers.",to:"/forums"},
               {key:"home_feature_courses",icon:"◷",title:t("courses"),description:lang==="sq"?"Teste të programuara dhe materiale të organizuara.":"Scheduled tests and structured study materials.",to:"/courses"},
               {key:"home_feature_support",icon:"☏",title:t("support"),description:lang==="sq"?"Ndihmë e shpejtë kur të duhet.":"Help when you need it.",to:"/support"}
             ].map(f=><article className="p3-feature-card" key={f.key}>
@@ -540,7 +347,7 @@ function Homepage() {
           <div className="p3-visual-row reverse">
             <div className="p3-visual-copy"><span className="p3-eyebrow">{lang==="sq"?"Komuniteti ynë":"Our community"}</span>
               <h2><RichInlineText text={copy("community","title",t("community"))} /></h2>
-              <p className="p3-rich-inline"><RichInlineText text={copy("community","subtitle",t("heroDesc"))} /></p><Link to="/forum-catalog">{t("meet")} →</Link></div>
+              <p className="p3-rich-inline"><RichInlineText text={copy("community","subtitle",t("heroDesc"))} /></p><Link to="/forums">{t("meet")} →</Link></div>
             {imageFor("community")?<img loading="lazy" decoding="async" src={imageFor("community")} alt={lang==="sq"?"Ekipi shqiptar në Olimpiadën Ndërkombëtare të Matematikës":"Albanian team at the International Mathematical Olympiad"}/>:
               <div className="p3-visual-fallback" aria-hidden="true">★</div>}
           </div>

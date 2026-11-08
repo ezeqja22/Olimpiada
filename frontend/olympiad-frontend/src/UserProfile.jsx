@@ -1,6 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/img-redundant-alt */
+import {useAuth} from "./context/AuthContext";
+import {useSearchParams} from "react-router-dom";
 import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -41,11 +43,14 @@ const renderMathContent = (text) => {
 };
 
 function UserProfile() {
+  const {logout}=useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("problems");
+  const [tabParams,setTabParams]=useSearchParams();
+  const activeTab=["problems","comments","bookmarks","drafts"].includes(tabParams.get("tab"))?tabParams.get("tab"):"problems";
+  const setActiveTab=tab=>setTabParams(p=>{const n=new URLSearchParams(p);n.set("tab",tab);return n});
   const [commentsSubTab, setCommentsSubTab] = useState("all");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -535,7 +540,7 @@ function UserProfile() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    logout();
 
     setProfileData(null);
     setActiveTab("problems");

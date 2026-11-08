@@ -10,6 +10,10 @@ import {
 } from "react-router-dom";
 import "./theme.css";
 // Removed WebSocket import
+import Header from "./components/Header";
+import PublicForums from "./PublicForums";
+import {useAuth} from "./context/AuthContext";
+import {Link,useLocation} from "react-router-dom";
 import LandingPage from "./LandingPage";
 import Signup from "./Signup";
 import Login from "./Login";
@@ -54,7 +58,26 @@ import ToastProvider from "./components/ToastProvider";
 import ConfirmProvider from "./components/ConfirmProvider";
 import { FAQPage, SupportPage } from "./HelpPages";
 import { AdminFAQ, AdminSupport } from "./AdminHelp";
+import "./ux-foundations.css";
 
+function ForumsEntry(){const {currentUser,authLoading}=useAuth();return authLoading?<p role="status">Loading…</p>:currentUser?<Forums/>:<PublicForums/>;}
+function ConnectedPage({children}){return <><Header/>{children}</>;}
+function RouteOrientation(){
+ const {pathname}=useLocation();
+ useEffect(()=>{
+  let focused=false,frame;
+  const orient=()=>{
+   const main=document.querySelector('main');
+   if(main){main.id='main-content';main.tabIndex=-1;if(!focused){main.focus({preventScroll:true});focused=true}}
+   const title=document.querySelector('h1')?.textContent;
+   document.title=title?title+' · Olimpiada':'Olimpiada';
+  };
+  const observer=new MutationObserver(()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(orient)});
+  observer.observe(document.body,{childList:true,subtree:true,characterData:true});orient();
+  return()=>{observer.disconnect();cancelAnimationFrame(frame)};
+ },[pathname]);
+ return null;
+}
 function App() {
   // Removed WebSocket functionality
 
@@ -62,7 +85,7 @@ function App() {
     <Router>
       <LanguageProvider>
       <AuthProvider>
-        <AnalyticsConsent />
+        <AnalyticsConsent /><RouteOrientation/>
         <ToastProvider>
           <ConfirmProvider>
             <Routes>
@@ -73,19 +96,19 @@ function App() {
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/homepage" element={<Homepage />} />
               <Route path="/pricing" element={<Navigate to="/explore" replace />} />
-              <Route path="/explore" element={<Explore />} />
+              <Route path="/explore" element={<ConnectedPage><Explore /></ConnectedPage>} />
               <Route path="/library" element={<Navigate to="/explore" replace />} />
               <Route path="/library/:id" element={<Navigate to="/explore" replace />} />
-              <Route path="/courses" element={<ProtectedRoute><CourseHub /></ProtectedRoute>} />
-              <Route path="/weekly" element={<WeeklyPage />} />
-              <Route path="/forum-catalog" element={<ForumCatalogue />} />
-              <Route path="/teacher/apply" element={<TeacherApplicationPage />} />
-              <Route path="/teacher/workspace" element={<ProtectedRoute><TeacherWorkspace /></ProtectedRoute>} />
+              <Route path="/courses" element={<ProtectedRoute><ConnectedPage><CourseHub /></ConnectedPage></ProtectedRoute>} />
+              <Route path="/weekly" element={<ConnectedPage><WeeklyPage /></ConnectedPage>} />
+              <Route path="/forum-catalog" element={<Navigate to="/forums" replace />} />
+              <Route path="/teacher/apply" element={<ConnectedPage><TeacherApplicationPage /></ConnectedPage>} />
+              <Route path="/teacher/workspace" element={<ProtectedRoute><ConnectedPage><TeacherWorkspace /></ConnectedPage></ProtectedRoute>} />
               <Route path="/faq" element={<FAQPage />} />
               <Route path="/support" element={<SupportPage />} />
-              <Route path="/family" element={<ProtectedRoute><FamilyPage /></ProtectedRoute>} />
-              <Route path="/teacher/courses" element={<ProtectedRoute><AdminCourses /></ProtectedRoute>} />
-              <Route path="/tutoring" element={<ProtectedRoute><Tutoring /></ProtectedRoute>} />
+              <Route path="/family" element={<ProtectedRoute><ConnectedPage><FamilyPage /></ConnectedPage></ProtectedRoute>} />
+              <Route path="/teacher/courses" element={<ProtectedRoute><ConnectedPage><AdminCourses /></ConnectedPage></ProtectedRoute>} />
+              <Route path="/tutoring" element={<ProtectedRoute><ConnectedPage><Tutoring /></ConnectedPage></ProtectedRoute>} />
               <Route
                 path="/feed"
                 element={
@@ -134,7 +157,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/verify-email" element={<EmailVerification />} />
+              <Route path="/verify-email" element={<ConnectedPage><EmailVerification /></ConnectedPage>} />
               <Route
                 path="/search"
                 element={
@@ -146,9 +169,7 @@ function App() {
               <Route
                 path="/forums"
                 element={
-                  <ProtectedRoute>
-                    <Forums />
-                  </ProtectedRoute>
+                  <ForumsEntry />
                 }
               />
               <Route
@@ -225,11 +246,12 @@ function App() {
                 <Route path="library" element={<Navigate to="/admin/content" replace />} />
                 <Route path="teachers" element={<AdminTeachers />} />
                 <Route path="site-content" element={<AdminSiteEditor />} />
-                <Route path="branding" element={<AdminSiteEditor />} />
+                <Route path="branding" element={<Navigate to="/admin/site-content" replace />} />
                 <Route path="faq" element={<AdminFAQ />} />
                 <Route path="support" element={<AdminSupport />} />
                 <Route path="parents" element={<AdminParents />} />
               </Route>
+            <Route path="/learning-resources" element={<ProtectedRoute><ConnectedPage><Learning/></ConnectedPage></ProtectedRoute>}/><Route path="*" element={<ConnectedPage><main id="main-content" className="p1-wrap"><h1>Page not found</h1><p>This address does not match a page.</p><Link to="/homepage">Home</Link> · <Link to="/forums">Forums</Link> · <Link to="/feed">Problems</Link></main></ConnectedPage>}/>
             </Routes>
           </ConfirmProvider>
         </ToastProvider>

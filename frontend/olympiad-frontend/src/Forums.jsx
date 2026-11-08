@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import {useDialogFocus} from "./hooks/useDialogFocus";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Layout from "./components/Layout";
 import Card from "./components/Card";
@@ -14,6 +15,9 @@ import { useToast } from "./components/ToastProvider";
 import "./forumModern.css";
 
 const Forums = () => {
+  const [params,setParams]=useSearchParams();
+  const paramsRef=useRef(params);paramsRef.current=params;
+  const updateParam=(key,value)=>{const next=new URLSearchParams(paramsRef.current);if(value===null)next.delete(key);else next.set(key,String(value));paramsRef.current=next;setParams(next,{replace:true})};
   const [forums, setForums] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,6 +27,7 @@ const Forums = () => {
   const { checkFeatureEnabled, showFeatureDisabledAlert } =
     useFeatureSettings();
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const createModalRef=useDialogFocus(showCreateForm,()=>setShowCreateForm(false));
   const [newForum, setNewForum] = useState({
     title: "",
     description: "",
@@ -32,13 +37,16 @@ const Forums = () => {
     level: "",
     tags: [""],
   });
-  const [activeTab, setActiveTab] = useState("all");
+  const activeTab=["all","public","private"].includes(params.get("tab"))?params.get("tab"):"all";
+  const setActiveTab=value=>updateParam("tab",value);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedForumId, setSelectedForumId] = useState(null);
   const [allForums, setAllForums] = useState([]); // Store all forums for filtering
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchQuery=params.get("q")||"";
+  const setSearchQuery=value=>updateParam("q",value);
   const [forumOnlineCounts, setForumOnlineCounts] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
+  const currentPage=Math.max(1,Number(params.get("page"))||1);
+  const setCurrentPage=value=>updateParam("page",value);
   const itemsPerPage = 20;
   const [isMobile, setIsMobile] = useState(false);
 
@@ -147,7 +155,7 @@ const Forums = () => {
       setAllForums(response.data); // Store all forums for filtering
 
       // Fetch online counts for all forums
-      fetchAllOnlineCounts(response.data);
+      // Online presence is fetched for the current page below, not every forum.
     } catch (error) {
       console.error("Error fetching forums:", error);
       console.error("Error response:", error.response);
@@ -166,7 +174,7 @@ const Forums = () => {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const onlineCountPromises = forums.map(async (forum) => {
+      const fetchCount = async (forum) => {
         try {
           const response = await axios.get(
             `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/forums/${forum.id}/online-count`,
@@ -182,9 +190,14 @@ const Forums = () => {
           );
           return { forumId: forum.id, onlineCount: 0 };
         }
-      });
-
-      const results = await Promise.all(onlineCountPromises);
+      };
+      // Presence requires membership. Bound concurrency instead of bursting one
+      // request per forum into the backend connection pool.
+      const eligible = forums.filter(forum => forum.is_member);
+      const results = [];
+      for (let start = 0; start < eligible.length; start += 4) {
+        results.push(...await Promise.all(eligible.slice(start,start+4).map(fetchCount)));
+      }
       const onlineCountsMap = {};
       results.forEach(({ forumId, onlineCount }) => {
         onlineCountsMap[forumId] = onlineCount;
@@ -335,6 +348,7 @@ const Forums = () => {
 
   // Local search filtering
   const handleLocalSearch = (query) => {
+    updateParam("filters",null);
     setSearchQuery(query);
     setCurrentPage(1);
     filterForums(query);
@@ -342,6 +356,7 @@ const Forums = () => {
 
   // Local advanced search filtering
   const handleLocalAdvancedSearch = (advancedData) => {
+    updateParam("filters",JSON.stringify(advancedData));
     setSearchQuery(advancedData.query || "");
     setCurrentPage(1);
     filterForumsAdvanced(advancedData);
@@ -421,6 +436,9 @@ const Forums = () => {
     setForums(filtered);
   };
 
+  const advancedParam=params.get("filters");
+  useEffect(()=>{try{if(advancedParam){filterForumsAdvanced(JSON.parse(advancedParam));return}}catch{}filterForums(searchQuery)},[allForums,searchQuery,advancedParam]);
+
   // Filter forums based on active tab, search query, and advanced filters
   const filteredForums = forums.filter((forum) => {
     // Tab filtering
@@ -437,6 +455,7 @@ const Forums = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentForums = filteredForums.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredForums.length / itemsPerPage);
+  useEffect(()=>{fetchAllOnlineCounts(currentForums)},[allForums,currentPage,activeTab,searchQuery]);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -501,7 +520,8 @@ const Forums = () => {
           style={{ marginBottom: spacing.lg }}
         >
           <SearchBar
-            placeholder="Search forums, users, tags..."
+            placeholder="Search forums, subjects, tags..."
+            initialQuery={searchQuery}
             searchMode="forums"
             onLocalSearch={handleLocalSearch}
             onAdvancedSearch={handleLocalAdvancedSearch}
@@ -558,7 +578,7 @@ const Forums = () => {
             }}
           >
             <div
-              className="forum-create-modal"
+              className="forum-create-modal" ref={createModalRef} tabIndex={-1}
               role="dialog"
               aria-modal="true"
               aria-labelledby="create-forum-title"
@@ -799,7 +819,7 @@ const Forums = () => {
               }}
               onClick={() => handleForumClick(forum)}
             >
-              <div style={{ marginBottom: spacing.md, pointerEvents: "none" }}>
+              <div style={{ marginBottom: spacing.md }}>
                 <h3
                   style={{
                     margin: "0 0 8px 0",
@@ -807,7 +827,7 @@ const Forums = () => {
                     fontSize: "1.25rem",
                   }}
                 >
-                  {forum.title}
+                  <Link to={`/forum/${forum.id}/info`} onClick={e=>e.stopPropagation()} style={{color:"inherit"}}>{forum.title}</Link>
                 </h3>
                 <p
                   className="forum-list-card__description"

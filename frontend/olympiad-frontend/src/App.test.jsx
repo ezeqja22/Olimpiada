@@ -11,7 +11,7 @@ test('homepage offers learning navigation without subscriptions or library', asy
   axios.get.mockImplementation(async url => ({data: url.endsWith('/experience/teachers') ? [] : url.endsWith('/site-info') ? {site_name:'Olimpiada',maintenance_mode:false} : {}}));
   render(<App />);
   expect(await screen.findByRole('heading',{level:1})).toBeInTheDocument();
-  expect(screen.getAllByRole('link').some(link=>link.getAttribute('href')==='/forum-catalog')).toBe(true);
+  expect(screen.getAllByRole('link').some(link=>link.getAttribute('href')==='/forums')).toBe(true);
   expect(screen.getAllByRole('link').some(link=>link.getAttribute('href')==='/pricing')).toBe(false);
   expect(screen.getAllByRole('link').some(link=>link.getAttribute('href')==='/library')).toBe(false);
   expect(screen.queryByText(/Basic|Premium|Abonimet|Biblioteka/)).not.toBeInTheDocument();

@@ -245,7 +245,7 @@ const AdminEmail = () => {
   }
 
   return (
-    <div className="admin-page admin-email-page">
+    <div className="admin-page admin-email-page"><details className="admin-card"><summary>Email templates</summary><AdminTemplates/></details>
       {/* Header */}
       <div className="admin-card">
         <div className="admin-card-header admin-card-header-wrap">

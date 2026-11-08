@@ -89,18 +89,11 @@ class SettingsService:
         """Refresh the settings cache"""
         self._load_settings()
 
-# Global settings service instance
-_settings_service = None
-
 def get_settings_service(db: Session) -> SettingsService:
-    """Get the global settings service instance"""
-    global _settings_service
-    if _settings_service is None:
-        _settings_service = SettingsService(db)
-    return _settings_service
+    """Request-local settings: never retain or share an ORM Session globally."""
+    return SettingsService(db)
+
 
 def refresh_settings_cache(db: Session):
-    """Refresh the global settings cache"""
-    global _settings_service
-    if _settings_service is not None:
-        _settings_service.refresh_cache()
+    """Compatibility entry point; each reader now loads committed settings afresh."""
+    return get_settings_service(db)

@@ -1,0 +1,110 @@
+### Result
+[{"name":"normal login defaults to homepage","passed":true},{"name":"normal login defaults to homepage","cleanup":{"remaining":0,"removed_counts":{"course_items":1,"forum_memberships":1,"forums":1,"notification_preferences":1,"user_sessions":1,"users":2}}},{"name":"protected learning return and explicit test start","passed":true},{"name":"protected learning return and explicit test start","cleanup":{"remaining":0,"removed_counts":{"course_attempts":1,"course_items":1,"forum_memberships":1,"forums":1,"notification_preferences":1,"user_sessions":1,"users":2}}},{"name":"forum canonical authenticated browser","passed":true},{"name":"forum canonical authenticated browser","cleanup":{"remaining":0,"removed_counts":{"course_items":1,"forum_memberships":1,"forums":1,"notification_preferences":1,"user_sessions":1,"users":2}}},{"name":"draft updates preserve one record and mathematical content","passed":true},{"name":"draft updates preserve one record and mathematical content","cleanup":{"remaining":0,"removed_counts":{"course_items":1,"drafts":1,"forum_memberships":1,"forums":1,"notification_preferences":1,"user_sessions":1,"users":2}}},{"name":"public forum join and create preserve working controls","passed":true},{"name":"public forum join and create preserve working controls","cleanup":{"remaining":0,"removed_counts":{"course_items":1,"forum_memberships":3,"forums":2,"notification_preferences":1,"user_sessions":1,"users":2}}},{"name":"learning errors recover and mobile forms remain within viewport","passed":true},{"name":"learning errors recover and mobile forms remain within viewport","cleanup":{"remaining":0,"removed_counts":{"course_items":1,"forum_memberships":1,"forums":1,"notification_preferences":1,"user_sessions":1,"users":2}}},{"name":"published learning material reaches its reader","passed":true},{"name":"published learning material reaches its reader","cleanup":{"remaining":0,"removed_counts":{"course_items":2,"forum_memberships":1,"forums":1,"notification_preferences":1,"user_sessions":1,"users":2}}}]
+### Ran Playwright code
+```js
+await (async page => {
+ const base='http://127.0.0.1:5178',api='http://127.0.0.1:8018';
+ const results=[];
+ const login=async(role)=>{
+  const secret=await (await page.request.get(api+'/__ux/credentials/'+role)).json();
+  await page.getByLabel('Email',{exact:true}).fill(secret.email);
+  await page.getByLabel('Password',{exact:true}).fill(secret.password);
+  await page.getByRole('button',{name:'Sign In',exact:true}).click();
+ };
+ const run=async(name,fn)=>{
+   try{
+     const fixture=await page.request.post(api+'/__ux/fixture');if(!fixture.ok())throw Error('Fixture creation failed');
+     await page.goto(base);await page.evaluate(()=>{localStorage.removeItem('token');sessionStorage.clear()});
+     await fn();results.push({name,passed:true})}
+   catch(e){results.push({name,passed:false,error:e.message.split('\n')[0]})}
+   finally{const cleanup=await (await page.request.post(api+'/__ux/cleanup')).json();results.push({name,cleanup});await page.evaluate(()=>localStorage.removeItem('token'))}
+ };
+ await page.setViewportSize({width:1440,height:1000});
+ await run('normal login defaults to homepage',async()=>{
+  await page.goto(base+'/login');await login('admin');await page.waitForURL('**/homepage');
+  await page.getByRole('button',{name:'☰ Menu'}).click();
+  await page.screenshot({path:'.local-state/screenshots/admin-menu-desktop.png'});
+  await page.getByRole('link',{name:'Paneli Admin',exact:true}).click();
+  await page.waitForURL('**/admin');await page.locator('.admin-main').waitFor();
+  await page.screenshot({path:'.local-state/screenshots/admin-desktop.png'});
+ });
+ await run('protected learning return and explicit test start',async()=>{
+  await page.goto(base+'/courses');await page.waitForURL('**/login');await login('student');await page.waitForURL('**/courses');
+  await page.getByRole('button',{name:'View test'}).click();
+  if(await page.getByRole('timer').count())throw Error('Timer started before explicit confirmation');
+  await page.screenshot({path:'.local-state/screenshots/course-before-start.png'});
+  await page.getByRole('button',{name:'Start timed test'}).click();await page.getByRole('timer').waitFor();
+  await page.getByLabel('Your answer').fill('[UX-TEST] four');
+  await page.getByRole('button',{name:'Submit answer',exact:true}).click();
+  await page.getByText('Submitted · awaiting review',{exact:true}).waitFor();
+  await page.screenshot({path:'.local-state/screenshots/course-submitted.png'});
+ });
+ await run('forum canonical authenticated browser',async()=>{
+  await page.goto(base+'/login');await login('student');await page.waitForURL('**/homepage');
+  await page.goto(base+'/forum-catalog');await page.waitForURL('**/forums');
+  await page.getByText('[UX-TEST] Algebra community',{exact:true}).waitFor();
+  await page.screenshot({path:'.local-state/screenshots/forums-desktop.png'});
+ });
+ await run('draft updates preserve one record and mathematical content',async()=>{
+  await page.goto(base+'/login');await login('student');await page.waitForURL('**/homepage');
+  await page.goto(base+'/create-problem?subject=mathematics');
+  await page.getByLabel('Title',{exact:false}).first().fill('[UX-TEST] Draft update');
+  await page.getByRole('textbox',{name:'Editor vizual matematikor'}).fill('Prove $x^2 = 4$.');
+  if(await page.locator('select[name="subject"]').inputValue()!=='Mathematics')throw Error('Subject prefill did not normalize');
+  await page.getByRole('button',{name:'Save as Draft',exact:true}).click();
+  await page.getByText('Draft saved successfully!',{exact:true}).waitFor();
+  await page.getByLabel('Title',{exact:false}).first().fill('[UX-TEST] Draft revised');
+  const saved=page.waitForResponse(r=>r.url().includes('/auth/drafts/')&&r.request().method()==='PUT');
+  await page.getByRole('button',{name:'Save as Draft',exact:true}).click();if(!(await saved).ok())throw Error('Update failed');
+  const drafts=await page.evaluate(async()=>{const r=await fetch('http://127.0.0.1:8018/auth/drafts',{headers:{Authorization:'Bearer '+localStorage.getItem('token')}});return r.json()});
+  if(drafts.length!==1||drafts[0].title!=='[UX-TEST] Draft revised'||!drafts[0].description.includes('x^2'))throw Error('Draft was duplicated or lost content');
+  await page.goto(base+'/create-problem?draft='+drafts[0].id);
+  await page.waitForFunction(()=>document.querySelector('input[name=title]')?.value==='[UX-TEST] Draft revised');
+  await page.getByLabel('Title',{exact:false}).first().fill('[UX-TEST] Resumed draft');
+  const resumed=page.waitForResponse(r=>r.url().endsWith('/auth/drafts/'+drafts[0].id)&&r.request().method()==='PUT');
+  await page.getByRole('button',{name:'Save as Draft',exact:true}).click();if(!(await resumed).ok())throw Error('Resumed update failed');
+  await page.screenshot({path:'.local-state/screenshots/draft-updated-desktop.png'});
+ });
+ await run('public forum join and create preserve working controls',async()=>{
+  await page.goto(base+'/login');await login('student');await page.waitForURL('**/homepage');await page.goto(base+'/forums');
+  const joined=page.waitForResponse(r=>r.url().includes('/join')&&r.request().method()==='POST');
+  await page.getByRole('button',{name:'Join Forum',exact:true}).click();if(!(await joined).ok())throw Error('Join failed');
+  await page.getByRole('button',{name:'Create New Forum',exact:true}).click();
+  await page.getByLabel('Forum Title').fill('[UX-TEST] Created forum');
+  await page.getByLabel('Description',{exact:true}).fill('Temporary local verification forum.');
+  await page.locator('#forum-subject').selectOption('Mathematics');
+  const created=page.waitForResponse(r=>r.url().endsWith('/auth/forums')&&r.request().method()==='POST');
+  await page.getByRole('dialog').getByRole('button',{name:'Create Forum',exact:true}).click();
+  if(!(await created).ok())throw Error('Create failed');
+  await page.getByRole('dialog').waitFor({state:'hidden'});
+ });
+ await run('learning errors recover and mobile forms remain within viewport',async()=>{
+  await page.goto(base+'/login');await login('student');await page.waitForURL('**/homepage');
+  await page.route('**/core/courses/items',route=>route.fulfill({status:503,body:'Unavailable'}));
+  await page.goto(base+'/courses');await page.getByRole('button',{name:'Retry',exact:true}).waitFor();
+  await page.unroute('**/core/courses/items');await page.getByRole('button',{name:'Retry',exact:true}).click();await page.getByRole('button',{name:'View test'}).waitFor();
+  for(const width of [320,360,390,768]){
+   await page.setViewportSize({width,height:900});
+   if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Learning overflow at '+width);
+  }
+  await page.screenshot({path:'.local-state/screenshots/course-mobile.png'});
+ });
+ await run('published learning material reaches its reader',async()=>{
+  await page.setViewportSize({width:1440,height:1000});
+  await page.goto(base+'/login');await login('admin');await page.waitForURL('**/homepage');
+  await page.goto(base+'/admin/courses');
+  await page.getByLabel('Titulli',{exact:true}).fill('[UX-TEST] Published algebra material');
+  await page.getByRole('textbox',{name:'Editor vizual matematikor'}).fill('Read this mathematical explanation.');
+  await page.getByLabel('Publikimi',{exact:true}).fill('2020-01-01T12:00');
+  const saved=page.waitForResponse(r=>r.url().endsWith('/core/courses/admin/items')&&r.request().method()==='POST');
+  await page.getByRole('button',{name:'Programo publikimin',exact:true}).click();if(!(await saved).ok())throw Error('Publishing failed');
+  await page.goto(base+'/courses');await page.getByText('[UX-TEST] Published algebra material',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'View material',exact:true}).click();
+  await page.getByText('Read this mathematical explanation.',{exact:true}).waitFor();
+ });
+ await page.goto(base+'/homepage');return results;
+}
+)(page);
+```
+### Events
+- New console entries: .playwright-cli\console-2026-11-08T01-40-10-736Z.log#L103-L137

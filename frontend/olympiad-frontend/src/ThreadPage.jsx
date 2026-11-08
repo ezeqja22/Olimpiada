@@ -19,18 +19,22 @@ function ThreadPage() {
     const [error, setError] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
     const [replyCounts, setReplyCounts] = useState({});
+    const [members,setMembers]=useState([]);
+    const [sendError,setSendError]=useState('');
+    const [sending,setSending]=useState(false);
     const [userRole, setUserRole] = useState('member');
     
     // Get scroll position from location state
     const scrollPosition = location.state?.scrollPosition || 0;
 
-    useEffect(() => {
-        fetchCurrentUser();
-        fetchForumData();
-        fetchOriginalMessage();
-        fetchReplies();
-    }, [forumId, messageId]);
+    const loadThread = async () => {
+        setLoading(true);setError(null);
+        await Promise.all([fetchCurrentUser(),fetchForumData(),fetchOriginalMessage(),fetchReplies()]);
+        setLoading(false);
+    };
+    useEffect(() => {loadThread();}, [forumId, messageId]);
 
+    useEffect(()=>{setUserRole(members.find(m=>m.user_id===currentUser?.id)?.role||'member')},[members,currentUser]);
     const fetchCurrentUser = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -59,10 +63,7 @@ function ThreadPage() {
             const membersResponse = await axios.get(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/auth/forums/${forumId}/members`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const userMembership = membersResponse.data.find(member => member.user_id === currentUser?.id);
-            if (userMembership) {
-                setUserRole(userMembership.role);
-            }
+            setMembers(membersResponse.data);
         } catch (error) {
             console.error("Error fetching forum:", error);
             setError("Failed to load forum");
@@ -80,8 +81,9 @@ function ThreadPage() {
             
             const message = response.data.find(msg => msg.id === parseInt(messageId));
             setOriginalMessage(message);
+            if (!message) setError("This message is no longer available.");
         } catch (error) {
-            console.error("Error fetching original message:", error);
+            setError("The original message could not load. Please retry.");
         }
     };
 
@@ -95,14 +97,13 @@ function ThreadPage() {
             });
             setReplies(response.data);
         } catch (error) {
-            console.error("Error fetching replies:", error);
-        } finally {
-            setLoading(false);
+            setError("Replies could not load. Please retry.");
         }
     };
 
     const sendReply = async () => {
-        if (!newReply.trim()) return;
+        if (!newReply.trim()||sending) return;
+        setSending(true);setSendError('');
 
         try {
             const token = localStorage.getItem("token");
@@ -116,8 +117,8 @@ function ThreadPage() {
             setNewReply('');
             fetchReplies(); // Refresh replies
         } catch (error) {
-            console.error("Error sending reply:", error);
-        }
+            setSendError("Your reply was not sent. Your text is still here; please try again.");
+        } finally {setSending(false)}
     };
 
     const handleBackToForum = () => {
@@ -160,7 +161,7 @@ function ThreadPage() {
             
             fetchReplies(); // Refresh replies
         } catch (error) {
-            console.error("Error deleting reply:", error);
+            setSendError("The reply could not be deleted. Please try again.");
         }
     };
 
@@ -171,20 +172,11 @@ function ThreadPage() {
         }
     }, [replies]);
 
-    if (loading) {
-        return (
-            <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ fontSize: '18px', color: colors.gray[600] }}>Loading thread...</div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ fontSize: '18px', color: colors.error }}>{error}</div>
-            </div>
-        );
+    if (loading || error) {
+        return <><Header/><main className="p1-wrap"><h1>Discussion</h1>
+            {loading?<p role="status">Loading thread…</p>:<div role="alert"><p>{error}</p><button onClick={loadThread}>Retry</button></div>}
+            <button onClick={handleBackToForum}>Back to forum</button>
+        </main></>;
     }
 
     return (
@@ -379,6 +371,7 @@ function ThreadPage() {
                     display: 'flex',
                     gap: spacing.sm
                 }}>
+                    {sendError&&<p role="alert">{sendError}</p>}
                     <textarea
                         value={newReply}
                         onChange={(e) => setNewReply(e.target.value)}
@@ -398,7 +391,7 @@ function ThreadPage() {
                     />
                     <button
                         onClick={sendReply}
-                        disabled={!newReply.trim()}
+                        disabled={!newReply.trim()||sending}
                         style={{
                             backgroundColor: newReply.trim() ? colors.primary : colors.gray[300],
                             color: colors.white,

@@ -16,6 +16,7 @@ export function AuthProvider({ children }) {
   const lastRefresh = useRef(Date.now());
   const logout = useCallback(() => {
     const token = localStorage.getItem("token");
+    sessionStorage.setItem("olimpiada_logout_at",String(Date.now()));
     localStorage.removeItem("token");
     setCurrentUser(null);
     if (token) {
@@ -28,12 +29,12 @@ export function AuthProvider({ children }) {
     setAuthLoading(true);
     try {
       const user = await axios.get(API_URL + "/auth/me", { headers: header(token) });
+      if(localStorage.getItem("token")!==token) return null;
       setCurrentUser(user.data);
       lastRefresh.current = Date.now();
       return user.data;
     } catch (error) {
-      localStorage.removeItem("token");
-      setCurrentUser(null);
+      if(localStorage.getItem("token")===token){localStorage.removeItem("token");setCurrentUser(null);}
       return null;
     } finally {
       setAuthLoading(false);

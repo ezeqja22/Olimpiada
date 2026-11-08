@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import Card from "../Card";
@@ -155,7 +155,7 @@ function ProblemCard({
         </div>
       )}
 
-      <h3 className="problem-title">{renderMathContent(problem.title)}</h3>
+      <h3 className="problem-title"><Link to={`/problem/${problem.id}?from=feed&tab=${activeTab}`} onClick={e=>e.stopPropagation()} style={{color:"inherit"}}>{renderMathContent(problem.title)}</Link></h3>
 
       <div className="problem-description">
         {renderMathContent(problem.description)}

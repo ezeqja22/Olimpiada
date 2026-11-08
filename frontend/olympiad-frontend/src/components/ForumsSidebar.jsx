@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Pin, X } from "lucide-react";
 import "./ForumsSidebar.css";
+import {useDialogFocus} from "../hooks/useDialogFocus";
 
 const getSubjectIcon = (subject) => {
   const subjectLower = subject?.toLowerCase() || "";
@@ -38,16 +39,7 @@ function ForumsSidebar({
   onForumClick,
   onTogglePin,
 }) {
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape" && open) {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open, onClose]);
+  const drawerRef = useDialogFocus(open,onClose);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -65,12 +57,13 @@ function ForumsSidebar({
     ...forums.filter((forum) => !pinnedForums.includes(forum.id)),
   ];
 
+  if (!open) return null;
   return (
     <>
       {open && (
         <button
           type="button"
-          className="forums-drawer-backdrop"
+          className="forums-drawer-backdrop" tabIndex={-1}
           onClick={onClose}
           aria-label="Close forums panel"
         />
@@ -78,7 +71,7 @@ function ForumsSidebar({
 
       <aside
         className={`forums-drawer ${open ? "open" : ""}`}
-        aria-hidden={!open}
+        ref={drawerRef} role="dialog" aria-modal="true" aria-label="My forums" tabIndex={-1}
       >
         <div className="forums-drawer-header">
           <button
