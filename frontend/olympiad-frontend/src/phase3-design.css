@@ -367,3 +367,14 @@
   .homepage-page .p3-hero-copy .hero-button:hover,
   .homepage-page .p3-feature-card:hover { transform: none; }
 }
+
+/* Mentors are a separate three-person showcase, not the four-column feature index. */
+.homepage-page .p3-mentors .p3-feature-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 900px) {
+  .homepage-page .p3-mentors .p3-feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .homepage-page .p3-mentors .p3-feature-grid { grid-template-columns: minmax(0, 1fr); }
+}
