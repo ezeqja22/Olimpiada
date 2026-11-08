@@ -1,0 +1,381 @@
+{
+  "passed": true,
+  "waves": [
+    {
+      "concurrency": 20,
+      "requests": 201,
+      "duration_seconds": 3.214,
+      "p95_seconds": 0.2442,
+      "max_seconds": 0.3788,
+      "status_counts": {
+        "/auth/login 200": 20,
+        "/auth/problems/ 200": 20,
+        "/auth/forums 200": 20,
+        "/site-info 200": 20,
+        "/core/courses/items 200": 20,
+        "/get-settings 200": 20,
+        "/core/courses/items 401": 20,
+        "/auth/login 401": 20,
+        "/does-not-exist 404": 20,
+        "/forums/__ux_failure/{id} 409": 20,
+        "/forums/__ux_failure/{id} 500": 1
+      },
+      "mismatches": [],
+      "pool_checked_out_after": 0
+    },
+    {
+      "concurrency": 35,
+      "requests": 351,
+      "duration_seconds": 4.081,
+      "p95_seconds": 0.3245,
+      "max_seconds": 0.4733,
+      "status_counts": {
+        "/auth/login 200": 35,
+        "/auth/problems/ 200": 35,
+        "/auth/forums 200": 35,
+        "/site-info 200": 35,
+        "/core/courses/items 200": 35,
+        "/get-settings 200": 35,
+        "/core/courses/items 401": 35,
+        "/auth/login 401": 35,
+        "/does-not-exist 404": 35,
+        "/forums/__ux_failure/{id} 409": 35,
+        "/forums/__ux_failure/{id} 500": 1
+      },
+      "mismatches": [],
+      "pool_checked_out_after": 0
+    },
+    {
+      "concurrency": 50,
+      "requests": 501,
+      "duration_seconds": 5.207,
+      "p95_seconds": 0.393,
+      "max_seconds": 0.5339,
+      "status_counts": {
+        "/auth/login 200": 50,
+        "/auth/problems/ 200": 50,
+        "/auth/forums 200": 50,
+        "/site-info 200": 50,
+        "/core/courses/items 200": 50,
+        "/get-settings 200": 50,
+        "/core/courses/items 401": 50,
+        "/auth/login 401": 50,
+        "/does-not-exist 404": 50,
+        "/forums/__ux_failure/{id} 409": 50,
+        "/forums/__ux_failure/{id} 500": 1
+      },
+      "mismatches": [],
+      "pool_checked_out_after": 0
+    }
+  ],
+  "cleanup": {
+    "pool_checked_out": 0,
+    "removed_record_counts": {
+      "learning_resources": 0,
+      "annual_report_deliveries": 0,
+      "faq_entries": 0,
+      "site_content_blocks": 0,
+      "users": 2,
+      "follows": 0,
+      "notification_preferences": 0,
+      "notifications": 0,
+      "forums": 1,
+      "drafts": 0,
+      "admin_actions": 0,
+      "email_campaigns": 0,
+      "site_reports": 0,
+      "system_settings": 0,
+      "password_reset_tokens": 0,
+      "user_sessions": 107,
+      "payment_submissions": 0,
+      "teacher_subjects": 0,
+      "tutoring_requests": 0,
+      "monthly_expenses": 0,
+      "library_documents": 0,
+      "teacher_applications": 0,
+      "email_templates": 0,
+      "email_delivery_logs": 0,
+      "parent_student_links": 0,
+      "support_tickets": 0,
+      "content_event_deliveries": 0,
+      "problems": 1,
+      "forum_memberships": 0,
+      "forum_invitations": 0,
+      "forum_join_requests": 0,
+      "user_online_status": 0,
+      "user_moderation_history": 0,
+      "course_items": 1,
+      "teacher_forum_assignments": 0,
+      "comments": 0,
+      "votes": 0,
+      "bookmarks": 0,
+      "problem_images": 0,
+      "forum_messages": 0,
+      "weekly_challenges": 2,
+      "course_attempts": 0,
+      "forum_replies": 0,
+      "weekly_submissions": 0,
+      "ux_rollback_probe": 0
+    },
+    "connections_before_drop": 0,
+    "database_absent": true,
+    "cluster_stopped": true,
+    "port_closed": true,
+    "cluster_files_removed": true
+  },
+  "limitations": [
+    "Local single-process PostgreSQL and Uvicorn; not a Railway/Supavisor latency or multi-replica benchmark.",
+    "Schema created from SQLAlchemy metadata, not a production migration rehearsal.",
+    "Email adapters disabled; external delivery and destructive account jobs are not exercised."
+  ],
+  "postgres_version": "postgres (PostgreSQL) 17.11",
+  "pool_configuration": {
+    "size": 5,
+    "max_overflow": 10,
+    "timeout_seconds": 30.0
+  },
+  "scheduler_cycles": [
+    {
+      "weekly": {
+        "opened": 1,
+        "published": 1
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    }
+  ],
+  "pool_pressure": {
+    "concurrency": 50,
+    "requests": 50,
+    "connection_hold_seconds": 0.1,
+    "duration_seconds": 0.78,
+    "all_200": true
+  },
+  "scheduler_exception_rolled_back_and_recovered": true,
+  "periodic_cleanup_entry_point_passed": true,
+  "deadlocks": 0,
+  "database_connection_states_after": {
+    "idle": 5
+  },
+  "total_http_requests": 1105,
+  "successful_scheduler_cycles": 31,
+  "pool_counters": {
+    "checkouts": 1227,
+    "checkins": 1227,
+    "active": 0,
+    "peak": 15
+  },
+  "failed_endpoint_executions": 108,
+  "middleware_replays": 0,
+  "rollback_probe_rows": 0,
+  "email_calls": 0,
+  "postgres_log_errors": [
+    "2026-11-08 13:19:18.864 CET [15644] ERROR:  division by zero",
+    "2026-11-08 13:19:22.946 CET [25776] ERROR:  division by zero",
+    "2026-11-08 13:19:28.152 CET [25920] ERROR:  division by zero",
+    "2026-11-08 13:19:28.163 CET [30996] ERROR:  division by zero"
+  ],
+  "duration_seconds": 25.136
+}

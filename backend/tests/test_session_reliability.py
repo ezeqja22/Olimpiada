@@ -75,3 +75,29 @@ def test_periodic_cleanup_dispatches_cycle_without_blocking_event_loop():
         with pytest.raises(asyncio.CancelledError):
             asyncio.run(main.periodic_cleanup())
         worker.assert_awaited_once_with(main.run_cleanup_cycle)
+
+
+@pytest.mark.parametrize('failing_job', ['run_weekly_transitions', 'send_due_learning_notices'])
+def test_scheduler_exception_rolls_back_and_releases_session(sessions, failing_job):
+    import inline_scheduler
+    factory, engine = sessions
+    with engine.begin() as connection:
+        connection.execute(text('CREATE TABLE scheduler_probe (id INTEGER PRIMARY KEY)'))
+
+    def fail_after_write(db):
+        db.execute(text('INSERT INTO scheduler_probe VALUES (1)'))
+        raise RuntimeError('synthetic scheduler failure')
+
+    with patch.object(inline_scheduler, 'SessionLocal', factory), \
+         patch.object(inline_scheduler, 'run_weekly_transitions', return_value={'opened': 0, 'published': 0}), \
+         patch.object(inline_scheduler, 'send_due_learning_notices', return_value=0):
+        with patch.object(inline_scheduler, failing_job, side_effect=fail_after_write):
+            with pytest.raises(RuntimeError, match='synthetic scheduler failure'):
+                inline_scheduler.run_scheduled_cycle()
+        assert engine.pool.checkedout() == 0
+        with engine.connect() as connection:
+            assert connection.execute(text('SELECT count(*) FROM scheduler_probe')).scalar() == 0
+        assert inline_scheduler.run_scheduled_cycle() == {
+            'weekly': {'opened': 0, 'published': 0}, 'learning_notices': 0,
+        }
+        assert engine.pool.checkedout() == 0

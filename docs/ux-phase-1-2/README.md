@@ -29,7 +29,7 @@ This is a review branch, not a production-readiness guarantee. No production rec
 6. Forum presence checks only query memberships on the displayed page, with concurrency limited to four.
 7. Course listings add only the current learner's attempt summary. Other learners' answers/feedback are not exposed.
 
-Pool size was not increased. A regression test exercises 100 checks with eight workers and a two-connection pool, including exception paths, and verifies all connections return. This is local SQLite/SQLAlchemy evidence, not a measured production PostgreSQL capacity result. A monitored staging PostgreSQL load run remains advisable before release.
+Pool size was not increased. A regression test exercises 100 checks with eight workers and a two-connection pool, including exception paths, and verifies all connections return. An additional isolated PostgreSQL 17.11 run now verifies 1,105 HTTP requests up to 50 concurrent, full 15-connection pool pressure, scheduler recovery and cleanup. See [PostgreSQL results](postgres-reliability.md). This is not a production capacity benchmark.
 
 ## Verification
 
@@ -56,7 +56,7 @@ Every browser scenario invokes verified cleanup in `finally`. The disposable bac
 
 ### Not browser-verified / limitations
 
-- No production write, email delivery, campaign, scheduled side effect, production file upload, or live PostgreSQL load test.
+- No production write, email delivery, campaign, scheduled side effect, production file upload, or production PostgreSQL load test. Disposable local PostgreSQL verification is documented separately.
 - Private invitation/retraction, parent/student consent, moderation permutations and weekly scheduling have existing/backend regression coverage, but were not all exercised end-to-end in this browser run.
 - Browser creation/editing of every possible content type was not tested. Do not treat the seven journeys as exhaustive coverage of 55 routes.
 - No physical iOS/Safari, Android or screen-reader session. Chromium viewport tests are not equivalent.
@@ -114,6 +114,6 @@ These are evidence, not a full redesign proposal. “Before” is the prior audi
 
 No SQL migration is required. No settings need changing to review this branch locally. Follow [local verification instructions](verification.md). PR checks install pytest and run the new regressions; they do not deploy.
 
-Before an approved production release, verify real environment URLs/CORS, capture current backend/frontend deployment IDs, run the release branch against isolated PostgreSQL, and perform a read-only production role check. Revert/redeploy the prior application commit if needed; there is no schema downgrade or data rollback in this change. Do not enable account cleanup or email jobs as part of deploying this branch. Keep the PR in draft until the remaining verification limitations are accepted or completed.
+Before an approved production release, verify real environment URLs/CORS, capture current backend/frontend deployment IDs, review the completed isolated PostgreSQL results, and perform a read-only production role check. Revert/redeploy the prior application commit if needed; there is no schema downgrade or data rollback in this change. Do not enable account cleanup or email jobs as part of deploying this branch. Keep the PR in draft until the remaining verification limitations are accepted or completed.
 
 The full baseline route list and current disposition are in [route-disposition.csv](route-disposition.csv). Review guidance applied: [Web Interface Guidelines](https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md), with the requested design and interaction skills.
