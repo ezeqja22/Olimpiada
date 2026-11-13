@@ -94,7 +94,7 @@ function Button({
         fontWeight: typography.fontWeight.medium,
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.6 : 1,
-        transition: "all 0.2s ease",
+        transition: "transform 160ms ease, opacity 160ms ease, background-color 160ms ease",
         boxShadow: shadows.sm,
         fontFamily: typography.fontFamily,
         display: "inline-flex",
