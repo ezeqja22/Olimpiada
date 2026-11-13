@@ -77,8 +77,9 @@ export default function CourseHub() {
         {},
         { headers: hdr() },
       );
-      setClockOffset(utcMillis(r.data.server_now) - Date.now());
-      setNow(Date.now());
+      const receivedAt = Date.now();
+      setClockOffset(utcMillis(r.data.server_now) - receivedAt);
+      setNow(receivedAt);
       setAttempt(r.data);
       setActive({ ...active, body: r.data.body });
     } catch (e) {

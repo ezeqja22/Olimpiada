@@ -14,9 +14,13 @@ import EmptyState from "./components/feed/EmptyState";
 import PaginationControls from "./components/feed/PaginationControls";
 import FloatingCreateButton from "./components/feed/FloatingCreateButton";
 import "./Feed.css";
+import { useLanguage } from "./context/LanguageContext";
 import { useToast } from "./components/ToastProvider";
 
 function Feed() {
+  const { lang } = useLanguage();
+  const [loadError, setLoadError] = useState(false);
+  const retryPage = useRef(1);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -96,6 +100,8 @@ function Feed() {
   };
 
   const loadFeedPage = async (page = 1, tab = activeTab) => {
+    retryPage.current = page;
+    setLoadError(false);
     const isInitialLoad = !hasLoadedOnce.current && problems.length === 0;
 
     if (isInitialLoad) {
@@ -114,6 +120,8 @@ function Feed() {
       }
 
       hasLoadedOnce.current = true;
+    } catch {
+      setLoadError(true);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -161,11 +169,7 @@ function Feed() {
 
       hydrateProblemMetadata(standaloneProblems);
     } catch (error) {
-      console.error("Error fetching problems:", error);
-      setProblems([]);
-      setCurrentPage(1);
-      setTotalPages(1);
-      setTotalProblems(0);
+      throw error;
     }
   };
 
@@ -207,12 +211,7 @@ function Feed() {
 
       hydrateProblemMetadata(filteredProblems);
     } catch (error) {
-      console.error("Error fetching following problems:", error);
-      setProblems([]);
-      setCurrentPage(1);
-      setTotalPages(1);
-      setTotalProblems(0);
-      hydrateProblemMetadata([]);
+      throw error;
     }
   };
 
@@ -247,12 +246,7 @@ function Feed() {
 
       hydrateProblemMetadata(standaloneProblems);
     } catch (error) {
-      console.error("Error fetching trending problems:", error);
-      setProblems([]);
-      setCurrentPage(1);
-      setTotalPages(1);
-      setTotalProblems(0);
-      hydrateProblemMetadata([]);
+      throw error;
     }
   };
 
@@ -574,7 +568,11 @@ function Feed() {
           <div className="feed-refreshing-pill">Updating feed...</div>
         )}
 
-        {problems.length === 0 ? (
+        {loadError && <div className="ol-status" role="alert">
+          <p>{lang === 'sq' ? 'Problemet nuk u ngarkuan. Provo përsëri.' : 'Could not load problems. Please try again.'}</p>
+          <button className="p1-btn" disabled={refreshing} onClick={() => loadFeedPage(retryPage.current, activeTab)}>{lang === 'sq' ? 'Provo përsëri' : 'Retry'}</button>
+        </div>}
+        {problems.length === 0 ? (loadError ? null :
           <EmptyState emptyState={emptyState} />
         ) : (
           <div

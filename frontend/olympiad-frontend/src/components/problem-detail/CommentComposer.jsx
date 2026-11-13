@@ -27,7 +27,7 @@ function CommentComposer({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr",
+          gridTemplateColumns: "minmax(0, 1fr)",
           gap: "12px",
           alignItems: "stretch",
           backgroundColor: "#f8fafc",
@@ -47,6 +47,7 @@ function CommentComposer({
           style={{
             display: "flex",
             flexDirection: "row",
+            flexWrap: "wrap",
             alignItems: "center",
             gap: "10px",
           }}
@@ -141,6 +142,7 @@ function CommentComposer({
             placeholder="Write a solution idea, question, or comment..."
             style={{
               width: "100%",
+              boxSizing: "border-box",
               minHeight: isMobile ? "110px" : "118px",
               border: "none",
               outline: "none",
@@ -189,6 +191,7 @@ function CommentComposer({
                     alt={image.name || `Comment image ${index + 1}`}
                     style={{
                       width: "100%",
+              boxSizing: "border-box",
                       height: "100%",
                       objectFit: "cover",
                     }}
