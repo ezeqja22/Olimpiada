@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from "react";
+import React,{useEffect,useState,useRef} from "react";
 import axios from "axios";
 import {loginIntent} from "./navigation";
 import {Link} from "react-router-dom";
@@ -69,11 +69,13 @@ export function SupportPage(){
  <Link className="p1-btn alt" to="/faq">FAQ →</Link></aside></div></main>;
 }
 export function TeacherWorkspace(){
+ const reviewVersion=useRef(0);
+ useEffect(()=>()=>{reviewVersion.current+=1},[]);
  const {lang}=useLanguage(),[classes,setClasses]=useState([]),[items,setItems]=useState([]),[form,setForm]=useState({forum_id:"",title:"",meet_url:"",starts_at:""}),[notice,setNotice]=useState(""),[chosen,setChosen]=useState(null),[answers,setAnswers]=useState([]),[grade,setGrade]=useState({});
  const [loading,setLoading]=useState(true),[loadError,setLoadError]=useState(false),[saving,setSaving]=useState(null);
  const reload=()=>{setLoading(true);setLoadError(false);Promise.all([axios.get(API+"/experience/teacher/classes",{headers:headers()}),axios.get(API+"/experience/teacher/courses",{headers:headers()})]).then(([c,i])=>{setClasses(c.data);setItems(i.data)}).catch(()=>setLoadError(true)).finally(()=>setLoading(false))};
  useEffect(()=>{reload()},[]);
- const open=async id=>{setChosen(id);try{const r=await axios.get(API+"/experience/teacher/courses/"+id+"/submissions",{headers:headers()});setAnswers(r.data);setGrade(Object.fromEntries(r.data.map(a=>[a.attempt_id,{score:a.score??0,feedback:a.feedback??""}])));}catch(e){setNotice("Nuk u lexuan dorëzimet.");}};
+ const open=async id=>{const version=++reviewVersion.current;setChosen(id);setAnswers([]);setGrade({});setNotice("");try{const r=await axios.get(API+"/experience/teacher/courses/"+id+"/submissions",{headers:headers()});if(version!==reviewVersion.current)return;setAnswers(r.data);setGrade(Object.fromEntries(r.data.map(a=>[a.attempt_id,{score:a.score??0,feedback:a.feedback??""}])));}catch(e){if(version===reviewVersion.current)setNotice("Nuk u lexuan dorëzimet. Provo përsëri.");}};
  const saveGrade=async id=>{if(saving!==null)return;setSaving(id);try{await axios.post(API+"/experience/teacher/submissions/"+id+"/grade",{score:Number(grade[id]?.score||0),feedback:grade[id]?.feedback||""},{headers:headers()});setNotice("Vlerësimi u ruajt.");await open(chosen);}catch(e){setNotice("Vlerësimi nuk u ruajt.");}finally{setSaving(null)}};
  const meeting=async e=>{e.preventDefault();try{await axios.post(API+"/experience/teacher/meetings",{...form,forum_id:Number(form.forum_id),starts_at:new Date(form.starts_at).toISOString().slice(0,19)},{headers:headers()});setNotice("Takimi u publikua.");}catch(e){setNotice(e.response?.data?.detail||"Takimi nuk u publikua.");}};
  return <main className="p1-wrap p3-body"><PageTitle kicker="Teacher workspace" title={lang==="sq"?"Klasat e mia":"My classes"} subtitle={lang==="sq"?"Vetëm forumet ku të ka caktuar administratori.":"Only classes assigned by an administrator."}/>
