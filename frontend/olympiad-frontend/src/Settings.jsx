@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -12,6 +11,7 @@ import { colors, spacing, typography, borderRadius } from "./designSystem";
 import { useAuth } from "./context/AuthContext";
 
 function Settings() {
+  const { logout } = useAuth();
   const [currentUser, setCurrentUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
@@ -360,12 +360,8 @@ function Settings() {
       if (response.status === 200) {
         setSuccess(true);
         // Clear token and redirect to homepage
-        const { logout } = useAuth();
         logout();
         navigate("/homepage", { replace: true });
-        setTimeout(() => {
-          navigate("/homepage");
-        }, 3000);
       }
     } catch (err) {
       console.error("Account deletion error:", err);
@@ -1229,7 +1225,7 @@ function Settings() {
             >
               <img
                 src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
-                alt="Delete"
+                alt=""
                 style={{
                   width: "16px",
                   height: "16px",
@@ -1323,7 +1319,7 @@ function Settings() {
                       <>
                         <img
                           src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
-                          alt="Delete"
+                          alt=""
                           style={{
                             width: "16px",
                             height: "16px",
@@ -1409,6 +1405,7 @@ function Settings() {
                       type="text"
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value)}
+                      aria-label="Verification code"
                       placeholder="Enter verification code"
                       style={{
                         width: "200px",
@@ -1466,7 +1463,7 @@ function Settings() {
                         <>
                           <img
                             src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
-                            alt="Delete"
+                            alt=""
                             style={{
                               width: "16px",
                               height: "16px",

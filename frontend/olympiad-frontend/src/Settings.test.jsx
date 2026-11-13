@@ -1,0 +1,21 @@
+import React from 'react';
+import { test,expect,vi,beforeEach } from 'vitest';
+import { render,screen,fireEvent,waitFor } from '@testing-library/react';
+import { MemoryRouter,Routes,Route } from 'react-router-dom';
+import axios from 'axios';
+import Settings from './Settings';
+const {logout}=vi.hoisted(()=>({logout:vi.fn()}));
+vi.mock('axios',()=>({default:{get:vi.fn(),post:vi.fn()}}));
+vi.mock('./context/AuthContext',()=>({useAuth:()=>{React.useState(null);return {logout};}}));
+vi.mock('./components/Layout',()=>({default:({children})=><main>{children}</main>}));
+beforeEach(()=>{vi.clearAllMocks();localStorage.setItem('token','isolated-test-token');axios.get.mockResolvedValue({data:{}});axios.post.mockResolvedValue({status:200});});
+test('verified account deletion logs out and returns home without calling hooks from a handler',async()=>{
+ render(<MemoryRouter initialEntries={['/settings']}><Routes><Route path="/settings" element={<Settings/>}/><Route path="/homepage" element={<h1>Home destination</h1>}/></Routes></MemoryRouter>);
+ fireEvent.click(screen.getByRole('button',{name:/^Delete Account$/}));
+ fireEvent.click(screen.getByRole('button',{name:/Yes, Delete Account/}));
+ fireEvent.change(await screen.findByLabelText('Verification code'),{target:{value:'123456'}});
+ fireEvent.submit(screen.getByLabelText('Verification code').closest('form'));
+ await screen.findByRole('heading',{name:'Home destination'});
+ expect(logout).toHaveBeenCalledTimes(1);
+ expect(axios.post).toHaveBeenCalledWith(expect.stringContaining('/auth/delete-account'),{verification_code:'123456'},expect.anything());
+});

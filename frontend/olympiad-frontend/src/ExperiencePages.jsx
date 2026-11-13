@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from "react";
+import React,{useEffect,useState,useRef} from "react";
 import axios from "axios";
 import {loginIntent} from "./navigation";
 import {Link} from "react-router-dom";
@@ -15,13 +15,15 @@ export function TeacherApplicationPage(){
  const {currentUser}=useAuth(),{lang}=useLanguage();
  const [form,setForm]=useState({first_name:"",last_name:"",birth_date:"",subject:"Mathematics",bio:""});
  const [state,setState]=useState(null),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false);
- useEffect(()=>{if(currentUser)axios.get(API+"/experience/teacher/me",{headers:headers()}).then(r=>setState(r.data)).catch(()=>{});},[currentUser]);
+ const [statusLoading,setStatusLoading]=useState(true),[statusError,setStatusError]=useState(false),[statusRetry,setStatusRetry]=useState(0);
+ useEffect(()=>{let live=true;if(!currentUser){setStatusLoading(false);return;}setStatusLoading(true);setStatusError(false);axios.get(API+"/experience/teacher/me",{headers:headers()}).then(r=>{if(live)setState(r.data)}).catch(()=>{if(live)setStatusError(true)}).finally(()=>{if(live)setStatusLoading(false)});return()=>{live=false}},[currentUser,statusRetry]);
  const submit=async e=>{e.preventDefault();setBusy(true);setNotice(""); try{const r=await axios.post(API+"/experience/teacher/apply",form,{headers:headers()});setState(r.data);setNotice(lang==="sq"?"Aplikimi u dërgua për verifikim.":"Your application awaits approval.");}
  catch(e){setNotice(typeof e.response?.data?.detail==="string"?e.response.data.detail:"Dërgimi dështoi.");}
  finally{setBusy(false);}};
  return <main className="p1-wrap p3-body"><PageTitle contentKey="page_teacher_application" kicker={lang==="sq"?"Bashkohu me ekipin":"Join the team"} title={lang==="sq"?"Apliko si mësues":"Apply as a teacher"}
  subtitle={lang==="sq"?"Aplikimet shqyrtohen nga administratori. Deri në miratim, nuk ke akses mësuesi.":"Applications are manually reviewed before teacher access is granted."}/>
  {!currentUser?<div className="p1-card"><Link to="/signup">Regjistrohu</Link> ose <Link to="/login" state={loginIntent("/teacher/apply")}>hyr në llogari</Link> për të aplikuar.</div>:
+ statusLoading?<p role="status">{lang==='sq'?'Duke ngarkuar aplikimin…':'Loading application…'}</p>:statusError?<div role="alert"><p>{lang==='sq'?'Statusi i aplikimit nuk u ngarkua.':'Could not load your application status.'}</p><button className="p1-btn" onClick={()=>setStatusRetry(n=>n+1)}>{lang==='sq'?'Provo përsëri':'Retry'}</button></div>:
  state&&state.status!=="not_applied"?<div className="p1-card"><h2>Statusi: {state.status}</h2><p className="p1-muted">{state.review_note||"Aplikimi yt është regjistruar."}</p></div>:
  <form className="p3-form p1-card" onSubmit={submit}>
  <div className="p1-grid two"><label>Emri<input className="p1-input" required value={form.first_name} onChange={e=>setForm({...form,first_name:e.target.value})}/></label>
@@ -67,11 +69,13 @@ export function SupportPage(){
  <Link className="p1-btn alt" to="/faq">FAQ →</Link></aside></div></main>;
 }
 export function TeacherWorkspace(){
+ const reviewVersion=useRef(0);
+ useEffect(()=>()=>{reviewVersion.current+=1},[]);
  const {lang}=useLanguage(),[classes,setClasses]=useState([]),[items,setItems]=useState([]),[form,setForm]=useState({forum_id:"",title:"",meet_url:"",starts_at:""}),[notice,setNotice]=useState(""),[chosen,setChosen]=useState(null),[answers,setAnswers]=useState([]),[grade,setGrade]=useState({});
  const [loading,setLoading]=useState(true),[loadError,setLoadError]=useState(false),[saving,setSaving]=useState(null);
  const reload=()=>{setLoading(true);setLoadError(false);Promise.all([axios.get(API+"/experience/teacher/classes",{headers:headers()}),axios.get(API+"/experience/teacher/courses",{headers:headers()})]).then(([c,i])=>{setClasses(c.data);setItems(i.data)}).catch(()=>setLoadError(true)).finally(()=>setLoading(false))};
  useEffect(()=>{reload()},[]);
- const open=async id=>{setChosen(id);try{const r=await axios.get(API+"/experience/teacher/courses/"+id+"/submissions",{headers:headers()});setAnswers(r.data);setGrade(Object.fromEntries(r.data.map(a=>[a.attempt_id,{score:a.score??0,feedback:a.feedback??""}])));}catch(e){setNotice("Nuk u lexuan dorëzimet.");}};
+ const open=async id=>{const version=++reviewVersion.current;setChosen(id);setAnswers([]);setGrade({});setNotice("");try{const r=await axios.get(API+"/experience/teacher/courses/"+id+"/submissions",{headers:headers()});if(version!==reviewVersion.current)return;setAnswers(r.data);setGrade(Object.fromEntries(r.data.map(a=>[a.attempt_id,{score:a.score??0,feedback:a.feedback??""}])));}catch(e){if(version===reviewVersion.current)setNotice("Nuk u lexuan dorëzimet. Provo përsëri.");}};
  const saveGrade=async id=>{if(saving!==null)return;setSaving(id);try{await axios.post(API+"/experience/teacher/submissions/"+id+"/grade",{score:Number(grade[id]?.score||0),feedback:grade[id]?.feedback||""},{headers:headers()});setNotice("Vlerësimi u ruajt.");await open(chosen);}catch(e){setNotice("Vlerësimi nuk u ruajt.");}finally{setSaving(null)}};
  const meeting=async e=>{e.preventDefault();try{await axios.post(API+"/experience/teacher/meetings",{...form,forum_id:Number(form.forum_id),starts_at:new Date(form.starts_at).toISOString().slice(0,19)},{headers:headers()});setNotice("Takimi u publikua.");}catch(e){setNotice(e.response?.data?.detail||"Takimi nuk u publikua.");}};
  return <main className="p1-wrap p3-body"><PageTitle kicker="Teacher workspace" title={lang==="sq"?"Klasat e mia":"My classes"} subtitle={lang==="sq"?"Vetëm forumet ku të ka caktuar administratori.":"Only classes assigned by an administrator."}/>

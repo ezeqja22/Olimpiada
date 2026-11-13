@@ -1,0 +1,22 @@
+import React from 'react';
+import {test,expect,vi} from 'vitest';
+import {render,screen,fireEvent} from '@testing-library/react';
+import {MemoryRouter} from 'react-router-dom';
+import axios from 'axios';
+import Feed from './Feed';
+vi.mock('axios',()=>({default:{get:vi.fn()}}));
+vi.mock('./context/LanguageContext',()=>({useLanguage:()=>({lang:'en'})}));
+vi.mock('./components/Layout',()=>({default:({children})=><main>{children}</main>}));
+vi.mock('./components/ToastProvider',()=>({useToast:()=>({showToast:vi.fn()})}));
+vi.mock('./hooks/useFeatureSettings',()=>({useFeatureSettings:()=>({checkFeatureEnabled:()=>true})}));
+vi.mock('./SearchBar',()=>({default:()=>null}));
+vi.mock('./components/feed/ProblemCard',()=>({default:({problem})=><article>{problem.title}</article>}));
+test('failed feed request exposes retry instead of a misleading empty list',async()=>{
+ localStorage.setItem('token','test-only');
+ axios.get.mockImplementation(url=>url.includes('/auth/me')?Promise.resolve({data:{id:1}}):Promise.reject(new Error('offline')));
+ render(<MemoryRouter><Feed/></MemoryRouter>);
+ expect(await screen.findByRole('alert')).toHaveTextContent('Could not load problems');
+ axios.get.mockImplementation(url=>url.includes('/auth/problems/?')?Promise.resolve({data:{problems:[{id:1,title:'Recovered problem'}]}}):Promise.resolve({data:{}}));
+ fireEvent.click(screen.getByRole('button',{name:'Retry'}));
+ await screen.findByText('Recovered problem');expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+});
