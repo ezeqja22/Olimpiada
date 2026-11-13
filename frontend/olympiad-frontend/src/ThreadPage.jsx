@@ -180,7 +180,7 @@ function ThreadPage() {
     }
 
     return (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="discussion-thread" style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
             <Header />
             
             <div style={{ 

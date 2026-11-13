@@ -6,6 +6,7 @@ function Card({
     padding = "lg",
     style = {},
     hover = false,
+    className = "",
     ...props
 }) {
     const getPadding = () => {
@@ -29,7 +30,7 @@ function Card({
 
     return (
         <div
-            className={hover ? "card-hover" : ""}
+            className={`ol-card ${hover ? "card-hover" : ""} ${className}`}
             style={cardStyles}
             {...props}
         >

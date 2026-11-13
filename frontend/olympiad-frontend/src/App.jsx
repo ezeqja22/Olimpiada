@@ -59,6 +59,7 @@ import ConfirmProvider from "./components/ConfirmProvider";
 import { FAQPage, SupportPage } from "./HelpPages";
 import { AdminFAQ, AdminSupport } from "./AdminHelp";
 import "./ux-foundations.css";
+import PlatformSurface from "./components/PlatformSurface";
 
 function ForumsEntry(){const {currentUser,authLoading}=useAuth();return authLoading?<p role="status">Loading…</p>:currentUser?<Forums/>:<PublicForums/>;}
 function ConnectedPage({children}){return <><Header/>{children}</>;}
@@ -88,7 +89,7 @@ function App() {
         <AnalyticsConsent /><RouteOrientation/>
         <ToastProvider>
           <ConfirmProvider>
-            <Routes>
+            <PlatformSurface><Routes>
               <Route path="/" element={<Navigate to="/homepage" replace />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/login" element={<Login />} />
@@ -252,7 +253,7 @@ function App() {
                 <Route path="parents" element={<AdminParents />} />
               </Route>
             <Route path="/learning-resources" element={<ProtectedRoute><ConnectedPage><Learning/></ConnectedPage></ProtectedRoute>}/><Route path="*" element={<ConnectedPage><main id="main-content" className="p1-wrap"><h1>Page not found</h1><p>This address does not match a page.</p><Link to="/homepage">Home</Link> · <Link to="/forums">Forums</Link> · <Link to="/feed">Problems</Link></main></ConnectedPage>}/>
-            </Routes>
+            </Routes></PlatformSurface>
           </ConfirmProvider>
         </ToastProvider>
       </AuthProvider>

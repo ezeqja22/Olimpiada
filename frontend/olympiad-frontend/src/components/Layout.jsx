@@ -17,14 +17,14 @@ function Layout({ children, showHomeButton = false, maxWidth = "1200px", backgro
     }, []);
 
     return (
-        <div style={{
+        <div className="ol-layout" style={{
             minHeight: "100vh",
             background: background,
             display: "flex",
             flexDirection: "column"
         }}>
             <Header showHomeButton={showHomeButton} />
-            <main id="main-content" tabIndex={-1} style={{
+            <main className="ol-layout-main" id="main-content" tabIndex={-1} style={{
                 flex: 1,
                 padding: isFullWidth ? "0" : (isMobile ? "4px" : spacing.xl),
                 maxWidth: isFullWidth ? "none" : maxWidth,

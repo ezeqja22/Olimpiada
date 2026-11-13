@@ -435,7 +435,7 @@ function CreateProblem() {
 
   return (
     <Layout showHomeButton={true}>
-      <div
+      <div className="problem-editor-page"
         style={{
           maxWidth: "860px",
           margin: "0 auto",
@@ -501,7 +501,7 @@ function CreateProblem() {
               left: 0,
               right: 0,
               height: "5px",
-              background: `linear-gradient(90deg, ${colors.primary}, ${secondaryColor})`,
+              background: colors.primary,
             }}
           />
 

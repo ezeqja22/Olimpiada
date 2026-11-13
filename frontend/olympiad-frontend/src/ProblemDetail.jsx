@@ -1036,7 +1036,7 @@ function ProblemDetail() {
 
   return (
     <Layout showHomeButton={true}>
-      <div
+      <div className="problem-reader"
         style={{
           background:
             "radial-gradient(circle at top left, rgba(26,77,58,0.12), transparent 32%), radial-gradient(circle at top right, rgba(118,75,162,0.13), transparent 28%)",

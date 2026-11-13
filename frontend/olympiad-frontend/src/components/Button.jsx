@@ -9,6 +9,7 @@ function Button({
     disabled = false,
     type = "button",
     style = {},
+    className = "",
     ...props 
 }) {
     const getVariantStyles = () => {
@@ -106,6 +107,7 @@ function Button({
 
     return (
         <button
+            className={`ol-button ol-button--${variant} ${className}`}
             type={type}
             onClick={onClick}
             disabled={disabled}

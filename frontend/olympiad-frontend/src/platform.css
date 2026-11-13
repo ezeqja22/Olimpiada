@@ -1,0 +1,74 @@
+/* Approved homepage palette, adapted to reading, discussion and editing tools.
+   The homepage is intentionally outside this scope. */
+.platform-surface { --paper:#faf9f5; --ink:#203e32; --muted:#56645c; --line:#dde3d9; --purple:#7254a3; --blue:#1d7cc6; min-height:100dvh; background:var(--paper); color:var(--ink); font:400 16px/1.6 system-ui,sans-serif; }
+.platform-surface .ol-layout { background:var(--paper)!important; }
+.platform-surface .ol-layout-main { min-width:0; }
+.platform-surface main { min-width:0; }
+.platform-surface main h1, .platform-surface .feed-mini-title, .platform-surface .forums-page__title { font-family:Georgia,'Times New Roman',serif!important; font-weight:400!important; font-size:clamp(30px,3.2vw,44px)!important; line-height:1.15!important; letter-spacing:-.03em!important; color:var(--ink)!important; text-wrap:balance; }
+.platform-surface main h2, .platform-surface main h3 { letter-spacing:-.02em; line-height:1.35; }
+.platform-surface :focus-visible { outline:3px solid var(--purple); outline-offset:3px; }
+.platform-surface button, .platform-surface a { touch-action:manipulation; }
+.platform-surface main :is(input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea) { font:inherit; color:var(--ink); background-color:white; border-color:#aebcb2!important; border-radius:6px!important; min-height:44px; max-width:100%; }
+.platform-surface main textarea { resize:vertical; }
+.platform-surface .ol-button { min-height:44px; padding:10px 18px!important; border-radius:7px!important; box-shadow:none!important; font-size:14px!important; }
+.platform-surface .ol-card { border:1px solid var(--line); border-radius:10px!important; box-shadow:none!important; }
+.platform-surface .site-page-intro { background:transparent!important; padding:0 0 28px; border:0; box-shadow:none; align-items:start; }
+.platform-surface .site-page-intro__kicker { color:var(--purple); font-size:12px; letter-spacing:.08em; }
+.platform-surface .site-page-intro p { color:var(--muted); max-width:65ch; }
+.platform-surface .p1-wrap { max-width:1200px; padding:0 32px; margin:36px auto; }
+.platform-surface .p1-card { border:1px solid var(--line); border-radius:10px; box-shadow:none; padding:24px; }
+.platform-surface .p1-grid { grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:20px; }
+.platform-surface .p1-top { align-items:flex-start; }
+.platform-surface .p1-pill { background:#eee7f4; color:#64458b; border-radius:4px; }
+.platform-surface .p1-muted { color:var(--muted); }
+.platform-surface .p1-note { border:1px solid var(--line); border-left:3px solid var(--blue); background:#f1f5f6; box-shadow:none; border-radius:6px; }
+.platform-surface .p1-btn { border-radius:7px; min-height:44px; padding:10px 18px; }
+.platform-surface .feed-page { max-width:1200px; padding:0 0 96px; }
+.platform-surface .feed-mini-banner { background:transparent; border:0; padding:8px 0 28px; border-radius:0; box-shadow:none; }
+.platform-surface .feed-mini-kicker { color:var(--purple); font-weight:600; }
+.platform-surface .feed-mini-kicker-dot { display:none; }
+.platform-surface .feed-mini-subtitle { max-width:64ch; color:var(--muted); font-weight:400; font-size:16px; }
+.platform-surface .feed-mini-stat { background:#eef2eb; border:0; border-radius:6px; box-shadow:none; }
+.platform-surface .feed-search-shell, .platform-surface .feed-tabs-card { background:white; border:1px solid var(--line); border-radius:8px; box-shadow:none; }
+.platform-surface .feed-tabs { gap:8px; }
+.platform-surface .feed-tab-button { border-radius:6px; box-shadow:none; }
+.platform-surface .problem-card { padding:24px!important; margin-bottom:18px; background:white!important; transform:none!important; }
+.platform-surface .problem-title { font-size:23px; font-weight:600; color:var(--ink); }
+.platform-surface .problem-description { font-size:16px; line-height:1.8; color:var(--ink); }
+.platform-surface .problem-tag { border-radius:4px; font-weight:500; }
+.platform-surface .problem-footer { border-color:var(--line); }
+.platform-surface .action-button { min-height:40px; border-radius:6px; }
+.platform-surface .empty-state { background:#f0f3ed; border:1px solid var(--line); border-radius:10px; box-shadow:none; }
+.platform-surface .create-fab, .platform-surface .forum-create-fab { border-radius:8px!important; box-shadow:0 3px 12px #173b2520!important; background:#1a4d3a!important; }
+.platform-surface .problem-reader { background:transparent!important; padding:0!important; }
+.platform-surface .problem-reader > section { border-radius:10px!important; box-shadow:none!important; }
+.platform-surface .problem-editor-page { max-width:1000px!important; }
+.platform-surface .problem-editor-page > div:first-child { text-align:left!important; }
+.platform-surface .vme { border-color:#aebcb2; border-radius:8px; background:white; }
+.platform-surface .vme-toolbar { background:#f1f3ee; border-color:var(--line); flex-wrap:wrap; }
+.platform-surface .vme-toolbar button { min-width:36px; min-height:36px; }
+.platform-surface .vme-canvas { min-height:180px; font-size:16px; line-height:1.8; }
+.platform-surface .katex-display { max-width:100%; overflow-x:auto; overflow-y:hidden; padding-block:4px; }
+.platform-surface .forums-page { padding:8px 0 48px!important; }
+.platform-surface { --forum-page-bg:#faf9f5; --forum-surface-soft:#f0f3ed; --forum-text:#203e32; --forum-muted:#56645c; --forum-border:#dde3d9; --forum-radius-md:8px; --forum-radius-lg:10px; --forum-shadow-md:none; }
+.platform-surface .forums-page__header { padding-bottom:24px; }
+.platform-surface .forums-page__subtitle { color:var(--muted)!important; }
+.platform-surface :is(.forum-detail-info-panel,.forum-detail-chat-panel,.forum-info-panel,.forum-create-modal,.forum-invite-modal) { border-radius:10px!important; box-shadow:none!important; }
+.platform-surface :is(.forum-chat-header,.forum-detail-chat-header,.forum-info-header,.forum-create-modal__header) { background:#f1f3ee!important; color:var(--ink); }
+.platform-surface :is(.forum-detail-message-bubble,.forum-message-bubble) { border-radius:8px!important; box-shadow:none!important; }
+.platform-surface .forum-detail-composer { background:white!important; }
+.platform-surface .discussion-thread { background:var(--paper); }
+@media(max-width:760px) {
+ .platform-surface .ol-layout-main { padding:20px 16px!important; }
+ .platform-surface .p1-wrap { padding:0 16px; margin:24px auto; }
+ .platform-surface .p1-card, .platform-surface .problem-card { padding:18px!important; }
+ .platform-surface .feed-mini-banner { align-items:flex-start; flex-direction:column; }
+ .platform-surface .feed-mini-stats { display:none; }
+ .platform-surface .problem-editor-page { padding:0!important; }
+ .platform-surface .p1-grid, .platform-surface .p1-grid.two { grid-template-columns:1fr; }
+ .platform-surface .forum-detail-page { padding:0!important; }
+}
+.platform-surface .p1-wrap a:not(.p1-btn), .platform-surface .site-page-intro__action { color:#1a4d3a; text-underline-offset:4px; }
+.platform-surface .p1-wrap .p1-top { margin-top:24px; }
+.platform-surface .p1-wrap .p1-rows { gap:20px; }
+.platform-surface .p1-wrap .p1-card h2 { margin-top:0; }
