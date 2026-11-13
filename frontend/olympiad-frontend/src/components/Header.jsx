@@ -8,6 +8,7 @@ import { primaryNavigation, moreNavigation, subjects } from "../navigation";
 import NotificationBell from "./NotificationBell";
 import ForumsSidebar from "./ForumsSidebar";
 import "./UnifiedNavigation.css";
+import brandMark from "../assets/LOGO_SIPER_ge2sdy.svg";
 const API = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 export default function Header() {
   const { currentUser, logout } = useAuth(),
@@ -120,12 +121,12 @@ export default function Header() {
               alt=""
               src={
                 siteSettings.site_logo ||
-                "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760809158/Olimpiada_Logo_hosmuj.png"
+                brandMark
               }
             />
             <span>Olimpiada</span>
           </Link>
-          <nav className="ol-primary" aria-label="Primary">
+          <nav className="ol-primary" aria-label={lang === "sq" ? "Navigimi kryesor" : "Primary navigation"}>
             {primaryNavigation.map(nav)}
           </nav>
           <div className="ol-nav-actions">
@@ -151,7 +152,7 @@ export default function Header() {
             id="ol-menu"
             className="ol-menu"
             ref={panel}
-            aria-label="All navigation"
+            aria-label={lang === "sq" ? "Navigimi i plotë" : "All navigation"}
           >
             <div>
               <h2>{lang === "sq" ? "Platforma" : "Browse"}</h2>

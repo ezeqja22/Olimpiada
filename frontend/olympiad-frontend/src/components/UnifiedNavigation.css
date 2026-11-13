@@ -215,3 +215,17 @@
     transition: none !important;
   }
 }
+/* Shared navigation refinement: destinations, account controls and permissions stay unchanged. */
+.ol-nav { background: #1a4d3a; }
+.ol-nav-bar { max-width: 1248px; min-height: 80px; }
+.ol-brand { letter-spacing: -.035em; font-size: 1.4rem; }
+.ol-primary a { font-size: 14px; border-radius: 6px; }
+.ol-primary a.active { background: #ffffff14; box-shadow: inset 0 -2px #d6e4da; }
+.ol-nav-actions > button { border-color: #ffffff40; border-radius: 7px; }
+.ol-menu { background: #fafbf8; border-color: #dde3d9; }
+.ol-menu a, .ol-menu button { border-radius: 6px; }
+.ol-menu h2 { color: #7254a3; letter-spacing: .04em; }
+@media (max-width: 600px) {
+  .ol-nav-bar { min-height: 68px; }
+  .ol-brand { font-size: 1.15rem; }
+}

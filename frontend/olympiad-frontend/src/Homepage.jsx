@@ -1,447 +1,99 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
-import {
-  ChevronDown,
-  ArrowUpRight,
-  LogOut,
-  Menu,
-  Settings,
-  ShieldCheck,
-  UserRound,
-} from "lucide-react";
-import { getUserInitial } from "./utils";
-import NotificationBell from "./components/NotificationBell";
-import { useSiteSettings } from "./hooks/useSiteSettings";
-import { useFeatureSettings } from "./hooks/useFeatureSettings";
-import { useAuth } from "./context/AuthContext";
-import { useToast } from "./components/ToastProvider";
-import AboutFounders from "./components/AboutFounders";
+import { ArrowRight, BookOpen, MessagesSquare, CalendarDays, LifeBuoy } from "lucide-react";
 import Header from "./components/Header";
-import ForumsSidebar from "./components/ForumsSidebar";
-import "./Homepage.css";
-import "./phase3.css";
 import RichInlineText from "./components/RichInlineText";
-import {useLanguage,LanguageSwitch} from "./context/LanguageContext";
-import biologySubjectIcon from "./assets/Biology_subject_pcxmoa.svg";
-import chemistrySubjectIcon from "./assets/chemistry_subject_r4n7jq.svg";
-import computerEngineeringSubjectIcon from "./assets/computer_engineering_subject_u2m2ze.svg";
-import communityIcon from "./assets/Comunity_lejla_1_kpxiv0.svg";
-import mathSubjectIcon from "./assets/math_subject_iqigfx.svg";
-import numratoreIcon from "./assets/numratore_xpudpv.svg";
-import olimpiadaLogo from "./assets/Olimpiada_Logo_hosmuj.png";
-import otherSubjectIcon from "./assets/other_subject_nkoxvo.svg";
-import physicsSubjectIcon from "./assets/physics_subject_m90gto.svg";
-import trophyIcon from "./assets/trofeu_px38ap.svg";
+import { useLanguage } from "./context/LanguageContext";
+import { useSiteSettings } from "./hooks/useSiteSettings";
+import { SECTION_DEFAULTS } from "./siteContentConfig";
+import mathIcon from "./assets/math_subject_iqigfx.svg";
+import physicsIcon from "./assets/physics_subject_m90gto.svg";
+import chemistryIcon from "./assets/chemistry_subject_r4n7jq.svg";
+import biologyIcon from "./assets/Biology_subject_pcxmoa.svg";
+import computingIcon from "./assets/computer_engineering_subject_u2m2ze.svg";
+import otherIcon from "./assets/other_subject_nkoxvo.svg";
+import "./HomepageRefined.css";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
-
+const API = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 const subjects = [
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Computer Science",
-  "Other",
+  ["mathematics", "Matematikë", "Mathematics", mathIcon],
+  ["physics", "Fizikë", "Physics", physicsIcon],
+  ["chemistry", "Kimi", "Chemistry", chemistryIcon],
+  ["biology", "Biologji", "Biology", biologyIcon],
+  ["computer-science", "Informatikë", "Computer science", computingIcon],
+  ["other", "Të tjera", "Other subjects", otherIcon],
+];
+const features = [
+  ["home_feature_weekly", "/weekly", CalendarDays, "Shiko problemin", "View weekly problem"],
+  ["home_feature_forums", "/forums", MessagesSquare, "Hap forumet", "Browse forums"],
+  ["home_feature_courses", "/courses", BookOpen, "Shiko materialet", "Browse learning materials"],
+  ["home_feature_support", "/support", LifeBuoy, "Kontakto suportin", "Contact support"],
 ];
 
-const featureCards = [
-  {
-    title: "Mathematical Excellence",
-    description:
-      "Solve complex mathematical problems with advanced LaTeX rendering and visual math editor tools.",
-    icon: numratoreIcon,
-  },
-  {
-    title: "Community Learning",
-    description:
-      "Connect with fellow problem-solvers, share solutions, and learn from the community's collective knowledge.",
-    icon: communityIcon,
-  },
-  {
-    title: "Olympiad Focus",
-    description:
-      "Practice with olympiad-style problems across multiple subjects and difficulty levels to prepare for competitions.",
-    icon: trophyIcon,
-  },
-];
-
-const getSubjectIcon = (subject) => {
-  const subjectLower = subject?.toLowerCase() || "";
-
-  if (subjectLower.includes("biology")) {
-    return biologySubjectIcon;
-  }
-  if (subjectLower.includes("chemistry")) {
-    return chemistrySubjectIcon;
-  }
-  if (subjectLower.includes("mathematics") || subjectLower.includes("math")) {
-    return mathSubjectIcon;
-  }
-  if (subjectLower.includes("physics")) {
-    return physicsSubjectIcon;
-  }
-  if (subjectLower.includes("computer")) {
-    return computerEngineeringSubjectIcon;
-  }
-
-  return otherSubjectIcon;
-};
-
-function Homepage() {
-  const {lang,t}=useLanguage();
-  const [contentBlocks,setContentBlocks]=useState({});
-  const [teacherProfiles,setTeacherProfiles]=useState([]);
-  const copy=(key,field,fallback)=>contentBlocks[key]?.[field+"_"+lang]||fallback;
-  const imageFor=(key)=>contentBlocks?.[key]?.image_url||"";
-  useEffect(()=>{
-     axios.get(API_URL+"/experience/content").then(r=>setContentBlocks(r.data && typeof r.data==="object" ? r.data : {})).catch(()=>{});
-     axios.get(API_URL+"/experience/teachers").then(r=>setTeacherProfiles(Array.isArray(r.data) ? r.data : [])).catch(()=>{});
-  },[]);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [showSubjectDropdown, setShowSubjectDropdown] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
-  const [myForums, setMyForums] = useState([]);
-  const [loadingForums, setLoadingForums] = useState(false);
-  const [pinnedForums, setPinnedForums] = useState(() => {
-    const saved = localStorage.getItem("pinnedForums");
-    if (!saved) return [];
-    try { const parsed=JSON.parse(saved); return Array.isArray(parsed) ? parsed : []; }
-    catch { return []; }
-  });
-
-  const navigate = useNavigate();
-  const { logout } = useAuth();
-  const { showToast } = useToast();
-  const { siteSettings = {}, loading: settingsLoading } = useSiteSettings();
-  const { checkFeatureEnabled, showFeatureDisabledAlert } =
-    useFeatureSettings();
-
-  useEffect(() => {
-    if (siteSettings.site_name) {
-      document.title = siteSettings.site_name;
-    }
-
-    if (siteSettings.site_favicon) {
-      const link =
-        document.querySelector("link[rel*='icon']") ||
-        document.createElement("link");
-
-      link.type = "image/x-icon";
-      link.rel = "shortcut icon";
-      link.href = siteSettings.site_favicon;
-      document.getElementsByTagName("head")[0].appendChild(link);
-    }
-
-    if (siteSettings.site_theme) {
-      document.documentElement.setAttribute(
-        "data-theme",
-        siteSettings.site_theme,
-      );
-      document.body.className = `theme-${siteSettings.site_theme}`;
-    }
-  }, [
-    siteSettings.site_name,
-    siteSettings.site_favicon,
-    siteSettings.site_theme,
-  ]);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchCurrentUser();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!currentUser || settingsLoading) return;
-
-    const notificationAlertShown = sessionStorage.getItem(
-      "notificationAlertShown",
-    );
-
-    if (
-      !notificationAlertShown &&
-      !checkFeatureEnabled("notifications_enabled")
-    ) {
-      const timeout = setTimeout(() => {
-        showToast("Notifications are temporarily disabled", "error");
-        sessionStorage.setItem("notificationAlertShown", "true");
-      }, 1000);
-
-      return () => clearTimeout(timeout);
-    }
-
-    return undefined;
-  }, [currentUser, settingsLoading, checkFeatureEnabled, showToast]);
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        setShowSubjectDropdown(false);
-        setShowUserDropdown(false);
-        setShowHamburgerMenu(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  const fetchCurrentUser = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCurrentUser(response.data);
-    } catch (error) {
-      console.error("Error fetching current user:", error);
-      setCurrentUser(null);
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
-    setCurrentUser(null);
-    setShowUserDropdown(false);
-    setShowHamburgerMenu(false);
-    navigate("/homepage", { replace: true });
-  };
-
-  const closeDropdowns = () => {
-    setShowSubjectDropdown(false);
-    setShowUserDropdown(false);
-  };
-
-  const handleSubjectClick = (subject) => {
-    closeDropdowns();
-    navigate(`/subject/${subject.toLowerCase().replace(/\s+/g, "-")}`);
-  };
-
-  const fetchMyForums = async () => {
-    if (!currentUser) return;
-
-    setLoadingForums(true);
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_URL}/auth/forums/my-forums`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setMyForums(response.data);
-    } catch (error) {
-      console.error("Error fetching my forums:", error);
-      setMyForums([]);
-    } finally {
-      setLoadingForums(false);
-    }
-  };
-
-  const handleHamburgerClick = async () => {
-    const willOpen = !showHamburgerMenu;
-    setShowHamburgerMenu(willOpen);
-    closeDropdowns();
-
-    if (willOpen) {
-      await fetchMyForums();
-    }
-  };
-
-  const handleForumClick = (forumId) => {
-    if (!checkFeatureEnabled("forums_enabled")) {
-      showFeatureDisabledAlert("Forums");
-      return;
-    }
-
-    navigate(`/forum/${forumId}`);
-    setShowHamburgerMenu(false);
-  };
-
-  const togglePin = (forumId) => {
-    const newPinnedForums = pinnedForums.includes(forumId)
-      ? pinnedForums.filter((id) => id !== forumId)
-      : [...pinnedForums, forumId];
-
-    setPinnedForums(newPinnedForums);
-    localStorage.setItem("pinnedForums", JSON.stringify(newPinnedForums));
-  };
-
-  const sortedForums = [
-    ...myForums.filter((forum) => pinnedForums.includes(forum.id)),
-    ...myForums.filter((forum) => !pinnedForums.includes(forum.id)),
-  ];
-
-  const siteName = siteSettings.site_name || "Olimpiada";
-  const siteLogo =
-    siteSettings.site_logo && siteSettings.site_logo.trim() !== ""
-      ? siteSettings.site_logo
-      : olimpiadaLogo;
-
-  const openSubjectDropdown = () => {
-    setShowSubjectDropdown((previous) => !previous);
-    setShowUserDropdown(false);
-  };
-
-  const openUserDropdown = () => {
-    setShowUserDropdown((previous) => !previous);
-    setShowSubjectDropdown(false);
-  };
-
-  return (
-    <div className="homepage-page">
-      <Header />
-
-      <main id="main-content" tabIndex={-1}>
-        <section className="homepage-hero">
-          <div className="homepage-hero-inner">
-            <div className="p3-hero-copy">
-              <p className="hero-kicker">{t("heroLabel")}</p>
-              <h1><RichInlineText text={copy("hero","title",t("heroTitle"))} /></h1>
-              <p className="hero-description p3-rich-inline"><RichInlineText text={copy("hero","subtitle",t("heroDesc"))} /></p>
-              <div className="hero-actions">
-                <Link to="/explore" className="hero-button hero-button-primary">{t("start")}</Link>
-                <Link to="/weekly" className="hero-button hero-button-secondary">{t("weekly")} →</Link>
-              </div>
-            </div>
-            <div className="p3-hero-image">
-              {imageFor("hero")?<img src={imageFor("hero")} fetchPriority="high" decoding="async" alt={lang==="sq"?"Nxënës duke zgjidhur detyra në një olimpiadë":"Student solving problems at a mathematics olympiad"} />:
-              <div className="p3-hero-placeholder" aria-hidden="true"><span>∞</span></div>}
-              <div className="p3-photo-caption">✦ {t("heroLabel")}</div>
-            </div>
-          </div>
-        </section>
-        <section className="p3-home-shell">
-          <header className="p3-section-head p3-section-head--intro">
-            <div className="p3-section-heading-copy">
-              <span className="p3-eyebrow p3-section-label"><span className="p3-label-dot" aria-hidden="true" />{lang==="sq"?"Olimpiada.al · Hapësira jote":"Olimpiada.al · Your space"}</span>
-              <h2><RichInlineText text={copy("home_intro","title",t("popular"))} /></h2>
-            </div>
-            <div className="p3-intro-aside">
-              <p className="p3-section-summary p3-rich-inline"><RichInlineText text={copy("home_intro","subtitle",lang==="sq"
-                ?"Nga Problema e Javës te forumet, materialet dhe testet: gjej mjetet që të ndihmojnë të përparosh."
-                :"From the Problem of the Week to forums, lessons and tests: find the tools to take your next step.")} /></p>
-              {imageFor("home_intro") && <img className="p3-section-thumb" loading="lazy" src={imageFor("home_intro")} alt="Olimpiada" />}
-            </div>
-          </header>
-          <div className="p3-feature-grid">
-            {[
-              {key:"home_feature_weekly",icon:"✦",title:t("weekly"),description:lang==="sq"?"Një problem i ri çdo javë dhe publikim i zgjidhjeve.":"A new challenge every week with published solutions.",to:"/weekly"},
-              {key:"home_feature_forums",icon:"◈",title:t("forums"),description:lang==="sq"?"Diskuto ide dhe puno me mësues e nxënës të tjerë.":"Discuss ideas with teachers and peers.",to:"/forums"},
-              {key:"home_feature_courses",icon:"◷",title:t("courses"),description:lang==="sq"?"Teste të programuara dhe materiale të organizuara.":"Scheduled tests and structured study materials.",to:"/courses"},
-              {key:"home_feature_support",icon:"☏",title:t("support"),description:lang==="sq"?"Ndihmë e shpejtë kur të duhet.":"Help when you need it.",to:"/support"}
-            ].map(f=><article className="p3-feature-card" key={f.key}>
-              {imageFor(f.key) && <img className="p3-feature-card__image" loading="lazy" decoding="async" src={imageFor(f.key)} alt="" />}
-              <span aria-hidden="true">{f.icon}</span>
-              <h3><RichInlineText text={copy(f.key,"title",f.title)} /></h3>
-              <p className="p3-rich-inline"><RichInlineText text={copy(f.key,"subtitle",f.description)} /></p>
-              <Link className="p3-feature-card__action" to={f.to}>{t("learn")} →</Link></article>)}
-          </div>
-          <div className="p3-visual-row">
-            {imageFor("competition")?<img loading="lazy" decoding="async" src={imageFor("competition")} alt={lang==="sq"?"Salla e garës gjatë një olimpiade matematike":"Mathematics olympiad competition hall"}/>:
-              <div className="p3-visual-fallback" aria-hidden="true">✧</div>}
-            <div className="p3-visual-copy"><span className="p3-eyebrow">{lang==="sq"?"Fryma e olimpiadës":"Olympiad spirit"}</span>
-              <h2><RichInlineText text={copy("competition","title",t("competition"))} /></h2>
-              <p className="p3-rich-inline"><RichInlineText text={copy("competition","subtitle",t("competitionDesc"))} /></p><Link to="/weekly">{t("discover")} →</Link></div>
-          </div>
-          <div className="p3-visual-row reverse">
-            <div className="p3-visual-copy"><span className="p3-eyebrow">{lang==="sq"?"Komuniteti ynë":"Our community"}</span>
-              <h2><RichInlineText text={copy("community","title",t("community"))} /></h2>
-              <p className="p3-rich-inline"><RichInlineText text={copy("community","subtitle",t("heroDesc"))} /></p><Link to="/forums">{t("meet")} →</Link></div>
-            {imageFor("community")?<img loading="lazy" decoding="async" src={imageFor("community")} alt={lang==="sq"?"Ekipi shqiptar në Olimpiadën Ndërkombëtare të Matematikës":"Albanian team at the International Mathematical Olympiad"}/>:
-              <div className="p3-visual-fallback" aria-hidden="true">★</div>}
-          </div>
-          {teacherProfiles.length>0&&<section className="p3-mentors">
-            <header className="p3-section-head p3-section-head--mentors">
-              <div className="p3-section-heading-copy">
-                <span className="p3-eyebrow p3-section-label"><span className="p3-label-dot" aria-hidden="true" />{lang==="sq"?"Mentorët tanë":"Meet your mentors"}</span>
-                <h2><RichInlineText text={copy("home_mentors","title",lang==="sq"?"Përparimi yt nis me mentorin e duhur.":"Your next breakthrough starts with the right mentor.")} /></h2>
-                <p className="p3-section-summary p3-rich-inline"><RichInlineText text={copy("home_mentors","subtitle",lang==="sq"
-                  ?"Mëso hap pas hapi, sqaro pyetjet dhe përgatitu më mirë me udhëzim individual."
-                  :"Ask better questions, build confidence and make progress with one-to-one guidance.")} /></p>
-                {imageFor("home_mentors")&&<img className="p3-mentor-accent" src={imageFor("home_mentors")} loading="lazy" alt="" />}
-              </div>
-              <Link to="/tutoring" className="p3-mentor-action">
-                {lang==="sq"?"Shiko seancat individuale":"Explore one-to-one sessions"}
-                <ArrowUpRight size={18} aria-hidden="true" />
-              </Link>
-            </header>
-            <div className="p3-feature-grid">{teacherProfiles.slice(0,3).map(person=><article className="p3-mentor-card" key={person.user_id}>
-              <div><span className="p3-eyebrow">{person.subject}</span><h3>{person.first_name} {person.last_name}</h3>
-                <p className="p3-rich-inline"><RichInlineText text={person.bio} /></p></div></article>)}</div>
-          </section>}
-          <div className="p3-partner-section">
-            <div><span>{t("partner")}</span><h3><RichInlineText text={copy("partner","title","Spark Education")} /></h3>
-              <p className="p3-rich-inline"><RichInlineText text={copy("partner","subtitle",lang==="sq"?"Bashkë për më shumë mundësi në matematikë dhe shkenca.":"Building new opportunities in mathematics and science.")} /></p></div>
-            {imageFor("partner")?<img loading="lazy" decoding="async" src={imageFor("partner")} alt="Logoja e SPARK Education" />:<div className="p3-spark-wordmark">SPARK</div>}
-          </div>
-          <section className="p3-final-cta" style={imageFor("cta")?{backgroundImage:`linear-gradient(90deg,rgba(7,36,56,.94),rgba(7,36,56,.54)),url("${imageFor("cta")}")`}:undefined}>
-            <span className="p3-eyebrow">Olimpiada.al</span>
-            <h2><RichInlineText text={copy("cta","title",lang==="sq"?"Gati për sfidën tjetër?":"Ready for your next challenge?")} /></h2>
-            <p className="p3-rich-inline"><RichInlineText text={copy("cta","subtitle",lang==="sq"?"Fillo me Problemen e Javës dhe eksploro materialet.":"Start with the Problem of the Week and explore learning resources.")} /></p>
-            <Link to={contentBlocks.cta?.button_url||"/explore"} className="p1-btn">{lang==="sq"?"Fillo tani":"Get started"} →</Link>
-          </section>
-        </section>
-        <AboutFounders />
-        <footer className="p3-footer"><span>© {new Date().getFullYear()} Olimpiada.al · {t("allRights")}</span>
-          <div><Link to="/faq">{t("faq")}</Link><Link to="/support">{t("contact")}</Link><Link to="/teacher/apply">{t("apply")}</Link></div></footer>
-      </main>
-
-      {(showSubjectDropdown || showUserDropdown) && (
-        <button
-          className="page-backdrop dropdown-backdrop"
-          onClick={closeDropdowns}
-          aria-label="Close open menu"
-        />
-      )}
-
-      <ForumsSidebar
-        open={showHamburgerMenu}
-        onClose={() => setShowHamburgerMenu(false)}
-        forumsEnabled={checkFeatureEnabled("forums_enabled")}
-        loading={loadingForums}
-        forums={sortedForums}
-        pinnedForums={pinnedForums}
-        onForumClick={handleForumClick}
-        onTogglePin={togglePin}
-      />
-    </div>
-  );
+function GeometryPractice({ sq }) {
+  const [answer, setAnswer] = useState(false);
+  return <aside className="home-practice" aria-labelledby="practice-title">
+    <div className="home-practice-label"><span>{sq ? "Ushtrim i shkurtër" : "Quick practice"}</span><span>{sq ? "Gjeometri" : "Geometry"}</span></div>
+    <svg viewBox="0 0 400 225" role="img" aria-label={sq ? "Trekëndëshi ABC me M në mes të brinjës BC. Segmenti AM ndan dy trekëndësha me baza të barabarta." : "Triangle ABC with M at the midpoint of BC. AM divides it into two triangles with equal bases."}>
+      <path d="M200 30 L50 190 L200 190 Z" fill="#e9e2f2" />
+      <path d="M200 30 L200 190 L350 190 Z" fill="#e5eee7" />
+      <path d="M200 30 L50 190 L350 190 Z" fill="none" stroke="#1a4d3a" strokeWidth="2" />
+      <path d="M200 30 V190" stroke="#7254a3" strokeWidth="2" strokeDasharray="5 5" />
+      <path d="M120 185 V195 M275 185 V195" stroke="#1a4d3a" strokeWidth="2" />
+      <g fill="#1a4d3a" fontFamily="Georgia, serif" fontSize="18"><text x="194" y="21">A</text><text x="31" y="207">B</text><text x="351" y="207">C</text><text x="192" y="214">M</text><text x="124" y="153">24</text><text x="257" y="153">?</text></g>
+    </svg>
+    <h2 id="practice-title">{sq ? "Dy trekëndësha, një lartësi" : "Two triangles, one height"}</h2>
+    <p>{sq ? "M është mesi i BC. Sipërfaqja e trekëndëshit ABM është 24 cm². Sa është sipërfaqja e ABC?" : "M is the midpoint of BC. Triangle ABM has an area of 24 cm². What is the area of ABC?"}</p>
+    <button type="button" aria-expanded={answer} aria-controls="practice-answer" onClick={() => setAnswer(!answer)}>{answer ? (sq ? "Mbyll shpjegimin" : "Hide explanation") : (sq ? "Shiko shpjegimin" : "Show explanation")} <span aria-hidden="true">{answer ? '−' : '+'}</span></button>
+    {answer && <p id="practice-answer" className="home-answer">{sq ? "Bazat BM dhe MC janë të barabarta dhe lartësia është e njëjtë. Të dy trekëndëshat kanë sipërfaqe 24 cm², prandaj ABC ka sipërfaqe 48 cm²." : "BM and MC are equal and share the same height. Each triangle has an area of 24 cm², so ABC has an area of 48 cm²."}</p>}
+  </aside>;
 }
 
-function UserDropdown({ currentUser, onLogout, onClose, mobile = false }) {
-  const {t}=useLanguage();
-  return (
-    <div className={`header-dropdown user-dropdown ${mobile ? "mobile" : ""}`}>
-      <Link to="/profile" className="dropdown-row" onClick={onClose}>
-        <UserRound size={17} />
-        <span>{t("profile")}</span>
-      </Link>
-
-      <Link to="/family" className="dropdown-row" onClick={onClose}><UserRound size={17} /><span>{t("family")}</span></Link>
-
-      <Link to="/settings" className="dropdown-row" onClick={onClose}>
-        <Settings size={17} />
-        <span>{t("settings")}</span>
-      </Link>
-
-      {currentUser && ["admin", "moderator", "reviewer", "super_admin"].includes(currentUser.role) && (
-        <Link
-          to="/admin"
-          className="dropdown-row dropdown-row-admin"
-          onClick={onClose}
-        >
-          <ShieldCheck size={17} />
-          <span>{t("admin")}</span>
-        </Link>
-      )}
-
-      <button className="dropdown-row dropdown-row-danger" onClick={onLogout}>
-        <LogOut size={17} />
-        <span>{t("logout")}</span>
-      </button>
-    </div>
-  );
+export default function Homepage() {
+  const { lang, t } = useLanguage();
+  const sq = lang === "sq";
+  const { siteSettings } = useSiteSettings();
+  const [blocks, setBlocks] = useState({});
+  const [teachers, setTeachers] = useState([]);
+  useEffect(() => {
+    const controller = new AbortController();
+    axios.get(API + "/experience/content", { signal: controller.signal }).then(r => setBlocks(r.data && !Array.isArray(r.data) && typeof r.data === "object" ? r.data : {})).catch(() => {});
+    axios.get(API + "/experience/teachers", { signal: controller.signal }).then(r => setTeachers(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    return () => controller.abort();
+  }, []);
+  useEffect(() => { document.title = siteSettings.site_name || "Olimpiada"; }, [siteSettings.site_name]);
+  const text = (key, field) => <RichInlineText text={blocks[key]?.[`${field}_${lang}`] || SECTION_DEFAULTS[key]?.[`${field}_${lang}`] || ""} />;
+  const picture = (key, priority = false) => blocks[key]?.image_url ? <img className="home-cms-image" src={blocks[key].image_url} alt="" width="720" height="480" loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : undefined} decoding="async" /> : null;
+  return <div className="home-refined">
+    <Header />
+    <main id="main-content" tabIndex={-1}>
+      <section className="home-hero home-wrap" aria-labelledby="home-title">
+        <div className="home-hero-copy">
+          <p className="home-eyebrow">{sq ? "Matematikë · Shkenca · Olimpiada" : "Mathematics · Science · Olympiads"}</p>
+          <h1 id="home-title">{text("hero", "title")}</h1>
+          <p className="home-lead">{text("hero", "subtitle")}</p>
+          <div className="home-actions"><Link className="home-button" to="/feed">{sq ? "Shfleto problemet" : "Browse problems"}<ArrowRight size={18} aria-hidden="true" /></Link><Link className="home-text-link" to="/weekly">{t("weekly")}<ArrowRight size={16} aria-hidden="true" /></Link></div>
+        </div>
+        {picture("hero", true) || <GeometryPractice sq={sq} />}
+      </section>
+      <section className="home-subject-section" aria-labelledby="subjects-title"><div className="home-wrap">
+        <h2 id="subjects-title" className="home-eyebrow">{sq ? "Zgjidh lëndën" : "Choose a subject"}</h2>
+        <div className="home-subjects">{subjects.map(([slug, al, en, icon]) => <Link to={`/subject/${slug}`} key={slug}><img src={icon} width="34" height="34" alt="" /><span>{sq ? al : en}</span><ArrowRight size={15} aria-hidden="true" /></Link>)}</div>
+      </div></section>
+      <section className="home-learning home-wrap" aria-labelledby="learning-title">
+        <header><p className="home-eyebrow">{sq ? "Në platformë" : "On the platform"}</p><h2 id="learning-title">{text("home_intro", "title")}</h2><p>{text("home_intro", "subtitle")}</p>{picture("home_intro")}</header>
+        <div className="home-learning-list">{features.filter(([, to]) => to !== "/forums" || siteSettings.forums_enabled !== false).map(([key, to, Icon, al, en]) => <article key={key}>
+          <Icon className="home-feature-icon" size={23} aria-hidden="true" /><div>{picture(key)}<h3>{text(key, "title")}</h3><p>{text(key, "subtitle")}</p><Link className="home-text-link" to={to}>{sq ? al : en}<ArrowRight size={16} aria-hidden="true" /></Link></div>
+        </article>)}</div>
+      </section>
+      <section className="home-community-section"><div className="home-wrap home-community-grid">
+        {[['competition', '/weekly', sq ? 'Përgatitje' : 'Practice', sq ? 'Shiko problemin e javës' : 'View the weekly problem'], ['community', '/forums', sq ? 'Diskutime' : 'Discussion', sq ? 'Shfleto diskutimet' : 'Browse discussions']].filter(([, to]) => to !== '/forums' || siteSettings.forums_enabled !== false).map(([key, to, label, action]) => <article key={key}>{picture(key)}<p className="home-eyebrow">{label}</p><h2>{text(key, 'title')}</h2><p>{text(key, 'subtitle')}</p><Link className="home-text-link" to={to}>{action}<ArrowRight size={16} aria-hidden="true" /></Link></article>)}
+      </div></section>
+      {teachers.length > 0 && <section className="home-wrap home-mentors"><header><p className="home-eyebrow">{sq ? 'Udhëzim individual' : 'Individual guidance'}</p><h2>{text('home_mentors', 'title')}</h2><p>{text('home_mentors', 'subtitle')}</p>{picture('home_mentors')}<Link className="home-text-link" to="/tutoring">{sq ? 'Shiko seancat individuale' : 'View tutoring sessions'}<ArrowRight size={16} aria-hidden="true" /></Link></header><div>{teachers.slice(0, 3).map(person => <article key={person.user_id}><p className="home-eyebrow">{person.subject}</p><h3>{person.first_name} {person.last_name}</h3><p><RichInlineText text={person.bio} /></p></article>)}</div></section>}
+      <section className="home-wrap home-partner"><div><p className="home-eyebrow">{t('partner')}</p><h2>{text('partner', 'title')}</h2></div><p>{text('partner', 'subtitle')}</p>{picture('partner')}</section>
+      <section className="home-closing"><div className="home-wrap"><div><h2>{text('cta', 'title')}</h2><p>{text('cta', 'subtitle')}</p><Link className="home-button" to={blocks.cta?.button_url || '/explore'}>{sq ? 'Eksploro platformën' : 'Explore the platform'}<ArrowRight size={18} aria-hidden="true" /></Link></div>{picture('cta')}</div></section>
+    </main>
+    <footer className="home-footer home-wrap"><Link className="home-footer-brand" to="/homepage">{siteSettings.site_name || 'Olimpiada'}</Link><nav aria-label={sq ? 'Lidhje ndihmëse' : 'Helpful links'}><Link to="/faq">{t('faq')}</Link><Link to="/support">{t('support')}</Link><Link to="/tutoring">{sq ? 'Seanca individuale' : 'Tutoring'}</Link><Link to="/teacher/apply">{t('apply')}</Link></nav><small>© {new Date().getFullYear()} Olimpiada.al</small></footer>
+  </div>;
 }
-
-export default Homepage;
