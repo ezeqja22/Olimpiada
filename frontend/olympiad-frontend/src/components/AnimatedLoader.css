@@ -1,0 +1,6 @@
+.ol-loader { display:grid; place-content:center; justify-items:center; min-height:260px; padding:32px; color:#1a4d3a; text-align:center; }
+.ol-loader--small { min-height:120px; }
+.ol-loader__track { display:block; width:72px; height:3px; overflow:hidden; background:#dce5dc; border-radius:2px; }
+.ol-loader__track span { display:block; width:32px; height:100%; background:#1a4d3a; animation:ol-progress 1.2s ease-in-out infinite alternate; }
+@keyframes ol-progress { from { transform:translateX(-20px); } to { transform:translateX(60px); } }
+@media(prefers-reduced-motion:reduce) { .ol-loader__track span { animation:none; transform:translateX(20px); } }

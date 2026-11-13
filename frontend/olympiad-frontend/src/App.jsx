@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useEffect } from "react";
+import React, { useEffect, lazy } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import {LanguageProvider} from "./context/LanguageContext";
 import {
@@ -11,55 +11,63 @@ import {
 import "./theme.css";
 // Removed WebSocket import
 import Header from "./components/Header";
-import PublicForums from "./PublicForums";
 import {useAuth} from "./context/AuthContext";
 import {Link,useLocation} from "react-router-dom";
-import LandingPage from "./LandingPage";
-import Signup from "./Signup";
-import Login from "./Login";
 import Homepage from "./Homepage";
-import Feed from "./Feed";
-import CreateProblem from "./CreateProblem";
 import ProtectedRoute from "./ProtectedRoute";
-import { Explore, Learning, Tutoring } from "./AccessPages";
-import { AdminTutoring } from "./AdminPhase1";
-import AdminContent from "./AdminContent";
 import AnalyticsConsent from "./AnalyticsConsent";
-import WeeklyPage, {AdminWeekly} from "./WeeklyPage";
-import CourseHub, {AdminCourses} from "./CourseHub";
-import ForumCatalogue from "./ForumCatalogue";
-import { TeacherApplicationPage, TeacherWorkspace } from "./ExperiencePages";
-import { AdminTeachers, AdminParents } from "./AdminExperience";
-import AdminSiteEditor from "./AdminSiteEditor";
-import FamilyPage from "./FamilyPage";
-import ProblemDetail from "./ProblemDetail";
-import UserProfile from "./UserProfile";
-import PublicUserProfile from "./PublicUserProfile";
-import EmailVerification from "./EmailVerification";
-import SearchResults from "./SearchResults";
-import Forums from "./Forums";
-import ForumDetail from "./ForumDetail";
-import ThreadPage from "./ThreadPage";
-import SubjectPage from "./SubjectPage";
-import Settings from "./Settings";
-import ResetPassword from "./ResetPassword";
-import FollowersFollowing from "./components/FollowersFollowing";
-import AdminLayout from "./AdminLayout";
-import AdminDashboard from "./AdminDashboard";
-import AdminUsers from "./AdminUsers";
-import AdminForums from "./AdminForums";
-import AdminReports from "./AdminReports";
-import AdminUserHistory from "./AdminUserHistory";
-import AdminSettings from "./AdminSettings";
-import AdminEmail from "./AdminEmail";
-import AdminAnalytics from "./AdminAnalytics";
-import ForgotPassword from "./ForgotPassword";
 import ToastProvider from "./components/ToastProvider";
 import ConfirmProvider from "./components/ConfirmProvider";
-import { FAQPage, SupportPage } from "./HelpPages";
-import { AdminFAQ, AdminSupport } from "./AdminHelp";
 import "./ux-foundations.css";
 import PlatformSurface from "./components/PlatformSurface";
+
+import RouteLoadBoundary from "./components/RouteLoadBoundary";
+const PublicForums = lazy(() => import("./PublicForums"));
+const Signup = lazy(() => import("./Signup"));
+const Login = lazy(() => import("./Login"));
+const Feed = lazy(() => import("./Feed"));
+const CreateProblem = lazy(() => import("./CreateProblem"));
+const Explore = lazy(() => import("./AccessPages").then(m => ({default:m.Explore})));
+const Learning = lazy(() => import("./AccessPages").then(m => ({default:m.Learning})));
+const Tutoring = lazy(() => import("./AccessPages").then(m => ({default:m.Tutoring})));
+const AdminTutoring = lazy(() => import("./AdminPhase1").then(m => ({default:m.AdminTutoring})));
+const AdminContent = lazy(() => import("./AdminContent"));
+const WeeklyPage = lazy(() => import("./WeeklyPage"));
+const AdminWeekly = lazy(() => import("./WeeklyPage").then(m => ({default:m.AdminWeekly})));
+const CourseHub = lazy(() => import("./CourseHub"));
+const AdminCourses = lazy(() => import("./CourseHub").then(m => ({default:m.AdminCourses})));
+const TeacherApplicationPage = lazy(() => import("./ExperiencePages").then(m => ({default:m.TeacherApplicationPage})));
+const TeacherWorkspace = lazy(() => import("./ExperiencePages").then(m => ({default:m.TeacherWorkspace})));
+const AdminTeachers = lazy(() => import("./AdminExperience").then(m => ({default:m.AdminTeachers})));
+const AdminParents = lazy(() => import("./AdminExperience").then(m => ({default:m.AdminParents})));
+const AdminSiteEditor = lazy(() => import("./AdminSiteEditor"));
+const FamilyPage = lazy(() => import("./FamilyPage"));
+const ProblemDetail = lazy(() => import("./ProblemDetail"));
+const UserProfile = lazy(() => import("./UserProfile"));
+const PublicUserProfile = lazy(() => import("./PublicUserProfile"));
+const EmailVerification = lazy(() => import("./EmailVerification"));
+const SearchResults = lazy(() => import("./SearchResults"));
+const Forums = lazy(() => import("./Forums"));
+const ForumDetail = lazy(() => import("./ForumDetail"));
+const ThreadPage = lazy(() => import("./ThreadPage"));
+const SubjectPage = lazy(() => import("./SubjectPage"));
+const Settings = lazy(() => import("./Settings"));
+const ResetPassword = lazy(() => import("./ResetPassword"));
+const FollowersFollowing = lazy(() => import("./components/FollowersFollowing"));
+const AdminLayout = lazy(() => import("./AdminLayout"));
+const AdminDashboard = lazy(() => import("./AdminDashboard"));
+const AdminUsers = lazy(() => import("./AdminUsers"));
+const AdminForums = lazy(() => import("./AdminForums"));
+const AdminReports = lazy(() => import("./AdminReports"));
+const AdminUserHistory = lazy(() => import("./AdminUserHistory"));
+const AdminSettings = lazy(() => import("./AdminSettings"));
+const AdminEmail = lazy(() => import("./AdminEmail"));
+const AdminAnalytics = lazy(() => import("./AdminAnalytics"));
+const ForgotPassword = lazy(() => import("./ForgotPassword"));
+const FAQPage = lazy(() => import("./HelpPages").then(m => ({default:m.FAQPage})));
+const SupportPage = lazy(() => import("./HelpPages").then(m => ({default:m.SupportPage})));
+const AdminFAQ = lazy(() => import("./AdminHelp").then(m => ({default:m.AdminFAQ})));
+const AdminSupport = lazy(() => import("./AdminHelp").then(m => ({default:m.AdminSupport})));
 
 function ForumsEntry(){const {currentUser,authLoading}=useAuth();return authLoading?<p role="status">Loading…</p>:currentUser?<Forums/>:<PublicForums/>;}
 function ConnectedPage({children}){return <><Header/>{children}</>;}
@@ -89,7 +97,7 @@ function App() {
         <AnalyticsConsent /><RouteOrientation/>
         <ToastProvider>
           <ConfirmProvider>
-            <PlatformSurface><Routes>
+            <PlatformSurface><RouteLoadBoundary><Routes>
               <Route path="/" element={<Navigate to="/homepage" replace />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/login" element={<Login />} />
@@ -253,7 +261,7 @@ function App() {
                 <Route path="parents" element={<AdminParents />} />
               </Route>
             <Route path="/learning-resources" element={<ProtectedRoute><ConnectedPage><Learning/></ConnectedPage></ProtectedRoute>}/><Route path="*" element={<ConnectedPage><main id="main-content" className="p1-wrap"><h1>Page not found</h1><p>This address does not match a page.</p><Link to="/homepage">Home</Link> · <Link to="/forums">Forums</Link> · <Link to="/feed">Problems</Link></main></ConnectedPage>}/>
-            </Routes></PlatformSurface>
+            </Routes></RouteLoadBoundary></PlatformSurface>
           </ConfirmProvider>
         </ToastProvider>
       </AuthProvider>

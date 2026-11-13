@@ -44,9 +44,10 @@ export default function CourseHub() {
     };
   }, [retry]);
   useEffect(() => {
+    if (!active || !attempt || attempt.submitted || active.my_attempt?.submitted_at) return;
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [active, attempt]);
   useEffect(() => {
     const before = (e) => {
       if (answer) {

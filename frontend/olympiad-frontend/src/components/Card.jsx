@@ -24,7 +24,7 @@ function Card({
         borderRadius: borderRadius.lg,
         boxShadow: shadows.md,
         padding: getPadding(),
-        transition: "all 0.2s ease",
+        transition: "transform 160ms ease, opacity 160ms ease, background-color 160ms ease",
         ...style
     };
 
