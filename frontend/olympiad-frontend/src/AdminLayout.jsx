@@ -4,6 +4,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {loginIntent} from "./navigation";
 import "./AdminLayout.css";
+import {useDialogFocus} from "./hooks/useDialogFocus";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
@@ -14,6 +15,7 @@ const AdminLayout = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const sidebarRef = useDialogFocus(isMobile && sidebarOpen, () => setSidebarOpen(false));
 
   useEffect(() => {
     fetchCurrentUser();
@@ -185,7 +187,7 @@ const AdminLayout = () => {
         />
       )}
 
-      <aside className={`admin-sidebar ${sidebarOpen ? "open" : "closed"}`}>
+      <aside ref={sidebarRef} id="admin-navigation" role={isMobile && sidebarOpen ? "dialog" : undefined} aria-modal={isMobile && sidebarOpen ? true : undefined} aria-label="Admin navigation" inert={isMobile && !sidebarOpen ? true : undefined} className={`admin-sidebar ${sidebarOpen ? "open" : "closed"}`}>
         <div className="admin-sidebar-header">
           {sidebarOpen && <h2>Admin Panel</h2>}
 
@@ -206,6 +208,7 @@ const AdminLayout = () => {
               key={item.path}
               className={`admin-nav-item ${isActiveRoute(item.path) ? "active" : ""}`}
               onClick={() => navigate(item.path)}
+              aria-current={isActiveRoute(item.path) ? "page" : undefined}
               title={!sidebarOpen ? item.label : undefined}
             >
               <span className="nav-icon">
@@ -243,6 +246,8 @@ const AdminLayout = () => {
                 className="mobile-menu-toggle"
                 onClick={() => setSidebarOpen(true)}
                 aria-label="Open admin navigation"
+                aria-expanded={sidebarOpen}
+                aria-controls="admin-navigation"
               >
                 ☰
               </button>
