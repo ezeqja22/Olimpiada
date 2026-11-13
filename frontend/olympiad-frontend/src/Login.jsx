@@ -128,7 +128,7 @@ function Login() {
                 marginBottom: spacing.sm,
               }}
             >
-              Welcome Back
+              Sign in to Olimpiada
             </h1>
 
             <p

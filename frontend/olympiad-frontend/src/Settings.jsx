@@ -424,7 +424,7 @@ function Settings() {
 
   return (
     <Layout>
-      <div style={{ maxWidth: "800px", margin: "0 auto", padding: spacing.xl }}>
+      <div className="account-settings" style={{ maxWidth: "800px", margin: "0 auto", padding: spacing.xl }}>
         <BackButton />
 
         <div style={{ marginBottom: spacing.xl }}>
@@ -464,7 +464,7 @@ function Settings() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "auto 1fr",
+                gridTemplateColumns: "auto minmax(0, 1fr)",
                 gap: spacing.md,
                 marginBottom: spacing.lg,
               }}

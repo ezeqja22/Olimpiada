@@ -72,3 +72,62 @@
 .platform-surface .p1-wrap .p1-top { margin-top:24px; }
 .platform-surface .p1-wrap .p1-rows { gap:20px; }
 .platform-surface .p1-wrap .p1-card h2 { margin-top:0; }
+/* Account and administration share the same reading and control system. */
+.platform-account .profile-page { max-width:1120px; margin:auto; }
+.platform-account .profile-page h1 { text-align:left!important; }
+.platform-account .profile-header, .platform-account .profile-info-card { background:#f0f3ed!important; border:1px solid var(--line); border-radius:10px!important; box-shadow:none!important; }
+.platform-account .profile-social-stats { flex-wrap:wrap; }
+.platform-account .profile-tabs { display:flex; flex-wrap:wrap; gap:8px; border:1px solid var(--line); border-radius:8px; box-shadow:none; }
+.platform-account .profile-tabs button { min-height:44px; border-radius:6px!important; }
+.platform-account .help-page { background:var(--paper); color:var(--ink); }
+.platform-account .help-card, .platform-account .help-faq-item, .platform-account .help-cta { border-color:var(--line); border-radius:10px; box-shadow:none; }
+.platform-account .help-aside { background:#1a4d3a; border-radius:10px; }
+.platform-account .help-eyebrow { color:var(--purple); }
+.platform-account .help-heading { padding-bottom:24px; }
+.platform-account .help-button, .platform-account .help-secondary { border-radius:7px; min-height:44px; }
+.platform-account .ol-layout-main > div { min-width:0; }
+.platform-admin .admin-layout, .platform-admin .admin-content { background:var(--paper); color:var(--ink); }
+.platform-admin .admin-sidebar { background:#1a4d3a; box-shadow:none; }
+.platform-admin .admin-nav-item { border-radius:6px; font-weight:500; }
+.platform-admin .admin-nav-item.active { background:#ffffff20; border-left-color:#d8e8d9; }
+.platform-admin .admin-header { background:#fff; border-bottom:1px solid var(--line); box-shadow:none; }
+.platform-admin .admin-header h1 { font-family:Georgia,serif; font-weight:400; color:var(--ink); }
+.platform-admin .admin-main { padding:28px; }
+.platform-admin .admin-page { max-width:1440px; margin-inline:auto; }
+.platform-admin .admin-page-heading h2 { font-size:28px; font-family:Georgia,serif; font-weight:400; color:var(--ink); }
+.platform-admin :is(.admin-card,.help-card,.stat-card,.admin-modal) { border:1px solid var(--line); border-radius:10px; box-shadow:none; background:white; }
+.platform-admin .admin-card-header { border-color:var(--line); background:#f3f5ef; }
+.platform-admin :is(.admin-btn,.help-button,.help-secondary) { border-radius:6px; min-height:40px; box-shadow:none; }
+.platform-admin .admin-btn.primary { background:#1a4d3a; border-color:#1a4d3a; }
+.platform-admin .admin-btn.secondary { background:#f0f3ed; color:#1a4d3a; border-color:var(--line); }
+.platform-admin .admin-table { font-size:14px; line-height:1.5; }
+.platform-admin .admin-table th { background:#eef2eb; color:#203e32; font-weight:600; text-transform:none; letter-spacing:0; }
+.platform-admin .admin-table td { padding:14px 12px; border-color:var(--line); vertical-align:middle; }
+.platform-admin .admin-table tbody tr:hover { background:#f6f8f2; }
+.platform-admin .admin-table-actions { flex-wrap:wrap; }
+.platform-admin .admin-neutral-badge, .platform-admin .user-role { background:#eee7f4; color:#64458b; border-radius:4px; }
+.platform-admin .admin-main .p1-wrap { padding:0; margin-top:0; }
+.platform-surface .notification-panel { border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 24px #203e3218; }
+.platform-surface .notification-panel-header { background:#f0f3ed; color:var(--ink); }
+.platform-surface .notification-item { border-color:var(--line); }
+.platform-surface .notification-action-button { border-radius:6px; min-height:36px; }
+.platform-surface .searchbar-button { border-radius:7px!important; box-shadow:none!important; }
+.platform-surface .searchbar-input { box-shadow:none!important; }
+@media(max-width:760px) {
+ .platform-admin .admin-main { padding:18px 12px; }
+ .platform-admin .admin-filter-grid, .platform-admin .admin-two-column-grid, .platform-admin .admin-help-grid { grid-template-columns:1fr; }
+ .platform-admin .admin-header { padding-inline:12px; }
+ .platform-admin .admin-table-wrap { overflow:auto; }
+ .platform-account .profile-page { width:100%; }
+ .platform-account .help-columns { grid-template-columns:1fr; }
+}
+
+.platform-account .account-settings span { overflow-wrap:anywhere; }
+.platform-account .account-settings label { gap:16px; }
+.platform-account .account-settings label > div { min-width:0; }
+.platform-account .account-settings input[type=checkbox] { flex-shrink:0; }
+@media(max-width:760px) {
+ .platform-account .account-settings { padding:0!important; }
+ .platform-account .account-settings .ol-card { padding:20px!important; }
+ .platform-account .account-settings label { padding:12px 0!important; }
+}
