@@ -5,11 +5,14 @@ import {Link} from "react-router-dom";
 import {useAuth} from "./context/AuthContext";
 import MathRenderer from "./MathRenderer";
 import "./phase1.css";
+import {useLanguage} from "./context/LanguageContext";
+import "./WeeklyWorkspace.css";
 import SitePageIntro from "./components/SitePageIntro";
 const API=process.env.REACT_APP_API_URL||"http://127.0.0.1:8000";
 const hdr=()=>({Authorization:"Bearer "+localStorage.getItem("token")});
 const clock=s=>s?new Date(s+"Z").toLocaleString("sq-AL",{timeZone:"Europe/Tirane"}):"";
 export default function WeeklyPage(){
+ const {lang}=useLanguage(),sq=lang==="sq";
  const {currentUser}=useAuth(),[challenge,setChallenge]=useState(null),[answer,setAnswer]=useState(""),[notice,setNotice]=useState("");
  const [sending,setSending]=useState(false);
  const [loading,setLoading]=useState(true),[loadError,setLoadError]=useState(false);
@@ -18,17 +21,26 @@ export default function WeeklyPage(){
  const send=async e=>{e.preventDefault();if(sending)return;setSending(true);try{
   await axios.post(API+"/core/weekly/"+challenge.id+"/submit",{answer},{headers:hdr()});
   setNotice("Zgjidhja u dërgua për shqyrtim. Faleminderit!");setAnswer("");}catch(e){setNotice(e.response?.data?.detail||"Dërgimi dështoi. Zgjidhja jote është ruajtur në formular.");}finally{setSending(false);}};
- return <main className="p1-wrap"><SitePageIntro contentKey="page_weekly" kicker="Sfida javore · Falas" title="Problema e Javës" subtitle="Çdo të hënë në 08:00 publikohet problemi i ri. Të dielën në 20:00 dalin fituesit dhe zgjidhja zyrtare." actionTo="/explore" actionLabel="Eksploro" />
- {loading?<p role="status">Loading…</p>:loadError?<div role="alert" className="ol-status">Could not load the weekly challenge. <button onClick={reload}>Retry</button></div>:!challenge?<section className="p1-card">Problema nuk është publikuar ende. Publikimi bëhet të hënën në 08:00.</section>:<div className="p1-rows">
-  <section className="p1-card"><span className="p1-pill">Java e {challenge.week_date}</span><h2>{challenge.problem.title}</h2><div className="p1-muted">Mbyllet: {clock(challenge.closes_at)} • Statusi: {challenge.status}</div><div style={{marginTop:16}}><MathRenderer text={challenge.problem.description}/></div></section>
-  {challenge.status==="open"&&<section className="p1-card"><h2>Dërgo zgjidhjen tënde</h2><p className="p1-muted">Një zgjidhje për çdo nxënës. Administratori e miraton ose refuzon.</p>
-  {currentUser?<form className="p1-form" onSubmit={send}><textarea aria-label="Zgjidhja jote" className="p1-input" required rows={7} maxLength={20000} value={answer} onChange={e=>setAnswer(e.target.value)} placeholder="Shpjego arsyetimin dhe zgjidhjen tënde..." />
-<button className="p1-btn" type="submit" disabled={sending}>{sending?"Duke dërguar…":"Dërgo zgjidhjen"}</button></form>:<Link to="/login" state={loginIntent("/weekly")} className="p1-btn">Hyr për të dërguar zgjidhjen</Link>}</section>}
-  {challenge.status==="published"&&<><section className="p1-card"><h2>Zgjidhja zyrtare</h2><MathRenderer text={challenge.official_solution}/></section><section className="p1-card"><h2>Fituesit e javës</h2>{challenge.winners.length? <ol>{challenge.winners.map(w=><li key={w.user_id}>{w.username}</li>)}</ol>:<p>Asnjë zgjidhje nuk u miratua për këtë javë.</p>}</section></>}
- </div>}
- {notice&&<p className="p1-note" role="status">{notice}</p>}
+ return <main className="weekly-workspace">
+  <SitePageIntro contentKey="page_weekly" kicker={sq?"Sfida javore":"Weekly challenge"} title={sq?"Problema e Javës":"Problem of the Week"} subtitle={sq?"Çdo të hënë në 08:00 publikohet problemi i ri. Të dielën në 20:00 dalin fituesit dhe zgjidhja zyrtare.":"A new problem every Monday at 08:00. Results and the official solution are published on Sunday at 20:00."} actionTo="/explore" actionLabel={sq?"Eksploro":"Explore"} />
+  <div className="weekly-workspace-grid">
+    <div className="weekly-workspace-content">
+      {loading?<p role="status">Loading…</p>:loadError?<div role="alert" className="ol-status">Could not load the weekly challenge. <button onClick={reload}>Retry</button></div>:!challenge?<section className="weekly-awaiting"><h2>{sq?"Sfida e radhës":"The next challenge"}</h2><p>{sq?"Problema nuk është publikuar ende. Publikimi bëhet të hënën në 08:00.":"The problem has not been published yet. Check back on Monday at 08:00."}</p><Link to="/feed">{sq?"Shfleto problemet ndërkohë →":"Browse problems meanwhile →"}</Link></section>:<>
+        <article className="weekly-statement"><div className="weekly-edition">{sq?"Java e":"Week of"} {challenge.week_date}<span>{challenge.status}</span></div><h2><MathRenderer text={challenge.problem.title}/></h2><div className="weekly-statement-body"><MathRenderer text={challenge.problem.description}/></div></article>
+        {challenge.status==="open"&&<section className="weekly-submission"><span className="weekly-section-number">02 / {sq?"Arsyetimi yt":"Your reasoning"}</span><h2>{sq?"Dërgo zgjidhjen tënde":"Submit your solution"}</h2><p>{sq?"Një zgjidhje për çdo nxënës. Administratori e miraton ose refuzon.":"One solution per student, reviewed by an administrator."}</p>
+          {currentUser?<form onSubmit={send}><label htmlFor="weekly-answer">{sq?"Zgjidhja jote":"Your solution"}</label><textarea id="weekly-answer" required rows={9} maxLength={20000} value={answer} onChange={e=>setAnswer(e.target.value)} placeholder={sq?"Shpjego arsyetimin dhe zgjidhjen tënde...":"Explain your reasoning and solution..."}/><button type="submit" disabled={sending}>{sending?(sq?"Duke dërguar…":"Sending…"):(sq?"Dërgo zgjidhjen":"Submit solution")}</button></form>:<Link to="/login" state={loginIntent("/weekly")} className="weekly-login">{sq?"Hyr për të dërguar zgjidhjen":"Sign in to submit your solution"}</Link>}
+        </section>}
+        {challenge.status==="published"&&<section className="weekly-official"><span className="weekly-section-number">02 / {sq?"Shqyrtimi":"Review"}</span><h2>{sq?"Zgjidhja zyrtare":"Official solution"}</h2><MathRenderer text={challenge.official_solution}/></section>}
+      </>}
+      {notice&&<p className="weekly-notice" role="status">{notice}</p>}
+    </div>
+    <aside className="weekly-schedule"><h2>{sq?"Këtë javë":"This week"}</h2><ol><li><span>01</span><div><strong>{sq?"Publikimi":"Publication"}</strong><p>{sq?"E hënë · 08:00":"Monday · 08:00"}</p></div></li><li><span>02</span><div><strong>{sq?"Afati i dorëzimit":"Submission deadline"}</strong><p>{challenge?.closes_at?clock(challenge.closes_at):(sq?"Shfaqet me problemën":"Shown with the problem")}</p></div></li><li><span>03</span><div><strong>{sq?"Zgjidhja dhe rezultatet":"Solution and results"}</strong><p>{sq?"E diel · 20:00":"Sunday · 20:00"}</p></div></li></ol><p className="weekly-timezone">Europe/Tirane</p>
+      {challenge?.status==="published"&&<section className="weekly-winners"><h2>{sq?"Fituesit e javës":"This week's winners"}</h2>{challenge.winners.length?<ol>{challenge.winners.map(w=><li key={w.user_id}>{w.username}</li>)}</ol>:<p>{sq?"Asnjë zgjidhje nuk u miratua për këtë javë.":"No solutions were approved this week."}</p>}</section>}
+    </aside>
+  </div>
  </main>;
 }
+
 export function AdminWeekly(){
  const requestVersion=useRef(0),[submissionsLoading,setSubmissionsLoading]=useState(false);
  useEffect(()=>()=>{requestVersion.current+=1;},[]);

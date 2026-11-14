@@ -7,6 +7,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import MathEditor from "./MathEditor";
 import "./MathEditor.css";
+import "./ProblemReading.css";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import Layout from "./components/Layout";
@@ -1036,15 +1037,7 @@ function ProblemDetail() {
 
   return (
     <Layout showHomeButton={true}>
-      <div className="problem-reader"
-        style={{
-          background:
-            "radial-gradient(circle at top left, rgba(26,77,58,0.12), transparent 32%), radial-gradient(circle at top right, rgba(118,75,162,0.13), transparent 28%)",
-          borderRadius: "18px",
-          padding: isMobile ? "14px" : "14px",
-          minHeight: "calc(100vh - 120px)",
-        }}
-      >
+      <div className="problem-reading-desk">
         <div style={{ marginBottom: "18px" }}>
           <BackButton fallbackPath={getSmartFallbackPath()} />
         </div>
@@ -1459,403 +1452,48 @@ function ProblemDetail() {
             </div>
           </section>
         ) : (
-          <section
-            style={{
-              position: "relative",
-              overflow: "hidden",
-              backgroundColor: ui.card,
-              border: `1px solid ${ui.border}`,
-              borderRadius: "18px",
-              boxShadow: "0 4px 14px rgba(15, 23, 42, 0.05)",
-              marginBottom: "14px",
-            }}
-          >
-            <div
-              style={{
-                height: "3px",
-                background: `linear-gradient(90deg, ${ui.primary}, ${ui.purple})`,
-              }}
-            />
-
-            <div style={{ padding: isMobile ? "18px" : "18px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "14px",
-                  alignItems: "flex-start",
-                  flexDirection: isMobile ? "column" : "row",
-                }}
-              >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {problem.author && (
-                    <button
-                      type="button"
-                      onClick={() => openAuthorProfile(problem.author)}
-                      style={{
-                        border: `1px solid ${ui.border}`,
-                        backgroundColor: "#f8fafc",
-                        borderRadius: "999px",
-                        padding: "8px 14px 8px 8px",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "11px",
-                        cursor: "pointer",
-                        marginBottom: "14px",
-                        boxShadow: ui.shadowSm,
-                      }}
-                    >
-                      <UserAvatar user={problem.author} size={40} />
-
-                      <span style={{ display: "grid", textAlign: "left" }}>
-                        <strong
-                          style={{
-                            color: ui.primary,
-                            fontSize: "14px",
-                            fontWeight: 950,
-                          }}
-                        >
-                          {getDisplayName(problem.author.username) ||
-                            "Unknown Author"}
-                        </strong>
-
-                        <span
-                          style={{
-                            color: ui.muted,
-                            fontSize: "12px",
-                            fontWeight: 750,
-                          }}
-                        >
-                          {formatDate(problem.created_at)}
-                          {isEdited(problem.created_at, problem.updated_at)
-                            ? " · Edited"
-                            : ""}
-                        </span>
-                      </span>
-                    </button>
-                  )}
-
-                  <h1
-                    style={{
-                      margin: "0 0 18px",
-                      color: ui.text,
-                      fontSize: isMobile ? "27px" : "34px",
-                      lineHeight: 1.08,
-                      letterSpacing: "-0.025em",
-                      fontWeight: 950,
-                    }}
-                  >
-                    {renderMathContent(problem.title)}
-                  </h1>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      flexWrap: "wrap",
-                      marginBottom: "14px",
-                    }}
-                  >
-                    {problem.subject && (
-                      <Pill bg="#e0e7ff" color="#3730a3">
-                        {problem.subject}
-                      </Pill>
-                    )}
-
-                    {problem.level && problem.level.trim() && (
-                      <Pill bg="#fef3c7" color="#92400e">
-                        {problem.level}
-                      </Pill>
-                    )}
-
-                    {problem.year && (
-                      <Pill bg="#dcfce7" color="#166534">
-                        Year: {problem.year}
-                      </Pill>
-                    )}
-
-                    {problem.tags &&
-                      problem.tags
-                        .split(",")
-                        .map((tag) => tag.trim())
-                        .filter(Boolean)
-                        .map((tag, index) => (
-                          <Pill
-                            key={`${tag}-${index}`}
-                            bg={ui.purple}
-                            color="white"
-                          >
-                            {tag}
-                          </Pill>
-                        ))}
-                  </div>
-                </div>
-
-                {canManageProblem && (
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      flexWrap: "wrap",
-                      width: isMobile ? "100%" : "auto",
-                    }}
-                  >
-                    <ModernButton
-                      onClick={handleEditProblem}
-                      variant="purple"
-                      style={{ width: isMobile ? "100%" : "auto" }}
-                    >
-                      Edit Problem
-                    </ModernButton>
-
-                    <ModernButton
-                      onClick={handleDeleteProblem}
-                      variant="danger"
-                      style={{ width: isMobile ? "100%" : "auto" }}
-                    >
-                      Delete Problem
-                    </ModernButton>
-                  </div>
-                )}
-              </div>
-
-              <div
-                style={{
-                  marginTop: "8px",
-                  backgroundColor: "#ffffff",
-                  border: `1px solid ${ui.border}`,
-                  borderRadius: "16px",
-                  padding: isMobile ? "17px" : "14px",
-                  color: ui.text,
-                  lineHeight: 1.82,
-                  fontSize: isMobile ? "15px" : "16px",
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {renderMathContent(problem.description)}
-              </div>
-
-              {problemImages && problemImages.length > 0 && (
-                <div style={{ marginTop: "26px" }}>
-                  <h3
-                    style={{
-                      margin: "0 0 14px",
-                      color: ui.text,
-                      fontSize: "19px",
-                      fontWeight: 950,
-                    }}
-                  >
-                    Problem Images
-                  </h3>
-
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: isMobile
-                        ? "1fr"
-                        : "repeat(auto-fill, minmax(185px, 245px))",
-                      gap: "15px",
-                    }}
-                  >
-                    {problemImages.map((image, index) => (
-                      <button
-                        type="button"
-                        key={`${image}-${index}`}
-                        onClick={() => openImageModal(index, problemImages)}
-                        style={{
-                          border: `1px solid ${ui.border}`,
-                          borderRadius: "14px",
-                          overflow: "hidden",
-                          backgroundColor: "#f8fafc",
-                          padding: 0,
-                          cursor: "pointer",
-                          minHeight: "160px",
-                          boxShadow: ui.shadowSm,
-                          position: "relative",
-                        }}
-                      >
-                        <img
-                          src={image}
-                          alt={`Problem image ${index + 1}`}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            minHeight: "160px",
-                            objectFit: "cover",
-                            display: "block",
-                          }}
-                        />
-
-                        <span
-                          style={{
-                            position: "absolute",
-                            right: "10px",
-                            top: "10px",
-                            backgroundColor: "rgba(15, 23, 42, 0.76)",
-                            color: "white",
-                            borderRadius: "999px",
-                            padding: "6px 10px",
-                            fontSize: "12px",
-                            fontWeight: 900,
-                          }}
-                        >
-                          View
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+          <article className="problem-reading-layout">
+            <div className="problem-reading-main">
+              <div className="problem-reading-kicker">{problem.subject || "Problem"} {problem.level && <span> / {problem.level}</span>}</div>
+              <h1>{renderMathContent(problem.title)}</h1>
+              <div className="problem-reading-statement">{renderMathContent(problem.description)}</div>
+              {problemImages?.length > 0 && <div className="problem-reading-figures">
+                {problemImages.map((image, index) => <button type="button" key={`${image}-${index}`} onClick={() => openImageModal(index, problemImages)} aria-label={`Open problem image ${index + 1}`}>
+                  <img src={image} alt={`Problem image ${index + 1}`} loading="lazy" />
+                </button>)}
+              </div>}
+              <a className="problem-reading-discuss" href="#discussion">Read the discussion <span aria-hidden="true">↓</span></a>
             </div>
-          </section>
+            <aside className="problem-reading-context" aria-label="Problem details">
+              <h2>About this problem</h2>
+              {problem.author && <button type="button" className="problem-reading-author" onClick={() => openAuthorProfile(problem.author)}>
+                <UserAvatar user={problem.author} size={36} />
+                <span>{getDisplayName(problem.author.username) || "Unknown Author"}</span>
+              </button>}
+              <dl><dt>Published</dt><dd>{formatDate(problem.created_at)}{isEdited(problem.created_at, problem.updated_at) ? " · Edited" : ""}</dd>
+                {problem.year && <><dt>Year</dt><dd>{problem.year}</dd></>}
+              </dl>
+              {problem.tags && <div className="problem-reading-tags">{problem.tags.split(",").map(tag => tag.trim()).filter(Boolean).map((tag,index) => <span key={`${tag}-${index}`}>{tag}</span>)}</div>}
+              {canManageProblem && <div className="problem-reading-management">
+                <button type="button" onClick={handleEditProblem}>Edit Problem</button>
+                <button type="button" className="problem-reading-delete" onClick={handleDeleteProblem}>Delete Problem</button>
+              </div>}
+            </aside>
+          </article>
         )}
 
-        <section
-          style={{
-            backgroundColor: ui.card,
-            border: `1px solid ${ui.border}`,
-            borderRadius: "18px",
-            padding: isMobile ? "16px" : "14px",
-            boxShadow: ui.shadowMd,
-            marginBottom: "14px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: isMobile ? "flex-start" : "center",
-              gap: "14px",
-              flexDirection: isMobile ? "column" : "row",
-            }}
-          >
-            <div>
-              <h3
-                style={{
-                  margin: "0 0 5px",
-                  fontSize: "14px",
-                  fontWeight: 950,
-                  color: ui.text,
-                }}
-              >
-                Vote on this Problem
-              </h3>
-              <p
-                style={{
-                  margin: 0,
-                  color: ui.muted,
-                  fontSize: "13px",
-                  fontWeight: 750,
-                }}
-              >
-                Help surface useful and well-written problems.
-              </p>
-            </div>
 
-            <div
-              style={{
-                display: "inline-flex",
-                backgroundColor: "#f8fafc",
-                borderRadius: "999px",
-                padding: "6px",
-                border: `1px solid ${ui.border}`,
-                boxShadow: "inset 0 1px 2px rgba(15, 23, 42, 0.04)",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => handleVote("like")}
-                disabled={voteLoading}
-                style={{
-                  ...buttonBase,
-                  padding: "10px 16px",
-                  backgroundColor:
-                    voteStatus.user_vote === "like"
-                      ? ui.primary
-                      : "transparent",
-                  color: voteStatus.user_vote === "like" ? "white" : ui.muted,
-                }}
-              >
-                Like {voteStatus.like_count || 0}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleVote("dislike")}
-                disabled={voteLoading}
-                style={{
-                  ...buttonBase,
-                  padding: "10px 16px",
-                  backgroundColor:
-                    voteStatus.user_vote === "dislike"
-                      ? ui.purple
-                      : "transparent",
-                  color:
-                    voteStatus.user_vote === "dislike" ? "white" : ui.muted,
-                }}
-              >
-                Dislike {voteStatus.dislike_count || 0}
-              </button>
-            </div>
-          </div>
+        <section className="problem-reading-votes" aria-label="Vote on this problem">
+          <span>Was this problem useful?</span>
+          <button type="button" onClick={() => handleVote("like")} disabled={voteLoading} aria-pressed={voteStatus.user_vote === "like"}>Like {voteStatus.like_count || 0}</button>
+          <button type="button" onClick={() => handleVote("dislike")} disabled={voteLoading} aria-pressed={voteStatus.user_vote === "dislike"}>Dislike {voteStatus.dislike_count || 0}</button>
         </section>
 
-        <section
-          style={{
-            backgroundColor: ui.card,
-            border: `1px solid ${ui.border}`,
-            borderRadius: "18px",
-            padding: isMobile ? "14px" : "18px",
-            boxShadow: "0 4px 14px rgba(15, 23, 42, 0.05)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-end",
-              gap: "14px",
-              flexWrap: "wrap",
-              marginBottom: "18px",
-            }}
-          >
-            <div>
-              <h2
-                style={{
-                  margin: "0 0 5px",
-                  color: ui.text,
-                  fontSize: isMobile ? "25px" : "18px",
-                  fontWeight: 950,
-                  letterSpacing: "-0.04em",
-                }}
-              >
-                Comments
-              </h2>
-
-              <p
-                style={{
-                  margin: 0,
-                  color: ui.muted,
-                  fontSize: "14px",
-                  fontWeight: 750,
-                }}
-              >
-                {comments.length}{" "}
-                {comments.length === 1 ? "comment" : "comments"}
-              </p>
-            </div>
-
-            {comments.some((comment) => comment.is_solution) && (
-              <Pill
-                bg={ui.primarySoft}
-                color={ui.primary}
-                borderColor={ui.primaryBorder}
-              >
-                ✓ Solution found
-              </Pill>
-            )}
-          </div>
-
+        <section id="discussion" className="problem-reading-discussion">
+          <header className="problem-reading-discussion-heading">
+            <div><span>DISCUSS & SOLVE</span><h2>Comments <small>{comments.length}</small></h2></div>
+            {comments.some(comment => comment.is_solution) && <span className="problem-reading-solved">✓ Solution found</span>}
+          </header>
           <CommentComposer
             onSubmit={handleSubmitComment}
             currentUser={currentUser}
@@ -1872,42 +1510,7 @@ function ProblemDetail() {
           />
 
           {comments.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "46px 18px",
-                border: `1px dashed ${ui.border}`,
-                borderRadius: "16px",
-                backgroundColor: "#fbfdfc",
-                color: ui.muted,
-              }}
-            >
-              <div
-                style={{
-                  width: "58px",
-                  height: "58px",
-                  borderRadius: "50%",
-                  backgroundColor: ui.primarySoft,
-                  color: ui.primary,
-                  display: "grid",
-                  placeItems: "center",
-                  fontSize: "16px",
-                  fontWeight: 950,
-                  margin: "0 auto 12px",
-                }}
-              >
-                ?
-              </div>
-
-              <h3
-                style={{ margin: "0 0 6px", color: ui.text, fontWeight: 950 }}
-              >
-                No comments yet
-              </h3>
-              <p style={{ margin: 0, fontWeight: 750 }}>
-                Start the discussion with a solution idea or question.
-              </p>
-            </div>
+            <p className="problem-reading-empty">No comments yet. Add a solution idea or question above.</p>
           ) : (
             <div style={{ display: "grid", gap: "14px" }}>
               {comments.map((comment) => (

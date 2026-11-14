@@ -2,7 +2,7 @@
 // src/Feed.jsx
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import Layout from "./components/Layout";
 import AnimatedLoader from "./components/AnimatedLoader";
@@ -14,6 +14,7 @@ import EmptyState from "./components/feed/EmptyState";
 import PaginationControls from "./components/feed/PaginationControls";
 import FloatingCreateButton from "./components/feed/FloatingCreateButton";
 import "./Feed.css";
+import "./DiscoveryWorkspace.css";
 import { useLanguage } from "./context/LanguageContext";
 import { useToast } from "./components/ToastProvider";
 
@@ -551,10 +552,11 @@ function Feed() {
 
   return (
     <Layout showHomeButton={true}>
-      <div className="feed-page">
-        <FeedBanner shownCount={problems.length} activeTab={activeTab} />
+      <div className="discovery-workspace">
+        <header className="discovery-heading"><div><span className="discovery-eyebrow">{lang==='sq'?'USHTRO & DISKUTO':'PRACTICE & DISCUSS'}</span><h1>{lang==='sq'?'Probleme':'Problems'}</h1><p>{lang==='sq'?'Gjej një problem. Zhvillo arsyetimin. Diskuto zgjidhjen.':'Find a problem, work through the reasoning and discuss a solution.'}</p></div><Link className="discovery-primary" to="/create-problem">{lang==='sq'?'+ Shto problem':'+ Add a problem'}</Link></header>
+        <div className="discovery-columns"><aside className="discovery-rail"><h2>{lang==='sq'?'Sipas lëndës':'Browse subjects'}</h2><nav aria-label={lang==='sq'?'Lëndët':'Subjects'}>{[['mathematics','Matematikë','Mathematics'],['physics','Fizikë','Physics'],['chemistry','Kimi','Chemistry'],['biology','Biologji','Biology'],['computer-science','Informatikë','Computer science']].map(([slug,sq,en],i)=><Link key={slug} to={'/subject/'+slug}><span className="discovery-subject-number">0{i+1}</span>{lang==='sq'?sq:en}<span aria-hidden="true">↗</span></Link>)}</nav><div className="discovery-rail-group"><h2>{lang==='sq'?'Hapësira jote':'Your workspace'}</h2><Link to="/profile">{lang==='sq'?'Draftet & të ruajturat':'Drafts & saved problems'} →</Link><Link to="/forums">{lang==='sq'?'Forumet':'Discussion forums'} →</Link></div><Link className="discovery-weekly" to="/weekly"><span>{lang==='sq'?'SFIDA JAVORE':'WEEKLY CHALLENGE'}</span><strong>{lang==='sq'?'Problema e javës':'This week’s problem'}</strong><span>{lang==='sq'?'Shiko problemin →':'View challenge →'}</span></Link></aside><section className="discovery-results" aria-label={lang==='sq'?'Lista e problemeve':'Problem list'}>
 
-        <div className="feed-search-shell">
+        <div className="discovery-search">
           <SearchBar placeholder="Search problems, users, tags, levels..." />
         </div>
 
@@ -605,7 +607,7 @@ function Feed() {
           onPageChange={(page) => loadFeedPage(page, activeTab)}
         />
 
-        <FloatingCreateButton />
+        </section></div>
       </div>
     </Layout>
   );
