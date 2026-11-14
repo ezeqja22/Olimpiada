@@ -1,0 +1,12 @@
+async page => {
+ const base='http://127.0.0.1:5178',api='http://127.0.0.1:8018',checks=[];
+ try {
+  const fixture=await page.request.post(api+'/__ux/teacher-fixture');if(!fixture.ok())throw Error('Teacher fixture failed');await page.goto(base+'/login');
+  const c=await(await page.request.get(api+'/__ux/credentials/teacher')).json();await page.getByLabel('Email',{exact:true}).fill(c.email);await page.getByLabel('Password',{exact:true}).fill(c.password);await page.getByRole('button',{name:'Sign In',exact:true}).click();await page.waitForURL('**/homepage');await page.goto(base+'/teacher/workspace');await page.getByRole('button',{name:'View submissions',exact:true}).click();await page.locator('.teaching-answer .katex').waitFor();
+  await page.getByLabel('Score /100').fill('80');const refreshed=page.waitForResponse(r=>r.url().includes('/submissions')&&r.request().method()==='GET');await page.getByRole('button',{name:'Save assessment',exact:true}).click();await refreshed;if(await page.getByRole('textbox',{name:'Feedback',exact:true}).inputValue()!=='Keep this feedback')throw Error('Feedback was lost');checks.push('teacher review, math rendering, score update retains feedback');
+  for(const width of [1440,1024,768,390,320]){await page.setViewportSize({width,height:950});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))throw Error('Teacher overflow '+width);await page.screenshot({path:'.local-state/redesign/after-teacher-'+width+'.png',fullPage:true});}
+  await page.getByText('Schedule a meeting',{exact:true}).click();await page.getByRole('combobox',{name:'Forum',exact:true}).selectOption({label:'[UX-TEST] Algebra community'});await page.getByLabel('Google Meet URL').waitFor();checks.push('meeting form discovery (not submitted) and five viewports');
+  await page.route('**/teacher/courses/*/submissions',r=>r.fulfill({status:503,body:'Unavailable'}));await page.getByRole('button',{name:'View submissions',exact:true}).click();await page.getByRole('alert').waitFor();await page.unroute('**/teacher/courses/*/submissions');await page.getByRole('button',{name:'Retry',exact:true}).click();await page.getByLabel('Score /100').waitFor();checks.push('review failure and retry');
+ }finally{await page.unrouteAll();const cleanup=await(await page.request.post(api+'/__ux/cleanup')).json();if(cleanup.remaining!==0)throw Error('Cleanup failed');checks.push({cleanup});await page.evaluate(()=>localStorage.removeItem('token'));}
+ return checks;
+}

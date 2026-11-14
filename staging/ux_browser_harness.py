@@ -60,6 +60,24 @@ def fixture(request:Request):
         db.commit()
     return {'ready':True}
 
+@app.post('/__ux/teacher-fixture')
+def teacher_fixture(request: Request):
+    fixture(request)
+    from datetime import date
+    with SessionLocal() as db:
+        password = secrets.token_urlsafe(24)
+        teacher = models.User(username='[UX-TEST] teacher', email='ux-test-teacher@example.org', password_hash=hash_password(password), role='teacher', is_verified=True, is_active=True, is_banned=False, preferred_language='en')
+        db.add(teacher); db.flush()
+        credentials['teacher'] = {'email': teacher.email, 'password': password, 'id': teacher.id}
+        forum = db.query(models.Forum).one()
+        db.add(models.TeacherApplication(user_id=teacher.id, first_name='Synthetic', last_name='Teacher', birth_date=date(1990,1,1), bio='Isolated testing only', subject='Mathematics', id_photo_key='', portrait_key='', status='approved'))
+        db.add(models.TeacherForumAssignment(teacher_id=teacher.id, forum_id=forum.id, assigned_by=credentials['admin']['id']))
+        db.add(models.ForumMembership(forum_id=forum.id, user_id=teacher.id, role='member', is_active=True, is_banned=False))
+        item = db.query(models.CourseItem).one(); item.forum_id = forum.id
+        db.add(models.CourseAttempt(item_id=item.id, student_id=credentials['student']['id'], submitted_at=datetime.utcnow(), answers='[UX-TEST] Since $2+2=4$, the answer is four.', score=60, feedback='Keep this feedback'))
+        db.commit()
+    return {'ready': True}
+
 @app.get('/__ux/credentials/{role}')
 def get_credentials(role:str,request:Request):
     local(request)

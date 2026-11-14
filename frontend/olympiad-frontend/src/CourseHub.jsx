@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import MathRenderer from "./MathRenderer";
 import VisualMathEditor from "./components/VisualMathEditor";
 import "./phase1.css";
+import "./LearningWorkspace.css";
 import SitePageIntro from "./components/SitePageIntro";
 const API = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000",
   hdr = () => ({ Authorization: "Bearer " + localStorage.getItem("token") });
@@ -127,57 +128,22 @@ export default function CourseHub() {
       (!subject || i.subject === subject) &&
       (i.title + " " + i.subject).toLowerCase().includes(query.toLowerCase()),
   );
-  return (
-    <main id="main-content" className="p1-wrap">
-      <SitePageIntro
-        contentKey="page_courses"
-        title="Materials, homework and tests"
-        subtitle="Choose a subject, read materials and review your progress."
-      />
-      <p>
-        <Link to="/learning-resources">
-          More learning resources and meeting links
-        </Link>{" "}
-        · <Link to="/tutoring">Request tutoring</Link>
-      </p>
-      <div className="p1-row">
-        <label>
-          Search materials
-          <input
-            className="p1-input"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </label>
-        <label>
-          Subject
-          <select
-            className="p1-select"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-          >
-            <option value="">All subjects</option>
-            {[...new Set(items.map((i) => i.subject))].map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-        </label>
-      </div>
-      {notice && (
-        <p className="ol-status" role="status">
-          {notice}
-        </p>
-      )}
-      {status === "loading" && <p role="status">Loading materials…</p>}
-      {status === "error" && (
-        <div role="alert" className="ol-status">
-          Materials could not load.{" "}
-          <button onClick={() => setRetry((x) => x + 1)}>Retry</button>
-        </div>
-      )}
+  return <main id="main-content" className="learning-workspace">
+    <div className="learning-heading"><SitePageIntro contentKey="page_courses" title="Materials, homework and tests" subtitle="Choose a subject, read materials and review your progress."/><nav aria-label="Learning links"><Link to="/learning-resources">Learning resources ↗</Link><Link to="/tutoring">Request tutoring ↗</Link></nav></div>
+    <div className="learning-overview"><div><span>Available</span><strong>{items.length}</strong><small>materials & activities</small></div><div><span>Your work</span><strong>{items.filter(i=>i.my_attempt&&!i.my_attempt.submitted_at).length}</strong><small>in progress</small></div><div><span>Submitted</span><strong>{items.filter(i=>i.my_attempt?.submitted_at).length}</strong><small>completed activities</small></div></div>
+    {notice&&<p className="ol-status" role="status">{notice}</p>}
+    <div className={'learning-layout'+(active?' learning-layout--reading':'')}>
+      <section className="learning-catalog" aria-label="Materials catalog">
+        <div className="learning-filter"><label>Search materials<input className="p1-input" type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Title or subject"/></label><label>Subject<select className="p1-select" value={subject} onChange={e=>setSubject(e.target.value)}><option value="">All subjects</option>{[...new Set(items.map(i=>i.subject))].map(s=><option key={s}>{s}</option>)}</select></label></div>
+        {status==='loading'&&<p role="status">Loading materials…</p>}
+        {status==='error'&&<div role="alert" className="ol-status">Materials could not load. <button onClick={()=>setRetry(x=>x+1)}>Retry</button></div>}
+        <div className="learning-list">{visible.map((item,index)=><article className={'learning-item'+(active?.id===item.id?' learning-item--selected':'')} key={item.id}>
+          <span className="learning-item__number">{String(index+1).padStart(2,'0')}</span><div className="learning-item__description"><div className="learning-item__meta"><span>{item.kind}</span><span>{item.subject}</span>{item.duration_minutes&&<span>{item.duration_minutes} min</span>}</div><h2>{item.title}</h2><p>{item.due_at?'Due '+readUTC(item.due_at):'No due date'}</p>{item.my_attempt&&<span className="learning-item__progress">{item.my_attempt.graded_at?'Reviewed · '+item.my_attempt.score+'/100':item.my_attempt.submitted_at?'Submitted · awaiting review':'In progress'}</span>}</div><button className="learning-item__open" onClick={()=>open(item)} aria-current={active?.id===item.id?'true':undefined}>View {item.kind}<span aria-hidden="true"> ↗</span></button>
+        </article>)}</div>
+        {status==='ready'&&!visible.length&&<p className="learning-empty">No materials match this selection.</p>}
+      </section>
       {active && (
-        <section className="p1-card p1-group">
+        <section className="learning-reader">
           <div className="p1-row">
             <h2>{active.title}</h2>
             <button
@@ -258,37 +224,11 @@ export default function CourseHub() {
           )}
         </section>
       )}
-      <div className="p1-grid">
-        {visible.map((item) => (
-          <article className="p1-card" key={item.id}>
-            <span className="p1-pill">{item.kind}</span>
-            <h2>{item.title}</h2>
-            <p>
-              {item.subject} ·{" "}
-              {item.duration_minutes ? item.duration_minutes + " min · " : ""}
-              {item.due_at ? "Due " + readUTC(item.due_at) : "No deadline"}
-            </p>
-            <p>
-              {item.my_attempt?.graded_at
-                ? "Reviewed · " + item.my_attempt.score + "/100"
-                : item.my_attempt?.submitted_at
-                  ? "Submitted · awaiting review"
-                  : item.my_attempt
-                    ? "In progress"
-                    : ""}
-            </p>
-            <button className="p1-btn" onClick={() => open(item)}>
-              View {item.kind}
-            </button>
-          </article>
-        ))}
-      </div>
-      {status === "ready" && !visible.length && (
-        <p>No materials match this selection.</p>
-      )}
-    </main>
-  );
+
+    </div>
+  </main>;
 }
+
 export function AdminCourses() {
   const [classes, setClasses] = useState([]),
     [published, setPublished] = useState([]),
