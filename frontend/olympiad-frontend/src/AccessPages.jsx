@@ -5,6 +5,9 @@ import { useAuth } from "./context/AuthContext";
 import SitePageIntro from "./components/SitePageIntro";
 import "./phase1.css";
 import "./ResourceWorkspace.css";
+import MathRenderer from "./MathRenderer";
+import { useLanguage } from "./context/LanguageContext";
+import "./ExploreWorkspace.css";
 const API = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 const authHeaders = () => ({
   Authorization: "Bearer " + localStorage.getItem("token"),
@@ -22,6 +25,7 @@ function Header({ contentKey, title, description }) {
   );
 }
 export function Explore() {
+  const {lang}=useLanguage();const sq=lang==='sq';
   const [forums, setForums] = useState([]);
   const [weekly, setWeekly] = useState(null);
   const { currentUser } = useAuth();
@@ -49,67 +53,18 @@ export function Explore() {
     };
   }, [retry]);
   const canForum = !!currentUser;
-  return (
-    <main className="p1-wrap">
-      <Header
-        contentKey="page_explore"
-        title="Eksploro Olimpiada"
-        description="Zbulo problemen e javës dhe forumet."
-      />
-      {status === "loading" && <p role="status">Loading…</p>}
-      {status === "error" && (
-        <p role="alert">
-          Could not load this overview.{" "}
-          <button onClick={() => setRetry((x) => x + 1)}>Retry</button>
-        </p>
-      )}
-      {status === "ready" && (
-        <>
-          <section className="p1-card p1-group">
-            <div className="p1-row">
-              <h2>
-                <Link to="/weekly">Problema e Javës</Link>
-              </h2>
-              <span className="p1-pill">FALAS</span>
-            </div>
-            {weekly ? (
-              <>
-                <h3>{weekly.title}</h3>
-                <p style={{ whiteSpace: "pre-wrap" }}>{weekly.description}</p>
-                <span className="p1-muted">
-                  {weekly.subject} · {weekly.level}
-                </span>
-              </>
-            ) : (
-              <p className="p1-muted">
-                Problema e javës nuk është publikuar ende.
-              </p>
-            )}
-          </section>
-          <div className="p1-row">
-            <h2 className="p1-section-title">Forume publike</h2>
-            <Link className="p1-btn alt" to="/forums">
-              Shiko forumet
-            </Link>
-          </div>
-          <div className="p1-grid">
-            {forums.length ? (
-              forums.map((f) => (
-                <ContentItem
-                  key={f.id}
-                  title={f.title}
-                  subtitle={f.subject}
-                  url={canForum ? "/forum/" + f.id : "/forums"}
-                />
-              ))
-            ) : (
-              <p className="p1-muted">Ende nuk ka forume publike.</p>
-            )}
-          </div>
-        </>
-      )}
-    </main>
-  );
+  return <main className="explore-workspace">
+    <SitePageIntro contentKey="page_explore" title={sq?'Eksploro Olimpiada':'Explore Olimpiada'} subtitle={sq?'Probleme, diskutime dhe materiale mësimore.':'Problems, discussions and learning materials.'}/>
+    <nav className="explore-paths" aria-label={sq?'Zgjidh aktivitetin':'Choose an activity'}>{[
+      ['/feed',sq?'Zgjidh probleme':'Solve problems',sq?'Shfleto sipas lëndës dhe diskuto zgjidhjet.':'Browse by subject and discuss solutions.'],
+      ['/courses',sq?'Materiale dhe teste':'Materials and tests',sq?'Lexo materialet dhe provo njohuritë.':'Read materials and test your understanding.'],
+      ['/tutoring',sq?'Mentorim':'Tutoring',sq?'Gjej një mësues sipas lëndës.':'Find a tutor by subject.']
+    ].map(([to,title,description],index)=><Link key={to} to={to}><span>{String(index+1).padStart(2,'0')}</span><div><h2>{title} <span aria-hidden="true">↗</span></h2><p>{description}</p></div></Link>)}</nav>
+    {status==='loading'&&<p role="status">{sq?'Duke ngarkuar…':'Loading…'}</p>}{status==='error'&&<div role="alert"><p>{sq?'Përmbledhja nuk u ngarkua.':'Could not load this overview.'}</p><button onClick={()=>setRetry(x=>x+1)}>{sq?'Provo përsëri':'Retry'}</button></div>}
+    {status==='ready'&&<div className="explore-columns"><section className="explore-weekly"><span>{sq?'Sfida e javës':'Weekly challenge'}</span><h2>{weekly?weekly.title:(sq?'Problema e javës':'Problem of the week')}</h2>{weekly?<><div className="explore-statement"><MathRenderer text={weekly.description}/></div><small>{weekly.subject} · {weekly.level}</small></>:<p>{sq?'Problema e javës nuk është publikuar ende.':'The next weekly problem has not been published yet.'}</p>}<Link to="/weekly">{sq?'Hap sfidën e javës':'Open the weekly challenge'} →</Link></section>
+      <section className="explore-community"><header><h2>{sq?'Forume publike':'Public forums'}</h2><Link to="/forums">{sq?'Të gjitha':'View all'} →</Link></header>{forums.map(f=><Link className="explore-forum" key={f.id} to={canForum?'/forum/'+f.id:'/forums'}><small>{f.subject}</small><strong>{f.title}</strong><span aria-hidden="true">↗</span></Link>)}{!forums.length&&<p>{sq?'Ende nuk ka forume publike.':'No public forums yet.'}</p>}</section>
+    </div>}
+  </main>;
 }
 export function Learning() {
   const [rows, setRows] = useState([]);

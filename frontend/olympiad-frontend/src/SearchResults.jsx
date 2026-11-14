@@ -327,31 +327,11 @@ const SearchResults = () => {
       }
 
       const problemIds = problemsList.map((problem) => problem.id);
-      let response;
-
-      try {
-        response = await axios.post(
-          `${API_BASE}/auth/problems/bookmark-status`,
-          { problem_ids: problemIds },
-          {
-            headers: {
-              ...getAuthHeaders(),
-              "Content-Type": "application/json",
-            },
-          },
-        );
-      } catch (firstError) {
-        response = await axios.post(
-          `${API_BASE}/auth/problems/bookmark-status`,
-          problemIds,
-          {
-            headers: {
-              ...getAuthHeaders(),
-              "Content-Type": "application/json",
-            },
-          },
-        );
-      }
+      const response = await axios.post(
+        `${API_BASE}/auth/problems/bookmark-status`,
+        problemIds,
+        { headers: { ...getAuthHeaders(), "Content-Type": "application/json" } },
+      );
 
       const convertedData = {};
 
