@@ -40,7 +40,7 @@ const renderMathContent = (text) => {
 };
 
 
-export default function ProblemCard({problem,activeTab,currentUser,voteData,bookmarkData,followStatus,onVote,onBookmark,onFollow,onUnfollow,problemHref}) {
+export default function ProblemCard({problem,activeTab,currentUser,voteData,bookmarkData,followStatus,onVote,onBookmark,onFollow,onUnfollow,problemHref,showFollow=true}) {
  const {lang}=useLanguage(), sq=lang==='sq';
  const href=problemHref||`/problem/${problem.id}?from=feed&tab=${activeTab}`;
  const vote=voteData[problem.id]||{}, saved=!!bookmarkData[problem.id]?.isBookmarked;
@@ -61,7 +61,7 @@ export default function ProblemCard({problem,activeTab,currentUser,voteData,book
    <div className="problem-entry__credit">
     {problem.author?<Link to={currentUser?.id===problem.author.id?'/profile':`/user/${encodeURIComponent(problem.author.username)}`}>{getDisplayName(problem.author.username)}</Link>:<span>{sq?'Autor i panjohur':'Unknown author'}</span>}
     <time dateTime={problem.created_at}>{new Date(problem.created_at).toLocaleDateString(sq?'sq-AL':'en-GB',{day:'numeric',month:'short',year:'numeric'})}</time>
-    {currentUser&&problem.author&&problem.author.id!==currentUser.id&&<FollowButton isFollowing={followStatus[problem.author.id]} onFollow={()=>onFollow(problem.author.id)} onUnfollow={()=>onUnfollow(problem.author.id)} size="sm" isDeletedUser={problem.author.username.startsWith('__deleted_user_')}/>}
+    {showFollow&&currentUser&&problem.author&&problem.author.id!==currentUser.id&&<FollowButton isFollowing={followStatus[problem.author.id]} onFollow={()=>onFollow(problem.author.id)} onUnfollow={()=>onUnfollow(problem.author.id)} size="sm" isDeletedUser={problem.author.username.startsWith('__deleted_user_')}/>}
    </div>
   </div>
  </article>;
