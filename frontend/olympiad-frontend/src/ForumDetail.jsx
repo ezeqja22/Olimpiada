@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/img-redundant-alt */
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
@@ -1493,16 +1493,7 @@ const ForumDetail = () => {
                     marginBottom: spacing.sm,
                   }}
                 >
-                  <h1
-                    className="community-workspace-section-title"
-                    style={{
-                      color: colors.primary,
-                      margin: 0,
-                      fontSize: typography.fontSize["3xl"],
-                    }}
-                  >
-                    {forum.title}
-                  </h1>
+                  <h2 className="community-workspace-section-title">{activeTab === 'members' ? 'Members' : activeTab === 'problems' ? 'Shared problems' : 'Banned members'}</h2>
 
                   {/* Actions Dropdown */}
                   <div style={{ position: "relative" }} data-actions-dropdown>
@@ -1684,25 +1675,7 @@ const ForumDetail = () => {
                     )}
                   </div>
                 </div>
-                <p
-                  style={{
-                    color: colors.gray[600],
-                    marginBottom: spacing.md,
-                    fontSize: typography.fontSize.base,
-                  }}
-                >
-                  {forum.description}
-                </p>
-                <div
-                  style={{
-                    color: colors.gray[500],
-                    marginBottom: spacing.lg,
-                    fontSize: typography.fontSize.sm,
-                  }}
-                >
-                  {members.length}/{forum.max_members} members{" "}
-                  {forum.is_private ? "Private" : "Public"}
-                </div>
+
               </div>
 
               {/* Tab Content */}
@@ -2332,162 +2305,14 @@ const ForumDetail = () => {
                         : "No problems match your filters"}
                     </p>
                   ) : (
-                    filteredProblems.map((problem) => (
-                      <Card
-                        key={problem.id}
-                        style={{
-                          marginBottom: spacing.md,
-                          cursor: "pointer",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            backgroundColor: colors.gray[50],
-                          },
-                        }}
-                        onClick={() =>
-                          navigate(
-                            `/problem/${problem.id}?from=forum&forumId=${forumId}`,
-                          )
-                        }
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor =
-                            colors.gray[50];
-                          e.currentTarget.style.transform = "translateY(-2px)";
-                          e.currentTarget.style.boxShadow =
-                            "0 4px 12px rgba(0,0,0,0.15)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = colors.white;
-                          e.currentTarget.style.transform = "translateY(0)";
-                          e.currentTarget.style.boxShadow = shadows.sm;
-                        }}
-                      >
-                        <h4
-                          style={{
-                            margin: "0 0 8px 0",
-                            color: colors.gray[800],
-                            pointerEvents: "none",
-                          }}
-                        >
-                          {renderMathContent(problem.title)}
-                        </h4>
-                        <p
-                          style={{
-                            color: colors.gray[600],
-                            margin: "0 0 12px 0",
-                            fontSize: "0.9rem",
-                            pointerEvents: "none",
-                          }}
-                        >
-                          {renderMathContent(problem.description)}
-                        </p>
-
-                        {/* Badges */}
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "8px",
-                            marginBottom: "12px",
-                            alignItems: "center",
-                            flexWrap: "wrap",
-                            pointerEvents: "none",
-                          }}
-                        >
-                          <span
-                            style={{
-                              backgroundColor: "#e0e7ff",
-                              color: "#3730a3",
-                              padding: "6px 12px",
-                              borderRadius: "16px",
-                              fontSize: "12px",
-                              fontWeight: "600",
-                              boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
-                              transition: "all 0.2s ease",
-                            }}
-                          >
-                            {problem.subject}
-                          </span>
-                          {problem.level && problem.level.trim() && (
-                            <span
-                              style={{
-                                backgroundColor: "#fef3c7",
-                                color: "#92400e",
-                                padding: "6px 12px",
-                                borderRadius: "16px",
-                                fontSize: "12px",
-                                fontWeight: "600",
-                                boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
-                                transition: "all 0.2s ease",
-                              }}
-                            >
-                              {problem.level}
-                            </span>
-                          )}
-                          {problem.year && (
-                            <span
-                              style={{
-                                backgroundColor: "#dcfce7",
-                                color: "#166534",
-                                padding: "6px 12px",
-                                borderRadius: "16px",
-                                fontSize: "12px",
-                                fontWeight: "600",
-                                boxShadow: "0 2px 6px rgba(26, 77, 58, 0.2)",
-                                transition: "all 0.2s ease",
-                              }}
-                            >
-                              Year: {problem.year}
-                            </span>
-                          )}
-                          {problem.tags && problem.tags.trim() && (
-                            <div
-                              style={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                gap: "8px",
-                                pointerEvents: "none",
-                              }}
-                            >
-                              {problem.tags.split(",").map((tag, index) => {
-                                const trimmedTag = tag.trim();
-                                if (!trimmedTag) return null;
-                                return (
-                                  <span
-                                    key={index}
-                                    style={{
-                                      backgroundColor: colors.tertiary,
-                                      color: "white",
-                                      padding: "6px 12px",
-                                      borderRadius: "16px",
-                                      fontSize: "12px",
-                                      fontWeight: "600",
-                                      whiteSpace: "nowrap",
-                                      boxShadow:
-                                        "0 2px 6px rgba(124, 58, 237, 0.3)",
-                                      transition: "all 0.2s ease",
-                                    }}
-                                  >
-                                    {trimmedTag}
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-
-                        <div
-                          style={{
-                            color: colors.gray[500],
-                            fontSize: "0.8rem",
-                            pointerEvents: "none",
-                          }}
-                        >
-                          Posted by{" "}
-                          {getDisplayName(
-                            problem.author?.username || "Unknown",
-                          )}{" "}
-                          • {new Date(problem.created_at).toLocaleDateString()}
-                        </div>
-                      </Card>
+                    filteredProblems.map(problem => (
+                      <article className="community-problem-entry" key={problem.id}>
+                        <div className="community-problem-meta"><span>{problem.subject}</span>{problem.level&&<span>{problem.level}</span>}{problem.year&&<span>{problem.year}</span>}</div>
+                        <h3><Link to={`/problem/${problem.id}?from=forum&forumId=${forumId}`}>{renderMathContent(problem.title)}</Link></h3>
+                        <div className="community-problem-statement">{renderMathContent(problem.description)}</div>
+                        {problem.tags&&<div className="community-problem-tags">{problem.tags.split(',').map(tag=>tag.trim()).filter(Boolean).map((tag,index)=><span key={`${tag}-${index}`}>{tag}</span>)}</div>}
+                        <footer>Posted by {getDisplayName(problem.author?.username||'Unknown')} · <time dateTime={problem.created_at}>{new Date(problem.created_at).toLocaleDateString()}</time></footer>
+                      </article>
                     ))
                   )}
                 </div>
