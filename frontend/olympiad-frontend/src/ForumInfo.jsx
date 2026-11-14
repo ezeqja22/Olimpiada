@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import Layout from "./components/Layout";
 import Card from "./components/Card";
@@ -22,6 +22,8 @@ import "katex/dist/katex.min.css";
 import { useToast } from "./components/ToastProvider";
 import { useConfirm } from "./components/ConfirmProvider";
 import "./forumModern.css";
+import "./ForumOverview.css";
+import MathRenderer from "./MathRenderer";
 
 // Helper function to render math content
 const renderMathContent = (text) => {
@@ -201,281 +203,15 @@ const ForumInfo = () => {
 
   return (
     <Layout showHomeButton={true}>
-      <div
-        className="forum-info-page"
-        style={{
-          maxWidth: "1000px",
-          margin: "0 auto",
-          padding: spacing.lg,
-          "--forum-primary": colors.primary,
-        }}
-      >
-        <BackButton fallbackPath={`/forum/${forumId}`} />
-
-        {/* Forum Header */}
-        <div
-          className="forum-info-header"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: spacing.xl,
-            padding: spacing.lg,
-            backgroundColor: colors.light,
-            borderRadius: borderRadius.lg,
-            border: `1px solid ${colors.gray[200]}`,
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                fontSize: "2rem",
-                fontWeight: "700",
-                color: colors.primary,
-                margin: "0 0 8px 0",
-              }}
-            >
-              {forum.title}
-            </h1>
-            <p
-              style={{
-                color: colors.gray[600],
-                margin: "0 0 12px 0",
-                fontSize: "1.1rem",
-              }}
-            >
-              {forum.description}
-            </p>
-            <div
-              style={{ display: "flex", gap: spacing.md, alignItems: "center" }}
-            >
-              <span style={{ color: colors.gray[500] }}>
-                {forum.member_count}/{forum.max_members} members
-              </span>
-              <span
-                style={{
-                  color: forum.is_private ? colors.warning : colors.success,
-                  fontWeight: "600",
-                }}
-              >
-                {forum.is_private ? "Private" : "Public"}
-              </span>
-            </div>
-          </div>
-          <div
-            className="forum-info-header__actions"
-            style={{ display: "flex", gap: spacing.sm }}
-          >
-            <Button
-              onClick={() => navigate(`/forum/${forumId}`)}
-              style={{ backgroundColor: colors.primary }}
-            >
-              Open Chat
-            </Button>
-            <Button
-              onClick={handleLeaveForum}
-              style={{ backgroundColor: colors.error }}
-            >
-              Leave Forum
-            </Button>
-          </div>
+      <div className="community-overview">
+        <BackButton fallbackPath="/forums" />
+        <header className="community-overview-heading"><div><span>{forum.subject} · {forum.is_private?"Private forum":"Public forum"}</span><h1>{forum.title}</h1><p>{forum.description}</p></div><Link to={`/forum/${forumId}?view=discussion`} className="community-overview-open">Open Chat →</Link></header>
+        <div className="community-overview-layout">
+          <aside className="community-overview-summary"><h2>Community details</h2><dl><dt>Members</dt><dd>{forum.member_count}/{forum.max_members}</dd><dt>Access</dt><dd>{forum.is_private?"Private":"Public"}</dd></dl><Link to={`/forum/${forumId}`}>Forum workspace →</Link><button type="button" onClick={handleLeaveForum}>Leave Forum</button></aside>
+          <section className="community-overview-content"><div className="community-overview-tabs" role="group" aria-label="Forum information"><button type="button" aria-pressed={activeTab==='members'} onClick={()=>setActiveTab('members')}>Members ({members.length})</button><button type="button" aria-pressed={activeTab==='problems'} onClick={()=>setActiveTab('problems')}>Problems ({problems.length})</button></div>
+            {activeTab==='members'?<div className="community-overview-members">{members.map(member=><article key={member.id}><div className="community-overview-avatar" aria-hidden="true">{getUserInitial(member.user?.username||'?')}</div><div><h3>{getDisplayName(member.user?.username||'Unknown')}</h3><p>Joined {new Date(member.joined_at).toLocaleDateString()}</p></div><span>{member.role}</span></article>)}</div>:<div className="community-overview-problems">{problems.length===0?<p>No problems have been shared in this forum yet.</p>:problems.map(problem=><article key={problem.id}><div><span>{problem.subject}</span><time dateTime={problem.posted_at}>{new Date(problem.posted_at).toLocaleDateString()}</time></div><h3><Link to={`/forum-problem/${problem.id}?from=forum&forumId=${forumId}`}><MathRenderer text={problem.title}/></Link></h3><MathRenderer text={problem.description}/></article>)}</div>}
+          </section>
         </div>
-
-        {/* Tabs */}
-        <div
-          className="forum-info-tabs"
-          style={{
-            display: "flex",
-            borderBottom: `1px solid ${colors.gray[300]}`,
-            marginBottom: spacing.lg,
-          }}
-        >
-          <button
-            onClick={() => setActiveTab("members")}
-            style={{
-              padding: "12px 24px",
-              border: "none",
-              backgroundColor:
-                activeTab === "members" ? colors.primary : "transparent",
-              color: activeTab === "members" ? colors.white : colors.gray[600],
-              cursor: "pointer",
-              borderBottom:
-                activeTab === "members"
-                  ? `3px solid ${colors.primary}`
-                  : "3px solid transparent",
-              transition: "all 0.2s ease",
-            }}
-          >
-            Members ({members.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("problems")}
-            style={{
-              padding: "12px 24px",
-              border: "none",
-              backgroundColor:
-                activeTab === "problems" ? colors.primary : "transparent",
-              color: activeTab === "problems" ? colors.white : colors.gray[600],
-              cursor: "pointer",
-              borderBottom:
-                activeTab === "problems"
-                  ? `3px solid ${colors.primary}`
-                  : "3px solid transparent",
-              transition: "all 0.2s ease",
-            }}
-          >
-            Problems ({problems.length})
-          </button>
-        </div>
-
-        {/* Members Tab */}
-        {activeTab === "members" && (
-          <div>
-            <div
-              className="forum-info-list"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: spacing.md,
-              }}
-            >
-              {members.map((member) => (
-                <Card
-                  key={member.id}
-                  className="forum-info-member-card"
-                  style={{ padding: spacing.md }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: spacing.md,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        borderRadius: "50%",
-                        backgroundColor: colors.primary,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: colors.white,
-                        fontWeight: "bold",
-                        fontSize: "18px",
-                      }}
-                    >
-                      {getUserInitial(member.user?.username || "?")}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <h4
-                        style={{ margin: "0 0 4px 0", color: colors.gray[800] }}
-                      >
-                        {getDisplayName(member.user?.username || "Unknown")}
-                      </h4>
-                      <span
-                        style={{
-                          color: colors.gray[500],
-                          fontSize: "0.9rem",
-                        }}
-                      >
-                        Joined {new Date(member.joined_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <span
-                      style={{
-                        backgroundColor:
-                          member.role === "creator"
-                            ? colors.primary
-                            : member.role === "moderator"
-                              ? colors.warning
-                              : colors.gray[400],
-                        color: colors.white,
-                        padding: "4px 12px",
-                        borderRadius: borderRadius.sm,
-                        fontSize: "0.8rem",
-                        fontWeight: "600",
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      {member.role}
-                    </span>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Problems Tab */}
-        {activeTab === "problems" && (
-          <div>
-            <div
-              className="forum-info-list"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: spacing.md,
-              }}
-            >
-              {problems.map((problem) => (
-                <Card
-                  key={problem.id}
-                  className="forum-info-problem-card"
-                  hover={true}
-                  style={{ cursor: "pointer" }}
-                  onClick={() =>
-                    navigate(
-                      `/forum-problem/${problem.id}?from=forum&forumId=${forumId}`,
-                    )
-                  }
-                >
-                  <h4 style={{ margin: "0 0 8px 0", color: colors.gray[800] }}>
-                    {renderMathContent(problem.title)}
-                  </h4>
-                  <p
-                    style={{
-                      margin: "0 0 12px 0",
-                      color: colors.gray[600],
-                      lineHeight: "1.5",
-                    }}
-                  >
-                    {renderMathContent(problem.description.substring(0, 300))}
-                    {problem.description.length > 300 && "..."}
-                  </p>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: spacing.sm,
-                      alignItems: "center",
-                    }}
-                  >
-                    {problem.subject && (
-                      <span
-                        style={{
-                          backgroundColor: colors.light,
-                          color: colors.primary,
-                          padding: "4px 8px",
-                          borderRadius: borderRadius.sm,
-                          fontSize: "0.8rem",
-                          fontWeight: "600",
-                        }}
-                      >
-                        {problem.subject}
-                      </span>
-                    )}
-                    <span
-                      style={{ color: colors.gray[500], fontSize: "0.8rem" }}
-                    >
-                      Posted {new Date(problem.posted_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </Layout>
   );
