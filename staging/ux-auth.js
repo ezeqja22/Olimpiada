@@ -4,8 +4,8 @@ async page => {
  const login=async(role)=>{
   const secret=await (await page.request.get(api+'/__ux/credentials/'+role)).json();
   await page.getByLabel('Email',{exact:true}).fill(secret.email);
-  await page.getByLabel('Password',{exact:true}).fill(secret.password);
-  await page.getByRole('button',{name:'Sign In',exact:true}).click();
+  await page.getByLabel(/^(Password|Fjalëkalimi)$/).fill(secret.password);
+  await page.getByRole('button',{name:/^(Sign In|Hyr)$/}).click();
  };
  const run=async(name,fn)=>{
    try{
@@ -20,7 +20,7 @@ async page => {
   await page.goto(base+'/login');await login('admin');await page.waitForURL('**/homepage');
   await page.getByRole('button',{name:'☰ Menu'}).click();
   await page.screenshot({path:'.local-state/screenshots/admin-menu-desktop.png'});
-  await page.getByRole('link',{name:'Paneli Admin',exact:true}).click();
+  await page.getByRole('link',{name:/^(Paneli Admin|Admin Panel)$/}).click();
   await page.waitForURL('**/admin');await page.locator('.admin-main').waitFor();
   await page.screenshot({path:'.local-state/screenshots/admin-desktop.png'});
  });
