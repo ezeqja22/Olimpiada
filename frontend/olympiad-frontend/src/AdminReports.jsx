@@ -1,3 +1,4 @@
+import {PublishingHeader} from "./components/PublishingWorkspace";
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
@@ -187,14 +188,11 @@ const AdminReports = () => {
   }
 
   return (
-    <div className="admin-page admin-reports-page">
-      {/* Filters */}
-      <div className="admin-card">
-        <h2>Content Reports</h2>
+    <div className="publishing-workspace admin-reports-page"><PublishingHeader eyebrow="Community / Moderation" title="Content reports" description="Review reports in context, assign responsibility and record moderation decisions."/><div className="publishing-settings-columns"><aside className="publishing-section"><h2>Review queue</h2>
         <div className="admin-filter-row">
           <div>
-            <label>Status</label>
-            <select
+            <label htmlFor="report-status">Status</label>
+            <select id="report-status"
               value={filters.status}
               onChange={(e) => handleFilterChange("status", e.target.value)}
             >
@@ -206,11 +204,9 @@ const AdminReports = () => {
             </select>
           </div>
         </div>
-      </div>
-
-      {/* Reports Table */}
-      <div className="admin-card">
-        <div className="admin-table">
+      </aside>
+      <div className="publishing-section">
+        <div className="publishing-table">
           <table>
             <thead>
               <tr>
@@ -383,6 +379,7 @@ const AdminReports = () => {
             onReportUpdate={handleReportUpdate}
           />
         )}
+      </div>
       </div>
     </div>
   );

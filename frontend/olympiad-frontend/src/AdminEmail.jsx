@@ -1,3 +1,4 @@
+import {PublishingHeader} from "./components/PublishingWorkspace";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useToast } from "./components/ToastProvider";
@@ -245,11 +246,11 @@ const AdminEmail = () => {
   }
 
   return (
-    <div className="admin-page admin-email-page"><details className="admin-card"><summary>Email templates</summary><AdminTemplates/></details>
+    <div className="publishing-workspace admin-email-page"><PublishingHeader eyebrow="Website / Communication" title="Email campaigns" description="Prepare campaigns, review recipients and inspect delivery history. Sending an email is a separate action."/><details className="publishing-maintenance"><summary>Notification templates</summary><AdminTemplates/></details>
       {/* Header */}
       <div className="admin-card">
         <div className="admin-card-header admin-card-header-wrap">
-          <h2>Email Campaigns</h2>
+          <h2>Campaign history</h2>
           <button className="admin-btn" onClick={() => setShowCreateForm(true)}>
             Create Campaign
           </button>
@@ -258,13 +259,13 @@ const AdminEmail = () => {
 
       {/* Create Campaign Form */}
       {showCreateForm && (
-        <div className="admin-card">
-          <h3>Create New Email Campaign</h3>
+        <div className="publishing-section publishing-composer">
+          <header><h3>Create a campaign</h3><p>Compose the message and select its audience. Review the campaign before sending.</p></header>
           <form onSubmit={handleCreateCampaign} className="admin-form">
             <div className="form-group">
-              <label>Subject</label>
+              <label htmlFor="campaign-subject">Subject</label>
               <input
-                type="text"
+                id="campaign-subject" type="text"
                 value={newCampaign.subject}
                 onChange={(e) =>
                   setNewCampaign((prev) => ({
@@ -278,8 +279,8 @@ const AdminEmail = () => {
             </div>
 
             <div className="form-group">
-              <label>Content</label>
-              <textarea
+              <label htmlFor="campaign-content">Content</label>
+              <textarea id="campaign-content"
                 value={newCampaign.content}
                 onChange={(e) =>
                   setNewCampaign((prev) => ({

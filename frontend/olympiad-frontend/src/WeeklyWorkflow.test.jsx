@@ -23,8 +23,8 @@ test('failed weekly submission keeps the answer and permits retry; pending submi
 test('changing weekly review never shows submissions from an earlier request',async()=>{
  let resolveOld;
  axios.get.mockImplementation(url=>url.endsWith('/queue')?Promise.resolve({data:[{id:1,week_date:'Week 1'},{id:2,week_date:'Week 2'}]}):url.includes('/1/submissions')?new Promise(r=>{resolveOld=r}):Promise.resolve({data:[{id:22,answer:'Second week',status:'pending'}]}));
- render(<AdminWeekly/>);
- const buttons=await screen.findAllByRole('button',{name:'Shiko zgjidhjet'});
+ render(<MemoryRouter><AdminWeekly/></MemoryRouter>);
+ const buttons=await screen.findAllByRole('button',{name:/Shiko zgjidhjet/});
  fireEvent.click(buttons[0]);fireEvent.click(buttons[1]);await screen.findByText('Second week');
  await act(async()=>resolveOld({data:[{id:11,answer:'Old week',status:'pending'}]}));
  expect(screen.queryByText('Old week')).not.toBeInTheDocument();expect(screen.getByText('Second week')).toBeInTheDocument();

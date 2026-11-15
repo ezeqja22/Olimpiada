@@ -1,3 +1,4 @@
+import {PublishingHeader} from "./components/PublishingWorkspace";
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
@@ -18,7 +19,7 @@ const AdminAnalytics = () => {
 
   const fetchAnalytics = async () => {
     try {
-      setLoading(true);
+      setLoading(true);setError(null);
       const token = localStorage.getItem("token");
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/admin/analytics?range=${timeRange}`,
@@ -67,12 +68,12 @@ const AdminAnalytics = () => {
   }
 
   return (
-    <div className="admin-page admin-analytics-page">
+    <div className="publishing-workspace admin-analytics-page"><PublishingHeader eyebrow="Administration / Activity" title="Platform activity" description="Compare community activity over time. These figures describe usage, not service availability."/>
       {/* Time Range Selector */}
       <div className="admin-card">
         <div className="admin-card-header admin-card-header-wrap">
-          <h2>Analytics Dashboard</h2>
-          <select
+          <label htmlFor="analytics-period">Reporting period</label>
+          <select id="analytics-period"
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
             style={{
@@ -91,14 +92,14 @@ const AdminAnalytics = () => {
       </div>
 
       {/* Key Metrics */}
-      <div className="stats-grid">
-        <div className="stat-card">
+      <div className="publishing-metrics">
+        <div className="publishing-metric">
           <h3>New Users</h3>
           <p className="stat-value">{analytics?.new_users || 0}</p>
           <p className="stat-change">{getTimeRangeLabel(timeRange)}</p>
         </div>
 
-        <div className="stat-card">
+        <div className="publishing-metric">
           <h3>Active Users</h3>
           <p className="stat-value">{analytics?.active_users || 0}</p>
           <p className="stat-change">
@@ -106,19 +107,19 @@ const AdminAnalytics = () => {
           </p>
         </div>
 
-        <div className="stat-card">
+        <div className="publishing-metric">
           <h3>New Forums</h3>
           <p className="stat-value">{analytics?.new_forums || 0}</p>
           <p className="stat-change">{getTimeRangeLabel(timeRange)}</p>
         </div>
 
-        <div className="stat-card">
+        <div className="publishing-metric">
           <h3>New Problems</h3>
           <p className="stat-value">{analytics?.new_problems || 0}</p>
           <p className="stat-change">{getTimeRangeLabel(timeRange)}</p>
         </div>
 
-        <div className="stat-card">
+        <div className="publishing-metric">
           <h3>Total Comments</h3>
           <p className="stat-value">{analytics?.total_comments || 0}</p>
           <p className="stat-change">
@@ -126,7 +127,7 @@ const AdminAnalytics = () => {
           </p>
         </div>
 
-        <div className="stat-card">
+        <div className="publishing-metric">
           <h3>Reports</h3>
           <p className="stat-value">{analytics?.total_reports || 0}</p>
           <p className="stat-change">
@@ -613,75 +614,7 @@ const AdminAnalytics = () => {
 
       <GA4Dashboard />
       <AdminFinance />
-      {/* System Health */}
-      <div className="admin-card">
-        <h2>System Health</h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "20px",
-          }}
-        >
-          <div
-            style={{
-              textAlign: "center",
-              padding: "20px",
-              background: "#f8f9fa",
-              borderRadius: "8px",
-            }}
-          >
-            <h3 style={{ margin: "0 0 10px 0", color: "#28a745" }}>
-              Service health not monitored
-            </h3>
-            <p style={{ margin: 0, color: "#6c757d" }}>
-              This page does not verify service availability.
-            </p>
-          </div>
-
-          <div
-            style={{
-              textAlign: "center",
-              padding: "20px",
-              background: "#f8f9fa",
-              borderRadius: "8px",
-            }}
-          >
-            <h3 style={{ margin: "0 0 10px 0", color: "#17a2b8" }}>Database</h3>
-            <p style={{ margin: 0, color: "#6c757d" }}>
-              Response time: {analytics?.db_response_time || "N/A"}ms
-            </p>
-          </div>
-
-          <div
-            style={{
-              textAlign: "center",
-              padding: "20px",
-              background: "#f8f9fa",
-              borderRadius: "8px",
-            }}
-          >
-            <h3 style={{ margin: "0 0 10px 0", color: "#ffc107" }}>Storage</h3>
-            <p style={{ margin: 0, color: "#6c757d" }}>
-              Usage: {analytics?.storage_usage || "N/A"}
-            </p>
-          </div>
-
-          <div
-            style={{
-              textAlign: "center",
-              padding: "20px",
-              background: "#f8f9fa",
-              borderRadius: "8px",
-            }}
-          >
-            <h3 style={{ margin: "0 0 10px 0", color: "#6f42c1" }}>Uptime</h3>
-            <p style={{ margin: 0, color: "#6c757d" }}>
-              {"Not measured"}
-            </p>
-          </div>
-        </div>
-      </div>
+      <section className="publishing-section"><h2>Monitoring information</h2><p>This page does not verify service availability or uptime.</p><dl className="publishing-health"><div><dt>Database response time</dt><dd>{analytics?.db_response_time!=null?analytics.db_response_time+" ms":"Not measured"}</dd></div><div><dt>Storage usage</dt><dd>{analytics?.storage_usage||"Not measured"}</dd></div></dl></section>
     </div>
   );
 };
