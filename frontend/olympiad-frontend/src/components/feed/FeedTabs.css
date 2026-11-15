@@ -1,0 +1,7 @@
+.discovery-tabs { display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #d8e0d5;margin-bottom:20px; }
+.discovery-tabs__choices { display:flex;gap:24px;min-width:0;overflow:auto; }
+.discovery-tabs__choices button { background:transparent;border:0;border-bottom:2px solid transparent;padding:14px 0;min-height:44px;white-space:nowrap;color:#66756b;font:inherit;font-size:13px;cursor:pointer; }
+.discovery-tabs__choices button[aria-pressed=true] { color:#1a4d3a;border-bottom-color:#1a4d3a;font-weight:600; }
+.discovery-tabs__choices button:focus-visible { outline:2px solid #7254a3;outline-offset:-2px; }
+.discovery-tabs__count { font-size:12px;color:#66756b;white-space:nowrap; }
+@media(max-width:600px){.discovery-tabs{display:block}.discovery-tabs__choices{gap:20px}.discovery-tabs__count{display:block;padding:10px 0}}

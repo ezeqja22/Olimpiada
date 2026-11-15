@@ -4669,15 +4669,13 @@ async def delete_reply(
     """Delete a reply (author or moderator/creator only)"""
     try:
         # Check if user has access to forum (or is admin/moderator)
-        if current_user.role not in ['admin', 'moderator', 'reviewer', 'super_admin']:
-            membership = db.query(ForumMembership).filter(
-                ForumMembership.forum_id == forum_id,
-                ForumMembership.user_id == current_user.id,
-                ForumMembership.is_active == True
-            ).first()
-            
-            if not membership:
-                raise HTTPException(status_code=403, detail="Access denied")
+        membership = db.query(ForumMembership).filter(
+            ForumMembership.forum_id == forum_id,
+            ForumMembership.user_id == current_user.id,
+            ForumMembership.is_active == True
+        ).first()
+        if current_user.role not in ['admin', 'moderator', 'reviewer', 'super_admin'] and not membership:
+            raise HTTPException(status_code=403, detail="Access denied")
         
         # Get reply
         reply = db.query(ForumReply).filter(
@@ -4689,7 +4687,7 @@ async def delete_reply(
             raise HTTPException(status_code=404, detail="Reply not found")
         
         # Check permissions (author or moderator/creator)
-        user_role = membership.role
+        user_role = membership.role if membership else None
         can_delete = (
             reply.author_id == current_user.id or  # Author can delete their own reply
             user_role == 'creator' or  # Creator can delete any reply

@@ -22,7 +22,7 @@ test('grading view ignores an old course response after changing selection',asyn
  let resolveOld;
  axios.get.mockImplementation(url=>url.endsWith('/classes')?Promise.resolve({data:[]}):url.endsWith('/courses')?Promise.resolve({data:[{id:1,title:'One'},{id:2,title:'Two'}]}):url.includes('/1/submissions')?new Promise(r=>{resolveOld=r}):Promise.resolve({data:[{attempt_id:22,student_id:2,answers:'Second answer'}]}));
  render(<MemoryRouter><TeacherWorkspace/></MemoryRouter>);
- const buttons=await screen.findAllByRole('button',{name:'Shiko dorëzimet'});
+ const buttons=await screen.findAllByRole('button',{name:'View submissions'});
  fireEvent.click(buttons[0]);fireEvent.click(buttons[1]);await screen.findByText(/Second answer/);
  await act(async()=>resolveOld({data:[{attempt_id:11,student_id:1,answers:'Old answer'}]}));
  expect(screen.queryByText(/Old answer/)).not.toBeInTheDocument();expect(screen.getByText(/Second answer/)).toBeInTheDocument();

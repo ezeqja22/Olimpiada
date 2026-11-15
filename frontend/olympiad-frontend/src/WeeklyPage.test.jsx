@@ -4,6 +4,7 @@ import {render, screen, fireEvent, waitFor} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
 import axios from "axios";
 import WeeklyPage from "./WeeklyPage";
+vi.mock('./context/LanguageContext',()=>({useLanguage:()=>({lang:'sq'})}));
 vi.mock("axios",()=>({default:{get:vi.fn(),post:vi.fn()}}));
 vi.mock("./context/AuthContext",()=>({useAuth:()=>({currentUser:{id:1}})}));
 vi.mock("./components/SitePageIntro",()=>({default:()=>null}));

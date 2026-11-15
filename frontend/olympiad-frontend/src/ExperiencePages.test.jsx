@@ -14,8 +14,8 @@ beforeEach(()=>{
 });
 test('changing only a score preserves the saved feedback',async()=>{
  render(<MemoryRouter><TeacherWorkspace/></MemoryRouter>);
- fireEvent.click(await screen.findByRole('button',{name:'Shiko dorëzimet'}));
+ fireEvent.click(await screen.findByRole('button',{name:'View submissions'}));
  fireEvent.change(await screen.findByLabelText('Score /100'),{target:{value:'80'}});
- fireEvent.click(screen.getByRole('button',{name:'Ruaj vlerësimin'}));
+ fireEvent.click(screen.getByRole('button',{name:'Save assessment'}));
  await waitFor(()=>expect(axios.post).toHaveBeenCalledWith(expect.stringContaining('/submissions/7/grade'),{score:80,feedback:'Keep this feedback'},expect.anything()));
 });

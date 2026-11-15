@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/img-redundant-alt */
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
@@ -27,6 +27,7 @@ import ReportModal from "./ReportModal";
 import { useToast } from "./components/ToastProvider";
 import { useConfirm } from "./components/ConfirmProvider";
 import "./forumModern.css";
+import "./ForumWorkspace.css";
 import koshIcon from "./assets/kosh_icon_red_yr4dpb.svg";
 import xIcon from "./assets/X_Icon_White_ehzzaz.svg";
 import sandwichIcon from "./assets/sanwich_icon_hlmeja.svg";
@@ -192,6 +193,9 @@ const ForumDetail = () => {
 
   // Get location for scroll position restoration
   const location = useLocation();
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get("view") === "discussion") setShowChat(true);
+  }, [location.search, forumId]);
 
   // Handle clicking the new message indicator
   const handleNewMessageClick = () => {
@@ -1459,97 +1463,25 @@ const ForumDetail = () => {
 
   return (
     <>
-      <style>
-        {`
-                    @keyframes slideInFromBottom {
-                        0% {
-                            transform: translateY(100%);
-                            opacity: 0;
-                        }
-                        100% {
-                            transform: translateY(0);
-                            opacity: 1;
-                        }
-                    }
-                    
-                    @keyframes slideOutToBottom {
-                        0% {
-                            transform: translateY(0);
-                            opacity: 1;
-                        }
-                        100% {
-                            transform: translateY(100%);
-                            opacity: 0;
-                        }
-                    }
-                    
-                    /* Android navigation button fix */
-                    @media screen and (max-width: 768px) {
-                        [data-chat-input-form] {
-                            padding-bottom: 40px !important;
-                            margin-bottom: 0 !important;
-                        }
-                        
-                        /* Additional Android-specific fixes */
-                        @supports (padding: max(0px)) {
-                            [data-chat-input-form] {
-                                padding-bottom: max(40px, env(safe-area-inset-bottom) + 8px) !important;
-                            }
-                        }
-                    }
-                `}
-      </style>
-      <div
-        className="forum-detail-page"
-        style={{
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          "--forum-primary": colors.primary,
-        }}
-      >
+      <div className="community-workspace">
         <Header />
 
-        {/* Main Content */}
-        <div
-          className={`forum-detail-layout ${showChat ? "is-chat-open" : ""} ${
-            showSidebar ? "is-sidebar-open" : ""
-          }`}
-          style={{
-            display: "flex",
-            height: "calc(100vh - 80px)",
-            transition: "all 0.3s ease-in-out",
-          }}
-        >
-          {/* Forum Info Panel */}
-          <div
-            className="forum-detail-info-panel"
-            style={{
-              width: showChat
-                ? isMobile
-                  ? showSidebar
-                    ? "60%"
-                    : "100%"
-                  : "30%"
-                : "100%",
-              minWidth: showChat
-                ? isMobile
-                  ? showSidebar
-                    ? "auto"
-                    : "auto"
-                  : "300px"
-                : "auto",
-              transition: "all 0.3s ease-in-out",
-              overflow: "hidden",
-              borderRight: showChat ? `1px solid ${colors.gray[200]}` : "none",
-              display: "block", // Always show on mobile, let width handle the layout
-            }}
-          >
-            <div
-              className="forum-detail-info-scroll"
-              style={{ padding: spacing.lg, height: "100%", overflowY: "auto" }}
-            >
-              <BackButton fallbackPath="/forums" />
+        <div className="community-workspace-heading"><div><span>{forum.subject} · {forum.is_private ? "Private community" : "Public community"}</span><h1>{forum.title}</h1></div><BackButton fallbackPath="/forums" /></div>
+        <div className="community-workspace-layout">
+          <aside className="community-workspace-rail">
+            <p>{forum.description}</p>
+            <div className="community-workspace-members">{members.length}/{forum.max_members} members · {onlineCount} online</div>
+            <nav aria-label="Forum sections">
+              <button type="button" aria-pressed={showChat} onClick={()=>{if(!showChat)toggleChat();}}>Discussion</button>
+              <button type="button" aria-pressed={!showChat&&activeTab==="members"} onClick={()=>{if(showChat)toggleChat();setActiveTab("members");}}>Members <span>{members.length}</span></button>
+              <button type="button" aria-pressed={!showChat&&activeTab==="problems"} onClick={()=>{if(showChat)toggleChat();setActiveTab("problems");}}>Problems <span>{problems.length}</span></button>
+              {isCreator&&<button type="button" aria-pressed={!showChat&&activeTab==="banned"} onClick={()=>{if(showChat)toggleChat();setActiveTab("banned");fetchBannedMembers();}}>Banned <span>{bannedMembers.length}</span></button>}
+            </nav>
+            {!isMember&&<Button onClick={handleJoinForum}>Join Forum</Button>}
+          </aside>
+          <div className="community-workspace-info" hidden={showChat}>
+            <div className="community-workspace-info-scroll">
+
 
               <div style={{ marginTop: spacing.md }}>
                 <div
@@ -1561,16 +1493,7 @@ const ForumDetail = () => {
                     marginBottom: spacing.sm,
                   }}
                 >
-                  <h1
-                    className="forum-detail-title"
-                    style={{
-                      color: colors.primary,
-                      margin: 0,
-                      fontSize: typography.fontSize["3xl"],
-                    }}
-                  >
-                    {forum.title}
-                  </h1>
+                  <h2 className="community-workspace-section-title">{activeTab === 'members' ? 'Members' : activeTab === 'problems' ? 'Shared problems' : 'Banned members'}</h2>
 
                   {/* Actions Dropdown */}
                   <div style={{ position: "relative" }} data-actions-dropdown>
@@ -1752,166 +1675,7 @@ const ForumDetail = () => {
                     )}
                   </div>
                 </div>
-                <p
-                  style={{
-                    color: colors.gray[600],
-                    marginBottom: spacing.md,
-                    fontSize: typography.fontSize.base,
-                  }}
-                >
-                  {forum.description}
-                </p>
-                <div
-                  style={{
-                    color: colors.gray[500],
-                    marginBottom: spacing.lg,
-                    fontSize: typography.fontSize.sm,
-                  }}
-                >
-                  {members.length}/{forum.max_members} members{" "}
-                  {forum.is_private ? "Private" : "Public"}
-                </div>
-              </div>
 
-              {/* Chat Toggle Button */}
-              <div
-                className="forum-detail-chat-toggle-row"
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-start",
-                  marginBottom: spacing.lg,
-                }}
-              >
-                <Button
-                  onClick={toggleChat}
-                  style={{
-                    backgroundColor: colors.primary,
-                    color: colors.white,
-                    border: "none",
-                    padding: "12px 24px",
-                    borderRadius: borderRadius.md,
-                    cursor: "pointer",
-                    fontSize: typography.fontSize.base,
-                    fontWeight: "600",
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = colors.secondary;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = colors.primary;
-                  }}
-                >
-                  {showChat ? "Close Chat" : "Open Chat"}
-                </Button>
-
-                {!isMember && (
-                  <Button
-                    onClick={handleJoinForum}
-                    style={{
-                      backgroundColor: colors.secondary,
-                      color: colors.white,
-                      border: "none",
-                      padding: "12px 24px",
-                      borderRadius: borderRadius.md,
-                      cursor: "pointer",
-                      fontSize: typography.fontSize.base,
-                      fontWeight: "600",
-                      marginLeft: spacing.sm,
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = colors.primary;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = colors.secondary;
-                    }}
-                  >
-                    Join Forum
-                  </Button>
-                )}
-              </div>
-
-              {/* Tabs */}
-              <div
-                className="forum-detail-tabs"
-                style={{
-                  display: "flex",
-                  borderBottom: `2px solid ${colors.gray[200]}`,
-                  marginBottom: spacing.lg,
-                }}
-              >
-                <button
-                  onClick={() => setActiveTab("members")}
-                  style={{
-                    padding: "12px 24px",
-                    border: "none",
-                    backgroundColor: "transparent",
-                    color:
-                      activeTab === "members"
-                        ? colors.primary
-                        : colors.gray[600],
-                    borderBottom:
-                      activeTab === "members"
-                        ? `2px solid ${colors.primary}`
-                        : "2px solid transparent",
-                    cursor: "pointer",
-                    fontSize: typography.fontSize.base,
-                    fontWeight: "600",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  Members ({members.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("problems")}
-                  style={{
-                    padding: "12px 24px",
-                    border: "none",
-                    backgroundColor: "transparent",
-                    color:
-                      activeTab === "problems"
-                        ? colors.primary
-                        : colors.gray[600],
-                    borderBottom:
-                      activeTab === "problems"
-                        ? `2px solid ${colors.primary}`
-                        : "2px solid transparent",
-                    cursor: "pointer",
-                    fontSize: typography.fontSize.base,
-                    fontWeight: "600",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  Problems ({problems.length})
-                </button>
-                {isCreator && (
-                  <button
-                    onClick={() => {
-                      setActiveTab("banned");
-                      fetchBannedMembers();
-                    }}
-                    style={{
-                      padding: "12px 24px",
-                      border: "none",
-                      backgroundColor: "transparent",
-                      color:
-                        activeTab === "banned"
-                          ? colors.primary
-                          : colors.gray[600],
-                      borderBottom:
-                        activeTab === "banned"
-                          ? `2px solid ${colors.primary}`
-                          : "2px solid transparent",
-                      cursor: "pointer",
-                      fontSize: typography.fontSize.base,
-                      fontWeight: "600",
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    Banned ({bannedMembers.length})
-                  </button>
-                )}
               </div>
 
               {/* Tab Content */}
@@ -2541,162 +2305,14 @@ const ForumDetail = () => {
                         : "No problems match your filters"}
                     </p>
                   ) : (
-                    filteredProblems.map((problem) => (
-                      <Card
-                        key={problem.id}
-                        style={{
-                          marginBottom: spacing.md,
-                          cursor: "pointer",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            backgroundColor: colors.gray[50],
-                          },
-                        }}
-                        onClick={() =>
-                          navigate(
-                            `/problem/${problem.id}?from=forum&forumId=${forumId}`,
-                          )
-                        }
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor =
-                            colors.gray[50];
-                          e.currentTarget.style.transform = "translateY(-2px)";
-                          e.currentTarget.style.boxShadow =
-                            "0 4px 12px rgba(0,0,0,0.15)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = colors.white;
-                          e.currentTarget.style.transform = "translateY(0)";
-                          e.currentTarget.style.boxShadow = shadows.sm;
-                        }}
-                      >
-                        <h4
-                          style={{
-                            margin: "0 0 8px 0",
-                            color: colors.gray[800],
-                            pointerEvents: "none",
-                          }}
-                        >
-                          {renderMathContent(problem.title)}
-                        </h4>
-                        <p
-                          style={{
-                            color: colors.gray[600],
-                            margin: "0 0 12px 0",
-                            fontSize: "0.9rem",
-                            pointerEvents: "none",
-                          }}
-                        >
-                          {renderMathContent(problem.description)}
-                        </p>
-
-                        {/* Badges */}
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "8px",
-                            marginBottom: "12px",
-                            alignItems: "center",
-                            flexWrap: "wrap",
-                            pointerEvents: "none",
-                          }}
-                        >
-                          <span
-                            style={{
-                              backgroundColor: "#e0e7ff",
-                              color: "#3730a3",
-                              padding: "6px 12px",
-                              borderRadius: "16px",
-                              fontSize: "12px",
-                              fontWeight: "600",
-                              boxShadow: "0 2px 6px rgba(30, 64, 175, 0.2)",
-                              transition: "all 0.2s ease",
-                            }}
-                          >
-                            {problem.subject}
-                          </span>
-                          {problem.level && problem.level.trim() && (
-                            <span
-                              style={{
-                                backgroundColor: "#fef3c7",
-                                color: "#92400e",
-                                padding: "6px 12px",
-                                borderRadius: "16px",
-                                fontSize: "12px",
-                                fontWeight: "600",
-                                boxShadow: "0 2px 6px rgba(245, 158, 11, 0.2)",
-                                transition: "all 0.2s ease",
-                              }}
-                            >
-                              {problem.level}
-                            </span>
-                          )}
-                          {problem.year && (
-                            <span
-                              style={{
-                                backgroundColor: "#dcfce7",
-                                color: "#166534",
-                                padding: "6px 12px",
-                                borderRadius: "16px",
-                                fontSize: "12px",
-                                fontWeight: "600",
-                                boxShadow: "0 2px 6px rgba(26, 77, 58, 0.2)",
-                                transition: "all 0.2s ease",
-                              }}
-                            >
-                              Year: {problem.year}
-                            </span>
-                          )}
-                          {problem.tags && problem.tags.trim() && (
-                            <div
-                              style={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                gap: "8px",
-                                pointerEvents: "none",
-                              }}
-                            >
-                              {problem.tags.split(",").map((tag, index) => {
-                                const trimmedTag = tag.trim();
-                                if (!trimmedTag) return null;
-                                return (
-                                  <span
-                                    key={index}
-                                    style={{
-                                      backgroundColor: colors.tertiary,
-                                      color: "white",
-                                      padding: "6px 12px",
-                                      borderRadius: "16px",
-                                      fontSize: "12px",
-                                      fontWeight: "600",
-                                      whiteSpace: "nowrap",
-                                      boxShadow:
-                                        "0 2px 6px rgba(124, 58, 237, 0.3)",
-                                      transition: "all 0.2s ease",
-                                    }}
-                                  >
-                                    {trimmedTag}
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-
-                        <div
-                          style={{
-                            color: colors.gray[500],
-                            fontSize: "0.8rem",
-                            pointerEvents: "none",
-                          }}
-                        >
-                          Posted by{" "}
-                          {getDisplayName(
-                            problem.author?.username || "Unknown",
-                          )}{" "}
-                          • {new Date(problem.created_at).toLocaleDateString()}
-                        </div>
-                      </Card>
+                    filteredProblems.map(problem => (
+                      <article className="community-problem-entry" key={problem.id}>
+                        <div className="community-problem-meta"><span>{problem.subject}</span>{problem.level&&<span>{problem.level}</span>}{problem.year&&<span>{problem.year}</span>}</div>
+                        <h3><Link to={`/problem/${problem.id}?from=forum&forumId=${forumId}`}>{renderMathContent(problem.title)}</Link></h3>
+                        <div className="community-problem-statement">{renderMathContent(problem.description)}</div>
+                        {problem.tags&&<div className="community-problem-tags">{problem.tags.split(',').map(tag=>tag.trim()).filter(Boolean).map((tag,index)=><span key={`${tag}-${index}`}>{tag}</span>)}</div>}
+                        <footer>Posted by {getDisplayName(problem.author?.username||'Unknown')} · <time dateTime={problem.created_at}>{new Date(problem.created_at).toLocaleDateString()}</time></footer>
+                      </article>
                     ))
                   )}
                 </div>
@@ -2825,26 +2441,7 @@ const ForumDetail = () => {
 
           {/* Chat Panel */}
           {showChat && (
-            <div
-              className="forum-detail-chat-panel"
-              data-chat-panel
-              style={{
-                width: isMobile ? "100%" : "70%",
-                height: isMobile ? "calc(100vh - 60px)" : "100%", // Subtract header height
-                display: "flex",
-                flexDirection: "column",
-                backgroundColor: colors.light,
-                transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                position: isMobile ? "fixed" : "relative",
-                top: isMobile ? "60px" : "auto", // Start below header
-                left: isMobile ? "0" : "auto",
-                zIndex: isMobile ? 1000 : "auto",
-                transform: "translateY(0)",
-                opacity: 1,
-                animation:
-                  "slideInFromBottom 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-              }}
-            >
+            <div className="community-workspace-chat" data-chat-panel>
               {/* Chat Header */}
               <div
                 className="forum-detail-chat-header"
@@ -2896,78 +2493,7 @@ const ForumDetail = () => {
                   </div>
                 </div>
 
-                {/* Close Chat Button */}
-                <button
-                  onClick={() => {
-                    // Add slide out animation
-                    const chatPanel =
-                      document.querySelector("[data-chat-panel]");
-                    if (chatPanel) {
-                      chatPanel.style.animation =
-                        "slideOutToBottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
-                      setTimeout(() => {
-                        toggleChat();
-                      }, 300);
-                    } else {
-                      toggleChat();
-                    }
-                  }}
-                  style={{
-                    backgroundColor: colors.primary,
-                    border: "none",
-                    borderRadius: "50%",
-                    width: "40px",
-                    height: "40px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = colors.secondary;
-                    e.target.style.transform = "scale(1.05)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = colors.primary;
-                    e.target.style.transform = "scale(1)";
-                  }}
-                >
-                  <img
-                    src={xIcon}
-                    alt="Close Chat"
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      objectFit: "contain",
-                    }}
-                  />
-                </button>
-
-                {isMobile && (
-                  <button
-                    onClick={() => setShowSidebar(!showSidebar)}
-                    style={{
-                      backgroundColor: "transparent",
-                      border: "none",
-                      color: colors.gray[600],
-                      fontSize: "24px",
-                      cursor: "pointer",
-                      padding: "8px",
-                    }}
-                  >
-                    <img
-                      src={sandwichIcon}
-                      alt="Menu"
-                      style={{
-                        width: "20px",
-                        height: "20px",
-                        objectFit: "contain",
-                      }}
-                    />
-                  </button>
-                )}
+                <button type="button" className="community-workspace-back" onClick={toggleChat}>Members & details</button>
               </div>
 
               {/* Pinned Message Banner */}
@@ -3613,108 +3139,10 @@ const ForumDetail = () => {
                 </div>
               )}
 
-              {/* Message Input */}
-              <form
-                className="forum-detail-composer"
-                data-chat-input-form
-                onSubmit={sendMessage}
-                style={{
-                  padding: isMobile ? spacing.xs : spacing.md,
-                  paddingBottom: isMobile ? "40px" : spacing.md,
-                  backgroundColor: colors.white,
-                  borderTop: `1px solid ${colors.gray[200]}`,
-                  flexShrink: 0,
-                  position: isMobile ? "sticky" : "static",
-                  bottom: isMobile ? "0" : "auto",
-                  zIndex: isMobile ? 1001 : "auto",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    gap: isMobile ? spacing.sm : spacing.sm,
-                    alignItems: "center",
-                    flexWrap: "nowrap",
-                  }}
-                >
-                  <button
-                    className="forum-detail-attach-button"
-                    type="button"
-                    onClick={handleAttachmentClick}
-                    style={{
-                      backgroundColor: colors.primary,
-                      color: colors.white,
-                      border: "none",
-                      borderRadius: "50%",
-                      width: isMobile ? "28px" : "40px",
-                      height: isMobile ? "28px" : "40px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      fontSize: isMobile ? "12px" : "20px",
-                      fontWeight: "bold",
-                      transition: "all 0.2s ease",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                      flexShrink: 0,
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = colors.secondary;
-                      e.target.style.transform = "scale(1.05)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = colors.primary;
-                      e.target.style.transform = "scale(1)";
-                    }}
-                  >
-                    +
-                  </button>
-
-                  <input
-                    className="forum-detail-chat-input"
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => {
-                      setNewMessage(e.target.value);
-                      handleTypingStart();
-                    }}
-                    placeholder="Type a message..."
-                    style={{
-                      flex: 1,
-                      padding: isMobile ? spacing.xs : spacing.md,
-                      border: `1px solid ${colors.gray[300]}`,
-                      borderRadius: borderRadius.md,
-                      fontSize: isMobile
-                        ? typography.fontSize.sm
-                        : typography.fontSize.base,
-                      outline: "none",
-                      height: isMobile ? "28px" : "auto",
-                      minHeight: isMobile ? "28px" : "auto",
-                      maxHeight: isMobile ? "28px" : "auto",
-                    }}
-                  />
-                  <Button
-                    className="forum-detail-send-button"
-                    type="submit"
-                    style={{
-                      backgroundColor: colors.primary,
-                      color: colors.white,
-                      border: "none",
-                      padding: isMobile ? "6px 8px" : "12px 24px",
-                      borderRadius: borderRadius.md,
-                      cursor: "pointer",
-                      fontSize: isMobile
-                        ? typography.fontSize.sm
-                        : typography.fontSize.base,
-                      fontWeight: "600",
-                      height: isMobile ? "28px" : "auto",
-                      minHeight: isMobile ? "28px" : "auto",
-                      flexShrink: 0,
-                    }}
-                  >
-                    Send
-                  </Button>
-                </div>
+              <form className="community-message-form" data-chat-input-form onSubmit={sendMessage}>
+                <button type="button" aria-label="Add attachment or mathematical content" aria-expanded={showAttachmentMenu} onClick={handleAttachmentClick}>+</button>
+                <input type="text" aria-label="Message" value={newMessage} onChange={e=>{setNewMessage(e.target.value);handleTypingStart();}} placeholder="Type a message..."/>
+                <button type="submit">Send</button>
               </form>
 
               {/* Attachment Menu */}

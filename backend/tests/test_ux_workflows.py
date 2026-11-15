@@ -66,3 +66,29 @@ def test_learning_feedback_only_exposes_own_attempt(local_app):
     row=client.get('/core/courses/items').json()[0]
     assert row['my_attempt']['score']==72 and row['my_attempt']['feedback']=='Good reasoning'
     assert 'answers' not in row['my_attempt']
+
+
+@pytest.mark.parametrize('site_role', ['student', 'admin', 'moderator', 'reviewer', 'super_admin'])
+def test_reply_deletion_resolves_membership_for_all_roles(local_app, site_role):
+    from models import Forum, ForumMembership, ForumMessage, ForumReply
+    client, factory, current, users = local_app
+    current[0].role = site_role
+    with factory() as db:
+        forum = Forum(title='[UX-TEST] discussion', creator_id=users[1].id, is_private=False, is_approved=True)
+        db.add(forum); db.flush()
+        db.add(ForumMembership(forum_id=forum.id, user_id=users[0].id, role='member', is_active=True))
+        message = ForumMessage(forum_id=forum.id, author_id=users[1].id, content='Question', message_type='text')
+        db.add(message); db.flush()
+        own = ForumReply(forum_id=forum.id, parent_message_id=message.id, author_id=users[0].id, content='Own answer')
+        other = ForumReply(forum_id=forum.id, parent_message_id=message.id, author_id=users[1].id, content='Other answer')
+        db.add_all([own, other]); db.commit()
+        forum_id, own_id, other_id = forum.id, own.id, other.id
+    url = f'/auth/forums/{forum_id}/replies/'
+    assert client.delete(url + str(own_id)).status_code == 200
+    assert client.delete(url + str(other_id)).status_code == 403
+    with factory() as db:
+        assert db.get(ForumReply, own_id).is_deleted
+        assert not db.get(ForumReply, other_id).is_deleted
+        membership = db.query(ForumMembership).filter_by(forum_id=forum_id, user_id=users[0].id).one()
+        membership.role = 'creator'; db.commit()
+    assert client.delete(url + str(other_id)).status_code == 200

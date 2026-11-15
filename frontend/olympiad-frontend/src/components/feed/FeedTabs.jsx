@@ -1,41 +1,18 @@
 import React from "react";
+import { useLanguage } from "../../context/LanguageContext";
+import "./FeedTabs.css";
 
-function FeedTabs({ activeTab, onTabChange, problemsCount }) {
+export default function FeedTabs({ activeTab, onTabChange, problemsCount }) {
+  const { lang } = useLanguage();
+  const labels = lang === "sq"
+    ? [["all", "Të gjitha"], ["following", "Nga të ndjekurit"], ["trending", "Në vëmendje"]]
+    : [["all", "All Problems"], ["following", "Following"], ["trending", "Trending"]];
   return (
-    <section className="feed-tabs-card">
-      <div className="feed-tabs">
-        <button
-          onClick={() => onTabChange("all")}
-          className={`feed-tab-button ${activeTab === "all" ? "active" : ""}`}
-        >
-          All Problems
-        </button>
-
-        <button
-          onClick={() => onTabChange("following")}
-          className={`feed-tab-button ${
-            activeTab === "following" ? "active" : ""
-          }`}
-        >
-          Following
-        </button>
-
-        <button
-          onClick={() => onTabChange("trending")}
-          className={`feed-tab-button ${
-            activeTab === "trending" ? "active" : ""
-          }`}
-        >
-          Trending
-        </button>
+    <div className="discovery-tabs">
+      <div className="discovery-tabs__choices" aria-label={lang === "sq" ? "Renditja e problemeve" : "Problem feeds"} role="group">
+        {labels.map(([value, label]) => <button key={value} type="button" aria-pressed={activeTab === value} onClick={() => onTabChange(value)}>{label}</button>)}
       </div>
-
-      <div className="feed-count">
-        <strong>{problemsCount}</strong>{" "}
-        {problemsCount === 1 ? "problem" : "problems"} shown
-      </div>
-    </section>
+      <span className="discovery-tabs__count">{problemsCount} {lang === "sq" ? "probleme" : problemsCount === 1 ? "problem" : "problems"}</span>
+    </div>
   );
 }
-
-export default FeedTabs;

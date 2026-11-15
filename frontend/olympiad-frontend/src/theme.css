@@ -46,12 +46,12 @@ body {
 }
 
 /* Header theme support - Keep original look for light mode */
-.theme-dark header {
+.theme-dark .ol-nav {
   background: linear-gradient(135deg, #2d2d2d, #404040);
   color: #ffffff;
 }
 
-.theme-light header {
+.theme-light .ol-nav {
   /* Keep original header styling - same dark green as homepage */
   background: #1a4d3a;
   color: #ffffff;

@@ -1,3 +1,4 @@
+import "./ProblemWorkspace.css";
 /* Clean minimal ProblemDetail page replacement - V3 */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
@@ -7,6 +8,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import MathEditor from "./MathEditor";
 import "./MathEditor.css";
+import "./ProblemReading.css";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import Layout from "./components/Layout";
@@ -277,6 +279,7 @@ function ProblemDetail() {
   const [replyText, setReplyText] = useState("");
   const [replyImages, setReplyImages] = useState([]);
   const [editingProblem, setEditingProblem] = useState(false);
+  const [showEditPreview, setShowEditPreview] = useState(false);
   const [editProblemData, setEditProblemData] = useState({
     title: "",
     description: "",
@@ -1036,826 +1039,75 @@ function ProblemDetail() {
 
   return (
     <Layout showHomeButton={true}>
-      <div className="problem-reader"
-        style={{
-          background:
-            "radial-gradient(circle at top left, rgba(26,77,58,0.12), transparent 32%), radial-gradient(circle at top right, rgba(118,75,162,0.13), transparent 28%)",
-          borderRadius: "18px",
-          padding: isMobile ? "14px" : "14px",
-          minHeight: "calc(100vh - 120px)",
-        }}
-      >
+      <div className="problem-reading-desk">
         <div style={{ marginBottom: "18px" }}>
           <BackButton fallbackPath={getSmartFallbackPath()} />
         </div>
 
         {editingProblem ? (
-          <section
-            style={{
-              backgroundColor: ui.card,
-              border: `1px solid ${ui.border}`,
-              borderRadius: "18px",
-              padding: isMobile ? "18px" : "18px",
-              boxShadow: "0 4px 14px rgba(15, 23, 42, 0.05)",
-              marginBottom: "14px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "12px",
-                flexWrap: "wrap",
-                marginBottom: "14px",
-              }}
-            >
-              <div>
-                <h1
-                  style={{
-                    margin: 0,
-                    color: ui.text,
-                    fontSize: isMobile ? "25px" : "18px",
-                    fontWeight: 950,
-                    letterSpacing: "-0.04em",
-                  }}
-                >
-                  Edit Problem
-                </h1>
-                <p
-                  style={{
-                    margin: "6px 0 0",
-                    color: ui.muted,
-                    fontSize: "14px",
-                    fontWeight: 700,
-                  }}
-                >
-                  Update the statement, metadata, tags, and images.
-                </p>
-              </div>
-
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <ModernButton onClick={handleCancelProblemEdit}>
-                  Cancel
-                </ModernButton>
-                <ModernButton onClick={handleSaveProblem} variant="green">
-                  Save Problem
-                </ModernButton>
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                gap: "12px",
-                marginBottom: "16px",
-              }}
-            >
-              <input
-                ref={editTitleRef}
-                type="text"
-                value={editProblemData.title}
-                onChange={(event) =>
-                  setEditProblemData((previous) => ({
-                    ...previous,
-                    title: event.target.value,
-                  }))
-                }
-                placeholder="Problem title"
-                style={{
-                  flex: 1,
-                  padding: "15px 16px",
-                  border: `1px solid ${ui.border}`,
-                  borderRadius: "18px",
-                  fontSize: isMobile ? "14px" : "27px",
-                  fontWeight: 950,
-                  outline: "none",
-                  fontFamily: "inherit",
-                  color: ui.text,
-                  backgroundColor: "#f8fafc",
-                }}
-              />
-
-              <ModernButton
-                onClick={() => openMathEditor("title")}
-                variant="purple"
-              >
-                Symbols
-              </ModernButton>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
-                gap: "12px",
-                marginBottom: "16px",
-              }}
-            >
-              <input
-                type="text"
-                value={editProblemData.subject}
-                onChange={(event) =>
-                  setEditProblemData((previous) => ({
-                    ...previous,
-                    subject: event.target.value,
-                  }))
-                }
-                placeholder="Subject"
-                style={{
-                  padding: "12px 14px",
-                  border: `1px solid ${ui.border}`,
-                  borderRadius: "16px",
-                  outline: "none",
-                  fontFamily: "inherit",
-                }}
-              />
-
-              <input
-                type="text"
-                value={editProblemData.level}
-                onChange={(event) =>
-                  setEditProblemData((previous) => ({
-                    ...previous,
-                    level: event.target.value,
-                  }))
-                }
-                placeholder="Level"
-                style={{
-                  padding: "12px 14px",
-                  border: `1px solid ${ui.border}`,
-                  borderRadius: "16px",
-                  outline: "none",
-                  fontFamily: "inherit",
-                }}
-              />
-
-              <input
-                type="number"
-                value={editProblemData.year}
-                onChange={(event) =>
-                  setEditProblemData((previous) => ({
-                    ...previous,
-                    year: event.target.value,
-                  }))
-                }
-                placeholder="Year"
-                min="1900"
-                max="2030"
-                style={{
-                  padding: "12px 14px",
-                  border: `1px solid ${ui.border}`,
-                  borderRadius: "16px",
-                  outline: "none",
-                  fontFamily: "inherit",
-                }}
-              />
-            </div>
-
-            <div
-              style={{
-                backgroundColor: "#f8fafc",
-                border: `1px solid ${ui.border}`,
-                borderRadius: "14px",
-                padding: "15px",
-                marginBottom: "16px",
-              }}
-            >
-              <div
-                style={{
-                  color: ui.muted,
-                  fontSize: "13px",
-                  fontWeight: 900,
-                  marginBottom: "10px",
-                }}
-              >
-                Tags ({editTags.length}/5)
-              </div>
-
-              <div style={{ display: "grid", gap: "8px" }}>
-                {editTags.map((tag, index) => (
-                  <div key={index} style={{ display: "flex", gap: "8px" }}>
-                    <input
-                      type="text"
-                      value={tag}
-                      onChange={(event) =>
-                        handleEditTagChange(index, event.target.value)
-                      }
-                      placeholder={`Tag ${index + 1}`}
-                      style={{
-                        flex: 1,
-                        padding: "10px 12px",
-                        border: `1px solid ${ui.border}`,
-                        borderRadius: "14px",
-                        outline: "none",
-                      }}
-                    />
-
-                    {editTags.length > 1 && (
-                      <ModernButton
-                        onClick={() => removeEditTag(index)}
-                        style={{
-                          backgroundColor: ui.dangerSoft,
-                          color: "#991b1b",
-                          border: "1px solid #fecaca",
-                        }}
-                      >
-                        Remove
-                      </ModernButton>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {editTags.length < 5 && (
-                <ModernButton
-                  onClick={addEditTag}
-                  style={{
-                    marginTop: "10px",
-                    backgroundColor: ui.primarySoft,
-                    color: ui.primary,
-                    border: `1px solid ${ui.primaryBorder}`,
-                  }}
-                >
-                  + Add Tag
-                </ModernButton>
-              )}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                gap: "12px",
-                marginBottom: "18px",
-              }}
-            >
-              <textarea
-                ref={editDescriptionRef}
-                value={editProblemData.description}
-                onChange={(event) =>
-                  setEditProblemData((previous) => ({
-                    ...previous,
-                    description: event.target.value,
-                  }))
-                }
-                placeholder="Problem description"
-                style={{
-                  flex: 1,
-                  minHeight: "190px",
-                  padding: "16px",
-                  border: `1px solid ${ui.border}`,
-                  borderRadius: "14px",
-                  resize: "vertical",
-                  outline: "none",
-                  fontFamily: "inherit",
-                  fontSize: "15px",
-                  lineHeight: 1.65,
-                  backgroundColor: "#f8fafc",
-                }}
-              />
-
-              <ModernButton
-                onClick={() => openMathEditor("description")}
-                variant="green"
-                style={{ alignSelf: isMobile ? "stretch" : "flex-start" }}
-              >
-                Symbols
-              </ModernButton>
-            </div>
-
-            <div
-              style={{
-                border: `1px solid ${ui.border}`,
-                borderRadius: "14px",
-                padding: "18px",
-                backgroundColor: "#fbfdfc",
-              }}
-            >
-              <h3
-                style={{
-                  margin: "0 0 14px",
-                  color: ui.text,
-                  fontSize: "18px",
-                  fontWeight: 950,
-                }}
-              >
-                Problem Images ({problemImages.length}/10)
-              </h3>
-
-              {problemImages.length > 0 && (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: isMobile
-                      ? "repeat(auto-fill, minmax(125px, 1fr))"
-                      : "repeat(auto-fill, minmax(155px, 190px))",
-                    gap: "14px",
-                    marginBottom: "16px",
-                  }}
-                >
-                  {problemImages.map((image, index) => (
-                    <div
-                      key={`${image}-${index}`}
-                      style={{
-                        position: "relative",
-                        height: "125px",
-                        borderRadius: "14px",
-                        overflow: "hidden",
-                        border: `1px solid ${ui.border}`,
-                        backgroundColor: "#f8fafc",
-                      }}
-                    >
-                      <img
-                        src={image}
-                        alt={`Problem image ${index + 1}`}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          display: "block",
-                        }}
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteProblemImage(image)}
-                        style={{
-                          position: "absolute",
-                          top: "8px",
-                          right: "8px",
-                          width: "18px",
-                          height: "18px",
-                          borderRadius: "50%",
-                          border: "none",
-                          backgroundColor: "rgba(220, 38, 38, 0.92)",
-                          color: "white",
-                          cursor: "pointer",
-                          fontSize: "17px",
-                          fontWeight: 950,
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+          <section className="problem-workspace" aria-label="Edit problem">
+            <header className="problem-workspace-heading"><div><span>PROBLEM WORKSPACE</span><h1>Edit Problem</h1><p>Update your statement, mathematical expressions and details.</p></div><div className="problem-workspace-actions"><button type="button" onClick={handleCancelProblemEdit}>Cancel</button><button type="button" className="problem-edit-save" onClick={handleSaveProblem}>Save Problem</button></div></header>
+            <div className="problem-workspace-grid">
+              <div className="problem-workspace-writing">
+                <label htmlFor="edit-problem-title">Title</label><div className="problem-workspace-title"><input id="edit-problem-title" ref={editTitleRef} value={editProblemData.title} onChange={e=>setEditProblemData(previous=>({...previous,title:e.target.value}))} placeholder="Problem title"/><button type="button" onClick={()=>openMathEditor('title')}>Symbols</button></div>
+                <div className="problem-workspace-canvas"><div className="problem-workspace-section-label"><label htmlFor="edit-problem-description">Statement</label><button type="button" aria-pressed={showEditPreview} onClick={()=>setShowEditPreview(value=>!value)}>{showEditPreview?'Edit statement':'Preview mathematics'}</button></div>
+                  <div hidden={showEditPreview}><textarea id="edit-problem-description" className="problem-edit-statement" ref={editDescriptionRef} value={editProblemData.description} onChange={e=>setEditProblemData(previous=>({...previous,description:e.target.value}))} placeholder="Problem description" rows={12}/><button type="button" onClick={()=>openMathEditor('description')}>Insert mathematical symbols</button></div>
+                  {showEditPreview&&<div className="problem-workspace-preview">{renderMathContent(editProblemData.description)}</div>}
                 </div>
-              )}
-
-              {problemImages.length < 10 ? (
-                <>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleUploadProblemImages}
-                    style={{ display: "none" }}
-                    id="edit-problem-images"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      document.getElementById("edit-problem-images")?.click()
-                    }
-                    style={{
-                      width: isMobile ? "100%" : "205px",
-                      height: "120px",
-                      border: `2px dashed rgba(26,77,58,0.38)`,
-                      borderRadius: "14px",
-                      backgroundColor: ui.primarySoft,
-                      color: ui.primary,
-                      cursor: "pointer",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: 950,
-                      gap: "4px",
-                    }}
-                  >
-                    <span style={{ fontSize: "18px", lineHeight: 1 }}>+</span>
-                    <span>Add Image</span>
-                    <small style={{ color: ui.muted }}>
-                      {10 - problemImages.length} remaining
-                    </small>
-                  </button>
-                </>
-              ) : (
-                <div
-                  style={{
-                    padding: "12px",
-                    borderRadius: "14px",
-                    backgroundColor: "#f8fafc",
-                    color: ui.muted,
-                    fontSize: "13px",
-                    fontWeight: 800,
-                  }}
-                >
-                  Maximum 10 images reached.
-                </div>
-              )}
+                <div className="problem-workspace-attachments"><div><h2>Problem Images ({problemImages.length}/10)</h2><p>Image changes are saved immediately.</p></div>{problemImages.length<10&&<label className="problem-workspace-upload">Add Image<input type="file" multiple accept="image/*" onChange={handleUploadProblemImages} id="edit-problem-images" aria-label="Add problem images"/></label>}</div>
+                <div className="problem-workspace-images">{problemImages.map((image,index)=><figure key={`${image}-${index}`}><img src={image} alt={`Problem image ${index+1}`}/><button type="button" onClick={()=>handleDeleteProblemImage(image)} aria-label={`Remove problem image ${index+1}`}>Remove</button></figure>)}</div>
+              </div>
+              <aside className="problem-workspace-details"><h2>Problem details</h2>
+                <label htmlFor="edit-problem-subject">Subject</label><input id="edit-problem-subject" value={editProblemData.subject} onChange={e=>setEditProblemData(previous=>({...previous,subject:e.target.value}))} placeholder="Subject"/>
+                <label htmlFor="edit-problem-level">Level</label><input id="edit-problem-level" value={editProblemData.level} onChange={e=>setEditProblemData(previous=>({...previous,level:e.target.value}))} placeholder="Level"/>
+                <label htmlFor="edit-problem-year">Year</label><input id="edit-problem-year" type="number" min="1900" max="2030" value={editProblemData.year} onChange={e=>setEditProblemData(previous=>({...previous,year:e.target.value}))} placeholder="Year"/>
+                <fieldset><legend>Tags ({editTags.length}/5)</legend>{editTags.map((tag,index)=><div className="problem-workspace-tag" key={index}><input value={tag} onChange={e=>handleEditTagChange(index,e.target.value)} placeholder={`Tag ${index+1}`} aria-label={`Tag ${index+1}`}/>{editTags.length>1&&<button type="button" onClick={()=>removeEditTag(index)} aria-label={`Remove tag ${index+1}`}>×</button>}</div>)}{editTags.length<5&&<button type="button" onClick={addEditTag}>+ Add Tag</button>}</fieldset>
+              </aside>
             </div>
           </section>
         ) : (
-          <section
-            style={{
-              position: "relative",
-              overflow: "hidden",
-              backgroundColor: ui.card,
-              border: `1px solid ${ui.border}`,
-              borderRadius: "18px",
-              boxShadow: "0 4px 14px rgba(15, 23, 42, 0.05)",
-              marginBottom: "14px",
-            }}
-          >
-            <div
-              style={{
-                height: "3px",
-                background: `linear-gradient(90deg, ${ui.primary}, ${ui.purple})`,
-              }}
-            />
-
-            <div style={{ padding: isMobile ? "18px" : "18px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "14px",
-                  alignItems: "flex-start",
-                  flexDirection: isMobile ? "column" : "row",
-                }}
-              >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {problem.author && (
-                    <button
-                      type="button"
-                      onClick={() => openAuthorProfile(problem.author)}
-                      style={{
-                        border: `1px solid ${ui.border}`,
-                        backgroundColor: "#f8fafc",
-                        borderRadius: "999px",
-                        padding: "8px 14px 8px 8px",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "11px",
-                        cursor: "pointer",
-                        marginBottom: "14px",
-                        boxShadow: ui.shadowSm,
-                      }}
-                    >
-                      <UserAvatar user={problem.author} size={40} />
-
-                      <span style={{ display: "grid", textAlign: "left" }}>
-                        <strong
-                          style={{
-                            color: ui.primary,
-                            fontSize: "14px",
-                            fontWeight: 950,
-                          }}
-                        >
-                          {getDisplayName(problem.author.username) ||
-                            "Unknown Author"}
-                        </strong>
-
-                        <span
-                          style={{
-                            color: ui.muted,
-                            fontSize: "12px",
-                            fontWeight: 750,
-                          }}
-                        >
-                          {formatDate(problem.created_at)}
-                          {isEdited(problem.created_at, problem.updated_at)
-                            ? " · Edited"
-                            : ""}
-                        </span>
-                      </span>
-                    </button>
-                  )}
-
-                  <h1
-                    style={{
-                      margin: "0 0 18px",
-                      color: ui.text,
-                      fontSize: isMobile ? "27px" : "34px",
-                      lineHeight: 1.08,
-                      letterSpacing: "-0.025em",
-                      fontWeight: 950,
-                    }}
-                  >
-                    {renderMathContent(problem.title)}
-                  </h1>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      flexWrap: "wrap",
-                      marginBottom: "14px",
-                    }}
-                  >
-                    {problem.subject && (
-                      <Pill bg="#e0e7ff" color="#3730a3">
-                        {problem.subject}
-                      </Pill>
-                    )}
-
-                    {problem.level && problem.level.trim() && (
-                      <Pill bg="#fef3c7" color="#92400e">
-                        {problem.level}
-                      </Pill>
-                    )}
-
-                    {problem.year && (
-                      <Pill bg="#dcfce7" color="#166534">
-                        Year: {problem.year}
-                      </Pill>
-                    )}
-
-                    {problem.tags &&
-                      problem.tags
-                        .split(",")
-                        .map((tag) => tag.trim())
-                        .filter(Boolean)
-                        .map((tag, index) => (
-                          <Pill
-                            key={`${tag}-${index}`}
-                            bg={ui.purple}
-                            color="white"
-                          >
-                            {tag}
-                          </Pill>
-                        ))}
-                  </div>
-                </div>
-
-                {canManageProblem && (
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      flexWrap: "wrap",
-                      width: isMobile ? "100%" : "auto",
-                    }}
-                  >
-                    <ModernButton
-                      onClick={handleEditProblem}
-                      variant="purple"
-                      style={{ width: isMobile ? "100%" : "auto" }}
-                    >
-                      Edit Problem
-                    </ModernButton>
-
-                    <ModernButton
-                      onClick={handleDeleteProblem}
-                      variant="danger"
-                      style={{ width: isMobile ? "100%" : "auto" }}
-                    >
-                      Delete Problem
-                    </ModernButton>
-                  </div>
-                )}
-              </div>
-
-              <div
-                style={{
-                  marginTop: "8px",
-                  backgroundColor: "#ffffff",
-                  border: `1px solid ${ui.border}`,
-                  borderRadius: "16px",
-                  padding: isMobile ? "17px" : "14px",
-                  color: ui.text,
-                  lineHeight: 1.82,
-                  fontSize: isMobile ? "15px" : "16px",
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {renderMathContent(problem.description)}
-              </div>
-
-              {problemImages && problemImages.length > 0 && (
-                <div style={{ marginTop: "26px" }}>
-                  <h3
-                    style={{
-                      margin: "0 0 14px",
-                      color: ui.text,
-                      fontSize: "19px",
-                      fontWeight: 950,
-                    }}
-                  >
-                    Problem Images
-                  </h3>
-
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: isMobile
-                        ? "1fr"
-                        : "repeat(auto-fill, minmax(185px, 245px))",
-                      gap: "15px",
-                    }}
-                  >
-                    {problemImages.map((image, index) => (
-                      <button
-                        type="button"
-                        key={`${image}-${index}`}
-                        onClick={() => openImageModal(index, problemImages)}
-                        style={{
-                          border: `1px solid ${ui.border}`,
-                          borderRadius: "14px",
-                          overflow: "hidden",
-                          backgroundColor: "#f8fafc",
-                          padding: 0,
-                          cursor: "pointer",
-                          minHeight: "160px",
-                          boxShadow: ui.shadowSm,
-                          position: "relative",
-                        }}
-                      >
-                        <img
-                          src={image}
-                          alt={`Problem image ${index + 1}`}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            minHeight: "160px",
-                            objectFit: "cover",
-                            display: "block",
-                          }}
-                        />
-
-                        <span
-                          style={{
-                            position: "absolute",
-                            right: "10px",
-                            top: "10px",
-                            backgroundColor: "rgba(15, 23, 42, 0.76)",
-                            color: "white",
-                            borderRadius: "999px",
-                            padding: "6px 10px",
-                            fontSize: "12px",
-                            fontWeight: 900,
-                          }}
-                        >
-                          View
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+          <article className="problem-reading-layout">
+            <div className="problem-reading-main">
+              <div className="problem-reading-kicker">{problem.subject || "Problem"} {problem.level && <span> / {problem.level}</span>}</div>
+              <h1>{renderMathContent(problem.title)}</h1>
+              <div className="problem-reading-statement">{renderMathContent(problem.description)}</div>
+              {problemImages?.length > 0 && <div className="problem-reading-figures">
+                {problemImages.map((image, index) => <button type="button" key={`${image}-${index}`} onClick={() => openImageModal(index, problemImages)} aria-label={`Open problem image ${index + 1}`}>
+                  <img src={image} alt={`Problem image ${index + 1}`} loading="lazy" />
+                </button>)}
+              </div>}
+              <a className="problem-reading-discuss" href="#discussion">Read the discussion <span aria-hidden="true">↓</span></a>
             </div>
-          </section>
+            <aside className="problem-reading-context" aria-label="Problem details">
+              <h2>About this problem</h2>
+              {problem.author && <button type="button" className="problem-reading-author" onClick={() => openAuthorProfile(problem.author)}>
+                <UserAvatar user={problem.author} size={36} />
+                <span>{getDisplayName(problem.author.username) || "Unknown Author"}</span>
+              </button>}
+              <dl><dt>Published</dt><dd>{formatDate(problem.created_at)}{isEdited(problem.created_at, problem.updated_at) ? " · Edited" : ""}</dd>
+                {problem.year && <><dt>Year</dt><dd>{problem.year}</dd></>}
+              </dl>
+              {problem.tags && <div className="problem-reading-tags">{problem.tags.split(",").map(tag => tag.trim()).filter(Boolean).map((tag,index) => <span key={`${tag}-${index}`}>{tag}</span>)}</div>}
+              {canManageProblem && <div className="problem-reading-management">
+                <button type="button" onClick={handleEditProblem}>Edit Problem</button>
+                <button type="button" className="problem-reading-delete" onClick={handleDeleteProblem}>Delete Problem</button>
+              </div>}
+            </aside>
+          </article>
         )}
 
-        <section
-          style={{
-            backgroundColor: ui.card,
-            border: `1px solid ${ui.border}`,
-            borderRadius: "18px",
-            padding: isMobile ? "16px" : "14px",
-            boxShadow: ui.shadowMd,
-            marginBottom: "14px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: isMobile ? "flex-start" : "center",
-              gap: "14px",
-              flexDirection: isMobile ? "column" : "row",
-            }}
-          >
-            <div>
-              <h3
-                style={{
-                  margin: "0 0 5px",
-                  fontSize: "14px",
-                  fontWeight: 950,
-                  color: ui.text,
-                }}
-              >
-                Vote on this Problem
-              </h3>
-              <p
-                style={{
-                  margin: 0,
-                  color: ui.muted,
-                  fontSize: "13px",
-                  fontWeight: 750,
-                }}
-              >
-                Help surface useful and well-written problems.
-              </p>
-            </div>
 
-            <div
-              style={{
-                display: "inline-flex",
-                backgroundColor: "#f8fafc",
-                borderRadius: "999px",
-                padding: "6px",
-                border: `1px solid ${ui.border}`,
-                boxShadow: "inset 0 1px 2px rgba(15, 23, 42, 0.04)",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => handleVote("like")}
-                disabled={voteLoading}
-                style={{
-                  ...buttonBase,
-                  padding: "10px 16px",
-                  backgroundColor:
-                    voteStatus.user_vote === "like"
-                      ? ui.primary
-                      : "transparent",
-                  color: voteStatus.user_vote === "like" ? "white" : ui.muted,
-                }}
-              >
-                Like {voteStatus.like_count || 0}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleVote("dislike")}
-                disabled={voteLoading}
-                style={{
-                  ...buttonBase,
-                  padding: "10px 16px",
-                  backgroundColor:
-                    voteStatus.user_vote === "dislike"
-                      ? ui.purple
-                      : "transparent",
-                  color:
-                    voteStatus.user_vote === "dislike" ? "white" : ui.muted,
-                }}
-              >
-                Dislike {voteStatus.dislike_count || 0}
-              </button>
-            </div>
-          </div>
+        <section className="problem-reading-votes" aria-label="Vote on this problem">
+          <span>Was this problem useful?</span>
+          <button type="button" onClick={() => handleVote("like")} disabled={voteLoading} aria-pressed={voteStatus.user_vote === "like"}>Like {voteStatus.like_count || 0}</button>
+          <button type="button" onClick={() => handleVote("dislike")} disabled={voteLoading} aria-pressed={voteStatus.user_vote === "dislike"}>Dislike {voteStatus.dislike_count || 0}</button>
         </section>
 
-        <section
-          style={{
-            backgroundColor: ui.card,
-            border: `1px solid ${ui.border}`,
-            borderRadius: "18px",
-            padding: isMobile ? "14px" : "18px",
-            boxShadow: "0 4px 14px rgba(15, 23, 42, 0.05)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-end",
-              gap: "14px",
-              flexWrap: "wrap",
-              marginBottom: "18px",
-            }}
-          >
-            <div>
-              <h2
-                style={{
-                  margin: "0 0 5px",
-                  color: ui.text,
-                  fontSize: isMobile ? "25px" : "18px",
-                  fontWeight: 950,
-                  letterSpacing: "-0.04em",
-                }}
-              >
-                Comments
-              </h2>
-
-              <p
-                style={{
-                  margin: 0,
-                  color: ui.muted,
-                  fontSize: "14px",
-                  fontWeight: 750,
-                }}
-              >
-                {comments.length}{" "}
-                {comments.length === 1 ? "comment" : "comments"}
-              </p>
-            </div>
-
-            {comments.some((comment) => comment.is_solution) && (
-              <Pill
-                bg={ui.primarySoft}
-                color={ui.primary}
-                borderColor={ui.primaryBorder}
-              >
-                ✓ Solution found
-              </Pill>
-            )}
-          </div>
-
+        <section id="discussion" className="problem-reading-discussion">
+          <header className="problem-reading-discussion-heading">
+            <div><span>DISCUSS & SOLVE</span><h2>Comments <small>{comments.length}</small></h2></div>
+            {comments.some(comment => comment.is_solution) && <span className="problem-reading-solved">✓ Solution found</span>}
+          </header>
           <CommentComposer
             onSubmit={handleSubmitComment}
             currentUser={currentUser}
@@ -1872,42 +1124,7 @@ function ProblemDetail() {
           />
 
           {comments.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "46px 18px",
-                border: `1px dashed ${ui.border}`,
-                borderRadius: "16px",
-                backgroundColor: "#fbfdfc",
-                color: ui.muted,
-              }}
-            >
-              <div
-                style={{
-                  width: "58px",
-                  height: "58px",
-                  borderRadius: "50%",
-                  backgroundColor: ui.primarySoft,
-                  color: ui.primary,
-                  display: "grid",
-                  placeItems: "center",
-                  fontSize: "16px",
-                  fontWeight: 950,
-                  margin: "0 auto 12px",
-                }}
-              >
-                ?
-              </div>
-
-              <h3
-                style={{ margin: "0 0 6px", color: ui.text, fontWeight: 950 }}
-              >
-                No comments yet
-              </h3>
-              <p style={{ margin: 0, fontWeight: 750 }}>
-                Start the discussion with a solution idea or question.
-              </p>
-            </div>
+            <p className="problem-reading-empty">No comments yet. Add a solution idea or question above.</p>
           ) : (
             <div style={{ display: "grid", gap: "14px" }}>
               {comments.map((comment) => (
