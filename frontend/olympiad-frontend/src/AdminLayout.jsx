@@ -1,9 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {loginIntent} from "./navigation";
 import "./AdminLayout.css";
+import "./AdministrationWorkspace.css";
 import {useDialogFocus} from "./hooks/useDialogFocus";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
@@ -201,22 +202,13 @@ const AdminLayout = () => {
           </button>
         </div>
 
-        <nav className="admin-nav" aria-label="Admin navigation">
-          {filteredMenuItems.map((item) => (
-            <button
-              type="button"
-              key={item.path}
-              className={`admin-nav-item ${isActiveRoute(item.path) ? "active" : ""}`}
-              onClick={() => navigate(item.path)}
-              aria-current={isActiveRoute(item.path) ? "page" : undefined}
-              title={!sidebarOpen ? item.label : undefined}
-            >
-              <span className="nav-icon">
-                <img src={item.icon} alt="" />
-              </span>
-              {sidebarOpen && <span className="nav-label">{item.label}</span>}
-            </button>
-          ))}
+        <nav className="admin-nav administration-navigation" aria-label="Admin navigation">
+          {[
+            ["Overview",["/admin","/admin/analytics"]],
+            ["Community",["/admin/users","/admin/forums","/admin/reports","/admin/user-history"]],
+            ["Learning",["/admin/weekly","/admin/courses","/admin/content","/admin/teachers","/admin/tutoring","/admin/parents"]],
+            ["Website & communication",["/admin/site-content","/admin/faq","/admin/support","/admin/email","/admin/settings"]]
+          ].map(([group,paths])=><div className="administration-nav-group" key={group}>{sidebarOpen && <h3>{group}</h3>}{filteredMenuItems.filter(item=>paths.includes(item.path)).map(item=><Link key={item.path} to={item.path} className={`admin-nav-item ${isActiveRoute(item.path)?"active":""}`} aria-current={isActiveRoute(item.path)?"page":undefined} title={!sidebarOpen?item.label:undefined} aria-label={!sidebarOpen?item.label:undefined}><span className="nav-icon"><img src={item.icon} alt=""/></span>{sidebarOpen && <span className="nav-label">{item.label}</span>}</Link>)}</div>)}
         </nav>
 
         <div className="admin-sidebar-footer">
@@ -254,7 +246,7 @@ const AdminLayout = () => {
             )}
 
             <div className="admin-header-copy">
-              <h1>Admin Panel</h1>
+              <div className="administration-breadcrumb"><Link to="/homepage">Olimpiada</Link><span>/ Administration</span><h1>{filteredMenuItems.find(item=>item.path===location.pathname)?.label || "Administration"}</h1></div>
               <span className="user-role">
                 {currentUser.role.replaceAll("_", " ")}
               </span>

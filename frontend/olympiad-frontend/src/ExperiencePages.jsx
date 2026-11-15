@@ -1,3 +1,4 @@
+import "./SecondaryWorkspace.css";
 import React,{useEffect,useState,useRef} from "react";
 import axios from "axios";
 import {loginIntent} from "./navigation";
@@ -20,12 +21,13 @@ export function TeacherApplicationPage(){
  const submit=async e=>{e.preventDefault();setBusy(true);setNotice(""); try{const r=await axios.post(API+"/experience/teacher/apply",form,{headers:headers()});setState(r.data);setNotice(lang==="sq"?"Aplikimi u dërgua për verifikim.":"Your application awaits approval.");}
  catch(e){setNotice(typeof e.response?.data?.detail==="string"?e.response.data.detail:"Dërgimi dështoi.");}
  finally{setBusy(false);}};
- return <main className="p1-wrap p3-body"><PageTitle contentKey="page_teacher_application" kicker={lang==="sq"?"Bashkohu me ekipin":"Join the team"} title={lang==="sq"?"Apliko si mësues":"Apply as a teacher"}
+ return <main className="secondary-workspace"><PageTitle contentKey="page_teacher_application" kicker={lang==="sq"?"Bashkohu me ekipin":"Join the team"} title={lang==="sq"?"Apliko si mësues":"Apply as a teacher"}
  subtitle={lang==="sq"?"Aplikimet shqyrtohen nga administratori. Deri në miratim, nuk ke akses mësuesi.":"Applications are manually reviewed before teacher access is granted."}/>
+ <div className="secondary-columns"><aside className="secondary-guide"><h2>{lang==="sq"?"Si funksionon":"How it works"}</h2><ol><li>{lang==="sq"?"Plotëso të dhënat dhe përvojën tënde.":"Tell us about your subject and experience."}</li><li>{lang==="sq"?"Administratori shqyrton aplikimin.":"An administrator reviews your application."}</li><li>{lang==="sq"?"Pas miratimit, përdor hapësirën e mësuesit.":"After approval, use the teacher workspace."}</li></ol><p>{lang==="sq"?"Shfletimi dhe pjesëmarrja e zakonshme nuk kërkojnë status mësuesi.":"Ordinary browsing and participation do not require teacher status."}</p><Link to="/support">{lang==="sq"?"Ke pyetje?":"Questions?"} →</Link></aside><section className="secondary-main">
  {!currentUser?<div className="p1-card"><Link to="/signup">Regjistrohu</Link> ose <Link to="/login" state={loginIntent("/teacher/apply")}>hyr në llogari</Link> për të aplikuar.</div>:
  statusLoading?<p role="status">{lang==='sq'?'Duke ngarkuar aplikimin…':'Loading application…'}</p>:statusError?<div role="alert"><p>{lang==='sq'?'Statusi i aplikimit nuk u ngarkua.':'Could not load your application status.'}</p><button className="p1-btn" onClick={()=>setStatusRetry(n=>n+1)}>{lang==='sq'?'Provo përsëri':'Retry'}</button></div>:
  state&&state.status!=="not_applied"?<div className="p1-card"><h2>Statusi: {state.status}</h2><p className="p1-muted">{state.review_note||"Aplikimi yt është regjistruar."}</p></div>:
- <form className="p3-form p1-card" onSubmit={submit}>
+ <form className="secondary-form" onSubmit={submit}>
  <div className="p1-grid two"><label>Emri<input className="p1-input" required value={form.first_name} onChange={e=>setForm({...form,first_name:e.target.value})}/></label>
  <label>Mbiemri<input className="p1-input" required value={form.last_name} onChange={e=>setForm({...form,last_name:e.target.value})}/></label></div>
  <label>Datëlindja<input className="p1-input" type="date" max={new Date().toISOString().slice(0,10)} required value={form.birth_date} onChange={e=>setForm({...form,birth_date:e.target.value})}/></label>
@@ -33,7 +35,7 @@ export function TeacherApplicationPage(){
  <label>Lënda<input className="p1-input" required value={form.subject} onChange={e=>setForm({...form,subject:e.target.value})}/></label>
  <label>Eksperienca dhe bio<textarea className="p1-input" minLength={25} rows={6} required value={form.bio} onChange={e=>setForm({...form,bio:e.target.value})}/></label>
  <button className="p1-btn" disabled={busy}>{busy?"Duke dërguar...":"Dërgo aplikimin"}</button></form>}
- {notice&&<p role="status" className="p1-note">{notice}</p>}</main>;
+ {notice&&<p role="status" className="p1-note">{notice}</p>}</section></div></main>;
 }
 export function FAQPage(){
  const {lang}=useLanguage();const [items,setItems]=useState([]),[open,setOpen]=useState(null);

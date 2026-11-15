@@ -35,3 +35,15 @@ test("editor uses the same grouped sidebar and can select inner pages",async()=>
   fireEvent.click(screen.getByRole("button",{name:"Pyetjet e shpeshta"}));
   expect(screen.getByText(/Seksioni: page_faq/)).toBeInTheDocument();
 });
+
+test("failed CMS load blocks editing until a successful retry",async()=>{
+  axios.get.mockRejectedValueOnce(new Error('offline'));
+  render(<MemoryRouter><AdminSiteEditor/></MemoryRouter>);
+  await screen.findByRole('button',{name:'Provo përsëri'});
+  expect(screen.queryByLabelText(/Titulli \(SQ\)/)).not.toBeInTheDocument();
+  expect(screen.queryByRole('button',{name:'Ruaj ndryshimet'})).not.toBeInTheDocument();
+  axios.get.mockResolvedValue({data:{hero:{title_sq:'Stored title'}}});
+  fireEvent.click(screen.getByRole('button',{name:'Provo përsëri'}));
+  expect(await screen.findByLabelText(/Titulli \(SQ\)/)).toHaveValue('Stored title');
+  expect(axios.put).not.toHaveBeenCalled();
+});

@@ -1,3 +1,6 @@
+import {Link} from "react-router-dom";
+import {useLanguage} from "./context/LanguageContext";
+import "./AuthenticationWorkspace.css";
 import React, { useState } from "react";
 import axios from "axios";
 import Layout from "./components/Layout";
@@ -8,6 +11,8 @@ import dryriImage from "./assets/dryri_wvbhuh.svg";
 import emailSentImage from "./assets/EMAIL_SENT_rmh0e0.svg";
 
 function ForgotPassword() {
+  const {lang}=useLanguage();
+  const label=(en,sq)=>lang==="sq"?sq:en;
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -55,188 +60,11 @@ function ForgotPassword() {
     }
   };
 
-  if (success) {
-    return (
-      <Layout>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "60vh",
-            padding: spacing.lg,
-          }}
-        >
-          <Card style={{ maxWidth: "500px", textAlign: "center" }}>
-            <div style={{ fontSize: "64px", marginBottom: "20px" }}>
-              <img
-                src={emailSentImage}
-                alt="Menu"
-                style={{
-                  width: "80px",
-                  height: "80px",
-                  objectFit: "contain",
-                }}
-              />
-            </div>
-            <h1
-              style={{
-                color: colors.success,
-                marginBottom: "20px",
-                fontSize: typography.fontSize.xxl,
-                fontWeight: typography.fontWeight.bold,
-              }}
-            >
-              Email Sent!
-            </h1>
-            <p
-              style={{
-                color: colors.gray[600],
-                marginBottom: "30px",
-                fontSize: typography.fontSize.lg,
-                lineHeight: 1.6,
-              }}
-            >
-              If the email exists, a password reset link has been sent to your
-              inbox.
-            </p>
-            <Button
-              onClick={() => (window.location.href = "/login")}
-              style={{
-                backgroundColor: colors.primary,
-                color: colors.white,
-                border: `1px solid ${colors.primary}`,
-                padding: `${spacing.md} ${spacing.lg}`,
-                borderRadius: borderRadius.md,
-                fontSize: typography.fontSize.base,
-                fontWeight: typography.fontWeight.medium,
-                cursor: "pointer",
-              }}
-            >
-              Go to Login
-            </Button>
-          </Card>
-        </div>
-      </Layout>
-    );
-  }
-
-  return (
-    <Layout>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "60vh",
-          padding: spacing.lg,
-        }}
-      >
-        <Card style={{ maxWidth: "500px" }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "48px", marginBottom: "20px" }}>
-              <img
-                src={dryriImage}
-                alt="Menu"
-                style={{
-                  width: "80px",
-                  height: "80px",
-                  objectFit: "contain",
-                }}
-              />
-            </div>
-            <h1
-              style={{
-                color: colors.primary,
-                marginBottom: "20px",
-                fontSize: typography.fontSize.xxl,
-                fontWeight: typography.fontWeight.bold,
-              }}
-            >
-              Forgot Password
-            </h1>
-            <p
-              style={{
-                color: colors.gray[600],
-                marginBottom: "30px",
-                fontSize: typography.fontSize.base,
-                lineHeight: 1.6,
-              }}
-            >
-              Enter your registered email address below to receive a password
-              reset link.
-            </p>
-
-            <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: spacing.lg, textAlign: "left" }}>
-                <label htmlFor="forgotpassword-0"
-                  style={{
-                    display: "block",
-                    marginBottom: spacing.sm,
-                    fontWeight: typography.fontWeight.medium,
-                    color: colors.gray[700],
-                  }}
-                >
-                  Email Address
-                </label>
-                <input id="forgotpassword-0" name="forgotpassword-0"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  style={{
-                    width: "100%",
-                    padding: spacing.md,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.fontSize.base,
-                    outline: "none",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = colors.primary)}
-                  onBlur={(e) =>
-                    (e.target.style.borderColor = colors.gray[300])
-                  }
-                />
-              </div>
-
-              {error && (
-                <div
-                  style={{
-                    color: colors.danger,
-                    marginBottom: spacing.md,
-                    fontSize: typography.fontSize.sm,
-                    textAlign: "center",
-                  }}
-                >
-                  {error}
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                disabled={loading}
-                style={{
-                  width: "100%",
-                  backgroundColor: colors.primary,
-                  color: colors.white,
-                  border: `1px solid ${colors.primary}`,
-                  padding: `${spacing.md} ${spacing.lg}`,
-                  borderRadius: borderRadius.md,
-                  fontSize: typography.fontSize.base,
-                  fontWeight: typography.fontWeight.medium,
-                  cursor: loading ? "not-allowed" : "pointer",
-                  opacity: loading ? 0.6 : 1,
-                }}
-              >
-                {loading ? "Sending..." : "Send Reset Link"}
-              </Button>
-            </form>
-          </div>
-        </Card>
-      </div>
-    </Layout>
-  );
+  return <Layout><div className="authentication-workspace">
+    <aside className="authentication-context"><p className="authentication-eyebrow">Olimpiada</p><h2>{label("Account recovery", "Rikuperimi i llogarisë")}</h2><p>{label("Use your registered email to request a password reset link.", "Përdor emailin e regjistruar për të kërkuar lidhjen e rivendosjes së fjalëkalimit.")}</p><nav><Link to="/login">← {label("Back to sign in", "Kthehu te hyrja")}</Link><Link to="/support">{label("Need help?", "Të duhet ndihmë?")} →</Link></nav></aside>
+    <section className="authentication-form"><header><p className="authentication-eyebrow">{label("Password reset", "Rivendosja e fjalëkalimit")}</p><h1>{success?label("Check your inbox", "Kontrollo emailin"):label("Forgot your password?", "Harrove fjalëkalimin?")}</h1><p>{success?label("If this email is registered, a reset link has been sent. Check your spam folder too.", "Nëse ky email është i regjistruar, lidhja e rivendosjes është dërguar. Kontrollo edhe dosjen spam."):label("Enter the email address associated with your account.", "Shkruaj adresën e emailit të llogarisë tënde.")}</p></header>
+      {success?<Link to="/login">{label("Return to sign in", "Kthehu te hyrja")} →</Link>:<form onSubmit={handleSubmit}><label htmlFor="recovery-email">Email</label><input id="recovery-email" type="email" autoComplete="email" spellCheck={false} value={email} onChange={e=>setEmail(e.target.value)} required disabled={loading}/>{error&&<p role="alert" className="authentication-error">{error}</p>}<button type="submit" className="authentication-submit" disabled={loading}>{loading?label("Sending…", "Duke dërguar…"):label("Send reset link", "Dërgo lidhjen")}</button></form>}
+    </section>
+  </div></Layout>;
 }
-
 export default ForgotPassword;

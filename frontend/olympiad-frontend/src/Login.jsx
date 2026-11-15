@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars */
-import {loginDestination} from "./navigation";
+import "./AuthenticationWorkspace.css";
+import {useLanguage} from "./context/LanguageContext";
+import {loginDestination, loginIntent} from "./navigation";
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -11,6 +13,8 @@ import { useAuth } from "./context/AuthContext";
 import { useToast } from "./components/ToastProvider";
 
 function Login() {
+  const {lang}=useLanguage();
+  const label=(en,sq)=>lang==="sq"?sq:en;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -108,206 +112,17 @@ function Login() {
     }
   };
 
-  return (
-    <Layout>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "60vh",
-        }}
-      >
-        <Card style={{ width: "100%", maxWidth: "400px" }}>
-          <div style={{ textAlign: "center", marginBottom: spacing.xl }}>
-            <h1
-              style={{
-                fontSize: typography.fontSize["3xl"],
-                fontWeight: typography.fontWeight.bold,
-                color: colors.primary,
-                marginBottom: spacing.sm,
-              }}
-            >
-              Sign in to Olimpiada
-            </h1>
-
-            <p
-              style={{
-                color: colors.gray[600],
-                fontSize: typography.fontSize.base,
-                margin: 0,
-              }}
-            >
-              Sign in to your Olimpiada account
-            </p>
-          </div>
-
-          <form onSubmit={handleLogin}>
-            <div style={{ marginBottom: spacing.lg }}>
-              <label htmlFor="login-0"
-                style={{
-                  display: "block",
-                  marginBottom: spacing.sm,
-                  fontWeight: typography.fontWeight.medium,
-                  color: colors.dark,
-                  fontSize: typography.fontSize.base,
-                }}
-              >
-                Email
-              </label>
-
-              <input id="login-0" name="login-0"
-                type="email" autoComplete="email" spellCheck={false}
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isSubmitting}
-                style={{
-                  width: "100%",
-                  padding: spacing.md,
-                  border: `1px solid ${colors.gray[300]}`,
-                  borderRadius: borderRadius.md,
-                  fontSize: typography.fontSize.base,
-                  fontFamily: typography.fontFamily,
-                  boxSizing: "border-box",
-                  transition: "border-color 0.2s ease",
-                  opacity: isSubmitting ? 0.7 : 1,
-                }}
-                onFocus={(e) => (e.target.style.borderColor = colors.primary)}
-                onBlur={(e) => (e.target.style.borderColor = colors.gray[300])}
-              />
-            </div>
-
-            <div style={{ marginBottom: spacing.xl }}>
-              <label htmlFor="login-1"
-                style={{
-                  display: "block",
-                  marginBottom: spacing.sm,
-                  fontWeight: typography.fontWeight.medium,
-                  color: colors.dark,
-                  fontSize: typography.fontSize.base,
-                }}
-              >
-                Password
-              </label>
-
-              <div style={{ position: "relative" }}>
-                <input id="login-1" name="login-1"
-                  type={showPassword ? "text" : "password"} autoComplete="current-password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={isSubmitting}
-                  style={{
-                    width: "100%",
-                    padding: spacing.md,
-                    paddingRight: "50px",
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.fontSize.base,
-                    fontFamily: typography.fontFamily,
-                    boxSizing: "border-box",
-                    transition: "border-color 0.2s ease",
-                    opacity: isSubmitting ? 0.7 : 1,
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = colors.primary)}
-                  onBlur={(e) =>
-                    (e.target.style.borderColor = colors.gray[300])
-                  }
-                />
-
-                <button type="button" aria-label={showPassword?"Hide password":"Show password"}
-                  onClick={() => {
-                    if (!isSubmitting) {
-                      setShowPassword((prev) => !prev);
-                    }
-                  }}
-                  style={{
-                    cursor: isSubmitting ? "default" : "pointer",
-                    position: "absolute",
-                    right: "15px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: colors.gray[600],
-                    padding: "8px",
-                    userSelect: "none",
-                    zIndex: 10,
-                    opacity: isSubmitting ? 0.6 : 1,
-                  }}
-                >
-                  <img
-                    src={
-                      showPassword
-                        ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_MBYLL_cioicv.svg"
-                        : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_HAP_yencim.svg"
-                    }
-                    alt={showPassword ? "Hide password" : "Show password"}
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      objectFit: "contain",
-                    }}
-                  />
-                </button>
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={isSubmitting}
-              style={{
-                width: "100%",
-                marginBottom: spacing.lg,
-                opacity: isSubmitting ? 0.75 : 1,
-                cursor: isSubmitting ? "not-allowed" : "pointer",
-              }}
-            >
-              {isSubmitting ? "Signing in..." : "Sign In"}
-            </Button>
-          </form>
-
-          <Link
-            to="/forgot-password"
-            style={{ color: "#1a4d3a", textDecoration: "underline" }}
-          >
-            Forgot Password?
-          </Link>
-
-          <div
-            style={{
-              textAlign: "center",
-              paddingTop: spacing.lg,
-              borderTop: `1px solid ${colors.gray[200]}`,
-              marginTop: spacing.lg,
-            }}
-          >
-            <p
-              style={{
-                margin: `0 0 ${spacing.sm} 0`,
-                color: colors.gray[600],
-                fontSize: typography.fontSize.base,
-              }}
-            >
-              Don't have an account?
-            </p>
-
-            <Button
-              variant="outline"
-              size="md"
-              disabled={isSubmitting}
-              onClick={() => navigate("/signup", { state: { redirectTo } })}
-            >
-              Create Account
-            </Button>
-          </div>
-        </Card>
-      </div>
-    </Layout>
-  );
+  return <Layout><div className="authentication-workspace">
+    <aside className="authentication-context"><p className="authentication-eyebrow">Olimpiada</p><h2>{label("Your learning, in one place.", "Mësimi yt, në një vend.")}</h2><p>{label("Return to your saved problems, discussions and course materials.", "Rikthehu te problemet e ruajtura, diskutimet dhe materialet mësimore.")}</p><nav aria-label={label("Explore before signing in", "Eksploro përpara hyrjes")}><Link to="/feed">{label("Browse problems", "Shfleto problemet")} →</Link><Link to="/forums">{label("Explore forums", "Eksploro forumet")} →</Link></nav></aside>
+    <section className="authentication-form"><header><p className="authentication-eyebrow">{label("Account access", "Hyrja në llogari")}</p><h1>{label("Sign in to Olimpiada", "Hyr në Olimpiada")}</h1><p>{label("Use the email address associated with your account.", "Përdor adresën e emailit të llogarisë tënde.")}</p></header>
+      <form onSubmit={handleLogin}>
+        <label htmlFor="login-0">Email</label><input id="login-0" name="email" type="email" autoComplete="email" spellCheck={false} value={email} onChange={e=>setEmail(e.target.value)} required disabled={isSubmitting}/>
+        <div className="authentication-label-row"><label htmlFor="login-1">{label("Password", "Fjalëkalimi")}</label><Link to="/forgot-password">{label("Forgot Password?", "Harrove fjalëkalimin?")}</Link></div>
+        <div className="authentication-password"><input id="login-1" name="password" type={showPassword?"text":"password"} autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required disabled={isSubmitting}/><button type="button" aria-label={showPassword?label("Hide password", "Fshih fjalëkalimin"):label("Show password", "Shfaq fjalëkalimin")} aria-pressed={showPassword} onClick={()=>setShowPassword(value=>!value)} disabled={isSubmitting}>{showPassword?label("Hide", "Fshih"):label("Show", "Shfaq")}</button></div>
+        <button className="authentication-submit" type="submit" disabled={isSubmitting}>{isSubmitting?label("Signing in…", "Duke hyrë…"):label("Sign In", "Hyr")}</button>
+      </form>
+      <footer><p>{label("Don't have an account?", "Nuk ke llogari?")}</p><Link to="/signup" state={loginIntent(redirectTo)}>{label("Create Account", "Krijo llogari")} →</Link></footer>
+    </section>
+  </div></Layout>;
 }
-
 export default Login;

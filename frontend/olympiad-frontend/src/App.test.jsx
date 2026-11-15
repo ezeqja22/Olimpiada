@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, screen, cleanup} from '@testing-library/react';
+import {render, screen, cleanup, act} from '@testing-library/react';
 import {vi, test, expect, afterEach} from 'vitest';
 import axios from 'axios';
 import App from './App';
@@ -10,6 +10,7 @@ test('homepage offers learning navigation without subscriptions or library', asy
   window.history.replaceState({}, '', '/homepage');
   axios.get.mockImplementation(async url => ({data: url.endsWith('/experience/teachers') ? [] : url.endsWith('/site-info') ? {site_name:'Olimpiada',maintenance_mode:false} : {}}));
   render(<App />);
+  await act(async () => { await vi.dynamicImportSettled(); });
   expect(await screen.findByRole('heading',{level:1})).toBeInTheDocument();
   expect(screen.getAllByRole('link').some(link=>link.getAttribute('href')==='/forums')).toBe(true);
   expect(screen.getAllByRole('link').some(link=>link.getAttribute('href')==='/pricing')).toBe(false);
@@ -22,6 +23,7 @@ test.each(['/library','/library/1'])('retired library link %s redirects to Explo
   window.history.replaceState({},'',path);
   axios.get.mockImplementation(async url=>({data:url.endsWith('/public/forums')?[]:{}}));
   render(<App/>);
+  await act(async () => { await vi.dynamicImportSettled(); });
   expect(await screen.findByRole('heading',{name:'Eksploro Olimpiada'})).toBeInTheDocument();
   expect(window.location.pathname).toBe('/explore');
 });

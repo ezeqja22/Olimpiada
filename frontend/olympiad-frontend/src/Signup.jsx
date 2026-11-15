@@ -1,7 +1,9 @@
-/* eslint-disable react-hooks/rules-of-hooks */
+import {loginDestination, loginIntent} from "./navigation";
 import React, { useState } from "react";
+import "./AuthenticationWorkspace.css";
+import {useLanguage} from "./context/LanguageContext";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import Card from "./components/Card";
 import Button from "./components/Button";
@@ -10,6 +12,10 @@ import { useAuth } from "./context/AuthContext";
 import { useToast } from "./components/ToastProvider";
 
 function Signup() {
+  const {logout}=useAuth();
+  const {lang}=useLanguage();
+  const label=(en,sq)=>lang==="sq"?sq:en;
+  const [busy,setBusy]=useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,15 +28,15 @@ function Signup() {
   const { showToast } = useToast();
 
   // Get redirect path from location state
-  const redirectTo = location.state?.redirectTo || "/homepage";
+  const redirectTo = loginDestination(location.state);
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    if(busy)return;
+    setBusy(true);
     try {
       // Clear any existing token first
-      const { logout } = useAuth();
       logout();
-      navigate("/homepage", { replace: true });
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/register`,
         {
@@ -52,7 +58,7 @@ function Signup() {
           state: {
             email: email,
             username: username,
-            redirectTo: redirectTo,
+            ...loginIntent(redirectTo),
             token: response.data.access_token,
           },
         });
@@ -62,7 +68,7 @@ function Signup() {
           state: {
             email: email,
             username: username,
-            redirectTo: redirectTo,
+            ...loginIntent(redirectTo),
           },
         });
       }
@@ -71,323 +77,17 @@ function Signup() {
         "Signup failed: " + (err.response?.data?.detail || err.message),
         "error",
       );
-    }
+    } finally {setBusy(false);}
   };
 
-  return (
-    <Layout>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "60vh",
-        }}
-      >
-        <Card style={{ width: "100%", maxWidth: "400px" }}>
-          <div style={{ textAlign: "center", marginBottom: spacing.xl }}>
-            <h1
-              style={{
-                fontSize: typography.fontSize["3xl"],
-                fontWeight: typography.fontWeight.bold,
-                color: colors.primary,
-                marginBottom: spacing.sm,
-              }}
-            >
-              Join Olimpiada
-            </h1>
-            <p
-              style={{
-                color: colors.gray[600],
-                fontSize: typography.fontSize.base,
-                margin: 0,
-              }}
-            >
-              Create your account to start solving problems
-            </p>
-          </div>
-
-          <form onSubmit={handleSignup}>
-            <div style={{ marginBottom: spacing.lg }}>
-              <label htmlFor="signup-0"
-                style={{
-                  display: "block",
-                  marginBottom: spacing.sm,
-                  fontWeight: typography.fontWeight.medium,
-                  color: colors.dark,
-                  fontSize: typography.fontSize.base,
-                }}
-              >
-                Username
-              </label>
-              <input id="signup-0" name="signup-0"
-                type="text"
-                placeholder="Choose a username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: spacing.md,
-                  border: `1px solid ${colors.gray[300]}`,
-                  borderRadius: borderRadius.md,
-                  fontSize: typography.fontSize.base,
-                  fontFamily: typography.fontFamily,
-                  boxSizing: "border-box",
-                  transition: "border-color 0.2s ease",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = colors.primary)}
-                onBlur={(e) => (e.target.style.borderColor = colors.gray[300])}
-              />
-            </div>
-
-            <div style={{ marginBottom: spacing.lg }}>
-              <label htmlFor="signup-1"
-                style={{
-                  display: "block",
-                  marginBottom: spacing.sm,
-                  fontWeight: typography.fontWeight.medium,
-                  color: colors.dark,
-                  fontSize: typography.fontSize.base,
-                }}
-              >
-                Email
-              </label>
-              <input id="signup-1" name="signup-1"
-                type="email" autoComplete="email" spellCheck={false}
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: spacing.md,
-                  border: `1px solid ${colors.gray[300]}`,
-                  borderRadius: borderRadius.md,
-                  fontSize: typography.fontSize.base,
-                  fontFamily: typography.fontFamily,
-                  boxSizing: "border-box",
-                  transition: "border-color 0.2s ease",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = colors.primary)}
-                onBlur={(e) => (e.target.style.borderColor = colors.gray[300])}
-              />
-            </div>
-
-            <div style={{ marginBottom: spacing.xl }}>
-              <label htmlFor="signup-2"
-                style={{
-                  display: "block",
-                  marginBottom: spacing.sm,
-                  fontWeight: typography.fontWeight.medium,
-                  color: colors.dark,
-                  fontSize: typography.fontSize.base,
-                }}
-              >
-                Password
-              </label>
-              {/* Add wrapper div for password field */}
-              <div style={{ position: "relative" }}>
-                <input id="signup-2" name="signup-2"
-                  type={showPassword ? "text" : "password"} autoComplete="new-password"
-                  placeholder="Create a password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: spacing.md,
-                    paddingRight: "50px",
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: borderRadius.md,
-                    fontSize: typography.fontSize.base,
-                    fontFamily: typography.fontFamily,
-                    boxSizing: "border-box",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = colors.primary)}
-                  onBlur={(e) =>
-                    (e.target.style.borderColor = colors.gray[300])
-                  }
-                />
-                {/* Add custom eye icon */}
-                <button type="button" aria-label={showPassword?"Hide password":"Show password"}
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    cursor: "pointer",
-                    position: "absolute",
-                    right: "15px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: colors.gray[600],
-                    padding: "8px",
-                    userSelect: "none",
-                    zIndex: 10,
-                  }}
-                >
-                  <img
-                    src={
-                      showPassword
-                        ? "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_MBYLL_cioicv.svg"
-                        : "https://res.cloudinary.com/dqmmgk88b/image/upload/v1762348022/SY_HAP_yencim.svg"
-                    }
-                    alt={showPassword ? "Hide password" : "Show password"}
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      objectFit: "contain",
-                    }}
-                  />
-                </button>
-              </div>
-            </div>
-
-            {/* Notification Preferences */}
-            <div style={{ marginBottom: spacing.lg }}>
-              <h3
-                style={{
-                  fontSize: typography.fontSize.lg,
-                  fontWeight: typography.fontWeight.semibold,
-                  color: colors.dark,
-                  marginBottom: spacing.md,
-                }}
-              >
-                Notification Preferences
-              </h3>
-
-              <div style={{ marginBottom: spacing.md }}>
-                <label htmlFor="signup-3"
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: spacing.sm,
-                    cursor: "pointer",
-                    padding: spacing.sm,
-                    borderRadius: borderRadius.md,
-                    transition: "background-color 0.2s ease",
-                  }}
-                >
-                  <input id="signup-3" name="signup-3"
-                    type="checkbox"
-                    checked={emailNotifications}
-                    onChange={(e) => setEmailNotifications(e.target.checked)}
-                    style={{
-                      marginTop: "2px",
-                      transform: "scale(1.2)",
-                      accentColor: colors.primary,
-                    }}
-                  />
-                  <div>
-                    <div
-                      style={{
-                        fontWeight: typography.fontWeight.medium,
-                        color: colors.dark,
-                        fontSize: typography.fontSize.base,
-                        marginBottom: spacing.xs,
-                      }}
-                    >
-                      Email Notifications
-                    </div>
-                    <div
-                      style={{
-                        color: colors.gray[600],
-                        fontSize: typography.fontSize.sm,
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      Get notified via email when someone likes, comments, or
-                      follows you (You can change this later in Settings)
-                    </div>
-                  </div>
-                </label>
-              </div>
-
-              <div style={{ marginBottom: spacing.md }}>
-                <label htmlFor="signup-4"
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: spacing.sm,
-                    cursor: "pointer",
-                    padding: spacing.sm,
-                    borderRadius: borderRadius.md,
-                    transition: "background-color 0.2s ease",
-                  }}
-                >
-                  <input id="signup-4" name="signup-4"
-                    type="checkbox"
-                    checked={marketingEmails}
-                    onChange={(e) => setMarketingEmails(e.target.checked)}
-                    style={{
-                      marginTop: "2px",
-                      transform: "scale(1.2)",
-                      accentColor: colors.primary,
-                    }}
-                  />
-                  <div>
-                    <div
-                      style={{
-                        fontWeight: typography.fontWeight.medium,
-                        color: colors.dark,
-                        fontSize: typography.fontSize.base,
-                        marginBottom: spacing.xs,
-                      }}
-                    >
-                      Marketing Updates
-                    </div>
-                    <div
-                      style={{
-                        color: colors.gray[600],
-                        fontSize: typography.fontSize.sm,
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      Receive occasional updates about new features and
-                      improvements (You can change this later in Settings)
-                    </div>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              style={{ width: "100%", marginBottom: spacing.lg }}
-            >
-              Create Account
-            </Button>
-          </form>
-
-          <div
-            style={{
-              textAlign: "center",
-              paddingTop: spacing.lg,
-              borderTop: `1px solid ${colors.gray[200]}`,
-            }}
-          >
-            <p
-              style={{
-                margin: `0 0 ${spacing.sm} 0`,
-                color: colors.gray[600],
-                fontSize: typography.fontSize.base,
-              }}
-            >
-              Already have an account?
-            </p>
-            <Button
-              variant="outline"
-              size="md"
-              onClick={() => navigate("/login", { state: { redirectTo } })}
-            >
-              Sign In
-            </Button>
-          </div>
-        </Card>
-      </div>
-    </Layout>
-  );
+  return <Layout><div className="authentication-workspace">
+    <aside className="authentication-context"><p className="authentication-eyebrow">Olimpiada</p><h2>{label("Join the learning community", "Bashkohu me komunitetin mësimor")}</h2><p>{label("Save problems, participate in discussions and use the learning materials with one account.", "Ruaj probleme, merr pjesë në diskutime dhe përdor materialet mësimore me një llogari.")}</p><nav><Link to="/feed">{label("Browse problems first", "Shfleto fillimisht problemet")} →</Link><Link to="/login" state={loginIntent(redirectTo)}>{label("Already registered? Sign in", "Ke llogari? Hyr")} →</Link></nav></aside>
+    <section className="authentication-form"><header><p className="authentication-eyebrow">{label("Registration", "Regjistrimi")}</p><h1>{label("Create your account", "Krijo llogarinë tënde")}</h1><p>{label("You will verify your email after registration.", "Pas regjistrimit do të verifikosh emailin.")}</p></header>
+      <form onSubmit={handleSignup}><label htmlFor="signup-0">{label("Username", "Emri i përdoruesit")}</label><input id="signup-0" autoComplete="username" value={username} onChange={e=>setUsername(e.target.value)} required disabled={busy}/><label htmlFor="signup-1">Email</label><input id="signup-1" type="email" autoComplete="email" spellCheck={false} value={email} onChange={e=>setEmail(e.target.value)} required disabled={busy}/><label htmlFor="signup-2">{label("Password", "Fjalëkalimi")}</label><div className="authentication-password"><input id="signup-2" type={showPassword?"text":"password"} autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)} required disabled={busy}/><button type="button" aria-label={showPassword?label("Hide password", "Fshih fjalëkalimin"):label("Show password", "Shfaq fjalëkalimin")} onClick={()=>setShowPassword(value=>!value)}>{showPassword?label("Hide", "Fshih"):label("Show", "Shfaq")}</button></div>
+        <fieldset className="authentication-preferences" disabled={busy}><legend>{label("Email preferences", "Preferencat e emailit")}</legend><p>{label("Optional. You can change these in Settings.", "Opsionale. Mund t'i ndryshosh te Cilësimet.")}</p><label><input type="checkbox" checked={emailNotifications} onChange={e=>setEmailNotifications(e.target.checked)}/><span>{label("Email about likes, comments and follows", "Email për pëlqime, komente dhe ndjekës")}</span></label><label><input type="checkbox" checked={marketingEmails} onChange={e=>setMarketingEmails(e.target.checked)}/><span>{label("Occasional platform news and updates", "Lajme dhe përditësime nga platforma")}</span></label></fieldset>
+        <button type="submit" className="authentication-submit" disabled={busy}>{busy?label("Creating account…", "Duke krijuar llogarinë…"):label("Create Account", "Krijo llogari")}</button>
+      </form>
+    </section>
+  </div></Layout>;
 }
-
 export default Signup;

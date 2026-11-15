@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./AdminLayout.css";
+import "./AdministrationWorkspace.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
@@ -54,194 +55,19 @@ const AdminDashboard = () => {
     );
   }
 
-  const quickActions = [
-    {
-      label: "Manage Users",
-      path: "/admin/users",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg",
-    },
-    {
-      label: "Moderate Forums",
-      path: "/admin/forums",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",
-    },
-    {
-      label: "Review Reports",
-      path: "/admin/reports",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg",
-    },
-    {
-      label: "Send Email",
-      path: "/admin/email",
-      secondary: true,
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811297/Email_admin_panel_zjmkz7.svg",
-    },
-    {
-      label: "View Analytics",
-      path: "/admin/analytics",
-      secondary: true,
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/Analytics_admin_panel_en0409.svg",
-    },
-  ];
-
-  return (
-    <div className="admin-page admin-dashboard-page">
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Total Users</h3>
-          <p className="stat-value">{stats.users.total}</p>
-          <p className="stat-change positive">+{stats.users.new_today} today</p>
-        </div>
-
-        <div className="stat-card">
-          <h3>Active Users</h3>
-          <p className="stat-value">{stats.users.active}</p>
-          <p className="stat-change">{stats.users.banned} banned</p>
-        </div>
-
-        <div className="stat-card">
-          <h3>Forums</h3>
-          <p className="stat-value">{stats.forums.total}</p>
-          <p className="stat-change">
-            {stats.forums.public} public, {stats.forums.private} private
-          </p>
-        </div>
-
-        <div className="stat-card">
-          <h3>Problems</h3>
-          <p className="stat-value">{stats.problems.total}</p>
-          <p className="stat-change positive">
-            +{stats.problems.new_today} today
-          </p>
-        </div>
-
-        <div className="stat-card">
-          <h3>Pending Reports</h3>
-          <p className="stat-value">{stats.reports.pending}</p>
-          <p className="stat-change">Need review</p>
-        </div>
-      </div>
-
-      <section className="admin-card">
-        <h2>Quick Actions</h2>
-        <div className="admin-quick-actions">
-          {quickActions.map((action) => (
-            <button
-              key={action.path}
-              className={`admin-btn ${action.secondary ? "secondary" : ""}`}
-              onClick={() => navigate(action.path)}
-            >
-              <img src={action.icon} alt="" />
-              {action.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <div className="admin-two-column-grid">
-        <section className="admin-card">
-          <h2>Recent Users</h2>
-          {stats.recent_users.length > 0 ? (
-            <div className="admin-table admin-table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Joined</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.recent_users.map((user) => (
-                    <tr key={user.id}>
-                      <td>
-                        <div className="admin-primary-cell">
-                          <strong>{user.username}</strong>
-                          <small>{user.email}</small>
-                        </div>
-                      </td>
-                      <td>
-                        <span
-                          className={`status-badge ${
-                            user.role === "admin"
-                              ? "active"
-                              : user.role === "moderator"
-                                ? "pending"
-                                : "inactive"
-                          }`}
-                        >
-                          {user.role}
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          className={`status-badge ${
-                            user.is_active ? "active" : "inactive"
-                          }`}
-                        >
-                          {user.is_active ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                      <td>{new Date(user.created_at).toLocaleDateString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="empty-state admin-compact-empty-state">
-              <h3>No recent users</h3>
-              <p>No new users have joined recently.</p>
-            </div>
-          )}
-        </section>
-
-        <section className="admin-card">
-          <h2>Recent Forums</h2>
-          {stats.recent_forums.length > 0 ? (
-            <div className="admin-table admin-table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Forum</th>
-                    <th>Creator</th>
-                    <th>Type</th>
-                    <th>Created</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.recent_forums.map((forum) => (
-                    <tr key={forum.id}>
-                      <td>
-                        <strong>{forum.title}</strong>
-                      </td>
-                      <td>{forum.creator}</td>
-                      <td>
-                        <span
-                          className={`status-badge ${
-                            forum.is_private ? "inactive" : "active"
-                          }`}
-                        >
-                          {forum.is_private ? "Private" : "Public"}
-                        </span>
-                      </td>
-                      <td>{new Date(forum.created_at).toLocaleDateString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="empty-state admin-compact-empty-state">
-              <h3>No recent forums</h3>
-              <p>No new forums have been created recently.</p>
-            </div>
-          )}
-        </section>
-      </div>
+  return <div className="administration-overview">
+    <header className="administration-heading"><div><p>Platform overview</p><h2>Community & learning</h2></div><button onClick={fetchDashboardStats}>Refresh overview</button></header>
+    <div className="administration-summary">
+      {[["Members",stats.users.total,`${stats.users.new_today} joined today`,"/admin/users"],["Active members",stats.users.active,`${stats.users.banned} banned`,"/admin/users"],["Problems",stats.problems.total,`${stats.problems.new_today} published today`,"/admin/content"],["Forums",stats.forums.total,`${stats.forums.public} public · ${stats.forums.private} private`,"/admin/forums"]].map(([title,value,note,path])=><Link key={title} to={path}><span>{title}</span><strong>{value}</strong><small>{note}</small></Link>)}
     </div>
-  );
+    <div className="administration-columns">
+      <section className="administration-activity"><header><h3>Recent members</h3><Link to="/admin/users">Manage users →</Link></header>
+        {stats.recent_users.length ? <div className="administration-table" tabIndex={0} role="region" aria-label="Recent members"><table><thead><tr><th scope="col">Member</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Joined</th></tr></thead><tbody>{stats.recent_users.map(user=><tr key={user.id}><td><strong>{user.username}</strong><small>{user.email}</small></td><td>{user.role.replaceAll('_',' ')}</td><td><span className={user.is_active?'administration-status':'administration-status is-muted'}>{user.is_active?'Active':'Inactive'}</span></td><td>{new Date(user.created_at).toLocaleDateString()}</td></tr>)}</tbody></table></div> : <p className="administration-empty">No recent members.</p>}
+        <header><h3>Recent forums</h3><Link to="/admin/forums">Moderate forums →</Link></header>
+        {stats.recent_forums.length ? <div className="administration-forum-list">{stats.recent_forums.map(forum=><article key={forum.id}><div><Link to={`/forum/${forum.id}`}>{forum.title}</Link><p>{forum.creator} · {new Date(forum.created_at).toLocaleDateString()}</p></div><span className="administration-status is-muted">{forum.is_private?'Private':'Public'}</span></article>)}</div> : <p className="administration-empty">No recent forums.</p>}
+      </section>
+      <aside className="administration-actions"><section className="administration-review"><p>Moderation queue</p><strong>{stats.reports.pending}</strong><h3>Reports awaiting review</h3><Link to="/admin/reports">Review reports →</Link></section><section><h3>Publishing</h3><Link to="/admin/weekly">Weekly competitions <span>→</span></Link><Link to="/admin/courses">Materials & tests <span>→</span></Link><Link to="/admin/content">Content management <span>→</span></Link></section><section><h3>Platform tools</h3><Link to="/admin/email">Email workspace <span>→</span></Link><Link to="/admin/analytics">Analytics <span>→</span></Link></section></aside>
+    </div>
+  </div>;
 };
-
 export default AdminDashboard;

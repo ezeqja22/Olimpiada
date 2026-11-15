@@ -1,3 +1,4 @@
+import {PublishingHeader} from "./components/PublishingWorkspace";
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
@@ -502,7 +503,7 @@ All settings are working correctly! 🎉
               cursor: isDisabled ? "not-allowed" : "default",
             }}
           >
-            <input
+            <input aria-label={config.label}
               type="checkbox"
               checked={value === "true"}
               onChange={(e) =>
@@ -540,7 +541,7 @@ All settings are working correctly! 🎉
           nonImplementedSelectFeatures.includes(key) || config.disabled;
 
         return (
-          <select
+          <select aria-label={config.label}
             value={value}
             onChange={(e) =>
               !isSelectDisabled &&
@@ -567,7 +568,7 @@ All settings are working correctly! 🎉
 
       case "textarea":
         return (
-          <textarea
+          <textarea aria-label={config.label}
             value={value}
             onChange={(e) => handleSettingChange(category, key, e.target.value)}
             rows={config.rows || 3}
@@ -584,7 +585,7 @@ All settings are working correctly! 🎉
 
       case "number":
         return (
-          <input
+          <input aria-label={config.label}
             type="number"
             value={value}
             onChange={(e) => handleSettingChange(category, key, e.target.value)}
@@ -603,7 +604,7 @@ All settings are working correctly! 🎉
       case "password":
         return (
           <div>
-            <input
+            <input aria-label={config.label}
               type="password"
               value={value && value !== "ENCRYPTED" ? value : ""}
               onChange={(e) =>
@@ -636,7 +637,7 @@ All settings are working correctly! 🎉
         const isNumberDisabled = nonImplementedNumberFeatures.includes(key);
 
         return (
-          <input
+          <input aria-label={config.label}
             type={config.type}
             value={value || ""}
             onChange={(e) =>
@@ -695,189 +696,11 @@ All settings are working correctly! 🎉
   }
 
   return (
-    <div className="admin-page admin-settings-page" style={{ padding: "24px" }}>
-      {/* Header */}
-      <div style={{ marginBottom: "32px" }}>
-        <h1
-          style={{
-            margin: "0 0 8px 0",
-            fontSize: "28px",
-            fontWeight: "bold",
-            background: "linear-gradient(135deg, #667eea, #764ba2)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
-          System Settings
-        </h1>
-        <p style={{ color: "#6b7280", margin: 0 }}>
-          Configure system-wide settings and preferences
-        </p>
-      </div>
-
-      {/* Search and Controls */}
-      <div className="settings-toolbar">
-        <div className="settings-search">
-          <input
-            type="text"
-            placeholder="Search settings..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "12px 16px",
-              border: "2px solid #e5e7eb",
-              borderRadius: "8px",
-              fontSize: "14px",
-            }}
-          />
-        </div>
-
-        <div className="settings-actions">
-          <button
-            onClick={saveSettings}
-            disabled={saving}
-            style={{
-              background: "linear-gradient(135deg, #10b981, #059669)",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "500",
-              opacity: saving ? 0.7 : 1,
-            }}
-          >
-            {saving ? "💾 Saving..." : "💾 Save All"}
-          </button>
-
-          <button
-            onClick={exportSettings}
-            style={{
-              background: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "500",
-            }}
-          >
-            📤 Export
-          </button>
-
-          <button
-            onClick={testSettings}
-            style={{
-              background: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "500",
-            }}
-          >
-            🧪 Test Settings
-          </button>
-
-          <button
-            onClick={fetchSettings}
-            style={{
-              background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "500",
-            }}
-          >
-            🔄 Refresh
-          </button>
-
-          <button
-            onClick={initializeSettings}
-            style={{
-              background: "linear-gradient(135deg, #f59e0b, #d97706)",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "500",
-            }}
-          >
-            🔄 Initialize
-          </button>
-
-          <button
-            onClick={resetSettings}
-            style={{
-              background: "linear-gradient(135deg, #ef4444, #dc2626)",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "500",
-            }}
-          >
-            🔄 Reset
-          </button>
-        </div>
-      </div>
-
-      {/* Advanced Toggle */}
-      <div style={{ marginBottom: "24px" }}>
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            cursor: "pointer",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={showAdvanced}
-            onChange={(e) => setShowAdvanced(e.target.checked)}
-            style={{ transform: "scale(1.2)" }}
-          />
-          <span style={{ fontWeight: "500" }}>Show Advanced Settings</span>
-        </label>
-      </div>
-
-      {/* Settings Tabs */}
-      <div className="settings-tabs">
-        {filteredCategories.map((category) => (
-          <button
-            key={category}
-            onClick={() => setActiveTab(category)}
-            style={{
-              background:
-                activeTab === category
-                  ? `linear-gradient(135deg, ${categories[category].color}, ${categories[category].color}dd)`
-                  : "#f9fafb",
-              color: activeTab === category ? "white" : "#374151",
-              border: "none",
-              padding: "12px 20px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "500",
-              fontSize: "14px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              transition: "all 0.2s",
-            }}
-          >
-            <span>{categories[category].icon}</span>
-            <span>{categories[category].name}</span>
-          </button>
-        ))}
-      </div>
-
+    <div className="publishing-workspace admin-settings-page">
+      <PublishingHeader eyebrow="Website / Configuration" title="System settings" description="Manage platform behavior. Review changes before saving; maintenance actions are separate below." />
+      <div className="publishing-actions settings-primary-actions"><button className="p1-btn" onClick={saveSettings} disabled={saving}>{saving?"Saving…":"Save all changes"}</button><button className="p1-btn alt" onClick={fetchSettings}>Refresh</button><button className="p1-btn alt" onClick={exportSettings}>Export</button></div>
+      <details className="publishing-maintenance"><summary>Maintenance actions</summary><p>These actions affect system configuration. Review the confirmation before proceeding.</p><div className="publishing-actions"><button className="p1-btn alt" onClick={testSettings}>Test settings</button><button className="p1-btn alt" onClick={initializeSettings}>Initialize</button><button className="p1-btn alt" onClick={resetSettings}>Reset</button></div></details>
+      <div className="publishing-settings-columns"><aside className="publishing-section"><label>Search settings<input type="search" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} placeholder="Setting name…"/></label><label className="help-checkbox"><input type="checkbox" checked={showAdvanced} onChange={e=>setShowAdvanced(e.target.checked)}/>Show advanced settings</label><nav className="publishing-queue" aria-label="Settings categories">{filteredCategories.map(category=><button key={category} aria-pressed={activeTab===category} onClick={()=>setActiveTab(category)}>{categories[category].name}<span aria-hidden="true">→</span></button>)}</nav></aside><div>
       {/* Settings Content */}
       <div className="admin-card">
         <h2
@@ -893,101 +716,11 @@ All settings are working correctly! 🎉
           {categories[activeTab].icon} {categories[activeTab].name}
         </h2>
 
-        {/* Debug Info */}
-        <div
-          style={{
-            background: "#f3f4f6",
-            padding: "12px",
-            borderRadius: "8px",
-            marginBottom: "16px",
-            fontSize: "12px",
-            color: "#6b7280",
-          }}
-        >
-          <strong>Debug Info:</strong> Active tab: {activeTab} | Settings for
-          this tab:{" "}
-          {settings[activeTab] ? Object.keys(settings[activeTab]).length : 0} |
-          Total settings loaded: {Object.keys(settings).length}
-        </div>
-
-        <div style={{ display: "grid", gap: "24px" }}>
-          {settingsConfig[activeTab] &&
-            Object.keys(settingsConfig[activeTab]).map((key) => {
-              const config = settingsConfig[activeTab][key];
-              const setting = settings[activeTab]?.[key];
-
-              return (
-                <div
-                  key={key}
-                  className="settings-field-card"
-                  style={{
-                    padding: "20px",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "12px",
-                    background: "#fafafa",
-                  }}
-                >
-                  <div style={{ marginBottom: "12px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontWeight: "600",
-                        marginBottom: "8px",
-                        color: config.disabled ? "#9ca3af" : "#374151",
-                      }}
-                    >
-                      {config.label}
-                      {config.required && (
-                        <span style={{ color: "#ef4444", marginLeft: "4px" }}>
-                          *
-                        </span>
-                      )}
-                      {config.disabled && (
-                        <span
-                          style={{
-                            color: "#9ca3af",
-                            fontSize: "12px",
-                            marginLeft: "8px",
-                          }}
-                        >
-                          (Coming soon)
-                        </span>
-                      )}
-                    </label>
-
-                    {renderSettingField(activeTab, key, config)}
-
-                    {setting?.description && (
-                      <div
-                        style={{
-                          marginTop: "8px",
-                          fontSize: "12px",
-                          color: "#6b7280",
-                          fontStyle: "italic",
-                        }}
-                      >
-                        {setting.description}
-                      </div>
-                    )}
-
-                    {setting?.updated_at && (
-                      <div
-                        style={{
-                          marginTop: "8px",
-                          fontSize: "12px",
-                          color: "#9ca3af",
-                        }}
-                      >
-                        Last updated:{" "}
-                        {new Date(setting.updated_at).toLocaleString()}
-                        {setting.updated_by && ` by ${setting.updated_by}`}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-
+        <div className="publishing-settings-fields">
+          {settingsConfig[activeTab] && Object.keys(settingsConfig[activeTab]).filter(key=>!searchTerm||settingsConfig[activeTab][key].label.toLowerCase().includes(searchTerm.toLowerCase())||key.toLowerCase().includes(searchTerm.toLowerCase())).map(key=>{
+            const config=settingsConfig[activeTab][key],setting=settings[activeTab]?.[key];
+            return <fieldset className="publishing-setting" key={key}><legend>{config.label}{config.required?' *':''}{config.disabled?' (Coming soon)':''}</legend>{renderSettingField(activeTab,key,config)}{setting?.description&&<p>{setting.description}</p>}{setting?.updated_at&&<small>Last updated: {new Date(setting.updated_at).toLocaleString()}{setting.updated_by&&` by ${setting.updated_by}`}</small>}</fieldset>;
+          })}
           {/* Show message if no settings for this tab */}
           {(!settingsConfig[activeTab] ||
             Object.keys(settingsConfig[activeTab]).length === 0) && (
@@ -1018,6 +751,7 @@ All settings are working correctly! 🎉
           )}
         </div>
       </div>
+      </div></div>
     </div>
   );
 };

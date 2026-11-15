@@ -1,3 +1,4 @@
+import {PublishingHeader} from "./components/PublishingWorkspace";
 import React, { useState } from "react";
 import axios from "axios";
 import { useToast } from "./components/ToastProvider";
@@ -24,7 +25,7 @@ const AdminUserHistory = () => {
       // First, find the user by username
       const token = localStorage.getItem("token");
       const userResponse = await axios.get(
-        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/user/${searchQuery}`,
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/user/${encodeURIComponent(searchQuery.trim())}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -92,25 +93,10 @@ const AdminUserHistory = () => {
   };
 
   return (
-    <div className="admin-page admin-user-history-page">
-      <div className="admin-page-heading">
-        <h1>User History</h1>
-        <p>Search for a user to view their moderation history</p>
-      </div>
-
-      {/* Search Form */}
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "20px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          marginBottom: "20px",
-        }}
-      >
+    <div className="publishing-workspace admin-user-history-page"><PublishingHeader eyebrow="Community / Moderation" title="User history" description="Find a member and review their recorded moderation history."/><div className="publishing-settings-columns"><aside className="publishing-section"><h2>Find a member</h2>
         <form onSubmit={handleSearch} className="admin-search-form">
           <input
-            type="text"
+            type="search" aria-label="Username"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Enter username to search..."
@@ -139,7 +125,7 @@ const AdminUserHistory = () => {
             {loading ? "Searching..." : "Search"}
           </button>
         </form>
-      </div>
+      </aside><section className="publishing-section">
 
       {/* Error Message */}
       {error && (
@@ -366,6 +352,7 @@ const AdminUserHistory = () => {
           </p>
         </div>
       )}
+      </section></div>
     </div>
   );
 };

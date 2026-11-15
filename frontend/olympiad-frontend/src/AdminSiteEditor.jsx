@@ -1,3 +1,4 @@
+import {PublishingHeader} from "./components/PublishingWorkspace";
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -27,6 +28,7 @@ export default function AdminSiteEditor() {
   const [lang, setLang] = useState("sq");
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError,setLoadError]=useState(false),[retry,setRetry]=useState(0);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState(null);
   const section = SITE_SECTIONS.find(item => item.key === selected) || SITE_SECTIONS[0];
@@ -39,12 +41,19 @@ export default function AdminSiteEditor() {
   ), [filter]);
 
   useEffect(() => {
-    let live = true;
+    let live = true;setLoading(true);setLoadError(false);
     axios.get(ENDPOINT + "/content")
       .then(r => {if(live) {setStored(r.data || {}); setLoading(false);}})
-      .catch(() => {if(live) {setStatus({error:true,text:"Nuk u lexua përmbajtja e website-it."});setLoading(false);}});
+      .catch(() => {if(live) {setLoadError(true);setStatus({error:true,text:"Nuk u lexua përmbajtja e website-it."});setLoading(false);}});
     return () => {live = false;};
-  }, []);
+  }, [retry]);
+
+  useEffect(()=>{
+    if(!dirty)return;
+    const warn=event=>{event.preventDefault();event.returnValue="";};
+    window.addEventListener('beforeunload',warn);
+    return()=>window.removeEventListener('beforeunload',warn);
+  },[dirty]);
 
   const change = (field, value) => {
     setDrafts(prev => ({...prev,[selected]:{...current,[field]:value}}));
@@ -60,6 +69,7 @@ export default function AdminSiteEditor() {
     setStatus(null);
   };
   const save = async () => {
+    if(loading||loadError||busy)return;
     setBusy(true); setStatus(null);
     try {
       await axios.put(ENDPOINT + "/admin/content/" + selected, current,
@@ -87,13 +97,8 @@ export default function AdminSiteEditor() {
 
   if (authLoading) return <main className="site-editor"><p className="site-editor__status">Duke verifikuar aksesin...</p></main>;
   if (!canEdit) return <main className="site-editor"><h1>Përmbajtja e Website-it</h1><p role="alert">Vetëm Admin dhe Super Admin mund të ndryshojnë këtë seksion.</p></main>;
-  return <main className="site-editor">
-    <h1 className="site-editor__title">Përmbajtja e Website-it</h1>
-    <p className="site-editor__lede">
-      Ndrysho tekstet në shqip dhe anglisht, fotografitë dhe lidhjet e seksioneve publike.
-      Zgjidh një seksion, kontrollo pamjen paraprake dhe ruaj. Për problema, materiale, FAQ dhe
-      forume përdor menutë e tyre ekzistuese.
-    </p>
+  return <main className="site-editor publishing-workspace">
+    <PublishingHeader eyebrow="Website / CMS" title="Përmbajtja e Website-it" description="Zgjidh faqen dhe gjuhën, redakto tekstin ose fotografinë dhe kontrollo pamjen paraprake para ruajtjes." to={section.url} linkLabel="Shiko faqen" />
     <div className="site-editor__layout">
       <nav className="site-editor__nav" aria-label="Seksionet e website-it">
         <label className="site-editor__hint" htmlFor="site-editor-search">Kërko një seksion</label>
@@ -124,9 +129,9 @@ export default function AdminSiteEditor() {
               <button type="button" aria-pressed={lang==="en"} onClick={()=>setLang("en")}>EN</button>
             </div>
           </div>
-          {loading?<p className="site-editor__status">Duke ngarkuar...</p>:
+          {loading?<p className="site-editor__status">Duke ngarkuar...</p>:loadError?<div role="alert"><p>Përmbajtja nuk u ngarkua. Provo përsëri para redaktimit.</p><button onClick={()=>setRetry(n=>n+1)}>Provo përsëri</button></div>:
           <form onSubmit={e=>{e.preventDefault();save();}}>
-            <div className="site-editor__fields">
+            <div className="publishing-cms-columns"><fieldset disabled={busy} className="site-editor__fields publishing-cms-fields">
               <label>
                 Titulli ({lang.toUpperCase()})
                 <input maxLength={250} value={current["title_"+lang]}
@@ -164,12 +169,12 @@ export default function AdminSiteEditor() {
                   onChange={e=>change("button_url",e.target.value)} />
                 <span className="site-editor__hint">Vetëm lidhje të brendshme që fillojnë me /.</span>
               </label>}
-            </div>
-            <div className="site-editor__preview">
+            </fieldset>
+            <aside className="site-editor__preview">
               <span className="site-editor__preview-label">Pamja paraprake · {lang.toUpperCase()}</span>
               <h3><RichInlineText text={title} /></h3>
               {subtitle && <p><RichInlineText text={subtitle} /></p>}
-            </div>
+            </aside></div>
             <div className="site-editor__actions">
               <button className="site-editor__save" type="submit" disabled={busy || !dirty}>
                 {busy?"Duke ruajtur...":"Ruaj ndryshimet"}

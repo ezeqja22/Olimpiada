@@ -1,13 +1,17 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-restricted-globals */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useToast } from "./components/ToastProvider";
 import { useAuth } from "./context/AuthContext";
 import "./AdminLayout.css";
+import "./AdministrationWorkspace.css";
+import {useConfirm} from "./components/ConfirmProvider";
 
 const AdminUsers = () => {
+  const {confirm}=useConfirm();
+  const requestVersion=useRef(0);
   const [allUsers, setAllUsers] = useState([]); // Store all users for filtering
   const [users, setUsers] = useState([]); // Displayed users
   const [loading, setLoading] = useState(true);
@@ -24,12 +28,15 @@ const AdminUsers = () => {
   });
 
   useEffect(() => {
-    fetchUsers();
-  }, [filters.role, filters.status, filters.page]);
+    const timer=setTimeout(fetchUsers,filters.search?250:0);
+    return ()=>{clearTimeout(timer);requestVersion.current+=1;};
+  }, [filters.search, filters.role, filters.status, filters.page]);
 
   const fetchUsers = async () => {
+    const version=++requestVersion.current;
     try {
       setLoading(true);
+      setError(null);
       const token = localStorage.getItem("token");
       const params = new URLSearchParams();
 
@@ -46,14 +53,15 @@ const AdminUsers = () => {
         },
       );
 
+      if(version!==requestVersion.current)return;
       setAllUsers(response.data.users);
       setUsers(response.data.users);
       setPagination(response.data.pagination);
     } catch (err) {
-      setError("Failed to load users");
+      if(version===requestVersion.current)setError("Failed to load users");
       console.error("Users error:", err);
     } finally {
-      setLoading(false);
+      if(version===requestVersion.current)setLoading(false);
     }
   };
 
@@ -65,32 +73,7 @@ const AdminUsers = () => {
     }));
   };
 
-  // Client-side filtering function
-  const filterUsers = (searchQuery) => {
-    if (!searchQuery.trim()) {
-      setUsers(allUsers);
-      return;
-    }
-
-    const filtered = allUsers.filter((user) => {
-      const searchTerm = searchQuery.toLowerCase();
-      return (
-        user.username.toLowerCase().includes(searchTerm) ||
-        user.email.toLowerCase().includes(searchTerm)
-      );
-    });
-
-    setUsers(filtered);
-  };
-
-  const handleSearchChange = (value) => {
-    setFilters((prev) => ({
-      ...prev,
-      search: value,
-      page: 1,
-    }));
-    filterUsers(value);
-  };
+  const handleSearchChange = value => setFilters(previous=>({...previous,search:value,page:1}));
 
   const handlePageChange = (newPage) => {
     setFilters((prev) => ({ ...prev, page: newPage }));
@@ -169,59 +152,25 @@ const AdminUsers = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="loading">
-        <div className="loading-spinner"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="admin-page admin-users-page">
-      {/* Filters */}
-      <div className="admin-card">
-        <h2>User Management</h2>
-        <div className="admin-filter-grid">
-          <div>
-            <label>Search</label>
-            <input
-              type="text"
-              placeholder="Username or email..."
-              value={filters.search}
-              onChange={(e) => handleSearchChange(e.target.value)}
-            />
-          </div>
-          <div>
-            <label>Role</label>
-            <select
-              value={filters.role}
-              onChange={(e) => handleFilterChange("role", e.target.value)}
-            >
-              <option value="">All Roles</option>
-              <option value="admin">Admin</option>
-              <option value="moderator">Moderator</option>
-              <option value="user">User</option>
-            </select>
-          </div>
-          <div>
-            <label>Status</label>
-            <select
-              value={filters.status}
-              onChange={(e) => handleFilterChange("status", e.target.value)}
-            >
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="banned">Banned</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
+    <div className="admin-page administration-directory">
+      <header className="administration-heading"><div><p>Community directory</p><h2>User Management</h2></div><span>{pagination.total ?? users.length} members</span></header>
+      <div className="administration-directory-columns">
+        <aside className="administration-filters" aria-label="User filters">
+          <h3>Find a member</h3>
+          <label htmlFor="admin-user-search">Search all members</label><input id="admin-user-search" type="search" placeholder="Username or email" value={filters.search} onChange={e=>handleSearchChange(e.target.value)} />
+          <label htmlFor="admin-user-role">Role</label><select id="admin-user-role" value={filters.role} onChange={e=>handleFilterChange("role",e.target.value)}><option value="">All roles</option>{["student","teacher","reviewer","admin","super_admin","moderator","user"].map(role=><option key={role} value={role}>{role.replaceAll('_',' ')}</option>)}</select>
+          <label htmlFor="admin-user-status">Status</label><select id="admin-user-status" value={filters.status} onChange={e=>handleFilterChange("status",e.target.value)}><option value="">All statuses</option><option value="active">Active</option><option value="banned">Banned</option><option value="inactive">Inactive</option></select>
+          <button onClick={()=>setFilters({search:"",role:"",status:"",page:1})}>Clear filters</button>
+          <p>Role changes remain limited to super administrators. Moderation actions are recorded in the existing history.</p>
+        </aside>
+        <section className="administration-directory-results" aria-label="Members">
+          {error && <p role="alert">{error} <button onClick={fetchUsers}>Retry</button></p>}
+          {loading && <p role="status">Loading members…</p>}
+          {!loading && !error && !users.length && <p className="administration-empty">No members match these filters.</p>}
       {/* Users Table */}
-      <div className="admin-card">
-        <div className="admin-table">
+      <div>
+        <div className="administration-table" tabIndex={0} role="region" aria-label="Member management table" aria-busy={loading}>
           <table>
             <thead>
               <tr>
@@ -248,6 +197,7 @@ const AdminUsers = () => {
                   <td>
                     <div className="admin-table-actions">
                       <select
+                        aria-label={`Role for ${user.username}`}
                         value={user.role}
                         onChange={(e) => {
                           if (e.target.value !== user.role) {
@@ -289,6 +239,7 @@ const AdminUsers = () => {
                             const reason = prompt(
                               "Enter ban reason (optional):",
                             );
+                            if(reason===null)return;
                             handleUserAction(user.id, "update", {
                               is_banned: true,
                               ban_reason: reason || "Banned by admin",
@@ -389,6 +340,8 @@ const AdminUsers = () => {
             </button>
           </div>
         )}
+      </div>
+        </section>
       </div>
     </div>
   );

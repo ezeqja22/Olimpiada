@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import "./phase1.css";
+import "./AccountWorkspace.css";
+import {useLanguage} from "./context/LanguageContext";
 const API = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 const headers = () => ({
   Authorization: "Bearer " + localStorage.getItem("token"),
 });
 export default function FamilyPage() {
+  const {lang}=useLanguage();
+  const label=(en,sq)=>lang==="sq"?sq:en;
+  const [pending,setPending]=useState(null);
   const [parent, setParent] = useState([]),
     [student, setStudent] = useState([]),
     [notice, setNotice] = useState("");
@@ -32,97 +36,29 @@ export default function FamilyPage() {
     load();
   }, []);
   const action = async (path) => {
+    if(pending) return;
+    setPending(path);
     try {
       await axios.post(API + path, {}, { headers: headers() });
-      setNotice("Miratimi u regjistrua.");
+      setNotice(label("Your response was recorded.", "Përgjigjja u regjistrua."));
       load();
     } catch (e) {
-      setNotice(e.response?.data?.detail || "Nuk u regjistrua.");
-    }
+      setNotice(typeof e.response?.data?.detail === "string" ? e.response.data.detail : label("Your response could not be saved.", "Përgjigjja nuk u ruajt."));
+    } finally {setPending(null);}
   };
-  return (
-    <main className="p1-wrap">
-      <h1>Prindërit & Raportet</h1>
-      <p className="p1-muted">
-        Raporte për progresin e një nxënësi dërgohen vetëm kur lidhja është
-        miratuar nga të dyja llogaritë.
-      </p>
-      {loading && <p role="status">Loading family links…</p>}
-      {loadError && (
-        <p role="alert">
-          Could not load your family links.{" "}
-          <button onClick={load}>Retry</button>
-        </p>
-      )}
-      {!loading &&
-        !loadError &&
-        parent.length === 0 &&
-        student.length === 0 && <p>No family links or invitations yet.</p>}
-      <div className="p1-grid two">
-        <div className="p1-card">
-          <h2>Ftesa si prind</h2>
-          {parent.map((p) => (
-            <div className="p3-assignment-row" key={p.id}>
-              <span>
-                Nxënësi #{p.student_id} · {p.status}
-              </span>
-              {p.status === "pending" && (
-                <button
-                  className="p1-btn"
-                  onClick={() =>
-                    action("/experience/parent/links/" + p.id + "/accept")
-                  }
-                >
-                  Prano lidhjen
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="p1-card">
-          <h2>Ftesa si nxënës</h2>
-          {student.map((p) => (
-            <div className="p3-assignment-row" key={p.id}>
-              <span>
-                Prindi #{p.parent_id} · {p.status}
-              </span>
-              {p.status === "parent_accepted" && (
-                <div className="p1-row">
-                  <button
-                    className="p1-btn"
-                    onClick={() =>
-                      action(
-                        "/experience/student/parent-links/" +
-                          p.id +
-                          "/approve?approve=true",
-                      )
-                    }
-                  >
-                    Lejo
-                  </button>
-                  <button
-                    className="p1-btn alt"
-                    onClick={() =>
-                      action(
-                        "/experience/student/parent-links/" +
-                          p.id +
-                          "/approve?approve=false",
-                      )
-                    }
-                  >
-                    Refuzo
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-      <p className="p1-muted">
-        Për krijimin e lidhjes kontakto administratorin.{" "}
-        <Link to="/support">Support</Link>
-      </p>
-      {notice && <p className="p1-note">{notice}</p>}
-    </main>
-  );
+  const statusLabel=status=>({pending:label("Awaiting parent", "Në pritje të prindit"),parent_accepted:label("Awaiting student", "Në pritje të nxënësit"),approved:label("Approved", "Miratuar"),rejected:label("Declined", "Refuzuar")}[status]||status);
+  return <main className="account-workspace family-workspace">
+    <header className="account-heading"><div><p>{label("Privacy & permissions", "Privatësia dhe lejet")}</p><h1>{label("Family connections", "Lidhjet familjare")}</h1></div></header>
+    <div className="account-columns"><aside className="family-context"><h2>{label("Consent comes first", "Miratimi vjen i pari")}</h2><p>{label("A family connection needs approval from both accounts before progress can be shared.", "Lidhja familjare kërkon miratimin e të dyja llogarive përpara se të ndahet progresi.")}</p><ol><li>{label("An administrator creates the invitation.", "Administratori krijon ftesën.")}</li><li>{label("The parent accepts the connection.", "Prindi pranon lidhjen.")}</li><li>{label("The student approves or declines.", "Nxënësi miraton ose refuzon.")}</li></ol><Link to="/support">{label("Request help with a connection", "Kërko ndihmë për një lidhje")} →</Link></aside>
+      <section className="family-connections">
+        {loading && <p role="status">{label("Loading family links…", "Duke ngarkuar lidhjet…")}</p>}
+        {loadError && <div role="alert" className="account-error">{label("Could not load your family links.", "Lidhjet familjare nuk u ngarkuan.")} <button onClick={load}>{label("Retry", "Provo përsëri")}</button></div>}
+        {notice && <p role="status" className="family-notice">{notice}</p>}
+        {!loading && !loadError && [["parent",label("As a parent", "Si prind"),parent],["student",label("As a student", "Si nxënës"),student]].map(([type,title,links])=><section key={type}><h2>{title}</h2>{!links.length ? <p className="family-empty">{label("No connections or invitations yet.", "Ende nuk ka lidhje ose ftesa.")}</p> : links.map(link=><article className="family-link" key={link.id}><div><h3>{type==="parent"?label("Student", "Nxënësi"):label("Parent", "Prindi")} #{type==="parent"?link.student_id:link.parent_id}</h3><p>{statusLabel(link.status)}</p></div><div className="family-actions">
+          {type==="parent" && link.status==="pending" && <button disabled={Boolean(pending)} onClick={()=>action(`/experience/parent/links/${link.id}/accept`)}>{label("Accept connection", "Prano lidhjen")}</button>}
+          {type==="student" && link.status==="parent_accepted" && <><button disabled={Boolean(pending)} onClick={()=>action(`/experience/student/parent-links/${link.id}/approve?approve=true`)}>{label("Approve", "Lejo")}</button><button disabled={Boolean(pending)} onClick={()=>action(`/experience/student/parent-links/${link.id}/approve?approve=false`)}>{label("Decline", "Refuzo")}</button></>}
+        </div></article>)}</section>)}
+      </section>
+    </div>
+  </main>;
 }

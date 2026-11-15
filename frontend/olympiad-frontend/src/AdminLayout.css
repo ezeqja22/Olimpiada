@@ -254,13 +254,13 @@
 }
 
 .mobile-menu-toggle {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  background: #1a4d3a;
   color: #fff;
   font-size: 1.25rem;
-  box-shadow: 0 8px 18px rgba(102, 126, 234, 0.24);
+  box-shadow: none;
   flex-shrink: 0;
 }
 

@@ -1,3 +1,4 @@
+import {PublishingHeader,PublishingSection} from "./components/PublishingWorkspace";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -285,13 +286,11 @@ export function AdminCourses() {
     }
   };
   return (
-    <main className="p1-wrap" style={{ maxWidth: "none" }}>
-      <h1>Materiale dhe Teste · Administrimi</h1>
-      <p className="p1-muted">
-        Data e publikimit dhe afati futen në orën lokale të pajisjes; në server
-        ruhen në UTC.
-      </p>
-      <form className="p1-card p1-form" onSubmit={submit}>
+    <main className="publishing-workspace">
+      <PublishingHeader eyebrow="Learning / Publishing" title="Materiale dhe Teste" description="Përgatit materialin, cakto klasën dhe programo publikimin. Datat shfaqen në orën lokale të pajisjes." to="/courses" linkLabel="Shiko materialet" />
+      <div className="publishing-columns">
+      <form className="publishing-section publishing-form" onSubmit={submit}>
+        <header><h2>Përgatit përmbajtjen</h2><p>Material, detyrë ose test me kohëmatës.</p></header>
         {classes.length > 0 && (
           <label>
             Klasa/forumi (i detyrueshëm për mësuesit)
@@ -358,6 +357,7 @@ export function AdminCourses() {
             minHeight={200}
           />
         </label>
+        <fieldset className="publishing-details"><legend>Orari dhe afati</legend>
         <label>
           Publikimi
           <input
@@ -395,6 +395,7 @@ export function AdminCourses() {
             />
           </label>
         )}
+        </fieldset>
         <button type="submit" disabled={busy} className="p1-btn">
           {busy ? "Saving…" : "Programo publikimin"}
         </button>
@@ -405,20 +406,19 @@ export function AdminCourses() {
           <button onClick={reload}>Retry</button>
         </p>
       )}
-      <section className="p1-card">
+      <section className="publishing-section publishing-history">
         <h2>Your publishing history</h2>
         <p>
           Scheduled items become visible after publication to learners with
           access to the selected forum. <Link to="/courses">Open learning</Link>
         </p>
         {published.map((i) => (
-          <p key={i.id}>
-            <strong>{i.title}</strong> · {i.kind} · {readUTC(i.published_at)}
-          </p>
+          <article key={i.id}><h3>{i.title}</h3><p>{i.kind} · {i.subject}</p><p>{readUTC(i.published_at)}</p><Link to="/courses">Open learning →</Link></article>
         ))}
       </section>
+      </div>
       {notice && (
-        <p className="p1-note" role="status">
+        <p className="publishing-notice" role="status">
           {notice}
         </p>
       )}
