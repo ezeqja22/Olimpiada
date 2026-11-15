@@ -1,5 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import {Link} from "react-router-dom";
+import "./AdministrationWorkspace.css";
 import axios from "axios";
 import { useToast } from "./components/ToastProvider";
 import { useConfirm } from "./components/ConfirmProvider";
@@ -8,6 +10,8 @@ import "./AdminLayout.css";
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 const AdminForums = () => {
+  const requestVersion = useRef(0);
+  const [search, setSearch] = useState("");
   const [forums, setForums] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,7 +29,13 @@ const AdminForums = () => {
     fetchForums();
   }, [filters]);
 
+  useEffect(() => {
+    const timer=setTimeout(()=>setFilters(previous=>previous.search===search?previous:({...previous,search,page:1})),250);
+    return ()=>clearTimeout(timer);
+  }, [search]);
+
   const fetchForums = async () => {
+    const version=++requestVersion.current;
     try {
       setLoading(true);
       setError(null);
@@ -42,13 +52,15 @@ const AdminForums = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      if(version!==requestVersion.current)return;
       setForums(response.data.forums);
       setPagination(response.data.pagination);
     } catch (err) {
+      if(version!==requestVersion.current)return;
       setError("Failed to load forums");
       console.error("Forums error:", err);
     } finally {
-      setLoading(false);
+      if(version===requestVersion.current)setLoading(false);
     }
   };
 
@@ -107,64 +119,21 @@ const AdminForums = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="loading">
-        <div className="loading-spinner" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="admin-card admin-error-card">
-        <h2>Error</h2>
-        <p>{error}</p>
-        <button className="admin-btn" onClick={fetchForums}>
-          Try Again
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="admin-page admin-forums-page">
-      <section className="admin-card">
-        <h2>Forum Management</h2>
+    <div className="administration-directory">
+      <header className="administration-heading"><div><p>Community / Forums</p><h2>Forum Management</h2></div><Link to="/forums">Open forum directory →</Link></header>
+      <div className="administration-directory-columns">
+        <aside className="administration-filters"><h3>Find a forum</h3>
+          <label htmlFor="forum-search">Search all forums</label><input id="forum-search" type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder="Forum title…"/>
+          <label htmlFor="forum-privacy">Privacy</label><select id="forum-privacy" value={filters.privacy} onChange={event=>handleFilterChange("privacy",event.target.value)}><option value="">All forums</option><option value="public">Public</option><option value="private">Private</option></select>
+          <button onClick={()=>{setSearch("");setFilters({search:"",privacy:"",page:1});}}>Clear filters</button>
+          <p>Review forum visibility and ownership. Open a forum to manage its discussions and memberships.</p>
+        </aside>
+        <section className="administration-directory-results" aria-label="Forum results" aria-busy={loading}>
+          {loading&&<p role="status">Loading forums…</p>}
+          {error&&<p role="alert">{error} <button onClick={fetchForums}>Try again</button></p>}
+        <div className="administration-table" tabIndex={0} aria-label="Forums table, scroll horizontally for more columns">
 
-        <div className="admin-filter-grid admin-filter-grid-two">
-          <div className="admin-field">
-            <label htmlFor="forum-search">Search</label>
-            <input
-              id="forum-search"
-              type="text"
-              placeholder="Forum title..."
-              value={filters.search}
-              onChange={(event) =>
-                handleFilterChange("search", event.target.value)
-              }
-            />
-          </div>
-
-          <div className="admin-field">
-            <label htmlFor="forum-privacy">Privacy</label>
-            <select
-              id="forum-privacy"
-              value={filters.privacy}
-              onChange={(event) =>
-                handleFilterChange("privacy", event.target.value)
-              }
-            >
-              <option value="">All Forums</option>
-              <option value="public">Public</option>
-              <option value="private">Private</option>
-            </select>
-          </div>
-        </div>
-      </section>
-
-      <section className="admin-card">
-        <div className="admin-table admin-table-scroll">
           <table>
             <thead>
               <tr>
@@ -182,7 +151,7 @@ const AdminForums = () => {
                 <tr key={forum.id}>
                   <td>
                     <div className="admin-primary-cell admin-wide-cell">
-                      <strong>{forum.title}</strong>
+                      <Link to={`/forum/${forum.id}`}>{forum.title}</Link>
                       {forum.description && (
                         <small>
                           {forum.description.length > 100
@@ -205,14 +174,7 @@ const AdminForums = () => {
                   <td>{formatDate(forum.last_activity)}</td>
                   <td>
                     <div className="admin-table-actions">
-                      <button
-                        className="admin-btn secondary admin-btn-small"
-                        onClick={() =>
-                          window.open(`/forum/${forum.id}`, "_blank")
-                        }
-                      >
-                        View
-                      </button>
+                      <Link className="admin-btn secondary admin-btn-small" to={`/forum/${forum.id}`}>View</Link>
 
                       <button
                         className="admin-btn danger admin-btn-small"
@@ -232,7 +194,7 @@ const AdminForums = () => {
           </table>
         </div>
 
-        {forums.length === 0 && (
+        {!loading && !error && forums.length === 0 && (
           <div className="empty-state">
             <h3>No forums found</h3>
             <p>No forums match your current filters.</p>
@@ -265,6 +227,7 @@ const AdminForums = () => {
           </div>
         )}
       </section>
+      </div>
     </div>
   );
 };
