@@ -368,36 +368,11 @@ const PublicUserProfile = () => {
 
       const problemIds = problemsList.map((problem) => problem.id);
       console.log("📤 Sending bookmark request with problem IDs:", problemIds);
-      // Try different request formats
-      let response;
-      try {
-        // First try: wrapped format
-        response = await axios.post(
-          `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/problems/bookmark-status`,
-          { problem_ids: problemIds },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-      } catch (firstError) {
-        console.log(
-          "🔄 First bookmark request failed, trying direct array format...",
-        );
-        // Second try: direct array format
-        response = await axios.post(
-          `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/problems/bookmark-status`,
-          problemIds,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-      }
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/auth/problems/bookmark-status`,
+        problemIds,
+        {headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"}},
+      );
 
       // Convert backend format to frontend format
       const convertedData = {};

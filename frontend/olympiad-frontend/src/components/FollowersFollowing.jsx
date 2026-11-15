@@ -8,6 +8,7 @@ import FollowButton from "./FollowButton";
 import AnimatedLoader from "./AnimatedLoader";
 import { getDisplayName, getUserInitial } from "../utils";
 import "./FollowersFollowing.css";
+import "../SecondaryWorkspace.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 const VALID_TYPES = new Set(["followers", "following"]);
@@ -249,11 +250,12 @@ const FollowersFollowing = ({ type }) => {
 
   return (
     <Layout showHomeButton={true}>
-      <main className="connections-page">
+      <main className="secondary-workspace connections-directory">
         <div className="connections-back-row">
           <BackButton fallbackPath={returnTo} />
         </div>
 
+        <div className="secondary-columns"><aside className="secondary-guide">
         <section className="connections-header">
           <div>
             <span className="connections-eyebrow">Community</span>
@@ -266,7 +268,7 @@ const FollowersFollowing = ({ type }) => {
         </section>
 
         <section
-          className="connections-tabs-card"
+          className="connections-directory-tabs"
           aria-label="User connections"
         >
           <button
@@ -274,6 +276,7 @@ const FollowersFollowing = ({ type }) => {
             className={`connections-tab ${
               activeTab === "followers" ? "active" : ""
             }`}
+            aria-pressed={activeTab === "followers"}
             onClick={() => handleTabChange("followers")}
           >
             <span>Followers</span>
@@ -285,6 +288,7 @@ const FollowersFollowing = ({ type }) => {
             className={`connections-tab ${
               activeTab === "following" ? "active" : ""
             }`}
+            aria-pressed={activeTab === "following"}
             onClick={() => handleTabChange("following")}
           >
             <span>Following</span>
@@ -292,6 +296,7 @@ const FollowersFollowing = ({ type }) => {
           </button>
         </section>
 
+        </aside><div className="secondary-main">
         {error ? (
           <section className="connections-state connections-state--error">
             <div className="connections-state-icon">!</div>
@@ -314,7 +319,7 @@ const FollowersFollowing = ({ type }) => {
               const isFollowing = Boolean(followingStatus[user.id]);
 
               return (
-                <article className="connection-card" key={user.id}>
+                <article className="connection-directory-row" key={user.id}>
                   <button
                     type="button"
                     className="connection-profile-button"
@@ -363,7 +368,7 @@ const FollowersFollowing = ({ type }) => {
             })}
           </section>
         )}
-      </main>
+      </div></div></main>
     </Layout>
   );
 };

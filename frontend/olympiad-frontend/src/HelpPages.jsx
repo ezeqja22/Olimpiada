@@ -1,3 +1,4 @@
+import "./SecondaryWorkspace.css";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -46,10 +47,11 @@ export function FAQPage() {
 
   return (
     <Layout maxWidth="1040px">
-      <div className="help-page">
+      <div className="secondary-workspace help-workspace">
         <Intro eyebrow="OLIMPIADA / FAQ" language={language} onLanguage={setLanguage}
           title={language === "sq" ? "Pyetje të shpeshta" : "Frequently asked questions"}
           description={language === "sq" ? "Përgjigje për platformën dhe komunitetin tonë." : "Answers about our platform and community."} />
+        <div className="secondary-columns"><aside className="secondary-guide"><h2>{language==='sq'?'Ndihma për platformën':'Platform help'}</h2><p>{language==='sq'?'Zgjidh një pyetje për të lexuar përgjigjen. Mund të ndryshosh gjuhën nga kreu i faqes.':'Choose a question to read its answer. You can switch languages at the top of the page.'}</p><Link to="/support">{language==='sq'?'Kontakto suportin':'Contact support'} →</Link></aside><section className="secondary-main">
         {loading && <p className="help-info" role="status">{language === "sq" ? "Duke ngarkuar…" : "Loading…"}</p>}
         {error && <button type="button" onClick={()=>setRetry(x=>x+1)}>Retry / Provo përsëri</button>}
         {error && <p className="help-info help-error" role="alert">{language === "sq" ? "Pyetjet nuk u ngarkuan. Provo përsëri më vonë." : "Could not load questions. Please try again later."}</p>}
@@ -58,7 +60,7 @@ export function FAQPage() {
         )}
         <div className="help-faq-list">
           {items.map((item) => (
-            <section key={item.id} className="help-faq-item">
+            <section key={item.id} className="help-question-row">
               <button type="button" aria-expanded={expanded === item.id}
                 onClick={() => setExpanded(expanded === item.id ? null : item.id)}>
                 <span>{language === "sq" ? item.question_sq : item.question_en}</span>
@@ -70,11 +72,7 @@ export function FAQPage() {
             </section>
           ))}
         </div>
-        <div className="help-cta">
-          <div><strong>{language === "sq" ? "Nuk e gjete përgjigjen?" : "Still have questions?"}</strong>
-            <p>{language === "sq" ? "Na shkruaj dhe do të përpiqemi të të ndihmojmë." : "Send us a message and we'll do our best to help."}</p></div>
-          <Link className="help-button" to="/support">{language === "sq" ? "Kontakto suportin" : "Contact support"} →</Link>
-        </div>
+        </section></div>
       </div>
     </Layout>
   );
@@ -110,12 +108,12 @@ export function SupportPage() {
 
   return (
     <Layout maxWidth="1040px">
-      <div className="help-page">
+      <div className="secondary-workspace help-workspace">
         <Intro eyebrow="OLIMPIADA / SUPPORT" language={language} onLanguage={setLanguage}
           title={language === "sq" ? "Jemi këtu për të ndihmuar" : "How can we help?"}
           description={language === "sq" ? "Na shkruaj për probleme teknike ose pyetje rreth platformës." : "Contact us about technical issues or questions about the platform."} />
-        <div className="help-columns">
-          <form className="help-card help-form" onSubmit={submit}>
+        <div className="secondary-columns support-workspace">
+          <form className="secondary-form" onSubmit={submit}>
             <div className="help-honeypot" aria-hidden="true">
               <label htmlFor="support-website">Website (leave blank)</label>
               <input id="support-website" name="website" autoComplete="off" tabIndex={-1}
@@ -133,7 +131,7 @@ export function SupportPage() {
             <button type="submit" className="help-button" disabled={busy}>{busy ? (language === "sq" ? "Duke dërguar…" : "Sending…") : (language === "sq" ? "Dërgo kërkesën" : "Send request")}</button>
             {notice && <p role={isError ? "alert" : "status"} className={`help-info ${isError ? "help-error" : "help-success"}`}>{notice}</p>}
           </form>
-          <aside className="help-aside">
+          <aside className="secondary-guide">
             <span className="help-eyebrow">{language === "sq" ? "NDIHMA" : "HELP CENTER"}</span>
             <h2>{language === "sq" ? "Ndoshta e kemi përgjigjen" : "Your answer may already be here"}</h2>
             <p>{language === "sq" ? "Shiko pyetjet më të shpeshta ose na dërgo mesazh." : "Check our frequently asked questions, or send us a message."}</p>
