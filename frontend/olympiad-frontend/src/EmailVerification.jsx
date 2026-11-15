@@ -1,18 +1,24 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import Layout from "./components/Layout";
+import {useLanguage} from "./context/LanguageContext";
+import "./AuthenticationWorkspace.css";
 import axios from "axios";
-import BackButton from "./components/BackButton";
+import { useAuth } from "./context/AuthContext";
+import { loginDestination, loginIntent } from "./navigation";
 import { useToast } from "./components/ToastProvider";
 
 const EmailVerification = () => {
+  const {lang}=useLanguage();
+  const label=(en,sq)=>lang==="sq"?sq:en;
   const navigate = useNavigate();
   const location = useLocation();
 
   // Get email from location state (passed from signup)
   const email = location.state?.email || "";
   const username = location.state?.username || "";
-  const redirectTo = location.state?.redirectTo || "/homepage";
+  const redirectTo = loginDestination(location.state);
   const token = location.state?.token || null;
 
   const [verificationCode, setVerificationCode] = useState("");
@@ -20,6 +26,13 @@ const EmailVerification = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [resending, setResending] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
+  const { loginWithToken } = useAuth();
+  useEffect(() => {
+    if (!success || !sessionReady) return;
+    const timer = window.setTimeout(() => navigate(redirectTo, {replace:true, state:null}), 2000);
+    return () => window.clearTimeout(timer);
+  }, [success, sessionReady, navigate, redirectTo]);
   const { showToast } = useToast();
 
   const handleVerify = async (e) => {
@@ -42,16 +55,10 @@ const EmailVerification = () => {
       );
 
       if (response.status === 200) {
+        const sessionToken = token || localStorage.getItem("token");
+        const user = sessionToken ? await loginWithToken(sessionToken) : null;
+        setSessionReady(Boolean(user));
         setSuccess(true);
-
-        // If we have a token from signup, ensure it's stored for automatic login
-        if (token) {
-          localStorage.setItem("token", token);
-        }
-
-        setTimeout(() => {
-          navigate(redirectTo);
-        }, 2000);
       }
     } catch (err) {
       console.error("Verification error:", err);
@@ -114,202 +121,11 @@ const EmailVerification = () => {
     }
   };
 
-  if (!email) return <main id="main-content" className="p1-wrap"><h1>Verify your email</h1><p>Sign in or register first so we can identify the account to verify.</p><Link to="/login" state={null}>Log in</Link> · <Link to="/signup">Sign up</Link></main>;
-
-  if (success) {
-  return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          backgroundColor: "#f8f9fa",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "white",
-            padding: "40px",
-            borderRadius: "10px",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            textAlign: "center",
-            maxWidth: "400px",
-            width: "100%",
-          }}
-        >
-          <div style={{ fontSize: "48px", marginBottom: "20px" }}></div>
-          <h2 style={{ color: "#28a745", marginBottom: "20px" }}>
-            Email Verified!
-          </h2>
-          <p style={{ color: "#666", marginBottom: "20px" }}>
-            Your email has been successfully verified. You are now automatically
-            logged in!
-          </p>
-          <p style={{ color: "#999", fontSize: "14px" }}>
-            Redirecting to your dashboard...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        backgroundColor: "#f8f9fa",
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "40px",
-          borderRadius: "10px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          maxWidth: "400px",
-          width: "100%",
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: "30px" }}>
-          <div style={{ fontSize: "48px", marginBottom: "20px" }}></div>
-          <h2 style={{ color: "#333", marginBottom: "10px" }}>
-            Verify Your Email
-          </h2>
-          <p style={{ color: "#666", fontSize: "14px" }}>
-            We've sent a 6-digit verification code to:
-          </p>
-          <p style={{ color: "#007bff", fontWeight: "bold", margin: "10px 0" }}>
-            {email}
-          </p>
-        </div>
-
-        <form onSubmit={handleVerify}>
-          <div style={{ marginBottom: "20px" }}>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                fontWeight: "bold",
-                color: "#333",
-              }}
-            >
-              Verification Code
-            </label>
-            <input
-              type="text"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-              placeholder="Enter 6-digit code"
-              maxLength="6"
-              style={{
-                width: "100%",
-                padding: "12px",
-                border: "2px solid #ddd",
-                borderRadius: "5px",
-                fontSize: "16px",
-                textAlign: "center",
-                letterSpacing: "2px",
-                fontFamily: "monospace",
-              }}
-              disabled={loading}
-            />
-          </div>
-
-          {error && (
-            <div
-              style={{
-                backgroundColor: "#f8d7da",
-                color: "#721c24",
-                padding: "10px",
-                borderRadius: "5px",
-                marginBottom: "20px",
-                fontSize: "14px",
-              }}
-            >
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || !verificationCode.trim()}
-            style={{
-              width: "100%",
-              padding: "12px",
-              backgroundColor: loading ? "#6c757d" : "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              fontSize: "16px",
-              fontWeight: "bold",
-              cursor: loading ? "not-allowed" : "pointer",
-              marginBottom: "15px",
-            }}
-          >
-            {loading ? "Verifying..." : "Verify Email"}
-          </button>
-
-          <div style={{ textAlign: "center" }}>
-            <p
-              style={{ color: "#666", fontSize: "14px", marginBottom: "10px" }}
-            >
-              Didn't receive the code?
-            </p>
-            <p
-              style={{
-                color: "#666",
-                fontSize: "12px",
-                marginBottom: "10px",
-                fontStyle: "italic",
-              }}
-            >
-              Check your spam folder
-            </p>
-            <button
-              type="button"
-              onClick={handleResendCode}
-              disabled={resending}
-              style={{
-                backgroundColor: "transparent",
-                color: "#007bff",
-                border: "1px solid #007bff",
-                padding: "8px 16px",
-                borderRadius: "5px",
-                cursor: resending ? "not-allowed" : "pointer",
-                fontSize: "14px",
-              }}
-            >
-              {resending ? "Sending..." : "Resend Code"}
-            </button>
-          </div>
-
-          <div
-            style={{
-              textAlign: "center",
-              marginTop: "20px",
-              paddingTop: "20px",
-              borderTop: "1px solid #eee",
-            }}
-          >
-            <BackButton
-              fallbackPath="/login"
-              style={{
-                backgroundColor: "transparent",
-                color: "#6c757d",
-                border: "none",
-                fontSize: "14px",
-                textDecoration: "underline",
-              }}
-            />
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+  return <Layout><div className="authentication-workspace">
+    <aside className="authentication-context"><p className="authentication-eyebrow">Olimpiada</p><h2>{label("Verify your email", "Verifiko emailin")}</h2><p>{label("Verification confirms that you can receive account messages at this address.", "Verifikimi konfirmon që mund të marrësh mesazhet e llogarisë në këtë adresë.")}</p><nav><Link to="/login">← {label("Back to sign in", "Kthehu te hyrja")}</Link><Link to="/support">{label("Get help", "Kërko ndihmë")} →</Link></nav></aside>
+    <section className="authentication-form"><header><p className="authentication-eyebrow">{label("Email confirmation", "Konfirmimi i emailit")}</p><h1>{success?label("Email verified", "Emaili u verifikua"):label("Enter your code", "Shkruaj kodin")}</h1><p>{!email?label("Sign in or register first so we can identify the account to verify.", "Hyr ose regjistrohu fillimisht për të identifikuar llogarinë."):success?(sessionReady?label("Verification is complete. Continuing to your destination…", "Verifikimi përfundoi. Duke vazhduar…"):label("Your email is verified. Sign in to continue.", "Emaili u verifikua. Hyr për të vazhduar.")):label("Enter the verification code sent to ", "Shkruaj kodin e verifikimit të dërguar te ")+email}</p></header>
+      {!email?<Link to="/signup">{label("Create Account", "Krijo llogari")} →</Link>:success?<Link to={sessionReady?redirectTo:"/login"} state={sessionReady?null:loginIntent(redirectTo)}>{sessionReady?label("Continue", "Vazhdo"):label("Sign in", "Hyr")} →</Link>:<><form onSubmit={handleVerify}><label htmlFor="verification-code">{label("Verification code", "Kodi i verifikimit")}</label><input id="verification-code" autoComplete="one-time-code" inputMode="numeric" value={verificationCode} onChange={e=>setVerificationCode(e.target.value)} required disabled={loading}/>{error&&<p role="alert" className="authentication-error">{error}</p>}<button type="submit" className="authentication-submit" disabled={loading}>{loading?label("Verifying…", "Duke verifikuar…"):label("Verify email", "Verifiko emailin")}</button></form><footer><p>{label("No code received?", "Nuk e ke marrë kodin?")}</p><button className="authentication-resend" onClick={handleResendCode} disabled={resending||loading}>{resending?label("Sending…", "Duke dërguar…"):label("Resend code", "Ridërgo kodin")}</button></footer></>}
+    </section>
+  </div></Layout>;
 };
-
 export default EmailVerification;

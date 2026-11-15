@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import "./AuthenticationWorkspace.css";
 import {useLanguage} from "./context/LanguageContext";
-import {loginDestination} from "./navigation";
+import {loginDestination, loginIntent} from "./navigation";
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -121,7 +121,7 @@ function Login() {
         <div className="authentication-password"><input id="login-1" name="password" type={showPassword?"text":"password"} autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required disabled={isSubmitting}/><button type="button" aria-label={showPassword?label("Hide password", "Fshih fjalëkalimin"):label("Show password", "Shfaq fjalëkalimin")} aria-pressed={showPassword} onClick={()=>setShowPassword(value=>!value)} disabled={isSubmitting}>{showPassword?label("Hide", "Fshih"):label("Show", "Shfaq")}</button></div>
         <button className="authentication-submit" type="submit" disabled={isSubmitting}>{isSubmitting?label("Signing in…", "Duke hyrë…"):label("Sign In", "Hyr")}</button>
       </form>
-      <footer><p>{label("Don't have an account?", "Nuk ke llogari?")}</p><Link to="/signup" state={{redirectTo}}>{label("Create Account", "Krijo llogari")} →</Link></footer>
+      <footer><p>{label("Don't have an account?", "Nuk ke llogari?")}</p><Link to="/signup" state={loginIntent(redirectTo)}>{label("Create Account", "Krijo llogari")} →</Link></footer>
     </section>
   </div></Layout>;
 }
