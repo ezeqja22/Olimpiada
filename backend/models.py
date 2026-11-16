@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, UniqueConstraint, Text, JSON, Date
+from sqlalchemy import true, Column, Integer, String, Boolean, DateTime, ForeignKey, UniqueConstraint, Text, JSON, Date, LargeBinary, CheckConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from database import Base
@@ -490,13 +490,17 @@ class WeeklyChallenge(Base):
 
 class WeeklySubmission(Base):
     __tablename__ = "weekly_submissions"
-    __table_args__ = (UniqueConstraint("challenge_id", "student_id", name="uq_weekly_student"),)
+    __table_args__ = (
+        UniqueConstraint("challenge_id", "student_id", name="uq_weekly_student"),
+        CheckConstraint("score BETWEEN 1 AND 10", name="ck_weekly_submission_score"),
+    )
     id = Column(Integer, primary_key=True)
     challenge_id = Column(Integer, ForeignKey("weekly_challenges.id"), nullable=False)
     student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     answer_text = Column(Text, nullable=False, default="")
     file_key = Column(String(250), nullable=True)
     status = Column(String(20), nullable=False, default="pending")
+    score = Column(Integer, nullable=True)
     review_note = Column(Text, nullable=True)
     reviewed_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     reviewed_at = Column(DateTime, nullable=True)
@@ -530,7 +534,6 @@ class CourseAttempt(Base):
     graded_at = Column(DateTime, nullable=True)
 
 class LibraryDocument(Base):
-    # Legacy schema mapping only; library endpoints and UI have been retired.
     __tablename__ = "library_documents"
     id = Column(Integer, primary_key=True)
     title = Column(String(250), nullable=False)
@@ -540,9 +543,37 @@ class LibraryDocument(Base):
     olympiad = Column(String(100), nullable=True)
     year = Column(Integer, nullable=True)
     storage_key = Column(String(250), nullable=False)
+    kind = Column(String(20), nullable=False, default="book", server_default="book")
+    discipline = Column(String(100), nullable=True)
+    description = Column(Text, nullable=False, default="", server_default="")
+    author = Column(String(250), nullable=False, default="", server_default="")
+    visible = Column(Boolean, nullable=False, default=True, server_default=true())
     page_count = Column(Integer, nullable=False)
     uploaded_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class LibraryFile(Base):
+    __tablename__ = "library_files"
+    document_id = Column(Integer, ForeignKey("library_documents.id", ondelete="CASCADE"), primary_key=True)
+    content = Column(LargeBinary, nullable=False)
+
+
+class OlympiadGuide(Base):
+    __tablename__ = "olympiad_guides"
+    id = Column(Integer, primary_key=True)
+    slug = Column(String(100), nullable=False, unique=True)
+    name = Column(String(250), nullable=False)
+    acronym = Column(String(30), nullable=False)
+    subject = Column(String(80), nullable=False)
+    scope = Column(String(30), nullable=False)
+    audience = Column(String(180), nullable=False)
+    importance = Column(Text, nullable=False)
+    history = Column(Text, nullable=False)
+    steps = Column(JSON, nullable=False)
+    source_url = Column(String(500), nullable=False)
+    local_url = Column(String(500), nullable=True)
+    published = Column(Boolean, nullable=False, default=False)
 
 
 class TeacherApplication(Base):

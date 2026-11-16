@@ -113,6 +113,8 @@ from phase2_routes import router as phase2_router
 app.include_router(phase2_router)
 from phase3_routes import router as phase3_router
 app.include_router(phase3_router)
+from catalog_routes import router as catalog_router
+app.include_router(catalog_router)
 # Removed notification admin router
 
 # Stage 2 help routes map existing migrated tables and never create/alter them.

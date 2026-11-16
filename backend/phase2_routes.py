@@ -2,6 +2,7 @@
 from datetime import date, datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import get_db
@@ -10,7 +11,7 @@ from models import (User, Problem, Forum, WeeklyChallenge, WeeklySubmission,
                     CourseItem, CourseAttempt, ForumMembership)
 from phase1_service import require_staff, require_feature, is_staff
 from phase2_service import (weekly_bounds, is_teacher_or_staff,
-                            run_weekly_transitions, can_enter_forum)
+                            weekly_status, can_enter_forum)
 
 router = APIRouter(prefix="/core", tags=["phase2"])
 
@@ -24,6 +25,7 @@ class WeeklyAnswer(BaseModel):
 
 class WeeklyReview(BaseModel):
     approve: bool
+    score: int | None = Field(default=None, strict=True, ge=1, le=10)
     note: str = Field(default="", max_length=1000)
 
 class ItemCreate(BaseModel):
@@ -46,22 +48,25 @@ def safe_challenge(challenge, db):
     problem = db.get(Problem, challenge.problem_id)
     if not problem:
         return None
-    published = challenge.status == "published"
+    status = weekly_status(challenge, datetime.utcnow())
+    published = status == "published"
     winners = []
     if published:
         winners = db.query(WeeklySubmission, User).join(
             User, User.id == WeeklySubmission.student_id).filter(
                 WeeklySubmission.challenge_id == challenge.id,
                 WeeklySubmission.status == "approved").order_by(
-                    WeeklySubmission.submitted_at.asc()).all()
+                    WeeklySubmission.score.desc().nulls_last(),
+                    WeeklySubmission.submitted_at.asc(), User.id.asc()).all()
     return {"id": challenge.id, "week_date": challenge.week_date,
             "starts_at": challenge.starts_at, "closes_at": challenge.closes_at,
-            "status": challenge.status,
+            "status": status,
             "problem": {"id": problem.id, "title": problem.title,
                         "description": problem.description, "subject": problem.subject,
                         "level": problem.level},
             "official_solution": challenge.official_solution if published else None,
-            "winners": [{"user_id": u.id, "username": u.username} for _, u in winners]}
+            "winners": [{"user_id": u.id, "username": u.username} for _, u in winners],
+            "rankings": rank_students((u.id, u.username, s.score) for s, u in winners if s.score is not None)}
 
 def active_week(db):
     return db.query(WeeklyChallenge).filter(
@@ -71,6 +76,38 @@ def active_week(db):
 @router.get("/weekly")
 def public_weekly(db: Session = Depends(get_db)):
     return {"challenge": safe_challenge(active_week(db), db)}
+
+def rank_students(rows):
+    ranked = []
+    previous = None
+    rank = 0
+    for index, (user_id, username, points) in enumerate(rows, 1):
+        if points != previous:
+            rank, previous = index, points
+        ranked.append({"user_id": user_id, "username": username, "points": points, "rank": rank})
+    return ranked
+
+
+@router.get("/weekly/rankings")
+def weekly_rankings(week: date | None = None, db: Session = Depends(get_db)):
+    now = datetime.utcnow()
+    visible = (WeeklyChallenge.starts_at <= now,
+               or_(WeeklyChallenge.status == "published", WeeklyChallenge.closes_at <= now))
+    published = db.query(WeeklyChallenge.week_date).filter(*visible)
+    published = [row.week_date for row in published.order_by(WeeklyChallenge.week_date.desc()).all()]
+    if week and week.isoformat() not in published:
+        raise HTTPException(404, "Rezultatet e kësaj jave nuk janë publikuar.")
+    total = func.sum(WeeklySubmission.score)
+    rows = db.query(User.id, User.username, total).select_from(WeeklySubmission).join(
+        User, User.id == WeeklySubmission.student_id).join(
+        WeeklyChallenge, WeeklyChallenge.id == WeeklySubmission.challenge_id).filter(
+        *visible, WeeklySubmission.status == "approved",
+        WeeklySubmission.score.is_not(None))
+    if week:
+        rows = rows.filter(WeeklyChallenge.week_date == week.isoformat())
+    rows = rows.group_by(User.id, User.username).order_by(total.desc(), User.username.asc(), User.id.asc())
+    return {"weeks": published, "rankings": rank_students(rows.all())}
+
 
 @router.post("/weekly/admin/schedule")
 def schedule_week(data: WeeklySchedule, user: User = Depends(get_verified_user),
@@ -100,7 +137,7 @@ def schedule_week(data: WeeklySchedule, user: User = Depends(get_verified_user),
 @router.get("/weekly/admin/queue")
 def weekly_admin_queue(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     require_staff(user)
-    return [{"id": c.id, "week_date": c.week_date, "status": c.status,
+    return [{"id": c.id, "week_date": c.week_date, "status": weekly_status(c, datetime.utcnow()),
              "starts_at": c.starts_at, "closes_at": c.closes_at, "problem_id": c.problem_id,
              "official_solution": c.official_solution}
             for c in db.query(WeeklyChallenge).order_by(WeeklyChallenge.starts_at.desc()).limit(60).all()]
@@ -111,7 +148,7 @@ def submit_weekly(challenge_id: int, data: WeeklyAnswer, user: User = Depends(ge
     """The Problem of the Week is free; no paid entitlement is required."""
     challenge = db.get(WeeklyChallenge, challenge_id)
     now = datetime.utcnow()
-    if not challenge or not (challenge.status == "open" and challenge.starts_at <= now < challenge.closes_at):
+    if not challenge or weekly_status(challenge, now) != "open":
         raise HTTPException(409, "Weekly submissions are closed")
     if db.query(WeeklySubmission).filter_by(challenge_id=challenge_id, student_id=user.id).first():
         raise HTTPException(409, "Only one submission per student is allowed")
@@ -131,7 +168,7 @@ def submissions(challenge_id: int, user: User = Depends(get_verified_user),
                 db: Session = Depends(get_db)):
     require_staff(user)
     return [{"id": s.id, "student_id": s.student_id, "answer": s.answer_text,
-             "status": s.status, "review_note": s.review_note,
+             "status": s.status, "score": s.score, "review_note": s.review_note,
              "submitted_at": s.submitted_at}
             for s in db.query(WeeklySubmission).filter_by(challenge_id=challenge_id)
             .order_by(WeeklySubmission.submitted_at).all()]
@@ -144,14 +181,19 @@ def review_submission(submission_id: int, data: WeeklyReview,
     if not s:
         raise HTTPException(404, "Submission not found")
     challenge = db.get(WeeklyChallenge, s.challenge_id)
-    if challenge.status == "published" or datetime.utcnow() >= challenge.closes_at:
+    if weekly_status(challenge, datetime.utcnow()) == "published":
         raise HTTPException(409, "Winner list has already closed")
+    if data.approve and data.score is None and s.score is None:
+        raise HTTPException(422, "Vendos pikët nga 1 në 10.")
+    if not data.approve and data.score is not None:
+        raise HTTPException(422, "Zgjidhjet e refuzuara nuk marrin pikë.")
     s.status = "approved" if data.approve else "rejected"
+    s.score = (data.score if data.score is not None else s.score) if data.approve else None
     s.review_note = data.note
     s.reviewed_at = datetime.utcnow()
     s.reviewed_by = user.id
     db.commit()
-    return {"id": s.id, "status": s.status}
+    return {"id": s.id, "status": s.status, "score": s.score}
 
 @router.get("/forums/catalog")
 def forum_catalog(user: User = Depends(get_verified_user), db: Session = Depends(get_db)):

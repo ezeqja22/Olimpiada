@@ -144,28 +144,84 @@ class CoreTests(unittest.TestCase):
                              headers=self.headers(self.student_token))
         self.assertEqual(sub.status_code,200,sub.text)
         review=self.client.post("/core/weekly/admin/submissions/"+str(sub.json()["id"])+"/review",
-                                json={"approve":True},headers=self.headers(self.admin_token))
+                                json={"approve":True,"score":8},headers=self.headers(self.admin_token))
         self.assertEqual(review.status_code,200,review.text)
+        self.assertEqual(self.client.get("/core/weekly/rankings").json()["rankings"], [])
+        self.assertEqual(self.client.post(
+            f"/core/weekly/admin/submissions/{sub.json()['id']}/review",
+            json={"approve":True,"score":11}, headers=self.headers(self.admin_token)).status_code,422)
         w.closes_at=now-timedelta(seconds=1)
         self.db.commit()
+        weekly=self.client.get(f"/core/weekly/rankings?week={w.week_date}").json()
+        self.assertEqual([(x["rank"],x["points"]) for x in weekly["rankings"]],[(1,8)])
+        self.assertEqual(self.client.get("/core/weekly/rankings").json()["rankings"],weekly["rankings"])
         result=run_weekly_transitions(self.db)
         self.assertGreaterEqual(result["published"],1)
         r=self.client.get("/core/weekly")
         self.assertEqual(r.json()["challenge"]["official_solution"],"CONFIDENTIAL_ANSWER_1")
         self.assertTrue(any(u["user_id"]==self.student.id for u in r.json()["challenge"]["winners"]))
 
-    def test_library_endpoints_are_retired_for_guests_students_and_admins(self):
-        doc=models.LibraryDocument(title="Retained",category="book",subject="Math",
-            level="school",storage_key="library/retained.pdf",page_count=1,uploaded_by=self.admin.id)
-        self.db.add(doc);self.db.commit()
-        for headers in ({},self.headers(self.student_token),self.headers(self.admin_token)):
-            for path in ("/public/library","/core/library/catalog",f"/core/library/{doc.id}",f"/core/library/{doc.id}/pages/1"):
-                response=self.client.get(path,headers=headers)
-                self.assertEqual(response.status_code,404,(path,response.text))
-            response=self.client.post("/core/library/admin/upload",headers=headers,
-                files={"file":("book.pdf",b"%PDF-1.4","application/pdf")})
-            self.assertEqual(response.status_code,404,response.text)
-        self.assertIsNotNone(self.db.get(models.LibraryDocument,doc.id))
+    def test_library_only_delivers_images_and_watermarked_training_pdfs(self):
+        from io import BytesIO
+        import json
+        from pypdf import PdfReader
+        from reportlab.pdfgen.canvas import Canvas
+
+        pdf = BytesIO()
+        canvas = Canvas(pdf)
+        for number in range(2):
+            canvas.drawString(50, 500, f"Training page {number}")
+            canvas.showPage()
+        canvas.save()
+        data = {"title":"Training notes","subject":"Math","level":"Intermediate",
+                "kind":"book","discipline":"Combinatorics"}
+        file = {"file":("book.pdf",pdf.getvalue(),"application/pdf")}
+        student = self.headers(self.student_token)
+        admin = self.headers(self.admin_token)
+        url = "/core/library/admin/upload"
+        self.assertEqual(self.client.post(url,headers=student,data={"metadata":json.dumps(data)},files=file).status_code,403)
+        result = self.client.post(url,headers=admin,data={"metadata":json.dumps(data)},files=file)
+        self.assertEqual(result.status_code,201,result.text)
+        doc_id = result.json()["id"]
+        catalog = self.client.get("/public/library").json()
+        doc = next(row for row in catalog if row["id"] == doc_id)
+        self.assertEqual(doc["page_count"],2)
+        self.assertNotIn("storage_key",doc)
+        self.assertNotIn("content",doc)
+        url = f"/core/library/{doc_id}"
+        self.assertIn(self.client.get(url+"/pages/1").status_code,(401,403))
+        page = self.client.get(url+"/pages/1",headers=student)
+        self.assertEqual(page.status_code,200,page.text if page.status_code != 200 else "")
+        self.assertEqual(page.headers["Content-Type"],"image/jpeg")
+        self.assertEqual(page.headers["Cache-Control"],"private, no-store")
+        self.assertEqual(self.client.get(url+"/download",headers=student).status_code,403)
+        data["kind"] = "training"
+        edited = self.client.put(f"/core/library/admin/{doc_id}",headers=admin,data={"metadata":json.dumps(data)})
+        self.assertEqual(edited.status_code,200,edited.text)
+        download = self.client.get(url+"/download",headers=student)
+        self.assertEqual(download.status_code,200)
+        pages = PdfReader(BytesIO(download.content)).pages
+        self.assertEqual(len(pages),2)
+        self.assertTrue(all(f"Olimpiada.al  |  ID {self.student.id}" in p.extract_text() for p in pages))
+        data["visible"] = False
+        self.client.put(f"/core/library/admin/{doc_id}",headers=admin,data={"metadata":json.dumps(data)})
+        self.assertEqual(self.client.get(url+"/pages/1",headers=student).status_code,404)
+
+    def test_olympiad_drafts_are_admin_only(self):
+        data = dict(slug="test-olympiad",name="Test Olympiad",acronym="TO",subject="Physics",
+                    scope="international",audience="Pupils",importance="The most interesting test",
+                    history="This is a test history",steps=["Apply through school"],
+                    source_url="https://example.org",published=False)
+        url = "/core/olympiads/admin"
+        self.assertEqual(self.client.post(url,headers=self.headers(self.student_token),json=data).status_code,403)
+        admin = self.headers(self.admin_token)
+        result = self.client.post(url,headers=admin,json=data)
+        self.assertEqual(result.status_code,201,result.text)
+        self.assertEqual(self.client.get("/public/olympiads").json(),[])
+        data["published"] = True
+        result = self.client.put(f"{url}/{result.json()['id']}",headers=admin,json=data)
+        self.assertEqual(result.status_code,200,result.text)
+        self.assertEqual(self.client.get("/public/olympiads").json()[0]["slug"],data["slug"])
 
     def test_timezone_dst(self):
         start,close=weekly_bounds(datetime(2026,3,23).date())
