@@ -119,10 +119,7 @@ export default function Header() {
               width="30"
               height="36"
               alt=""
-              src={
-                siteSettings.site_logo ||
-                brandMark
-              }
+              src={brandMark}
             />
             <span>Olimpiada</span>
           </Link>
