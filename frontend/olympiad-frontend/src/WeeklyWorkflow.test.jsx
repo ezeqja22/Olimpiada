@@ -29,3 +29,18 @@ test('changing weekly review never shows submissions from an earlier request',as
  await act(async()=>resolveOld({data:[{id:11,answer:'Old week',status:'pending'}]}));
  expect(screen.queryByText('Old week')).not.toBeInTheDocument();expect(screen.getByText('Second week')).toBeInTheDocument();
 });
+
+test('published rankings can be inspected by week while the current problem is open', async () => {
+ axios.get.mockImplementation((url, config) => {
+  if (url.endsWith('/rankings')) return Promise.resolve({data:{
+   weeks:['2026-10-05'], rankings:[{rank:1,user_id:1,username:'Student',points:config.params.week?8:15}],
+  }});
+  return Promise.resolve({data:{challenge:{id:2,status:'open',problem:{title:'Test',description:'Question'}}}});
+ });
+ render(<MemoryRouter><WeeklyPage/></MemoryRouter>);
+ expect(await screen.findByText('15')).toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Sipas javës'}));
+ expect(screen.getByText('Pikët shfaqen kur publikohen rezultatet.')).toBeInTheDocument();
+ fireEvent.change(screen.getByLabelText('Java'),{target:{value:'2026-10-05'}});
+ expect(await screen.findByText('8')).toBeInTheDocument();
+});

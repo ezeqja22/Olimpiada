@@ -51,6 +51,14 @@ def current_week_date(now=None):
     local = now.astimezone(TIRANA)
     return (local.date() - timedelta(days=local.weekday()))
 
+def weekly_status(challenge, now):
+    if challenge.status == "published" or now >= challenge.closes_at:
+        return "published"
+    if now >= challenge.starts_at:
+        return "open"
+    return "scheduled"
+
+
 def run_weekly_transitions(db, now=None):
     """Idempotent, safe to re-run. No emailing within transition transaction."""
     now = now or datetime.utcnow()

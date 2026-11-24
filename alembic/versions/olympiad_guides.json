@@ -1,0 +1,319 @@
+[
+  {
+    "slug": "okm",
+    "name": "Olimpiada Kombëtare e Matematikës",
+    "acronym": "OKM",
+    "subject": "Matematikë",
+    "scope": "national",
+    "audience": "Nxënës të arsimit parauniversitar sipas njoftimit",
+    "importance": "Është gara kombëtare ku nxënësit njihen me problemat me argumentim dhe, në gjimnaz, mund të hapin rrugën drejt seleksionimeve ndërkombëtare.",
+    "history": "Gara organizohet nga Ministria e Arsimit dhe Qendra e Shërbimeve Arsimore. Kalendari i publikuar nga AMA paraqet tri faza.",
+    "steps": [
+      "Pyet mësuesin e matematikës ose sekretarinë për regjistrimin dhe kategorinë e klasës tënde.",
+      "Merr pjesë në fazën e parë dhe ndiq njoftimet për kualifikimin në fazat II dhe III.",
+      "Pas fazës kombëtare, ndiq thirrjet e AMA-s për seleksionimet e ekipeve."
+    ],
+    "source_url": "https://www.ama.org.al/olympiads/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "imo",
+    "name": "Olimpiada Ndërkombëtare e Matematikës",
+    "acronym": "IMO",
+    "subject": "Matematikë",
+    "scope": "international",
+    "audience": "Nxënës parauniversitarë që plotësojnë rregulloren e IMO-s",
+    "importance": "Gara botërore kryesore e matematikës për nxënës. Gjashtë problemat e zhvilluara në dy ditë vlerësojnë arsyetimin dhe provat.",
+    "history": "Edicioni i parë u mbajt në Rumani më 1959. Shqipëria figuron për herë të parë në arkivin zyrtar më 1993.",
+    "steps": [
+      "Nis me Olimpiadën Kombëtare të Matematikës përmes shkollës dhe kalo fazat përkatëse.",
+      "Kontrollo njoftimet e AMA-s për kriteret e ftesës dhe merr pjesë në testet seleksionuese.",
+      "Syno të përzgjidhesh mes gjashtë nxënësve të ekipit shqiptar sipas kritereve të atij viti."
+    ],
+    "source_url": "https://www.imo-official.org/countries/ALB/",
+    "local_url": "https://www.ama.org.al/olympiads/",
+    "published": true
+  },
+  {
+    "slug": "bmo",
+    "name": "Olimpiada Ballkanike e Matematikës",
+    "acronym": "BMO",
+    "subject": "Matematikë",
+    "scope": "regional",
+    "audience": "Gjimnazistë të përzgjedhur në ekipin kombëtar",
+    "importance": "Gara ballkanike për ekipet e gjimnazistëve. Problemat kërkojnë prova të plota në algjebër, gjeometri, kombinatorikë dhe teori numrash.",
+    "history": "BMO mbledh delegacione të rajonit dhe ekipe të ftuara. AMA ka njoftuar se edicioni i 44-t do të mbahet në Korçë në vitin 2027.",
+    "steps": [
+      "Merr pjesë në OKM dhe ndiq njoftimet për seleksionimet e AMA-s.",
+      "Kryej testet e shpallura për ekipin. Delegacioni regjistrohet nga organizatori shqiptar."
+    ],
+    "source_url": "https://www.ama.org.al/olympiads/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "jbmo",
+    "name": "Olimpiada Ballkanike e Matematikës për të Rinj",
+    "acronym": "JBMO",
+    "subject": "Matematikë",
+    "scope": "regional",
+    "audience": "Nxënës që plotësojnë kufirin e moshës së edicionit",
+    "importance": "Gara rajonale për nxënës më të rinj. Formati me prova është një hap drejt garave të avancuara të matematikës.",
+    "history": "JBMO është gara për të rinj e kalendarit ballkanik. AMA dokumenton pjesëmarrjen e Shqipërisë në edicionin 2026 në Buzău.",
+    "steps": [
+      "Kontrollo me mësuesin dhe AMA-n kriteret e moshës dhe ftesën për seleksionime.",
+      "Merr pjesë në testet përzgjedhëse për grupmoshën tënde. Ekipi shqiptar regjistrohet nga organizatori."
+    ],
+    "source_url": "https://www.ama.org.al/olympiads/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "egmo",
+    "name": "Olimpiada Europiane e Matematikës për Vajza",
+    "acronym": "EGMO",
+    "subject": "Matematikë",
+    "scope": "international",
+    "audience": "Nxënëse që plotësojnë kriteret e EGMO-s",
+    "importance": "Garë me probleme që kërkojnë prova, për delegacione me deri në katër nxënëse.",
+    "history": "Edicioni i parë i EGMO-s u mbajt në 2012. Shqipëria figuron në regjistrin zyrtar që prej 2014.",
+    "steps": [
+      "Merr pjesë në garat kombëtare të matematikës dhe kontrollo thirrjet e AMA-s për EGMO.",
+      "Ndiq kriteret e seleksionimit për edicionin përkatës. Regjistrimin e ekipit e bën delegacioni."
+    ],
+    "source_url": "https://www.egmo.org/countries/",
+    "local_url": "https://www.ama.org.al/olympiads/",
+    "published": true
+  },
+  {
+    "slug": "emo",
+    "name": "Olimpiada Europiane e Matematikës",
+    "acronym": "EMO",
+    "subject": "Matematikë",
+    "scope": "international",
+    "audience": "Nxënës parauniversitarë sipas rregullores së edicionit",
+    "importance": "Garë e nivelit europian për përfaqësuesit e përzgjedhur të shkollave deri në klasën e 12-të.",
+    "history": "AMA e përfshin EMO-n në kalendarin shqiptar të garave matematikore. Për vitin 2027 ka njoftuar edicionin në Prishtinë.",
+    "steps": [
+      "Kontrollo te AMA njoftimin për edicionin dhe kriteret e përzgjedhjes së ekipit shqiptar.",
+      "Merr pjesë në seleksionimet kur shpallen dhe plotëso dokumentacionin përmes delegacionit nëse përzgjidhesh."
+    ],
+    "source_url": "https://www.ama.org.al/olympiads/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "kamo",
+    "name": "Olimpiada Matematike Kosovë–Shqipëri",
+    "acronym": "KAMO",
+    "subject": "Matematikë",
+    "scope": "regional",
+    "audience": "Nxënës të klasave 7–9 sipas edicionit",
+    "importance": "Garë për nxënësit e viseve shqiptare që zhvillon arsyetimin matematikor para gjimnazit.",
+    "history": "KAMO zhvillohet në bashkëpunim mes organizatorëve nga Kosova dhe Shqipëria. AMA e rendit si garë për klasat e shtata, të teta dhe të nënta.",
+    "steps": [
+      "Kontrollo thirrjen dhe klasat e pranuara për edicionin e radhës.",
+      "Kërko te mësuesi ose organizatori shqiptar mënyrën e regjistrimit dhe nëse kërkohet përzgjedhje."
+    ],
+    "source_url": "https://www.ama.org.al/olympiads/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "igo",
+    "name": "Olimpiada Iraniane e Gjeometrisë",
+    "acronym": "IGO",
+    "subject": "Matematikë",
+    "scope": "international",
+    "audience": "Nxënës sipas niveleve të shpallura",
+    "importance": "Garë e specializuar në gjeometri me probleme që kërkojnë ndërtim dhe argumentim.",
+    "history": "IGO e ka origjinën në Iran dhe zhvillohet në vende të ndryshme nëpërmjet organizatorëve lokalë. AMA dokumenton zhvillimin e edicionit shqiptar 2026 në Tiranë.",
+    "steps": [
+      "Kontrollo njoftimin e AMA-s për regjistrimin, vendin dhe kategorinë e klasës.",
+      "Zgjidh nivelin sipas rregullores dhe ushtrohu me problemat e edicioneve të mëparshme."
+    ],
+    "source_url": "https://www.ama.org.al/olympiads/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "ipho",
+    "name": "Olimpiada Ndërkombëtare e Fizikës",
+    "acronym": "IPhO",
+    "subject": "Fizikë",
+    "scope": "international",
+    "audience": "Nxënës parauniversitarë sipas rregullores së IPhO-s",
+    "importance": "Gara kombinon një provim teorik me një provim eksperimental, ndaj kërkon edhe aftësi laboratorike.",
+    "history": "IPhO ka arkiv ndërkombëtar të rezultateve. Arkivi për Shqipërinë dokumenton medalje bronzi dhe vlerësime nderi.",
+    "steps": [
+      "Nis me olimpiadën kombëtare të fizikës përmes shkollës.",
+      "Pyet organizatorin kombëtar nëse është shpallur delegacioni dhe si bëhet përzgjedhja atë vit.",
+      "Përgatitu në teori dhe eksperiment. Pjesëmarrja ndërkombëtare bëhet përmes ekipit."
+    ],
+    "source_url": "https://ipho-unofficial.org/countries/ALB/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "ioi",
+    "name": "Olimpiada Ndërkombëtare e Informatikës",
+    "acronym": "IOI",
+    "subject": "Informatikë",
+    "scope": "international",
+    "audience": "Nxënës parauniversitarë sipas rregullores së IOI-t",
+    "importance": "Gara kryesore ndërkombëtare e programimit algoritmik. Zgjidhjet vlerësohen me teste automatike dhe kufizime kohe e memorieje.",
+    "history": "Arkivi zyrtar shënon pjesëmarrjen e parë të Shqipërisë në vitin 1999. IOI organizohet me ekipe kombëtare deri në katër nxënës.",
+    "steps": [
+      "Nis me olimpiadën kombëtare të informatikës dhe ushtrohu me struktura të dhënash e algoritme.",
+      "Kontrollo njoftimin shqiptar për mënyrën e seleksionimit dhe formimin e ekipit.",
+      "Regjistrimin ndërkombëtar e bën delegacioni kombëtar."
+    ],
+    "source_url": "https://stats.ioinformatics.org/members/ALB/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "ioai",
+    "name": "Olimpiada Ndërkombëtare e Inteligjencës Artificiale",
+    "acronym": "IOAI",
+    "subject": "Inteligjencë artificiale",
+    "scope": "international",
+    "audience": "Nxënës parauniversitarë sipas rregullores së IOAI-t",
+    "importance": "Vlerëson përdorimin praktik të inteligjencës artificiale përmes detyrave me të dhëna, modele dhe argumentim.",
+    "history": "Drejtoria e IOAI-t evidenton STEM Hub Albania dhe përshkruan përzgjedhjen nga Olimpiada Kombëtare e AI. Në nëntor 2026, akreditimi për Shqipërinë figuronte i skaduar në atë drejtori.",
+    "steps": [
+      "Kontrollo te drejtoria e IOAI-t nëse akreditimi për Shqipërinë është aktiv për edicionin e radhës.",
+      "Nëse shpallet gara kombëtare, ndiq thirrjen dhe kriteret e përzgjedhjes të organizatorit shqiptar."
+    ],
+    "source_url": "https://ioai-official.org/about/countries-and-territories/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "ok-fizike",
+    "name": "Olimpiada Kombëtare e Fizikës",
+    "acronym": "OK Fizikë",
+    "subject": "Fizikë",
+    "scope": "national",
+    "audience": "Gjimnazistë sipas rregullores së vitit",
+    "importance": "Në këtë garë kombëtare nxënësit praktikojnë arsyetimin fizik dhe zgjidhjen e problemeve me modele matematikore.",
+    "history": "QSHA dokumenton fituesit dhe testet e fazës kombëtare në arkivin e olimpiadave. Për 2025–2026 publikoi edhe skemat e fazës II sipas klasave.",
+    "steps": [
+      "Pyet mësuesin për datën e fazës së parë në shkollë dhe kërkesat për klasën tënde.",
+      "Nëse kualifikohesh, merr pjesë në fazën vendore dhe më pas në fazën kombëtare sipas njoftimeve.",
+      "Shiko testet dhe skemat e QSHA-së dhe ushtrohu me mekanikë, elektricitet dhe interpretim grafikësh."
+    ],
+    "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "ok-informatike",
+    "name": "Olimpiada Kombëtare e Informatikës",
+    "acronym": "OK Informatikë",
+    "subject": "Informatikë",
+    "scope": "national",
+    "audience": "Gjimnazistë sipas rregullores së vitit",
+    "importance": "Në këtë garë kombëtare nxënësit praktikojnë zgjidhjen e problemeve dhe arsyetimin algoritmik.",
+    "history": "QSHA dokumenton fituesit dhe testet e fazës kombëtare në arkivin e olimpiadave. Për 2025–2026 publikoi edhe skemat e fazës II sipas klasave.",
+    "steps": [
+      "Pyet mësuesin për datën e fazës së parë në shkollë dhe kërkesat për klasën tënde.",
+      "Nëse kualifikohesh, merr pjesë në fazën vendore dhe më pas në fazën kombëtare sipas njoftimeve.",
+      "Shiko testet dhe skemat e QSHA-së dhe ushtrohu me testet e kaluara të klasës dhe analizo algoritmet e zgjidhjes."
+    ],
+    "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "ok-kimi",
+    "name": "Olimpiada Kombëtare e Kimisë",
+    "acronym": "OK Kimi",
+    "subject": "Kimi",
+    "scope": "national",
+    "audience": "Gjimnazistë sipas rregullores së vitit",
+    "importance": "Në këtë garë kombëtare nxënësit praktikojnë zbatimin e koncepteve të kimisë në llogaritje dhe në situata problemore.",
+    "history": "QSHA dokumenton fituesit dhe testet e fazës kombëtare në arkivin e olimpiadave. Për 2025–2026 publikoi edhe skemat e fazës II sipas klasave.",
+    "steps": [
+      "Pyet mësuesin për datën e fazës së parë në shkollë dhe kërkesat për klasën tënde.",
+      "Nëse kualifikohesh, merr pjesë në fazën vendore dhe më pas në fazën kombëtare sipas njoftimeve.",
+      "Shiko testet dhe skemat e QSHA-së dhe puno me stekiometri, tretësira dhe ekuilibër kimik."
+    ],
+    "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "ok-biologji",
+    "name": "Olimpiada Kombëtare e Biologjisë",
+    "acronym": "OK Biologji",
+    "subject": "Biologji",
+    "scope": "national",
+    "audience": "Gjimnazistë sipas rregullores së vitit",
+    "importance": "Në këtë garë kombëtare nxënësit praktikojnë interpretimin e të dhënave dhe lidhjen e koncepteve biologjike.",
+    "history": "QSHA dokumenton fituesit dhe testet e fazës kombëtare në arkivin e olimpiadave. Për 2025–2026 publikoi edhe skemat e fazës II sipas klasave.",
+    "steps": [
+      "Pyet mësuesin për datën e fazës së parë në shkollë dhe kërkesat për klasën tënde.",
+      "Nëse kualifikohesh, merr pjesë në fazën vendore dhe më pas në fazën kombëtare sipas njoftimeve.",
+      "Shiko testet dhe skemat e QSHA-së dhe praktiko interpretimin e grafikëve, gjenetikën dhe ekologjinë."
+    ],
+    "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "ok-histori",
+    "name": "Olimpiada Kombëtare e Historisë",
+    "acronym": "OK Histori",
+    "subject": "Histori",
+    "scope": "national",
+    "audience": "Gjimnazistë sipas rregullores së vitit",
+    "importance": "Në këtë garë kombëtare nxënësit praktikojnë arsyetimin historik dhe interpretimin e burimeve.",
+    "history": "QSHA dokumenton fituesit dhe testet e fazës kombëtare në arkivin e olimpiadave. Për 2025–2026 publikoi edhe skemat e fazës II sipas klasave.",
+    "steps": [
+      "Pyet mësuesin për datën e fazës së parë në shkollë dhe kërkesat për klasën tënde.",
+      "Nëse kualifikohesh, merr pjesë në fazën vendore dhe më pas në fazën kombëtare sipas njoftimeve.",
+      "Shiko testet dhe skemat e QSHA-së dhe ushtrohu me krahasimin e burimeve, kronologjinë dhe lidhjet shkak–pasojë."
+    ],
+    "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "ok-gjeografi",
+    "name": "Olimpiada Kombëtare e Gjeografisë",
+    "acronym": "OK Gjeografi",
+    "subject": "Gjeografi",
+    "scope": "national",
+    "audience": "Gjimnazistë sipas rregullores së vitit",
+    "importance": "Në këtë garë kombëtare nxënësit praktikojnë interpretimin e hartave, statistikave dhe proceseve gjeografike.",
+    "history": "QSHA dokumenton fituesit dhe testet e fazës kombëtare në arkivin e olimpiadave. Për 2025–2026 publikoi edhe skemat e fazës II sipas klasave.",
+    "steps": [
+      "Pyet mësuesin për datën e fazës së parë në shkollë dhe kërkesat për klasën tënde.",
+      "Nëse kualifikohesh, merr pjesë në fazën vendore dhe më pas në fazën kombëtare sipas njoftimeve.",
+      "Shiko testet dhe skemat e QSHA-së dhe praktiko leximin e hartave dhe të grafikëve dhe analizën e të dhënave gjeografike."
+    ],
+    "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
+    "local_url": null,
+    "published": true
+  },
+  {
+    "slug": "boi",
+    "name": "Olimpiada Ballkanike e Informatikës",
+    "acronym": "BOI",
+    "subject": "Informatikë",
+    "scope": "regional",
+    "audience": "Gjimnazistë të përzgjedhur nga vendet pjesëmarrëse",
+    "importance": "Nxënësit zgjidhin problema algoritmike në dy ditë gare. Ekipet kombëtare mund të kenë deri në katër nxënës.",
+    "history": "Gara nisi më 1993. Shqipëria është anëtare dhe priti edicionin 2026 në Tiranë, organizuar nga STEM Hub Center.",
+    "steps": [
+      "Fillo me garat kombëtare të informatikës dhe puno me problemet e arkivit të BOI-t.",
+      "Kontrollo thirrjen e organizatorit shqiptar për seleksionimet e atij viti.",
+      "Nëse përzgjidhesh, regjistrimin e bën delegacioni kombëtar."
+    ],
+    "source_url": "https://boi2026.al/",
+    "local_url": "https://qsha.gov.al/olimpiada-2025-2026/",
+    "published": true
+  }
+]

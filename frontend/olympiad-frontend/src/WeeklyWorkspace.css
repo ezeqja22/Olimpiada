@@ -3,3 +3,14 @@
 @media(max-width:767px){.weekly-workspace-grid{grid-template-columns:1fr;gap:32px}.weekly-schedule{border-left:0;border-top:1px solid #d8e0d5;padding:24px 0}.weekly-statement h2{font-size:27px}.weekly-statement-body{font-size:17px}.weekly-submission button{width:100%}}
 
 @media(max-width:767px){.weekly-workspace{padding:24px 16px 48px}}
+
+.weekly-rankings { margin-top: 26px; padding-top: 24px; border-top: 1px solid #d8e0d5; }
+.weekly-rankings h2 { margin-bottom: 12px; }
+.weekly-rankings-controls { display: flex; gap: 6px; margin-bottom: 12px; }
+.weekly-rankings button, .weekly-rankings select { padding: 6px 9px; border-radius: 6px; border: 1px solid #b6c4b4; background: #fff; color: #203e32; font: inherit; font-size: .85rem; }
+.weekly-rankings button { cursor: pointer; }
+.weekly-rankings button[aria-pressed=true] { background: #1a4d3a; color: #fff; }
+.weekly-rankings-scroll { max-height: 420px; overflow: auto; }
+.weekly-rankings table { width: 100%; border-collapse: collapse; font-size: .86rem; margin-top: 8px; }
+.weekly-rankings th, .weekly-rankings td { padding: 7px 5px; border-bottom: 1px solid #d8e0d5; text-align: left; overflow-wrap: anywhere; }
+.weekly-rankings th:last-child, .weekly-rankings td:last-child { text-align: right; }
