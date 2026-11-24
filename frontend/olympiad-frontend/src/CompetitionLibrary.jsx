@@ -5,6 +5,7 @@ import {Link, useParams} from "react-router-dom";
 import {useAuth} from "./context/AuthContext";
 import {useLanguage} from "./context/LanguageContext";
 import {loginIntent} from "./navigation";
+import SitePageIntro from "./components/SitePageIntro";
 import "./CompetitionLibrary.css";
 
 export const API = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
@@ -56,10 +57,7 @@ export function Olympiads() {
     && textKey([row.name, row.acronym, row.subject, row.importance].join(" ")).includes(textKey(query.trim())));
   const selected = rows.find(row => row.slug === slug);
   return <main className="catalog-shell">
-    <header className="catalog-hero">
-      <div><h1>{sq ? "Olimpiadat" : "Olympiads"}</h1><p>{sq ? "Gjej garën që të intereson dhe ndiq rrugën nga shkolla deri te ekipi shqiptar." : "Find a competition and follow the route from school to the Albanian team."}</p></div>
-      <Trophy size={90} strokeWidth={1} aria-hidden="true"/>
-    </header>
+    <SitePageIntro contentKey="page_olympiads" title={sq?'Olimpiadat':'Olympiads'} subtitle={sq?'Njih garat dhe mënyrat për të marrë pjesë.':'Explore competitions and participation routes.'}/>
     {!catalogue.rows ? <CatalogueState state={catalogue} sq={sq}/> : selected ?
       <article className="guide-detail">
         <Link to="/olympiads">← {sq ? "Të gjitha olimpiadat" : "All olympiads"}</Link>
@@ -183,10 +181,7 @@ export function Library() {
     && textKey([row.title, row.author, row.subject, row.discipline, row.level].join(" ")).includes(textKey(query.trim())));
   const filterNames = sq ? {subject: "Lënda", discipline: "Disiplina", level: "Niveli"} : {subject: "Subject", discipline: "Discipline", level: "Level"};
   return <main className="catalog-shell">
-    <header className="catalog-hero"><div><h1>{sq ? "Biblioteka online" : "Online library"}</h1>
-      <p>{sq ? "Shfleto libra, revista, broshura dhe materiale trajnimi sipas lëndës dhe nivelit." : "Browse books, magazines, booklets and training materials by subject and level."}</p></div>
-      <BookOpen size={90} strokeWidth={1} aria-hidden="true"/>
-    </header>
+    <SitePageIntro contentKey="page_library" title={sq?'Biblioteka online':'Online library'} subtitle={sq?'Libra, revista dhe materiale trajnimi sipas lëndës dhe nivelit.':'Books, magazines and training materials by subject and level.'}/>
     {!catalogue.rows ? <CatalogueState state={catalogue} sq={sq}/> : id ?
       <article className="guide-detail"><Link to="/library">← {sq ? "Biblioteka" : "Library"}</Link>
         {doc ? <><h2>{doc.title}</h2>{doc.author && <p>{doc.author}</p>}<Tags doc={doc}/><p>{doc.description}</p><Reader key={doc.id} doc={doc} sq={sq}/></>
