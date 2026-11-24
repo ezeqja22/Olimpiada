@@ -111,7 +111,7 @@ def library_payload(doc, has_file):
 def list_documents(db, visible_only=False):
     query = db.query(LibraryDocument, LibraryFile.document_id).outerjoin(LibraryFile)
     if visible_only:
-        query = query.filter(LibraryDocument.visible.is_(True))
+        query = query.filter(LibraryDocument.visible.is_(True), LibraryFile.document_id.is_not(None))
     return [library_payload(doc, file_id is not None) for doc, file_id in
             query.order_by(LibraryDocument.created_at.desc(), LibraryDocument.id.desc()).all()]
 

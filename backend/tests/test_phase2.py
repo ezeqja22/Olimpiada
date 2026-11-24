@@ -152,14 +152,41 @@ class CoreTests(unittest.TestCase):
             json={"approve":True,"score":11}, headers=self.headers(self.admin_token)).status_code,422)
         w.closes_at=now-timedelta(seconds=1)
         self.db.commit()
+        self.assertIsNone(self.client.get("/core/weekly").json()["challenge"]["official_solution"])
+        self.assertEqual(self.client.get("/core/weekly/rankings").json()["rankings"], [])
+        self.assertEqual(self.client.post(f"/core/weekly/admin/{w.id}/publish", headers=self.headers(self.student_token)).status_code, 403)
+        result=run_weekly_transitions(self.db)
+        self.assertGreaterEqual(result["closed"], 1)
+        self.assertEqual(result["published"], 0)
+        self.assertEqual(self.client.post(f"/core/weekly/admin/{w.id}/publish", headers=self.headers(self.admin_token)).status_code, 200)
         weekly=self.client.get(f"/core/weekly/rankings?week={w.week_date}").json()
         self.assertEqual([(x["rank"],x["points"]) for x in weekly["rankings"]],[(1,8)])
         self.assertEqual(self.client.get("/core/weekly/rankings").json()["rankings"],weekly["rankings"])
         result=run_weekly_transitions(self.db)
-        self.assertGreaterEqual(result["published"],1)
+        self.assertEqual(result["published"],0)
         r=self.client.get("/core/weekly")
         self.assertEqual(r.json()["challenge"]["official_solution"],"CONFIDENTIAL_ANSWER_1")
         self.assertTrue(any(u["user_id"]==self.student.id for u in r.json()["challenge"]["winners"]))
+
+    def test_publication_requires_complete_grading_after_close(self):
+        now=datetime.utcnow()
+        problem=models.Problem(title="[UX-TEST] grading",description="Solve",author_id=self.admin.id,subject="Math")
+        self.db.add(problem);self.db.flush()
+        week=models.WeeklyChallenge(week_date="2031-01-06",problem_id=problem.id,starts_at=now-timedelta(days=7),closes_at=now-timedelta(seconds=1),official_solution="PRIVATE",status="open",created_by=self.admin.id)
+        self.db.add(week);self.db.flush()
+        answer=models.WeeklySubmission(challenge_id=week.id,student_id=self.student.id,answer_text="Answer",status="pending")
+        self.db.add(answer);self.db.commit()
+        url=f"/core/weekly/admin/{week.id}/publish"
+        admin=self.headers(self.admin_token)
+        self.assertEqual(self.client.post(url,headers=admin).status_code,409)
+        self.assertEqual(self.client.post(f"/core/weekly/{week.id}/submit",json={"answer":"late"},headers=self.headers(self.student_token)).status_code,409)
+        answer.status="approved";self.db.commit()
+        self.assertEqual(self.client.post(url,headers=admin).status_code,409)
+        review=f"/core/weekly/admin/submissions/{answer.id}/review"
+        self.assertEqual(self.client.post(review,json={"approve":True,"score":7},headers=admin).status_code,200)
+        self.assertEqual(self.client.post(url,headers=admin).status_code,200)
+        self.assertEqual(self.client.post(url,headers=admin).status_code,200)
+        self.assertEqual(self.client.post(review,json={"approve":True,"score":9},headers=admin).status_code,409)
 
     def test_library_only_delivers_images_and_watermarked_training_pdfs(self):
         from io import BytesIO

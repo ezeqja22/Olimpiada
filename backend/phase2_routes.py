@@ -92,7 +92,7 @@ def rank_students(rows):
 def weekly_rankings(week: date | None = None, db: Session = Depends(get_db)):
     now = datetime.utcnow()
     visible = (WeeklyChallenge.starts_at <= now,
-               or_(WeeklyChallenge.status == "published", WeeklyChallenge.closes_at <= now))
+               WeeklyChallenge.status == "published")
     published = db.query(WeeklyChallenge.week_date).filter(*visible)
     published = [row.week_date for row in published.order_by(WeeklyChallenge.week_date.desc()).all()]
     if week and week.isoformat() not in published:
@@ -146,7 +146,7 @@ def weekly_admin_queue(user: User = Depends(get_current_user), db: Session = Dep
 def submit_weekly(challenge_id: int, data: WeeklyAnswer, user: User = Depends(get_verified_user),
                   db: Session = Depends(get_db)):
     """The Problem of the Week is free; no paid entitlement is required."""
-    challenge = db.get(WeeklyChallenge, challenge_id)
+    challenge = db.query(WeeklyChallenge).filter_by(id=challenge_id).with_for_update().first()
     now = datetime.utcnow()
     if not challenge or weekly_status(challenge, now) != "open":
         raise HTTPException(409, "Weekly submissions are closed")
@@ -177,10 +177,11 @@ def submissions(challenge_id: int, user: User = Depends(get_verified_user),
 def review_submission(submission_id: int, data: WeeklyReview,
                       user: User = Depends(get_verified_user), db: Session = Depends(get_db)):
     require_staff(user)
-    s = db.query(WeeklySubmission).filter_by(id=submission_id).with_for_update().first()
+    s = db.get(WeeklySubmission, submission_id)
     if not s:
         raise HTTPException(404, "Submission not found")
-    challenge = db.get(WeeklyChallenge, s.challenge_id)
+    challenge = db.query(WeeklyChallenge).filter_by(id=s.challenge_id).with_for_update().first()
+    db.refresh(s, with_for_update=True)
     if weekly_status(challenge, datetime.utcnow()) == "published":
         raise HTTPException(409, "Winner list has already closed")
     if data.approve and data.score is None and s.score is None:
@@ -194,6 +195,29 @@ def review_submission(submission_id: int, data: WeeklyReview,
     s.reviewed_by = user.id
     db.commit()
     return {"id": s.id, "status": s.status, "score": s.score}
+
+@router.post("/weekly/admin/{challenge_id}/publish")
+def publish_week(challenge_id: int, user: User = Depends(get_verified_user),
+                 db: Session = Depends(get_db)):
+    require_staff(user)
+    challenge = db.query(WeeklyChallenge).filter_by(id=challenge_id).with_for_update().first()
+    if not challenge:
+        raise HTTPException(404, "Challenge not found")
+    if challenge.status == "published":
+        return {"id": challenge.id, "status": "published"}
+    if datetime.utcnow() < challenge.closes_at:
+        raise HTTPException(409, "Submissions must close before publication")
+    incomplete = db.query(WeeklySubmission.id).filter(
+        WeeklySubmission.challenge_id == challenge_id,
+        or_(WeeklySubmission.status == "pending",
+            (WeeklySubmission.status == "approved") & WeeklySubmission.score.is_(None))).first()
+    if incomplete:
+        raise HTTPException(409, "Review all submissions and score approved answers before publishing")
+    challenge.status = "published"
+    challenge.published_at = datetime.utcnow()
+    db.commit()
+    return {"id": challenge.id, "status": "published"}
+
 
 @router.get("/forums/catalog")
 def forum_catalog(user: User = Depends(get_verified_user), db: Session = Depends(get_db)):

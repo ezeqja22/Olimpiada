@@ -52,8 +52,10 @@ def current_week_date(now=None):
     return (local.date() - timedelta(days=local.weekday()))
 
 def weekly_status(challenge, now):
-    if challenge.status == "published" or now >= challenge.closes_at:
+    if challenge.status == "published":
         return "published"
+    if now >= challenge.closes_at:
+        return "closed"
     if now >= challenge.starts_at:
         return "open"
     return "scheduled"
@@ -62,15 +64,14 @@ def weekly_status(challenge, now):
 def run_weekly_transitions(db, now=None):
     """Idempotent, safe to re-run. No emailing within transition transaction."""
     now = now or datetime.utcnow()
-    opened, published = 0, 0
+    opened, closed = 0, 0
     for challenge in db.query(WeeklyChallenge).filter(
-        WeeklyChallenge.status.in_(("scheduled", "open"))).all():
+        WeeklyChallenge.status.in_(("scheduled", "open"))).with_for_update().all():
         if challenge.status == "scheduled" and now >= challenge.starts_at:
             challenge.status = "open"
             opened += 1
         if challenge.status == "open" and now >= challenge.closes_at:
-            challenge.status = "published"
-            challenge.published_at = challenge.closes_at
-            published += 1
+            challenge.status = "closed"
+            closed += 1
     db.commit()
-    return {"opened": opened, "published": published}
+    return {"opened": opened, "closed": closed, "published": 0}

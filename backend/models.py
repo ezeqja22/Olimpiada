@@ -1,4 +1,4 @@
-from sqlalchemy import true, Column, Integer, String, Boolean, DateTime, ForeignKey, UniqueConstraint, Text, JSON, Date, LargeBinary, CheckConstraint
+from sqlalchemy import false, true, Column, Integer, String, Boolean, DateTime, ForeignKey, UniqueConstraint, Text, JSON, Date, LargeBinary, CheckConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from database import Base
@@ -547,7 +547,7 @@ class LibraryDocument(Base):
     discipline = Column(String(100), nullable=True)
     description = Column(Text, nullable=False, default="", server_default="")
     author = Column(String(250), nullable=False, default="", server_default="")
-    visible = Column(Boolean, nullable=False, default=True, server_default=true())
+    visible = Column(Boolean, nullable=False, default=False, server_default=false())
     page_count = Column(Integer, nullable=False)
     uploaded_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
