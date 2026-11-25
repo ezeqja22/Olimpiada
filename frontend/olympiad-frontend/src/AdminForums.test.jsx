@@ -20,3 +20,5 @@ test('cancelled deletion leaves the forum intact and its reader reachable',async
  axios.get.mockResolvedValue({data:{forums:[{id:42,title:'Synthetic forum',creator:'Example'}],pagination:{}}});confirm.mockResolvedValue(false);render(<MemoryRouter><AdminForums/></MemoryRouter>);
  expect(await screen.findByRole('link',{name:'Synthetic forum'})).toHaveAttribute('href','/forum/42');fireEvent.click(screen.getByRole('button',{name:'Delete'}));await waitFor(()=>expect(confirm).toHaveBeenCalled());expect(axios.delete).not.toHaveBeenCalled();
 });
+
+vi.mock("./context/LanguageContext",()=>({useLanguage:()=>({lang:"en"})}));
