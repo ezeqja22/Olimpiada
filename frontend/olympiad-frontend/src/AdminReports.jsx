@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
@@ -8,6 +9,9 @@ import { useToast } from "./components/ToastProvider";
 import "./AdminLayout.css";
 
 const AdminReports = () => {
+  const {lang}=useLanguage();
+  const tr=(en,sq)=>lang==='sq'?sq:en;
+
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,7 +65,7 @@ const AdminReports = () => {
       setReports(response.data.reports);
       setPagination(response.data.pagination);
     } catch (err) {
-      setError("Failed to load reports");
+      setError(tr("Failed to load reports","Raportimet nuk u ngarkuan"));
       console.error("Reports error:", err);
     } finally {
       setLoading(false);
@@ -178,29 +182,29 @@ const AdminReports = () => {
   if (error) {
     return (
       <div className="admin-card">
-        <h2>Error</h2>
+        <h2>{tr("Error","Gabim")}</h2>
         <p>{error}</p>
         <button className="admin-btn" onClick={fetchReports}>
-          Try Again
+          {tr("Try Again","Provo përsëri")}
         </button>
       </div>
     );
   }
 
   return (
-    <div className="publishing-workspace admin-reports-page"><PublishingHeader eyebrow="Community / Moderation" title="Content reports" description="Review reports in context, assign responsibility and record moderation decisions."/><div className="publishing-settings-columns"><aside className="publishing-section"><h2>Review queue</h2>
+    <div className="publishing-workspace admin-reports-page"><PublishingHeader eyebrow={tr("Community / Moderation","Komuniteti / Moderimi")} title={tr("Content reports","Raportimet e përmbajtjes")} description={tr("Review reports in context, assign responsibility and record moderation decisions.","Shqyrto raportimet në kontekst, cakto përgjegjësinë dhe regjistro vendimet e moderimit.")}/><div className="publishing-settings-columns"><aside className="publishing-section"><h2>{tr("Review queue","Radha e shqyrtimit")}</h2>
         <div className="admin-filter-row">
           <div>
-            <label htmlFor="report-status">Status</label>
+            <label htmlFor="report-status">{tr("Status","Statusi")}</label>
             <select id="report-status"
               value={filters.status}
               onChange={(e) => handleFilterChange("status", e.target.value)}
             >
-              <option value="">All Reports</option>
-              <option value="pending">Pending</option>
-              <option value="under_review">Under Review</option>
-              <option value="resolved">Resolved</option>
-              <option value="dismissed">Dismissed</option>
+              <option value="">{tr("All Reports","Të gjitha raportimet")}</option>
+              <option value="pending">{tr("Pending","Në pritje")}</option>
+              <option value="under_review">{tr("Under Review","Në shqyrtim")}</option>
+              <option value="resolved">{tr("Resolved","Zgjidhur")}</option>
+              <option value="dismissed">{tr("Dismissed","Hedhur poshtë")}</option>
             </select>
           </div>
         </div>
@@ -210,13 +214,13 @@ const AdminReports = () => {
           <table>
             <thead>
               <tr>
-                <th>Report</th>
-                <th>Reporter</th>
-                <th>Type</th>
-                <th>Reason</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th>{tr("Report","Raportimi")}</th>
+                <th>{tr("Reporter","Raportuesi")}</th>
+                <th>{tr("Type","Lloji")}</th>
+                <th>{tr("Reason","Arsyeja")}</th>
+                <th>{tr("Status","Statusi")}</th>
+                <th>{tr("Date","Data")}</th>
+                <th>{tr("Actions","Veprimet")}</th>
               </tr>
             </thead>
             <tbody>
@@ -229,7 +233,7 @@ const AdminReports = () => {
                         {report.report_type}
                       </strong>
                       <br />
-                      <small>Target ID: {report.target_id}</small>
+                      <small>{tr("Target ID:","ID e objektit:")} {report.target_id}</small>
                       {report.description && (
                         <div
                           style={{
@@ -302,7 +306,7 @@ const AdminReports = () => {
                           fontSize: "0.8rem",
                         }}
                       >
-                        View Details
+                        {tr("View Details","Shiko detajet")}
                       </button>
 
                       {report.assigned_to && (
@@ -321,8 +325,8 @@ const AdminReports = () => {
         {/* Empty State */}
         {reports.length === 0 && (
           <div className="empty-state">
-            <h3>No reports found</h3>
-            <p>No reports match your current filters.</p>
+            <h3>{tr("No reports found","Nuk u gjet asnjë raportim")}</h3>
+            <p>{tr("No reports match your current filters.","Nuk ka raportime që përputhen me filtrat.")}</p>
           </div>
         )}
 
@@ -342,7 +346,7 @@ const AdminReports = () => {
               onClick={() => handlePageChange(filters.page - 1)}
               disabled={filters.page <= 1}
             >
-              Previous
+              {tr("Previous","Mëparshmja")}
             </button>
 
             <span
@@ -361,7 +365,7 @@ const AdminReports = () => {
               onClick={() => handlePageChange(filters.page + 1)}
               disabled={filters.page >= pagination.pages}
             >
-              Next
+              {tr("Next","Tjetra")}
             </button>
           </div>
         )}

@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useRef } from "react";
 import {Link} from "react-router-dom";
@@ -10,6 +11,9 @@ import "./AdminLayout.css";
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 const AdminForums = () => {
+  const {lang}=useLanguage();
+  const tr=(en,sq)=>lang==='sq'?sq:en;
+
   const requestVersion = useRef(0);
   const [search, setSearch] = useState("");
   const [forums, setForums] = useState([]);
@@ -57,7 +61,7 @@ const AdminForums = () => {
       setPagination(response.data.pagination);
     } catch (err) {
       if(version!==requestVersion.current)return;
-      setError("Failed to load forums");
+      setError(tr("Failed to load forums","Forumet nuk u ngarkuan"));
       console.error("Forums error:", err);
     } finally {
       if(version===requestVersion.current)setLoading(false);
@@ -103,7 +107,7 @@ const AdminForums = () => {
 
   const getPrivacyBadge = (isPrivate) => (
     <span className={`status-badge ${isPrivate ? "inactive" : "active"}`}>
-      {isPrivate ? "Private" : "Public"}
+      {isPrivate ? tr("Private","Privat") : tr("Public","Publik")}
     </span>
   );
 
@@ -121,29 +125,29 @@ const AdminForums = () => {
 
   return (
     <div className="administration-directory">
-      <header className="administration-heading"><div><p>Community / Forums</p><h2>Forum Management</h2></div><Link to="/forums">Open forum directory →</Link></header>
+      <header className="administration-heading"><div><p>{tr("Community / Forums","Komuniteti / Forumet")}</p><h2>{tr("Forum Management","Administrimi i forumeve")}</h2></div><Link to="/forums">{tr("Open forum directory →","Hap listën e forumeve →")}</Link></header>
       <div className="administration-directory-columns">
-        <aside className="administration-filters"><h3>Find a forum</h3>
-          <label htmlFor="forum-search">Search all forums</label><input id="forum-search" type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder="Forum title…"/>
-          <label htmlFor="forum-privacy">Privacy</label><select id="forum-privacy" value={filters.privacy} onChange={event=>handleFilterChange("privacy",event.target.value)}><option value="">All forums</option><option value="public">Public</option><option value="private">Private</option></select>
-          <button onClick={()=>{setSearch("");setFilters({search:"",privacy:"",page:1});}}>Clear filters</button>
-          <p>Review forum visibility and ownership. Open a forum to manage its discussions and memberships.</p>
+        <aside className="administration-filters"><h3>{tr("Find a forum","Gjej një forum")}</h3>
+          <label htmlFor="forum-search">{tr("Search all forums","Kërko të gjitha forumet")}</label><input id="forum-search" type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder={tr("Forum title…","Titulli i forumit…")}/>
+          <label htmlFor="forum-privacy">{tr("Privacy","Privatësia")}</label><select id="forum-privacy" value={filters.privacy} onChange={event=>handleFilterChange("privacy",event.target.value)}><option value="">{tr("All forums","Të gjitha forumet")}</option><option value="public">{tr("Public","Publik")}</option><option value="private">{tr("Private","Privat")}</option></select>
+          <button onClick={()=>{setSearch("");setFilters({search:"",privacy:"",page:1});}}>{tr("Clear filters","Pastro filtrat")}</button>
+          <p>{tr("Review forum visibility and ownership. Open a forum to manage its discussions and memberships.","Shqyrto dukshmërinë dhe pronësinë e forumeve. Hap një forum për të administruar diskutimet dhe anëtarësimet.")}</p>
         </aside>
-        <section className="administration-directory-results" aria-label="Forum results" aria-busy={loading}>
-          {loading&&<p role="status">Loading forums…</p>}
-          {error&&<p role="alert">{error} <button onClick={fetchForums}>Try again</button></p>}
-        <div className="administration-table" tabIndex={0} aria-label="Forums table, scroll horizontally for more columns">
+        <section className="administration-directory-results" aria-label={tr("Forum results","Rezultatet e kërkimit")} aria-busy={loading}>
+          {loading&&<p role="status">{tr("Loading forums…","Duke ngarkuar forumet…")}</p>}
+          {error&&<p role="alert">{error} <button onClick={fetchForums}>{tr("Try again","Provo përsëri")}</button></p>}
+        <div className="administration-table" tabIndex={0} aria-label={tr("Forums table, scroll horizontally for more columns","Tabela e forumeve; lëviz horizontalisht për më shumë kolona")}>
 
           <table>
             <thead>
               <tr>
-                <th>Forum</th>
-                <th>Creator</th>
-                <th>Type</th>
-                <th>Members</th>
-                <th>Created</th>
-                <th>Last Activity</th>
-                <th>Actions</th>
+                <th>{tr("Forum","Forumi")}</th>
+                <th>{tr("Creator","Krijuesi")}</th>
+                <th>{tr("Type","Lloji")}</th>
+                <th>{tr("Members","Anëtarët")}</th>
+                <th>{tr("Created","Krijuar")}</th>
+                <th>{tr("Last Activity","Aktiviteti i fundit")}</th>
+                <th>{tr("Actions","Veprimet")}</th>
               </tr>
             </thead>
             <tbody>
@@ -174,7 +178,7 @@ const AdminForums = () => {
                   <td>{formatDate(forum.last_activity)}</td>
                   <td>
                     <div className="admin-table-actions">
-                      <Link className="admin-btn secondary admin-btn-small" to={`/forum/${forum.id}`}>View</Link>
+                      <Link className="admin-btn secondary admin-btn-small" to={`/forum/${forum.id}`}>{tr("View","Shiko")}</Link>
 
                       <button
                         className="admin-btn danger admin-btn-small"
@@ -184,7 +188,7 @@ const AdminForums = () => {
                           src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
                           alt=""
                         />
-                        Delete
+                        {tr("Delete","Fshi")}
                       </button>
                     </div>
                   </td>
@@ -196,8 +200,8 @@ const AdminForums = () => {
 
         {!loading && !error && forums.length === 0 && (
           <div className="empty-state">
-            <h3>No forums found</h3>
-            <p>No forums match your current filters.</p>
+            <h3>{tr("No forums found","Nuk u gjet asnjë forum")}</h3>
+            <p>{tr("No forums match your current filters.","Asnjë forum nuk përputhet me filtrat e zgjedhur.")}</p>
           </div>
         )}
 
@@ -213,7 +217,7 @@ const AdminForums = () => {
                 onClick={() => handlePageChange(filters.page - 1)}
                 disabled={filters.page <= 1}
               >
-                Previous
+                {tr("Previous","Mëparshmja")}
               </button>
 
               <button
@@ -221,7 +225,7 @@ const AdminForums = () => {
                 onClick={() => handlePageChange(filters.page + 1)}
                 disabled={filters.page >= pagination.pages}
               >
-                Next
+                {tr("Next","Tjetra")}
               </button>
             </div>
           </div>

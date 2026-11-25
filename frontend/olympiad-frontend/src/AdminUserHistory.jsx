@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 import React, { useState } from "react";
 import axios from "axios";
@@ -5,6 +6,9 @@ import { useToast } from "./components/ToastProvider";
 import "./AdminLayout.css";
 
 const AdminUserHistory = () => {
+  const {lang}=useLanguage();
+  const tr=(en,sq)=>lang==='sq'?sq:en;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [userHistory, setUserHistory] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -93,13 +97,13 @@ const AdminUserHistory = () => {
   };
 
   return (
-    <div className="publishing-workspace admin-user-history-page"><PublishingHeader eyebrow="Community / Moderation" title="User history" description="Find a member and review their recorded moderation history."/><div className="publishing-settings-columns"><aside className="publishing-section"><h2>Find a member</h2>
+    <div className="publishing-workspace admin-user-history-page"><PublishingHeader eyebrow={tr("Community / Moderation","Komuniteti / Moderimi")} title={tr("User history","Historiku i përdoruesve")} description={tr("Find a member and review their recorded moderation history.","Gjej një anëtar dhe shqyrto historikun e regjistruar të moderimit.")}/><div className="publishing-settings-columns"><aside className="publishing-section"><h2>{tr("Find a member","Gjej një anëtar")}</h2>
         <form onSubmit={handleSearch} className="admin-search-form">
           <input
-            type="search" aria-label="Username"
+            type="search" aria-label={tr("Username","Emri i përdoruesit")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Enter username to search..."
+            placeholder={tr("Enter username to search...","Shkruaj emrin e përdoruesit...")}
             style={{
               flex: 1,
               padding: "10px",
@@ -290,7 +294,7 @@ const AdminUserHistory = () => {
                           color: "#333",
                         }}
                       >
-                        <strong>Reason:</strong> {entry.reason}
+                        <strong>{tr("Reason:","Arsyeja:")}</strong> {entry.reason}
                       </div>
 
                       {entry.duration && (
@@ -301,7 +305,7 @@ const AdminUserHistory = () => {
                             color: "#333",
                           }}
                         >
-                          <strong>Duration:</strong> {entry.duration} days
+                          <strong>{tr("Duration:","Kohëzgjatja:")}</strong> {entry.duration} days
                         </div>
                       )}
 
@@ -315,11 +319,11 @@ const AdminUserHistory = () => {
                         }}
                       >
                         <span>
-                          <strong>Moderator:</strong> {entry.moderator}
+                          <strong>{tr("Moderator:","Moderatori:")}</strong> {entry.moderator}
                         </span>
                         {entry.report_id && (
                           <span>
-                            <strong>Report ID:</strong> #{entry.report_id}
+                            <strong>{tr("Report ID:","ID e raportimit:")}</strong> #{entry.report_id}
                           </span>
                         )}
                       </div>

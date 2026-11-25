@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
@@ -20,6 +21,9 @@ function errorText(error) {
 }
 
 export default function AdminSiteEditor() {
+  const {lang}=useLanguage();
+  const tr=(en,sq)=>lang==='sq'?sq:en;
+
   const { currentUser, authLoading } = useAuth();
   const canEdit = !!(currentUser?.is_superuser || ["admin","super_admin"].includes(currentUser?.role));
   const [stored, setStored] = useState({});
@@ -95,15 +99,15 @@ export default function AdminSiteEditor() {
   const title = current["title_" + lang] || defaults["title_" + lang] || section.label;
   const subtitle = current["subtitle_" + lang] || defaults["subtitle_" + lang] || "";
 
-  if (authLoading) return <main className="site-editor"><p className="site-editor__status">Duke verifikuar aksesin...</p></main>;
-  if (!canEdit) return <main className="site-editor"><h1>Përmbajtja e Website-it</h1><p role="alert">Vetëm Admin dhe Super Admin mund të ndryshojnë këtë seksion.</p></main>;
+  if (authLoading) return <main className="site-editor"><p className="site-editor__status">{tr("Verifying access...","Duke verifikuar aksesin...")}</p></main>;
+  if (!canEdit) return <main className="site-editor"><h1>{tr("Website content","Përmbajtja e Website-it")}</h1><p role="alert">{tr("Only Admin and Super Admin may edit this section.","Vetëm Admin dhe Super Admin mund të ndryshojnë këtë seksion.")}</p></main>;
   return <main className="site-editor publishing-workspace">
-    <PublishingHeader eyebrow="Website / CMS" title="Përmbajtja e Website-it" description="Zgjidh faqen dhe gjuhën, redakto tekstin ose fotografinë dhe kontrollo pamjen paraprake para ruajtjes." to={section.url} linkLabel="Shiko faqen" />
+    <PublishingHeader eyebrow={tr("Website / CMS","Faqja / Administrimi i përmbajtjes")} title={tr("Website content","Përmbajtja e Website-it")} description={tr("Choose the page and language, edit text or images, and inspect the preview before saving.","Zgjidh faqen dhe gjuhën, redakto tekstin ose fotografinë dhe kontrollo pamjen paraprake para ruajtjes.")} to={section.url} linkLabel={tr("View page","Shiko faqen")} />
     <div className="site-editor__layout">
-      <nav className="site-editor__nav" aria-label="Seksionet e website-it">
-        <label className="site-editor__hint" htmlFor="site-editor-search">Kërko një seksion</label>
+      <nav className="site-editor__nav" aria-label={tr("Website sections","Seksionet e website-it")}>
+        <label className="site-editor__hint" htmlFor="site-editor-search">{tr("Search for a section","Kërko një seksion")}</label>
         <input id="site-editor-search" value={filter} onChange={e=>setFilter(e.target.value)}
-          placeholder="p.sh. Mentorët, Forumet..." />
+          placeholder={tr("e.g. Mentors, Forums...","p.sh. Mentorët, Forumet...")} />
         {["Kreu","Faqet"].map(group => {
           const items = sections.filter(item=>item.group===group);
           if (!items.length) return null;
@@ -113,23 +117,23 @@ export default function AdminSiteEditor() {
               className="site-editor__item" aria-current={selected===item.key?"true":undefined}
               onClick={()=>navigateSection(item.key)}>
               <span>{item.label}</span>
-              {stored[item.key] && <span className="site-editor__modified-dot" aria-label="I personalizuar" title="I personalizuar" />}
+              {stored[item.key] && <span className="site-editor__modified-dot" aria-label={tr("Customized","I personalizuar")} title={tr("Customized","I personalizuar")} />}
             </button>)}
           </div>;
         })}
-        {!sections.length && <p className="site-editor__hint">Nuk u gjet asnjë seksion.</p>}
+        {!sections.length && <p className="site-editor__hint">{tr("No sections found.","Nuk u gjet asnjë seksion.")}</p>}
       </nav>
 
       <div className="site-editor__workspace">
-        <section className="site-editor__panel" aria-label="Redaktimi i seksionit">
+        <section className="site-editor__panel" aria-label={tr("Edit section","Redaktimi i seksionit")}>
           <div className="site-editor__top">
-            <div><h2>{section.label}</h2><div className="site-editor__meta">Seksioni: {section.key} · <Link to={section.url} target="_blank" rel="noopener noreferrer">Shiko faqen</Link></div></div>
-            <div className="site-editor__language" aria-label="Gjuha e redaktimit">
+            <div><h2>{section.label}</h2><div className="site-editor__meta">{tr("Section:","Seksioni:")} {section.key} · <Link to={section.url} target="_blank" rel="noopener noreferrer">{tr("View page","Shiko faqen")}</Link></div></div>
+            <div className="site-editor__language" aria-label={tr("Editing language","Gjuha e redaktimit")}>
               <button type="button" aria-pressed={lang==="sq"} onClick={()=>setLang("sq")}>SQ</button>
               <button type="button" aria-pressed={lang==="en"} onClick={()=>setLang("en")}>EN</button>
             </div>
           </div>
-          {loading?<p className="site-editor__status">Duke ngarkuar...</p>:loadError?<div role="alert"><p>Përmbajtja nuk u ngarkua. Provo përsëri para redaktimit.</p><button onClick={()=>setRetry(n=>n+1)}>Provo përsëri</button></div>:
+          {loading?<p className="site-editor__status">{tr("Loading...","Duke ngarkuar...")}</p>:loadError?<div role="alert"><p>{tr("Content failed to load. Try again before editing.","Përmbajtja nuk u ngarkua. Provo përsëri para redaktimit.")}</p><button onClick={()=>setRetry(n=>n+1)}>{tr("Try again","Provo përsëri")}</button></div>:
           <form onSubmit={e=>{e.preventDefault();save();}}>
             <div className="publishing-cms-columns"><fieldset disabled={busy} className="site-editor__fields publishing-cms-fields">
               <label>
@@ -137,7 +141,7 @@ export default function AdminSiteEditor() {
                 <input maxLength={250} value={current["title_"+lang]}
                   onChange={e=>change("title_"+lang,e.target.value)}
                   placeholder={defaults["title_"+lang] || "Titulli"} />
-                <span className="site-editor__hint">Lëre bosh për tekstin e parazgjedhur.</span>
+                <span className="site-editor__hint">{tr("Leave empty to use the default text.","Lëre bosh për tekstin e parazgjedhur.")}</span>
               </label>
               <label>
                 Përshkrimi ({lang.toUpperCase()})
@@ -157,31 +161,31 @@ export default function AdminSiteEditor() {
                   </label>
                   <div className="site-editor__media-preview">
                     {current.image_url ? <img src={current.image_url} alt="Pamje e fotografisë" /> :
-                      <span>Pa foto të personalizuar</span>}
+                      <span>{tr("No custom image","Pa foto të personalizuar")}</span>}
                   </div>
                 </div>
                 {current.image_url && <button className="site-editor__secondary" type="button"
-                  onClick={()=>change("image_url","")}>Hiq fotografinë</button>}
+                  onClick={()=>change("image_url","")}>{tr("Remove image","Hiq fotografinë")}</button>}
               </>}
               {section.link && <label>
                 Lidhja e butonit
                 <input value={current.button_url} placeholder="/explore" maxLength={500}
                   onChange={e=>change("button_url",e.target.value)} />
-                <span className="site-editor__hint">Vetëm lidhje të brendshme që fillojnë me /.</span>
+                <span className="site-editor__hint">{tr("Only internal links starting with /.","Vetëm lidhje të brendshme që fillojnë me /.")}</span>
               </label>}
             </fieldset>
             <aside className="site-editor__preview">
-              <span className="site-editor__preview-label">Pamja paraprake · {lang.toUpperCase()}</span>
+              <span className="site-editor__preview-label">{tr("Preview ·","Pamja paraprake ·")} {lang.toUpperCase()}</span>
               <h3><RichInlineText text={title} /></h3>
               {subtitle && <p><RichInlineText text={subtitle} /></p>}
             </aside></div>
             <div className="site-editor__actions">
               <button className="site-editor__save" type="submit" disabled={busy || !dirty}>
-                {busy?"Duke ruajtur...":"Ruaj ndryshimet"}
+                {busy?"Duke ruajtur...":tr("Save changes","Ruaj ndryshimet")}
               </button>
               <button type="button" className="site-editor__secondary" disabled={busy}
-                onClick={restore}>Rikthe parazgjedhjet</button>
-              {hasContent && <span className="site-editor__hint">Ky seksion ka ndryshime të ruajtura.</span>}
+                onClick={restore}>{tr("Restore defaults","Rikthe parazgjedhjet")}</button>
+              {hasContent && <span className="site-editor__hint">{tr("This section has saved changes.","Ky seksion ka ndryshime të ruajtura.")}</span>}
             </div>
           </form>}
           {status && <p className="site-editor__status" role={status.error?"alert":"status"}

@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
@@ -7,6 +8,9 @@ import { useToast } from "./components/ToastProvider";
 import { useConfirm } from "./components/ConfirmProvider";
 
 const AdminSettings = () => {
+  const {lang}=useLanguage();
+  const tr=(en,sq)=>lang==='sq'?sq:en;
+
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -689,7 +693,7 @@ All settings are working correctly! 🎉
       >
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: "24px", marginBottom: "16px" }}></div>
-          <div>Loading settings...</div>
+          <div>{tr("Loading settings...","Duke ngarkuar cilësimet...")}</div>
         </div>
       </div>
     );
@@ -697,10 +701,10 @@ All settings are working correctly! 🎉
 
   return (
     <div className="publishing-workspace admin-settings-page">
-      <PublishingHeader eyebrow="Website / Configuration" title="System settings" description="Manage platform behavior. Review changes before saving; maintenance actions are separate below." />
-      <div className="publishing-actions settings-primary-actions"><button className="p1-btn" onClick={saveSettings} disabled={saving}>{saving?"Saving…":"Save all changes"}</button><button className="p1-btn alt" onClick={fetchSettings}>Refresh</button><button className="p1-btn alt" onClick={exportSettings}>Export</button></div>
-      <details className="publishing-maintenance"><summary>Maintenance actions</summary><p>These actions affect system configuration. Review the confirmation before proceeding.</p><div className="publishing-actions"><button className="p1-btn alt" onClick={testSettings}>Test settings</button><button className="p1-btn alt" onClick={initializeSettings}>Initialize</button><button className="p1-btn alt" onClick={resetSettings}>Reset</button></div></details>
-      <div className="publishing-settings-columns"><aside className="publishing-section"><label>Search settings<input type="search" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} placeholder="Setting name…"/></label><label className="help-checkbox"><input type="checkbox" checked={showAdvanced} onChange={e=>setShowAdvanced(e.target.checked)}/>Show advanced settings</label><nav className="publishing-queue" aria-label="Settings categories">{filteredCategories.map(category=><button key={category} aria-pressed={activeTab===category} onClick={()=>setActiveTab(category)}>{categories[category].name}<span aria-hidden="true">→</span></button>)}</nav></aside><div>
+      <PublishingHeader eyebrow={tr("Website / Configuration","Faqja / Konfigurimi")} title={tr("System settings","Cilësimet e sistemit")} description={tr("Manage platform behavior. Review changes before saving; maintenance actions are separate below.","Administro funksionimin e platformës. Kontrollo ndryshimet para ruajtjes; veprimet e mirëmbajtjes janë të ndara më poshtë.")} />
+      <div className="publishing-actions settings-primary-actions"><button className="p1-btn" onClick={saveSettings} disabled={saving}>{saving?"Saving…":"Save all changes"}</button><button className="p1-btn alt" onClick={fetchSettings}>{tr("Refresh","Rifresko")}</button><button className="p1-btn alt" onClick={exportSettings}>{tr("Export","Eksporto")}</button></div>
+      <details className="publishing-maintenance"><summary>{tr("Maintenance actions","Veprimet e mirëmbajtjes")}</summary><p>{tr("These actions affect system configuration. Review the confirmation before proceeding.","Këto veprime ndikojnë në konfigurimin e sistemit. Kontrollo konfirmimin para se të vazhdosh.")}</p><div className="publishing-actions"><button className="p1-btn alt" onClick={testSettings}>{tr("Test settings","Testo cilësimet")}</button><button className="p1-btn alt" onClick={initializeSettings}>{tr("Initialize","Inicializo")}</button><button className="p1-btn alt" onClick={resetSettings}>{tr("Reset","Rivendos")}</button></div></details>
+      <div className="publishing-settings-columns"><aside className="publishing-section"><label>{tr("Search settings","Kërko cilësimet")}<input type="search" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} placeholder={tr("Setting name…","Emri i cilësimit…")}/></label><label className="help-checkbox"><input type="checkbox" checked={showAdvanced} onChange={e=>setShowAdvanced(e.target.checked)}/>{tr("Show advanced settings","Shfaq cilësimet e avancuara")}</label><nav className="publishing-queue" aria-label={tr("Settings categories","Kategoritë e cilësimeve")}>{filteredCategories.map(category=><button key={category} aria-pressed={activeTab===category} onClick={()=>setActiveTab(category)}>{categories[category].name}<span aria-hidden="true">→</span></button>)}</nav></aside><div>
       {/* Settings Content */}
       <div className="admin-card">
         <h2
@@ -719,7 +723,7 @@ All settings are working correctly! 🎉
         <div className="publishing-settings-fields">
           {settingsConfig[activeTab] && Object.keys(settingsConfig[activeTab]).filter(key=>!searchTerm||settingsConfig[activeTab][key].label.toLowerCase().includes(searchTerm.toLowerCase())||key.toLowerCase().includes(searchTerm.toLowerCase())).map(key=>{
             const config=settingsConfig[activeTab][key],setting=settings[activeTab]?.[key];
-            return <fieldset className="publishing-setting" key={key}><legend>{config.label}{config.required?' *':''}{config.disabled?' (Coming soon)':''}</legend>{renderSettingField(activeTab,key,config)}{setting?.description&&<p>{setting.description}</p>}{setting?.updated_at&&<small>Last updated: {new Date(setting.updated_at).toLocaleString()}{setting.updated_by&&` by ${setting.updated_by}`}</small>}</fieldset>;
+            return <fieldset className="publishing-setting" key={key}><legend>{config.label}{config.required?' *':''}{config.disabled?' (Coming soon)':''}</legend>{renderSettingField(activeTab,key,config)}{setting?.description&&<p>{setting.description}</p>}{setting?.updated_at&&<small>{tr("Last updated:","Përditësuar së fundmi:")} {new Date(setting.updated_at).toLocaleString()}{setting.updated_by&&` by ${setting.updated_by}`}</small>}</fieldset>;
           })}
           {/* Show message if no settings for this tab */}
           {(!settingsConfig[activeTab] ||

@@ -100,7 +100,7 @@ function CatalogueEditor({guides}) {
 
   const visibleField = guides ? "published" : "visible";
   return <main className="publishing-workspace">
-    <PublishingHeader title={guides ? t("Olimpiadat", "Olympiads") : t("Biblioteka online", "Online library")} to={guides ? "/olympiads" : "/library"} linkLabel={t("Shiko faqen publike", "View public page")}/>
+    <PublishingHeader eyebrow={guides ? t('Garat / Olimpiadat','Competitions / Olympiads') : t('Burimet mësimore / Biblioteka','Learning resources / Library')} title={guides ? t("Olimpiadat", "Olympiads") : t("Biblioteka online", "Online library")} to={guides ? "/olympiads" : "/library"} linkLabel={t("Shiko faqen publike", "View public page")}/>
     <div className="publishing-columns">
       <section className="publishing-section">
         <h2>{selected ? t("Përditëso", "Edit") : guides ? t("Shto olimpiadë", "Add olympiad") : t("Shto dokument", "Add document")}</h2>
