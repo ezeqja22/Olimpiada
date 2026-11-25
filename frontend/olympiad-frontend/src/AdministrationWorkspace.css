@@ -7,10 +7,10 @@
 .admin-sidebar-header h2{white-space:normal;overflow-wrap:anywhere}
 .administration-language{border:1px solid #c7d2ca;background:#fff;color:#1a4d3a;border-radius:4px;padding:8px;min-height:40px;font:inherit;font-size:13px;max-width:100%}
 .admin-header-right{gap:12px;flex-wrap:wrap;justify-content:flex-end}
-.administration-directory{margin:0 0 32px;padding:22px 0;border-top:1px solid #d9e1da;border-bottom:1px solid #d9e1da}
-.administration-directory>header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}
-.administration-directory h3{font-size:18px;color:#234535;margin:0 0 6px}
-.administration-directory p{font-size:13px;color:#68756d;margin:0}
+.administration-tools-directory{margin:0 0 32px;padding:22px 0;border-top:1px solid #d9e1da;border-bottom:1px solid #d9e1da}
+.administration-tools-directory>header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}
+.administration-tools-directory h3{font-size:18px;color:#234535;margin:0 0 6px}
+.administration-tools-directory p{font-size:13px;color:#68756d;margin:0}
 .administration-search{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#52695c;font-weight:600;min-width:0;width:min(100%,300px)}
 .administration-search input{border:1px solid #c4d0c7;background:#fff;border-radius:4px;padding:10px;min-height:44px;font:inherit;font-size:14px;width:100%}
 .administration-tool-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px}
@@ -19,4 +19,4 @@
 .administration-tool-groups a{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:8px 0;color:#1a4d3a;text-decoration:none;font-size:14px;border-top:1px solid #e6ebe6}
 .administration-tool-groups a:hover{text-decoration:underline}
 .administration-search input:focus-visible,.administration-language:focus-visible,.administration-navigation a:focus-visible{outline:2px solid #7254a3;outline-offset:2px}
-@media(max-width:768px){.administration-directory>header{align-items:stretch;flex-direction:column}.administration-search{width:100%}.admin-header-right{gap:6px}.admin-header-right .welcome-text{display:none}.administration-language{min-height:44px}}
+@media(max-width:768px){.administration-tools-directory>header{align-items:stretch;flex-direction:column}.administration-search{width:100%}.admin-header-right{gap:6px}.admin-header-right .welcome-text{display:none}.administration-language{min-height:44px}}
