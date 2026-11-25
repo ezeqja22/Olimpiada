@@ -144,7 +144,7 @@ const AdminReports = () => {
 
     return (
       <span className={`status-badge ${statusColors[status] || "inactive"}`}>
-        {status}
+        {({pending:tr("Pending","Në pritje"),reviewed:tr("Reviewed","Shqyrtuar"),under_review:tr("Under review","Në shqyrtim"),resolved:tr("Resolved","Zgjidhur"),dismissed:tr("Dismissed","Hedhur poshtë")})[status] || status}
       </span>
     );
   };
@@ -227,10 +227,10 @@ const AdminReports = () => {
                     <div>
                       <strong>
                         {getReportTypeIcon(report.report_type)}{" "}
-                        {report.report_type}
+                        {({user:tr("User","Përdorues"),forum:tr("Forum","Forum"),problem:tr("Problem","Problemë"),comment:tr("Comment","Koment"),message:tr("Message","Mesazh")})[report.report_type] || report.report_type}
                       </strong>
                       <br />
-                      <small>Target ID: {report.target_id}</small>
+                      <small>{tr("Target ID:","ID e objektit:")} {report.target_id}</small>
                       {report.description && (
                         <div
                           style={{
@@ -262,7 +262,7 @@ const AdminReports = () => {
                         fontSize: "0.8rem",
                       }}
                     >
-                      {report.report_type}
+                      {({user:tr("User","Përdorues"),forum:tr("Forum","Forum"),problem:tr("Problem","Problemë"),comment:tr("Comment","Koment"),message:tr("Message","Mesazh")})[report.report_type] || report.report_type}
                     </span>
                   </td>
                   <td>
@@ -306,7 +306,7 @@ const AdminReports = () => {
 
                       {report.assigned_to && (
                         <span style={{ fontSize: "0.8rem", color: "#6c757d" }}>
-                          Assigned to {report.assigned_to}
+                          {tr("Assigned to","Caktuar te")} {report.assigned_to}
                         </span>
                       )}
                     </div>
