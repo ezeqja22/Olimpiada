@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 STATE = ROOT / 'staging' / '.local-state'
 BIN = Path(r'C:\Program Files\PostgreSQL\17\bin')
 FAIL_CLEANUP = '--verify-failure-cleanup' in sys.argv
-REPORT = ROOT / 'docs' / 'ux-phase-1-2' / ('postgres-failure-cleanup.json' if FAIL_CLEANUP else 'postgres-reliability.json')
+REPORT = ROOT / 'docs' / 'catalogue-integration' / ('postgres-failure-cleanup.json' if FAIL_CLEANUP else 'postgres-reliability.json')
 
 
 def port():
@@ -128,11 +128,17 @@ def run():
             db.add(user); db.flush()
             db.add(models.User(username='[UX-TEST] student', email='ux-student@example.org', password_hash=user.password_hash, role='student', is_verified=True, is_active=True, is_banned=False))
             problem = models.Problem(title='[UX-TEST] problem', description='Synthetic mathematical exercise', subject='Mathematics', author_id=user.id)
-            db.add(problem); db.flush()
+            db.add(problem); db.flush(); problem_id=problem.id; admin_id=user.id
             db.add(models.Forum(title='[UX-TEST] forum', description='Synthetic forum', creator_id=user.id, is_private=False, is_approved=True, subject='Mathematics'))
             db.add(models.CourseItem(title='[UX-TEST] material', kind='material', subject='Mathematics', body='Synthetic material', published_at=now, created_by=user.id))
             for index, status in enumerate(('scheduled', 'open')):
                 db.add(models.WeeklyChallenge(week_date=f'2026-01-{5 + index * 7:02}', problem_id=problem.id, starts_at=now-timedelta(days=2), closes_at=now+timedelta(days=1) if index == 0 else now-timedelta(days=1), status=status, created_by=user.id))
+            from io import BytesIO
+            from reportlab.pdfgen.canvas import Canvas
+            pdf=BytesIO();canvas=Canvas(pdf);canvas.drawString(50,500,'[UX-TEST] PDF pressure');canvas.showPage();canvas.save()
+            document=models.LibraryDocument(title='[UX-TEST] PDF pressure',category='training',kind='training',subject='Math',level='School',storage_key='synthetic',page_count=1,uploaded_by=user.id,visible=True)
+            db.add(document);db.flush();document_id=document.id
+            db.add(models.LibraryFile(document_id=document_id,content=pdf.getvalue(),version=secrets.token_hex(16)))
             db.commit()
         if FAIL_CLEANUP:
             result['intentional_failure'] = True
@@ -182,6 +188,23 @@ def run():
                 assert all(r.status_code == 200 for r in pressure_responses)
                 assert engine.pool.checkedout() == 0
                 result['pool_pressure'] = {'concurrency': 50, 'requests': 50, 'connection_hold_seconds': .1, 'duration_seconds': round(time.perf_counter()-pressure_start, 3), 'all_200': True}
+                pdf_start=time.perf_counter()
+                pdf_responses, ordinary_responses=await asyncio.gather(
+                    asyncio.gather(*(client.get(f'/core/library/{document_id}/pages/1',headers=student_headers) for _ in range(50))),
+                    asyncio.gather(*(client.get('/get-settings',headers=headers) for _ in range(50))))
+                assert all(r.status_code==200 for r in ordinary_responses)
+                codes=collections.Counter(r.status_code for r in pdf_responses)
+                assert codes.get(200,0)>0 and set(codes)<= {200,503}
+                assert engine.pool.checkedout()==0
+                result['pdf_pressure']={'concurrency':50,'status_counts':dict(codes),'duration_seconds':round(time.perf_counter()-pdf_start,3),'pool_checked_out_after':0}
+                warm_start=time.perf_counter()
+                warm=await asyncio.gather(*(client.get(f'/core/library/{document_id}/pages/1',headers=headers) for _ in range(50)))
+                assert all(r.status_code==200 for r in warm)
+                result['pdf_warm_cache']={'concurrency':50,'all_200':True,'duration_seconds':round(time.perf_counter()-warm_start,3)}
+                result['ordinary_requests_during_pdf_burst']={'requests':50,'all_200':True}
+                download=await client.get(f'/core/library/{document_id}/download',headers=student_headers)
+                assert download.status_code==200
+                result['training_download_passed']=True
                 index = 0
                 for concurrency in (20, 35, 50):
                     wave_start = time.perf_counter()
@@ -202,6 +225,35 @@ def run():
                     result['waves'].append({'concurrency': concurrency, 'requests': len(rows)+1, 'duration_seconds': round(time.perf_counter()-wave_start, 3), 'p95_seconds': timings[int(len(timings)*.95)], 'max_seconds': max(timings), 'status_counts': dict(summary), 'mismatches': [r for r in rows if r['status'] != r['expected']], 'pool_checked_out_after': engine.pool.checkedout()})
                     print(f'Completed concurrency {concurrency}: {len(rows)+1} requests', flush=True)
                     assert not result['waves'][-1]['mismatches'], 'Unexpected HTTP status (see report)'
+                # Actual PostgreSQL row locks: duplicate submit and review/publication races.
+                with SessionLocal() as db:
+                    race=models.WeeklyChallenge(week_date='2000-01-03',problem_id=problem_id,
+                        starts_at=datetime.utcnow()-timedelta(days=1),closes_at=datetime.utcnow()+timedelta(days=1),
+                        status='open',official_solution='Synthetic answer',created_by=admin_id)
+                    db.add(race);db.commit();race_id=race.id
+                submissions=await asyncio.gather(*(client.post(f'/core/weekly/{race_id}/submit',headers=student_headers,json={'answer':'[UX-TEST] race'}) for _ in range(50)))
+                counts=collections.Counter(r.status_code for r in submissions)
+                assert counts=={200:1,409:49},counts
+                submission_id=next(r.json()['id'] for r in submissions if r.status_code==200)
+                with SessionLocal() as db:
+                    race=db.get(models.WeeklyChallenge,race_id);race.closes_at=datetime.utcnow()-timedelta(seconds=1);db.commit()
+                pending=await client.post(f'/core/weekly/admin/{race_id}/publish',headers=headers)
+                assert pending.status_code==409
+                async def grade():
+                    return await client.post(f'/core/weekly/admin/submissions/{submission_id}/review',headers=headers,json={'approve':True,'score':8})
+                async def publish():
+                    return await client.post(f'/core/weekly/admin/{race_id}/publish',headers=headers)
+                decisions=await asyncio.gather(*(grade() if i%2 else publish() for i in range(40)))
+                assert all(r.status_code in (200,409) for r in decisions)
+                assert (await publish()).status_code==200
+                with SessionLocal() as db:
+                    assert db.get(models.WeeklyChallenge,race_id).status=='published'
+                    answer=db.get(models.WeeklySubmission,submission_id)
+                    assert answer.status=='approved' and answer.score==8
+                assert engine.pool.checkedout()==0
+                result['weekly_races']={'submit_concurrency':50,'submit_status_counts':dict(counts),
+                    'grading_publication_concurrency':40,'decision_status_counts':dict(collections.Counter(r.status_code for r in decisions)),
+                    'pending_publication_blocked':True,'final_score':8,'pool_checked_out_after':0,'requests':92}
         with patch('phase1_jobs.anonymize_inactive_accounts') as anonymize, patch('phase1_jobs.send_annual_finance_report') as annual:
             asyncio.run(exercise())
             from unittest.mock import AsyncMock
@@ -214,9 +266,9 @@ def run():
         assert all(count == 1 for count in executions.values()), 'Middleware replayed a failed endpoint'
         with SessionLocal() as db:
             assert db.execute(text('SELECT count(*) FROM ux_rollback_probe')).scalar() == 0
-            assert sorted(w.status for w in db.query(models.WeeklyChallenge).all()) == ['open', 'published']
-        assert result['scheduler_cycles'][0]['weekly'] == {'opened': 1, 'published': 1}
-        assert all(c['weekly'] == {'opened': 0, 'published': 0} for c in result['scheduler_cycles'][1:])
+            assert sorted(w.status for w in db.query(models.WeeklyChallenge).all()) == ['closed', 'open', 'published']
+        assert result['scheduler_cycles'][0]['weekly'] == {'opened': 1, 'closed': 1, 'published': 0}
+        assert all(c['weekly'] == {'opened': 0, 'closed': 0, 'published': 0} for c in result['scheduler_cycles'][1:])
         assert not mail_calls
         def broken_scheduler(db):
             db.execute(text('INSERT INTO ux_rollback_probe VALUES (999999)'))
@@ -228,7 +280,7 @@ def run():
             except __import__('sqlalchemy').exc.DataError:
                 pass
         assert engine.pool.checkedout() == 0
-        assert inline_scheduler.run_scheduled_cycle()['weekly'] == {'opened': 0, 'published': 0}
+        assert inline_scheduler.run_scheduled_cycle()['weekly'] == {'opened': 0, 'closed': 0, 'published': 0}
         with SessionLocal() as db:
             assert db.execute(text('SELECT count(*) FROM ux_rollback_probe')).scalar() == 0
         result['scheduler_exception_rolled_back_and_recovered'] = True
@@ -241,7 +293,7 @@ def run():
         assert result['deadlocks'] == 0
         assert not any('transaction' in str(state) for state in result['database_connection_states_after'])
         assert engine.pool.checkedout() == 0 and stats['checkouts'] == stats['checkins']
-        result['total_http_requests'] = 2 + 50 + sum(w['requests'] for w in result['waves'])
+        result['total_http_requests'] = 2 + 50 + 151 + 92 + sum(w['requests'] for w in result['waves'])
         result['successful_scheduler_cycles'] = len(result['scheduler_cycles']) + 1
         result.update(pool_counters=dict(stats), failed_endpoint_executions=len(executions), middleware_replays=0, rollback_probe_rows=0, email_calls=len(mail_calls), passed=True)
     except BaseException as error:

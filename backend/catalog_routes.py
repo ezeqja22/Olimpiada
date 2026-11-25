@@ -1,5 +1,7 @@
 """Public olympiad and library catalogues, with staff-managed content."""
 from typing import Annotated, Literal
+from uuid import uuid4
+from library_limits import cache, pdf_work, pdf_rate, pdf_slot
 from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
@@ -136,7 +138,7 @@ def read_pdf(file):
         raise HTTPException(422, "Ngarko një skedar PDF.")
     try:
         count = page_count(data)
-    except (ValueError, RuntimeError) as exc:
+    except (PdfReadError, ValueError, RuntimeError) as exc:
         raise HTTPException(422, "PDF-ja është dëmtuar ose e mbrojtur.") from exc
     if not 1 <= count <= MAX_PAGES:
         raise HTTPException(422, "PDF-ja duhet të ketë nga 1 deri në 1500 faqe.")
@@ -165,63 +167,89 @@ def save_document(metadata, file, user, db, document_id=None):
         raise HTTPException(422, "Plotëso titullin, lëndën, disiplinën dhe nivelin.") from exc
     if document_id is None and file is None:
         raise HTTPException(422, "Ngarko PDF-në e dokumentit.")
+    user_id = user.id
+    validated_file = None
+    if file:
+        db.rollback()
+        with pdf_work(user_id, "upload"):
+            validated_file = read_pdf(file)
     doc = (db.query(LibraryDocument).filter_by(id=document_id).with_for_update().first()
            if document_id is not None
-           else LibraryDocument(category=data.kind, storage_key="database", uploaded_by=user.id))
+           else LibraryDocument(category=data.kind, storage_key="database", uploaded_by=user_id))
     if not doc:
         raise HTTPException(404, "Dokumenti nuk u gjet.")
     has_file = doc.id is not None and db.query(LibraryFile.document_id).filter_by(document_id=doc.id).first() is not None
     for field, value in data.model_dump().items():
         setattr(doc, field, value)
     if file:
-        content, doc.page_count = read_pdf(file)
+        content, doc.page_count = validated_file
         doc.storage_key = "database"
         db.add(doc)
         db.flush()
         if has_file:
-            db.query(LibraryFile).filter_by(document_id=doc.id).update({LibraryFile.content: content})
+            db.query(LibraryFile).filter_by(document_id=doc.id).update({LibraryFile.content: content, LibraryFile.version: str(uuid4())})
         else:
-            db.add(LibraryFile(document_id=doc.id, content=content))
+            db.add(LibraryFile(document_id=doc.id, content=content, version=str(uuid4())))
     db.commit()
     return library_payload(doc, has_file or file is not None)
 
 
 def readable_document(document_id, user, db):
     require_feature(user, "material")
-    result = db.query(LibraryDocument, LibraryFile.content).outerjoin(LibraryFile).filter(
+    row = db.query(LibraryDocument.id, LibraryDocument.kind, LibraryDocument.page_count,
+                   LibraryFile.version).join(LibraryFile).filter(
         LibraryDocument.id == document_id, LibraryDocument.visible.is_(True)).first()
-    if result is None:
-        raise HTTPException(404, "Dokumenti nuk u gjet.")
-    return result
+    if row is None:
+        raise HTTPException(404, "Document not available")
+    return row
+
+
+def source_bytes(document_id, version, db):
+    key = (document_id, version, "source")
+    source = cache.get(key)
+    if source is None:
+        source = db.query(LibraryFile.content).filter_by(document_id=document_id, version=version).scalar()
+        if source is None:
+            raise HTTPException(409, "Document changed. Please reload.")
+        cache.put(key, source)
+    return source
 
 
 @router.get("/core/library/{document_id}/pages/{page}")
 def document_page(document_id: int, page: int, user: User = Depends(get_verified_user),
                   db: Session = Depends(get_db)):
-    doc, source = readable_document(document_id, user, db)
+    pdf_rate(user.id, "page")
+    doc = readable_document(document_id, user, db)
     if not 1 <= page <= doc.page_count:
-        raise HTTPException(404, "Faqja nuk u gjet.")
-    if source is None:
-        raise HTTPException(404, "Skedari nuk është i disponueshëm.")
-    try:
-        image = render_page(source, page)
-    except (ValueError, RuntimeError, IndexError) as exc:
-        raise HTTPException(422, "Faqja nuk u hap.") from exc
+        raise HTTPException(404, "Page not found")
+    key = (doc.id, doc.version, page)
+    image = cache.get(key)
+    if image is None:
+        with pdf_slot():
+            source = source_bytes(doc.id, doc.version, db)
+            db.rollback()  # Return connection before CPU-heavy rendering; no writes here.
+            try:
+                image = render_page(source, page)
+            except (ValueError, RuntimeError, IndexError) as exc:
+                raise HTTPException(422, "Page could not be rendered") from exc
+            cache.put(key, image)
     return Response(image, media_type="image/jpeg", headers=PRIVATE)
 
 
 @router.get("/core/library/{document_id}/download")
 def download_training(document_id: int, user: User = Depends(get_verified_user),
                       db: Session = Depends(get_db)):
-    doc, source = readable_document(document_id, user, db)
-    if doc.kind != "training":
-        raise HTTPException(403, "Ky material lexohet në platformë.")
-    if source is None:
-        raise HTTPException(404, "Skedari nuk është i disponueshëm.")
-    try:
-        content = watermarked_pdf(source, user.id)
-    except (PdfReadError, ValueError, RuntimeError, OSError) as exc:
-        raise HTTPException(422, "PDF-ja nuk mund të përpunohej.") from exc
-    return Response(content, media_type="application/pdf", headers={
-        **PRIVATE, "Content-Disposition": f'attachment; filename="olimpiada-material-{doc.id}.pdf"'
-    })
+    user_id = user.id
+    with pdf_work(user_id, "download"):
+        doc = readable_document(document_id, user, db)
+        if doc.kind != "training":
+            raise HTTPException(403, "This document is read online only")
+        source = source_bytes(doc.id, doc.version, db)
+        db.rollback()
+        try:
+            content = watermarked_pdf(source, user_id)
+        except (PdfReadError, ValueError, RuntimeError, OSError) as exc:
+            raise HTTPException(422, "PDF could not be processed") from exc
+        return Response(content, media_type="application/pdf", headers={
+            **PRIVATE, "Content-Disposition": f'attachment; filename="olimpiada-material-{doc.id}.pdf"'
+        })

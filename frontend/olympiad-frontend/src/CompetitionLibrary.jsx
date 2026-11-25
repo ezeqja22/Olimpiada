@@ -109,6 +109,7 @@ function Reader({doc, sq}) {
   const [downloadError, setDownloadError] = useState("");
   const [downloading, setDownloading] = useState(false);
   const [retry, setRetry] = useState(0);
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     if (!currentUser || !doc.available) return;
@@ -160,11 +161,14 @@ function Reader({doc, sq}) {
         {Array.from({length: doc.page_count}, (_, index) => <option key={index} value={index + 1}>{index + 1}</option>)}
       </select> / {doc.page_count}</label>
       <button aria-label={sq ? "Faqja tjetër" : "Next page"} disabled={page >= doc.page_count} onClick={() => setPage(page + 1)}><ChevronRight size={20}/></button>
+      <label>{sq ? "Zmadhimi" : "Zoom"} <select value={zoom} onChange={e => setZoom(Number(e.target.value))}>
+        <option value={1}>{sq ? "Përshtat gjerësinë" : "Fit width"}</option><option value={1.5}>150%</option><option value={2}>200%</option><option value={3}>300%</option>
+      </select></label>
       {doc.kind === "training" && <button disabled={downloading} onClick={download}><Download size={18}/> {sq ? "Shkarko PDF me filigran" : "Download watermarked PDF"}</button>}
     </div>
     {downloadError && <p role="alert">{downloadError}</p>}
     {error ? <p role="alert">{error} <button onClick={() => setRetry(value => value + 1)}>{sq ? "Riprovo" : "Retry"}</button></p>
-      : image ? <img src={image} draggable={false} alt={(sq ? "Faqja " : "Page ") + page + " · " + doc.title}/>
+      : image ? <div className="reader-viewport" tabIndex={0} aria-label={sq ? "Faqja e dokumentit; lëviz për të lexuar" : "Document page; scroll to read"}><img src={image} style={{width: `${zoom * 100}%`, maxWidth: `${zoom * 800}px`}} alt={(sq ? "Faqja " : "Page ") + page + " · " + doc.title}/></div>
         : <p role="status">{sq ? "Duke ngarkuar faqen…" : "Loading page…"}</p>}
   </section>;
 }

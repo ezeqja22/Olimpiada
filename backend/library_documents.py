@@ -1,52 +1,42 @@
-"""Render private documents and stamp PDFs before attaching them to a response."""
-from contextlib import closing
-from io import BytesIO
-from threading import Lock
-
-import pypdfium2 as pdfium
-from pypdf import PdfReader, PdfWriter
-from reportlab.pdfgen.canvas import Canvas
+"""Bounded PDF operations; native parsers never run inside an API worker."""
+import os
+from pathlib import Path
+import subprocess
+import sys
 
 MAX_FILE_SIZE = 25 * 1024 * 1024
 MAX_PAGES = 1500
-_pdfium = Lock()
+PDF_TIMEOUT_SECONDS = 20
+WORKER = Path(__file__).with_name("library_pdf_worker.py")
+
+
+def _process(operation, content, argument=0):
+    if len(content) > MAX_FILE_SIZE:
+        raise ValueError("PDF exceeds the upload limit")
+    # Do not pass database, cloud or signing credentials into a PDF parser.
+    env = {key: value for key, value in os.environ.items()
+           if key.upper() in {"SYSTEMROOT", "WINDIR", "PATH", "TEMP", "TMP", "LANG"}}
+    try:
+        result = subprocess.run(
+            [sys.executable, "-I", str(WORKER), operation, str(argument)],
+            input=content, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            timeout=PDF_TIMEOUT_SECONDS, env=env,
+            creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise ValueError("PDF processing time limit exceeded") from exc
+    if result.returncode or not result.stdout or len(result.stdout) > 50 * 1024 * 1024:
+        raise ValueError("PDF could not be processed within resource limits")
+    return result.stdout
 
 
 def page_count(content):
-    with _pdfium, pdfium.PdfDocument(content) as document:
-        return len(document)
+    return int(_process("count", content))
 
 
 def render_page(content, number):
-    output = BytesIO()
-    with _pdfium, pdfium.PdfDocument(content) as document, closing(document[number - 1]) as page:
-        scale = min(2, 1600 / max(page.get_size()))
-        with closing(page.render(scale=scale)) as bitmap:
-            bitmap.to_pil().convert("RGB").save(output, "JPEG", quality=88)
-    return output.getvalue()
+    return _process("page", content, number)
 
 
 def watermarked_pdf(content, user_id):
-    reader = PdfReader(BytesIO(content))
-    writer = PdfWriter()
-    label = f"Olimpiada.al  |  ID {user_id}"
-    for page in reader.pages:
-        page.transfer_rotation_to_content()
-        box = page.cropbox
-        width, height = float(box.width), float(box.height)
-        stamp = BytesIO()
-        canvas = Canvas(stamp, pagesize=(width, height))
-        canvas.setFillColorRGB(0.22, 0.32, 0.28, alpha=0.28)
-        canvas.setFont("Helvetica-Bold", min(30, max(8, width / 18)))
-        canvas.translate(width / 2, height / 2)
-        canvas.rotate(30)
-        canvas.drawCentredString(0, 0, label)
-        canvas.showPage()
-        canvas.save()
-        stamp.seek(0)
-        page.merge_translated_page(PdfReader(stamp).pages[0], float(box.left), float(box.bottom))
-        writer.add_page(page, excluded_keys=("/Annots", "/AA"))
-
-    output = BytesIO()
-    writer.write(output)
-    return output.getvalue()
+    return _process("watermark", content, user_id)

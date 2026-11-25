@@ -557,6 +557,7 @@ class LibraryFile(Base):
     __tablename__ = "library_files"
     document_id = Column(Integer, ForeignKey("library_documents.id", ondelete="CASCADE"), primary_key=True)
     content = Column(LargeBinary, nullable=False)
+    version = Column(String(36), nullable=False, default="legacy", server_default="legacy")
 
 
 class OlympiadGuide(Base):

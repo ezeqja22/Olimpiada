@@ -39,7 +39,9 @@
 .reader-tools { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 12px; }
 .reader-tools button { display: inline-flex; align-items: center; gap: 6px; }
 .reader-tools button:disabled { opacity: .5; cursor: default; }
-.reader img { display: block; width: min(100%, 800px); margin: auto; height: auto; }
+.reader-viewport { overflow: auto; max-height: 85vh; min-height: 260px; }
+.reader-viewport img { display: block; max-width: none; margin: auto; height: auto; }
+.reader-viewport:focus-visible { outline: 2px solid #7254a3; outline-offset: 2px; }
 @media (max-width: 650px) { .guide-detail-grid { grid-template-columns: 1fr; gap: 12px; } }
 .library-cover h3 { color: #fff !important; }
 .catalog-shell :is(button,a,input,select):focus-visible { outline: 2px solid #7254a3; outline-offset: 3px; }

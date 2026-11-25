@@ -108,7 +108,7 @@ def entries():
         yield (key, kind, title, "Olimpiada.al", "Matematikë", discipline, level, description, exercises)
 
 
-def seed_library(admin_id):
+def seed_library(admin_id, include_external=False):
     with SessionLocal() as db:
         if not is_staff(db.get(User, admin_id)):
             raise ValueError("Jep ID-në e një administratori të projektit.")
@@ -117,13 +117,17 @@ def seed_library(admin_id):
         batch = []
         original_keys = {item[0] for item in ORIGINALS}
         for key, kind, title, author, subject, discipline, level, description, source in entries():
+            # Hash pinning proves identity, not redistribution rights. External
+            # editions require an operator's rights review; never fetch by default.
+            if key not in original_keys and not include_external:
+                continue
             storage_key = "starter/" + key
             if storage_key in existing:
                 continue
             pdf = make_handout(title, source) if key in original_keys else fetch_pdf(*source)
             batch.append((LibraryDocument(title=title, kind=kind, category=kind, author=author,
                 subject=subject, discipline=discipline, level=level, description=description,
-                storage_key=storage_key, page_count=page_count(pdf), uploaded_by=admin_id), pdf))
+                storage_key=storage_key, page_count=page_count(pdf), uploaded_by=admin_id, visible=False), pdf))
         for doc, pdf in batch:
             db.add(doc)
             db.flush()
@@ -135,4 +139,7 @@ def seed_library(admin_id):
 if __name__ == "__main__":
     parser = ArgumentParser(description=__doc__)
     parser.add_argument("--admin-id", type=int, required=True)
-    print(f"Dokumente të importuara: {seed_library(parser.parse_args().admin_id)}")
+    parser.add_argument("--include-external-after-rights-review", action="store_true",
+                        help="Fetch external editions only after verifying redistribution rights in the deployment jurisdiction. Imports stay hidden for review.")
+    args = parser.parse_args()
+    print(f"Dokumente të importuara: {seed_library(args.admin_id, args.include_external_after_rights_review)}")

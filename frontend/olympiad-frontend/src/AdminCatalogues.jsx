@@ -3,6 +3,7 @@ import axios from "axios";
 import {API, authHeaders} from "./CompetitionLibrary";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 import "./phase1.css";
+import {useLanguage} from "./context/LanguageContext";
 
 const emptyGuide = {slug: "", name: "", acronym: "", subject: "", scope: "international", audience: "",
   importance: "", history: "", steps: "", source_url: "", local_url: "", published: false};
@@ -17,8 +18,15 @@ const limits = {name:250, title:250, author:250, acronym:30, slug:100, audience:
   source_url:500, local_url:500, importance:2500, history:2500, description:3000};
 
 function CatalogueEditor({guides}) {
+  const sq = useLanguage().lang === "sq";
+  const t = (albanian, english) => sq ? albanian : english;
+  const [reload, setReload] = useState(0);
+  const [loading, setLoading] = useState(true);
   const blank = guides ? emptyGuide : emptyDocument;
-  const fields = guides ? guideFields : documentFields;
+  const enFields = {name:"Name", acronym:"Acronym", slug:"URL identifier", subject:guides?"Subject":"Category / subject",
+    audience:"Audience", importance:"Significance", history:"History", steps:"Participation steps (one per line)",
+    source_url:"Source", local_url:"Albanian announcements", title:"Title", author:"Author", discipline:"Discipline", level:"Level", description:"Description"};
+  const fields = Object.fromEntries(Object.entries(guides ? guideFields : documentFields).map(([key,label]) => [key,sq?label:enFields[key]]));
   const route = guides ? "/core/olympiads/admin" : "/core/library/admin";
   const [rows, setRows] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -30,13 +38,15 @@ function CatalogueEditor({guides}) {
 
   useEffect(() => {
     const controller = new AbortController();
+    setLoading(true);
+    setFeedback(previous => previous?.error ? null : previous);
     axios.get(API + route, {headers: authHeaders(), signal: controller.signal})
       .then(({data}) => setRows(data))
       .catch(() => {
-        if (!controller.signal.aborted) setFeedback({error: true, text: "Lista nuk u ngarkua."});
-      });
+        if (!controller.signal.aborted) setFeedback({error: true, text: t("Lista nuk u ngarkua.", "The list could not be loaded.")});
+      }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [route]);
+  }, [route, reload, sq]);
 
   function edit(row) {
     setSelected(row?.id ?? null);
@@ -79,10 +89,10 @@ function CatalogueEditor({guides}) {
       setRows(previous => previous.some(item => item.id === row.id)
         ? previous.map(item => item.id === row.id ? row : item) : [row, ...previous]);
       edit(row);
-      setFeedback({text: "Ndryshimet u ruajtën."});
+      setFeedback({text: t("Ndryshimet u ruajtën.", "Changes saved.")});
     } catch (error) {
       const detail = error.response?.data?.detail;
-      setFeedback({error: true, text: typeof detail === "string" ? detail : "Ruajtja dështoi. Kontrollo fushat dhe provo përsëri."});
+      setFeedback({error: true, text: typeof detail === "string" ? detail : t("Ruajtja dështoi. Kontrollo fushat dhe provo përsëri.", "Could not save. Check the fields and try again.")});
     } finally {
       setSaving(false);
     }
@@ -90,40 +100,43 @@ function CatalogueEditor({guides}) {
 
   const visibleField = guides ? "published" : "visible";
   return <main className="publishing-workspace">
-    <PublishingHeader title={guides ? "Olimpiadat" : "Biblioteka online"} to={guides ? "/olympiads" : "/library"} linkLabel="Shiko faqen publike"/>
+    <PublishingHeader title={guides ? t("Olimpiadat", "Olympiads") : t("Biblioteka online", "Online library")} to={guides ? "/olympiads" : "/library"} linkLabel={t("Shiko faqen publike", "View public page")}/>
     <div className="publishing-columns">
       <section className="publishing-section">
-        <h2>{selected ? "Përditëso" : guides ? "Shto olimpiadë" : "Shto dokument"}</h2>
+        <h2>{selected ? t("Përditëso", "Edit") : guides ? t("Shto olimpiadë", "Add olympiad") : t("Shto dokument", "Add document")}</h2>
+        <p className="p1-muted">{t("Teksti i katalogut shfaqet siç e shkruan në të dy gjuhët. Përfshi shqip dhe anglisht kur nevojitet.", "Catalogue text is displayed as entered in both languages. Include Albanian and English where needed.")}</p>
         <form className="p1-form" onSubmit={save}>
           <fieldset disabled={saving} style={{border:0, padding:0, margin:0, display:"grid", gap:14, minWidth:0}}>
             {Object.entries(fields).map(([key, label]) => {
               const many = ["description", "importance", "history", "steps"].includes(key);
-              const props = {className:"p1-input", value:form[key], onChange:event => input(key, event.target.value),
+              const props = {name:key, className:"p1-input", value:form[key], onChange:event => input(key, event.target.value),
                 required:!["description", "local_url", "author"].includes(key), maxLength:limits[key] || 2500};
               return <label key={key}>{label}{many ? <textarea rows={key === "steps" ? 5 : 3} {...props}/>
                 : <input {...props} type={key.endsWith("_url") ? "url" : "text"} pattern={key === "slug" ? "[a-z0-9]+(?:-[a-z0-9]+)*" : undefined}/>}</label>;
             })}
-            {guides ? <label>Niveli i garës<select className="p1-select" value={form.scope} onChange={e => input("scope",e.target.value)}>
-              <option value="national">Kombëtare</option><option value="regional">Rajonale</option><option value="international">Ndërkombëtare</option>
+            {guides ? <label>{t("Niveli i garës", "Competition scope")}<select className="p1-select" value={form.scope} onChange={e => input("scope",e.target.value)}>
+              <option value="national">{t("Kombëtare", "National")}</option><option value="regional">{t("Rajonale", "Regional")}</option><option value="international">{t("Ndërkombëtare", "International")}</option>
             </select></label> : <>
-              <label>Lloji<select className="p1-select" value={form.kind} onChange={e => input("kind",e.target.value)}>
-                <option value="book">Libër</option><option value="magazine">Revistë</option><option value="booklet">Broshurë</option><option value="training">Material trajnimi</option>
+              <label>{t("Lloji", "Kind")}<select className="p1-select" value={form.kind} onChange={e => input("kind",e.target.value)}>
+                <option value="book">{t("Libër", "Book")}</option><option value="magazine">{t("Revistë", "Magazine")}</option><option value="booklet">{t("Broshurë", "Booklet")}</option><option value="training">{t("Material trajnimi", "Training material")}</option>
               </select></label>
-              <label>{selected ? "Zëvendëso PDF-në (opsionale)" : "Skedari PDF"}<input key={fileKey} type="file" accept="application/pdf,.pdf" required={!selected} onChange={e => setFile(e.target.files[0] || null)}/></label>
+              <label>{selected ? t("Zëvendëso PDF-në (opsionale)", "Replace PDF (optional)") : t("Skedari PDF", "PDF file")}<input key={fileKey} type="file" accept="application/pdf,.pdf" required={!selected} onChange={e => setFile(e.target.files[0] || null)}/></label>
             </>}
-            <label><input type="checkbox" checked={form[visibleField]} onChange={e => input(visibleField,e.target.checked)}/> Shfaqe në katalog</label>
-            <div className="p1-row"><button className="p1-btn" type="submit">{saving ? "Duke ruajtur…" : "Ruaj"}</button>
-              {selected && <button className="p1-btn alt" type="button" onClick={() => edit(null)}>Shto të re</button>}</div>
+            <label><input type="checkbox" checked={form[visibleField]} onChange={e => input(visibleField,e.target.checked)}/> {t("Shfaqe në katalog", "Show in catalogue")}</label>
+            <div className="p1-row"><button className="p1-btn" type="submit">{saving ? t("Duke ruajtur…", "Saving…") : t("Ruaj", "Save")}</button>
+              {selected && <button className="p1-btn alt" type="button" onClick={() => edit(null)}>{t("Shto të re", "Add new")}</button>}</div>
           </fieldset>
         </form>
         {feedback && <p className="p1-note" role={feedback.error ? "alert" : "status"}>{feedback.text}</p>}
       </section>
       <section className="publishing-section">
-        <h2>{guides ? "Olimpiadat në katalog" : "Dokumentet në katalog"}</h2>
+        <h2>{guides ? t("Olimpiadat në katalog", "Olympiads in catalogue") : t("Dokumentet në katalog", "Documents in catalogue")}</h2>
+        <button type="button" className="p1-btn alt" disabled={loading} onClick={() => setReload(n => n + 1)}>{t("Ringarko listën", "Reload list")}</button>
+        {loading ? <p role="status">{t("Duke ngarkuar…", "Loading…")}</p> : !rows.length && <p>{t("Katalogu është bosh.", "The catalogue is empty.")}</p>}
         <div className="publishing-queue">{rows.map(row => <button type="button" key={row.id} disabled={saving}
           aria-pressed={row.id === selected} onClick={() => edit(row)}>
-          <span><strong>{guides ? row.name : row.title}</strong><small>{row.subject} · {row[visibleField] ? "Publik" : "I fshehur"}{!guides && !row.available ? " · Pa PDF" : ""}</small></span>
-          <span>Përditëso →</span>
+          <span><strong>{guides ? row.name : row.title}</strong><small>{row.subject} · {row[visibleField] ? t("Publik", "Public") : t("I fshehur", "Hidden")}{!guides && !row.available ? t(" · Pa PDF", " · No PDF") : ""}</small></span>
+          <span>{t("Përditëso →", "Edit →")}</span>
         </button>)}</div>
       </section>
     </div>

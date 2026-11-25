@@ -40,6 +40,16 @@ def run():
             row=c.execute(text('SELECT title,visible FROM library_documents WHERE id=90001')).one();assert row[0]=='[UX-TEST] private legacy' and row[1] is False
             assert c.execute(text('SELECT count(*) FROM olympiad_guides')).scalar()==18
             assert c.execute(text("SELECT count(*) FROM pg_class WHERE relname IN ('library_files','olympiad_guides') AND relrowsecurity")).scalar()==2
+        # Model the Data API's ordinary role, even if someone grants table SELECT.
+        with engine.begin() as c:
+            c.execute(text('CREATE ROLE catalogue_reader NOLOGIN NOSUPERUSER NOBYPASSRLS'))
+            c.execute(text('GRANT USAGE ON SCHEMA public TO catalogue_reader'))
+            c.execute(text('GRANT SELECT ON library_files, olympiad_guides TO catalogue_reader'))
+            c.execute(text("INSERT INTO library_files(document_id,content) VALUES (90001,decode('25504446','hex'))"))
+            c.execute(text('SET LOCAL ROLE catalogue_reader'))
+            assert c.execute(text('SELECT count(*) FROM olympiad_guides')).scalar()==0
+            assert c.execute(text('SELECT count(*) FROM library_files')).scalar()==0
+        result['ordinary_role_select_denied_by_rls']=True
         alembic.downgrade(cfg,'77f26f3')
         with engine.connect() as c:assert c.execute(text('SELECT count(*) FROM library_documents WHERE id=90001')).scalar()==1
         alembic.upgrade(cfg,'head')

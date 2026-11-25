@@ -65,7 +65,7 @@ def safe_challenge(challenge, db):
                         "description": problem.description, "subject": problem.subject,
                         "level": problem.level},
             "official_solution": challenge.official_solution if published else None,
-            "winners": [{"user_id": u.id, "username": u.username} for _, u in winners],
+            "winners": [{"username": u.username} for _, u in winners],
             "rankings": rank_students((u.id, u.username, s.score) for s, u in winners if s.score is not None)}
 
 def active_week(db):
@@ -84,7 +84,7 @@ def rank_students(rows):
     for index, (user_id, username, points) in enumerate(rows, 1):
         if points != previous:
             rank, previous = index, points
-        ranked.append({"user_id": user_id, "username": username, "points": points, "rank": rank})
+        ranked.append({"username": username, "points": points, "rank": rank})
     return ranked
 
 
