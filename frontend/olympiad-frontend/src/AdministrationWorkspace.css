@@ -20,3 +20,14 @@
 .administration-tool-groups a:hover{text-decoration:underline}
 .administration-search input:focus-visible,.administration-language:focus-visible,.administration-navigation a:focus-visible{outline:2px solid #7254a3;outline-offset:2px}
 @media(max-width:768px){.administration-tools-directory>header{align-items:stretch;flex-direction:column}.administration-search{width:100%}.admin-header-right{gap:6px}.admin-header-right .welcome-text{display:none}.administration-language{min-height:44px}}
+
+/* Keep the language control reachable without squeezing the mobile title. */
+@media(max-width:768px){
+  .platform-admin .admin-header{gap:10px}
+  .platform-admin .admin-header-right{display:flex;flex:0 0 auto;min-width:0}
+  .platform-admin .admin-header-left{flex:1;min-width:0;gap:8px}
+  .platform-admin .admin-header-copy,.platform-admin .administration-breadcrumb{min-width:0;overflow-wrap:anywhere}
+  .platform-admin .administration-breadcrumb h1{font-size:clamp(16px,3.5vw,21px)!important;overflow-wrap:anywhere}
+  .platform-admin .user-role{white-space:normal;overflow-wrap:anywhere}
+  .platform-admin .administration-language{max-width:96px;padding:6px}
+}
