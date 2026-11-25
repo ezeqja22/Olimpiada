@@ -270,7 +270,7 @@ const AdminUserHistory = () => {
                             textTransform: "uppercase",
                           }}
                         >
-                          {entry.action_type}
+                          {({warn:tr("Warning","Paralajmërim"),ban:tr("Ban","Bllokim"),unban:tr("Unban","Zhbllokim"),activate:tr("Activation","Aktivizim"),deactivate:tr("Deactivation","Çaktivizim"),time_ban:tr("Temporary ban","Bllokim i përkohshëm")})[entry.action_type] || entry.action_type}
                         </span>
                         <span
                           style={{
