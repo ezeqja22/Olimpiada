@@ -47,3 +47,5 @@ test("failed CMS load blocks editing until a successful retry",async()=>{
   expect(await screen.findByLabelText(/Titulli \(SQ\)/)).toHaveValue('Stored title');
   expect(axios.put).not.toHaveBeenCalled();
 });
+
+vi.mock("./context/LanguageContext",()=>({useLanguage:()=>({lang:"sq"})}));
