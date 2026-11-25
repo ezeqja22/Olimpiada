@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -7,6 +8,8 @@ import "./AdminLayout.css";
 import {AdminTemplates} from "./AdminExperience";
 
 const AdminEmail = () => {
+  const {lang} = useLanguage();
+  const tr = (en,sq) => lang === 'en' ? en : sq;
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,7 +41,7 @@ const AdminEmail = () => {
       );
       setCampaigns(response.data);
     } catch (err) {
-      setError("Failed to load email campaigns");
+      setError(tr("Failed to load email campaigns","Fushatat e email-it nuk u ngarkuan"));
       console.error("Email campaigns error:", err);
     } finally {
       setLoading(false);
@@ -68,7 +71,7 @@ const AdminEmail = () => {
       fetchCampaigns();
     } catch (err) {
       console.error("Create campaign error:", err);
-      showToast("Failed to create email campaign", "error");
+      showToast(tr("Failed to create email campaign","Fushata e email-it nuk u krijua"), "error");
     }
   };
 
@@ -126,8 +129,8 @@ const AdminEmail = () => {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "Not sent";
-    return new Date(dateString).toLocaleDateString("en-US", {
+    if (!dateString) return tr("Not sent","Nuk është dërguar");
+    return new Date(dateString).toLocaleDateString(lang === "en" ? "en-GB" : "sq-AL", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -138,11 +141,11 @@ const AdminEmail = () => {
 
   const handleSendCampaign = async (campaignId) => {
     const confirmed = await confirm({
-      title: "Send email campaign?",
+      title: tr("Send email campaign?","Dërgo fushatën e email-it?"),
       message:
-        "This will send the campaign to the selected users. This action cannot be undone.",
-      confirmText: "Send campaign",
-      cancelText: "Cancel",
+        tr("This will send the campaign to the selected users. This action cannot be undone.","Fushata do t'u dërgohet përdoruesve të zgjedhur. Ky veprim nuk mund të zhbëhet."),
+      confirmText: tr("Send campaign","Dërgo fushatën"),
+      cancelText: tr("Cancel","Anulo"),
       variant: "success",
     });
 
@@ -159,14 +162,14 @@ const AdminEmail = () => {
       );
 
       showToast(
-        `Campaign sent successfully! ${response.data.message}`,
+        tr(`Campaign sent successfully! ${response.data.message}`, `Fushata u dërgua me sukses! ${response.data.message}`),
         "success",
       );
       fetchCampaigns(); // Refresh the campaigns list
     } catch (err) {
       console.error("Send campaign error:", err);
       showToast(
-        `Failed to send campaign: ${err.response?.data?.detail || err.message}`,
+        tr(`Failed to send campaign: ${err.response?.data?.detail || err.message}`, `Dërgimi i fushatës dështoi: ${err.response?.data?.detail || err.message}`),
         "error",
       );
     }
@@ -187,7 +190,7 @@ const AdminEmail = () => {
     } catch (err) {
       console.error("View campaign error:", err);
       showToast(
-        `Failed to load campaign details: ${err.response?.data?.detail || err.message}`,
+        tr(`Failed to load campaign details: ${err.response?.data?.detail || err.message}`, `Detajet e fushatës nuk u ngarkuan: ${err.response?.data?.detail || err.message}`),
         "error",
       );
     }
@@ -195,11 +198,11 @@ const AdminEmail = () => {
 
   const handleDeleteCampaign = async (campaignId) => {
     const confirmed = await confirm({
-      title: "Delete email campaign?",
+      title: tr("Delete email campaign?","Fshi fushatën e email-it?"),
       message:
-        "This will delete the campaign and all associated data. This action cannot be undone.",
-      confirmText: "Delete campaign",
-      cancelText: "Cancel",
+        tr("This will delete the campaign and all associated data. This action cannot be undone.","Fushata dhe të dhënat e lidhura do të fshihen. Ky veprim nuk mund të zhbëhet."),
+      confirmText: tr("Delete campaign","Fshi fushatën"),
+      cancelText: tr("Cancel","Anulo"),
       variant: "success",
     });
 
@@ -214,12 +217,12 @@ const AdminEmail = () => {
         },
       );
 
-      showToast("Campaign deleted successfully", "success");
+      showToast(tr("Campaign deleted successfully","Fushata u fshi me sukses"), "success");
       fetchCampaigns(); // Refresh the campaigns list
     } catch (err) {
       console.error("Delete campaign error:", err);
       showToast(
-        `Failed to delete campaign: ${err.response?.data?.detail || err.message}`,
+        tr(`Failed to delete campaign: ${err.response?.data?.detail || err.message}`, `Fshirja e fushatës dështoi: ${err.response?.data?.detail || err.message}`),
         "error",
       );
     }
@@ -236,34 +239,30 @@ const AdminEmail = () => {
   if (error) {
     return (
       <div className="admin-card">
-        <h2>Error</h2>
+        <h2>{tr(tr("Error","Gabim"),"Gabim")}</h2>
         <p>{error}</p>
-        <button className="admin-btn" onClick={fetchCampaigns}>
-          Try Again
-        </button>
+        <button className="admin-btn" onClick={fetchCampaigns}>{tr(tr("Try Again","Provo përsëri"),"Provo përsëri")}</button>
       </div>
     );
   }
 
   return (
-    <div className="publishing-workspace admin-email-page"><PublishingHeader eyebrow="Website / Communication" title="Email campaigns" description="Prepare campaigns, review recipients and inspect delivery history. Sending an email is a separate action."/><details className="publishing-maintenance"><summary>Notification templates</summary><AdminTemplates/></details>
+    <div className="publishing-workspace admin-email-page"><PublishingHeader eyebrow={tr(tr("Website / Communication","Faqja / Komunikimi"),"Faqja / Komunikimi")} title={tr(tr("Email campaigns","Fushatat e email-it"),"Fushatat e email-it")} description={tr(tr("Prepare campaigns, review recipients and inspect delivery history. Sending an email is a separate action.","Përgatit fushatat, kontrollo marrësit dhe historikun e dërgesave. Dërgimi i email-it është veprim më vete."),"Përgatit fushatat, kontrollo marrësit dhe historikun e dërgesave. Dërgimi i email-it është veprim më vete.")}/><details className="publishing-maintenance"><summary>{tr(tr("Notification templates","Modelet e njoftimeve"),"Modelet e njoftimeve")}</summary><AdminTemplates/></details>
       {/* Header */}
       <div className="admin-card">
         <div className="admin-card-header admin-card-header-wrap">
-          <h2>Campaign history</h2>
-          <button className="admin-btn" onClick={() => setShowCreateForm(true)}>
-            Create Campaign
-          </button>
+          <h2>{tr(tr("Campaign history","Historiku i fushatave"),"Historiku i fushatave")}</h2>
+          <button className="admin-btn" onClick={() => setShowCreateForm(true)}>{tr(tr("Create Campaign","Krijo fushatë"),"Krijo fushatë")}</button>
         </div>
       </div>
 
       {/* Create Campaign Form */}
       {showCreateForm && (
         <div className="publishing-section publishing-composer">
-          <header><h3>Create a campaign</h3><p>Compose the message and select its audience. Review the campaign before sending.</p></header>
+          <header><h3>{tr(tr("Create a campaign","Krijo një fushatë"),"Krijo një fushatë")}</h3><p>{tr(tr("Compose the message and select its audience. Review the campaign before sending.","Përgatit mesazhin dhe zgjidh marrësit. Kontrollo fushatën para dërgimit."),"Përgatit mesazhin dhe zgjidh marrësit. Kontrollo fushatën para dërgimit.")}</p></header>
           <form onSubmit={handleCreateCampaign} className="admin-form">
             <div className="form-group">
-              <label htmlFor="campaign-subject">Subject</label>
+              <label htmlFor="campaign-subject">{tr(tr("Subject","Subjekti"),"Subjekti")}</label>
               <input
                 id="campaign-subject" type="text"
                 value={newCampaign.subject}
@@ -273,13 +272,13 @@ const AdminEmail = () => {
                     subject: e.target.value,
                   }))
                 }
-                placeholder="Email subject..."
+                placeholder={tr(tr("Email subject...","Subjekti i email-it..."),"Subjekti i email-it...")}
                 required
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="campaign-content">Content</label>
+              <label htmlFor="campaign-content">{tr(tr("Content","Përmbajtja"),"Përmbajtja")}</label>
               <textarea id="campaign-content"
                 value={newCampaign.content}
                 onChange={(e) =>
@@ -288,14 +287,14 @@ const AdminEmail = () => {
                     content: e.target.value,
                   }))
                 }
-                placeholder="Email content..."
+                placeholder={tr(tr("Email content...","Përmbajtja e email-it..."),"Përmbajtja e email-it...")}
                 rows={8}
                 required
               />
             </div>
 
             <div className="form-group">
-              <label>Target Audience</label>
+              <label>{tr(tr("Target Audience","Marrësit"),"Marrësit")}</label>
               <select
                 value={newCampaign.target_audience}
                 onChange={(e) =>
@@ -305,18 +304,18 @@ const AdminEmail = () => {
                   }))
                 }
               >
-                <option value="all">All Users</option>
-                <option value="marketing_opt_in">Marketing Opt-in Users</option>
-                <option value="admins">Admins Only</option>
-                <option value="moderators">Moderators Only</option>
-                <option value="users">Regular Users Only</option>
-                <option value="specific">Specific Users</option>
+                <option value="all">{tr(tr("All Users","Të gjithë përdoruesit"),"Të gjithë përdoruesit")}</option>
+                <option value="marketing_opt_in">{tr(tr("Marketing Opt-in Users","Përdoruesit që pranojnë marketingun"),"Përdoruesit që pranojnë marketingun")}</option>
+                <option value="admins">{tr(tr("Admins Only","Vetëm administratorët"),"Vetëm administratorët")}</option>
+                <option value="moderators">{tr(tr("Moderators Only","Vetëm moderatorët"),"Vetëm moderatorët")}</option>
+                <option value="users">{tr(tr("Regular Users Only","Vetëm përdoruesit e zakonshëm"),"Vetëm përdoruesit e zakonshëm")}</option>
+                <option value="specific">{tr(tr("Specific Users","Përdorues të caktuar"),"Përdorues të caktuar")}</option>
               </select>
             </div>
 
             {newCampaign.target_audience === "specific" && (
               <div className="form-group">
-                <label>User IDs (comma-separated)</label>
+                <label>{tr(tr("User IDs (comma-separated)","ID-të e përdoruesve (ndarë me presje)"),"ID-të e përdoruesve (ndarë me presje)")}</label>
                 <input
                   type="text"
                   value={newCampaign.target_user_ids.join(", ")}
@@ -335,16 +334,12 @@ const AdminEmail = () => {
             )}
 
             <div className="admin-form-actions">
-              <button type="submit" className="admin-btn">
-                Create Campaign
-              </button>
+              <button type="submit" className="admin-btn">{tr(tr("Create Campaign","Krijo fushatë"),"Krijo fushatë")}</button>
               <button
                 type="button"
                 className="admin-btn secondary"
                 onClick={() => setShowCreateForm(false)}
-              >
-                Cancel
-              </button>
+              >{tr(tr("Cancel","Anulo"),"Anulo")}</button>
             </div>
           </form>
         </div>
@@ -356,14 +351,14 @@ const AdminEmail = () => {
           <table>
             <thead>
               <tr>
-                <th>Subject</th>
-                <th>Target</th>
-                <th>Status</th>
-                <th>Recipients</th>
-                <th>Created By</th>
-                <th>Created</th>
-                <th>Sent</th>
-                <th>Actions</th>
+                <th>{tr(tr("Subject","Subjekti"),"Subjekti")}</th>
+                <th>{tr(tr("Target","Grupi i synuar"),"Grupi i synuar")}</th>
+                <th>{tr(tr("Status","Statusi"),"Statusi")}</th>
+                <th>{tr(tr("Recipients","Marrësit"),"Marrësit")}</th>
+                <th>{tr(tr("Created By","Krijuar nga"),"Krijuar nga")}</th>
+                <th>{tr(tr("Created","Krijuar më"),"Krijuar më")}</th>
+                <th>{tr(tr("Sent","Dërguar"),"Dërguar")}</th>
+                <th>{tr(tr("Actions","Veprimet"),"Veprimet")}</th>
               </tr>
             </thead>
             <tbody>
@@ -420,9 +415,7 @@ const AdminEmail = () => {
                             fontSize: "0.8rem",
                             fontWeight: "500",
                           }}
-                        >
-                          Send
-                        </button>
+                        >{tr(tr("Send","Dërgo"),"Dërgo")}</button>
                       )}
                       <button
                         className="admin-btn secondary"
@@ -431,9 +424,7 @@ const AdminEmail = () => {
                           padding: "6px 12px",
                           fontSize: "0.8rem",
                         }}
-                      >
-                        View
-                      </button>
+                      >{tr(tr("View","Shiko"),"Shiko")}</button>
                       {campaign.status === "draft" && (
                         <button
                           className="admin-btn danger"
@@ -445,16 +436,14 @@ const AdminEmail = () => {
                         >
                           <img
                             src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
-                            alt="Delete"
+                            alt={tr(tr("Delete","Fshi"),"Fshi")}
                             style={{
                               width: "14px",
                               height: "14px",
                               objectFit: "contain",
                               marginRight: "6px",
                             }}
-                          />
-                          Delete
-                        </button>
+                          />{tr(tr("Delete","Fshi"),"Fshi")}</button>
                       )}
                     </div>
                   </td>
@@ -467,14 +456,12 @@ const AdminEmail = () => {
         {/* Empty State */}
         {campaigns.length === 0 && (
           <div className="empty-state">
-            <h3>No email campaigns</h3>
-            <p>No email campaigns have been created yet.</p>
+            <h3>{tr(tr("No email campaigns","Nuk ka fushata email-i"),"Nuk ka fushata email-i")}</h3>
+            <p>{tr(tr("No email campaigns have been created yet.","Nuk është krijuar ende asnjë fushatë email-i."),"Nuk është krijuar ende asnjë fushatë email-i.")}</p>
             <button
               className="admin-btn"
               onClick={() => setShowCreateForm(true)}
-            >
-              Create Your First Campaign
-            </button>
+            >{tr(tr("Create Your First Campaign","Krijo fushatën e parë"),"Krijo fushatën e parë")}</button>
           </div>
         )}
       </div>
@@ -517,9 +504,7 @@ const AdminEmail = () => {
                   fontSize: "1.25rem",
                   fontWeight: "600",
                 }}
-              >
-                Campaign Details
-              </h3>
+              >{tr(tr("Campaign Details","Detajet e fushatës"),"Detajet e fushatës")}</h3>
               <button
                 onClick={() => {
                   setShowViewModal(false);
@@ -553,9 +538,7 @@ const AdminEmail = () => {
                   fontSize: "0.9rem",
                   fontWeight: "600",
                 }}
-              >
-                Subject:
-              </strong>
+              >{tr(tr("Subject:","Subjekti:"),"Subjekti:")}</strong>
               <p
                 style={{
                   margin: "4px 0",
@@ -575,9 +558,7 @@ const AdminEmail = () => {
                   fontSize: "0.9rem",
                   fontWeight: "600",
                 }}
-              >
-                Target Audience:
-              </strong>
+              >{tr(tr("Target Audience:","Marrësit:"),"Marrësit:")}</strong>
               <span
                 style={{
                   background: "#e9ecef",
@@ -599,9 +580,7 @@ const AdminEmail = () => {
                   fontSize: "0.9rem",
                   fontWeight: "600",
                 }}
-              >
-                Status:
-              </strong>
+              >{tr(tr("Status:","Statusi:"),"Statusi:")}</strong>
               <span
                 style={{
                   background:
@@ -638,9 +617,7 @@ const AdminEmail = () => {
                   fontSize: "0.9rem",
                   fontWeight: "600",
                 }}
-              >
-                Recipients:
-              </strong>
+              >{tr(tr("Recipients:","Marrësit:"),"Marrësit:")}</strong>
               <span
                 style={{
                   background: "#d1ecf1",
@@ -663,9 +640,7 @@ const AdminEmail = () => {
                   fontSize: "0.9rem",
                   fontWeight: "600",
                 }}
-              >
-                Content:
-              </strong>
+              >{tr(tr("Content:","Përmbajtja:"),"Përmbajtja:")}</strong>
               <div
                 style={{
                   background: "#f8f9fa",
@@ -707,9 +682,7 @@ const AdminEmail = () => {
                 onMouseLeave={(e) =>
                   (e.target.style.backgroundColor = "#6b7280")
                 }
-              >
-                Close
-              </button>
+              >{tr(tr("Close","Mbyll"),"Mbyll")}</button>
             </div>
           </div>
         </div>
