@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
@@ -7,6 +8,9 @@ import { useToast } from "./components/ToastProvider";
 import { useConfirm } from "./components/ConfirmProvider";
 
 const AdminSettings = () => {
+  const {lang}=useLanguage();
+  const tr=(en,sq)=>lang==='sq'?sq:en;
+
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -18,77 +22,77 @@ const AdminSettings = () => {
 
   // Settings categories
   const categories = {
-    site: { name: "Site Settings", icon: "🌐", color: "#3b82f6" },
-    email: { name: "Email Settings", icon: "", color: "#10b981" },
-    security: { name: "Security", icon: "", color: "#ef4444" },
-    content: { name: "Content", icon: "", color: "#8b5cf6" },
-    forum: { name: "Forums", icon: "", color: "#f59e0b" },
-    notification: { name: "Notifications", icon: "", color: "#06b6d4" },
-    analytics: { name: "Analytics", icon: "📊", color: "#84cc16" },
-    maintenance: { name: "Maintenance", icon: "🔧", color: "#6b7280" },
-    feature: { name: "Features", icon: "", color: "#ec4899" },
-    privacy: { name: "Privacy", icon: "🛡️", color: "#14b8a6" },
-    integration: { name: "Integrations", icon: "🔗", color: "#f97316" },
-    advanced: { name: "Advanced", icon: "⚡", color: "#6366f1" },
+    site: { name: tr("Site Settings","Cilësimet e faqes"), icon: "🌐", color: "#3b82f6" },
+    email: { name: tr("Email Settings","Cilësimet e emailit"), icon: "", color: "#10b981" },
+    security: { name: tr("Security","Siguria"), icon: "", color: "#ef4444" },
+    content: { name: tr("Content","Përmbajtja"), icon: "", color: "#8b5cf6" },
+    forum: { name: tr("Forums","Forumet"), icon: "", color: "#f59e0b" },
+    notification: { name: tr("Notifications","Njoftimet"), icon: "", color: "#06b6d4" },
+    analytics: { name: tr("Analytics","Statistikat"), icon: "📊", color: "#84cc16" },
+    maintenance: { name: tr("Maintenance","Mirëmbajtja"), icon: "🔧", color: "#6b7280" },
+    feature: { name: tr("Features","Funksionalitetet"), icon: "", color: "#ec4899" },
+    privacy: { name: tr("Privacy","Privatësia"), icon: "🛡️", color: "#14b8a6" },
+    integration: { name: tr("Integrations","Integrimet"), icon: "🔗", color: "#f97316" },
+    advanced: { name: tr("Advanced","Cilësimet e avancuara"), icon: "⚡", color: "#6366f1" },
   };
 
   // Settings definitions with types and validation
   const settingsConfig = {
     site: {
-      site_name: { type: "text", label: "Site Name", required: true },
+      site_name: { type: "text", label: tr("Site Name","Emri i faqes"), required: true },
       site_description: {
         type: "textarea",
-        label: "Site Description",
+        label: tr("Site Description","Përshkrimi i faqes"),
         rows: 3,
       },
-      site_logo: { type: "url", label: "Site Logo URL" },
-      site_favicon: { type: "url", label: "Favicon URL" },
+      site_logo: { type: "url", label: tr("Site Logo URL","URL-ja e logos") },
+      site_favicon: { type: "url", label: tr("Favicon URL","URL-ja e ikonës së faqes") },
       site_theme: {
         type: "select",
-        label: "Theme",
+        label: tr("Theme","Tema"),
         options: ["light", "dark", "auto"],
       },
       site_language: {
         type: "select",
-        label: "Language",
+        label: tr("Language","Gjuha"),
         options: ["en", "es", "fr", "de"],
       },
     },
     email: {
-      smtp_server: { type: "text", label: "SMTP Server", required: true },
-      smtp_port: { type: "number", label: "SMTP Port", min: 1, max: 65535 },
-      smtp_username: { type: "text", label: "SMTP Username" },
-      smtp_password: { type: "password", label: "SMTP Password" },
-      smtp_use_tls: { type: "boolean", label: "Use TLS" },
-      email_from_name: { type: "text", label: "From Name" },
-      email_from_address: { type: "email", label: "From Address" },
+      smtp_server: { type: "text", label: tr("SMTP Server","Serveri SMTP"), required: true },
+      smtp_port: { type: "number", label: tr("SMTP Port","Porta SMTP"), min: 1, max: 65535 },
+      smtp_username: { type: "text", label: tr("SMTP Username","Përdoruesi SMTP") },
+      smtp_password: { type: "password", label: tr("SMTP Password","Fjalëkalimi SMTP") },
+      smtp_use_tls: { type: "boolean", label: tr("Use TLS","Përdor TLS") },
+      email_from_name: { type: "text", label: tr("From Name","Emri i dërguesit") },
+      email_from_address: { type: "email", label: tr("From Address","Adresa e dërguesit") },
     },
     security: {
       password_min_length: {
         type: "number",
-        label: "Min Password Length",
+        label: tr("Min Password Length","Gjatësia minimale e fjalëkalimit"),
         min: 6,
         max: 50,
       },
       password_require_special: {
         type: "boolean",
-        label: "Require Special Characters",
+        label: tr("Require Special Characters","Kërko karaktere të veçanta"),
       },
       session_timeout_hours: {
         type: "number",
-        label: "Session Timeout (hours)",
+        label: tr("Session Timeout (hours)","Skadimi i sesionit (orë)"),
         min: 1,
         max: 168,
       },
       max_login_attempts: {
         type: "number",
-        label: "Max Login Attempts",
+        label: tr("Max Login Attempts","Numri maksimal i tentativave për hyrje"),
         min: 3,
         max: 20,
       },
       lockout_duration_minutes: {
         type: "number",
-        label: "Lockout Duration (minutes)",
+        label: tr("Lockout Duration (minutes)","Kohëzgjatja e bllokimit (minuta)"),
         min: 5,
         max: 1440,
       },
@@ -96,142 +100,142 @@ const AdminSettings = () => {
     content: {
       max_problem_length: {
         type: "number",
-        label: "Max Problem Length",
+        label: tr("Max Problem Length","Gjatësia maksimale e problemit"),
         min: 100,
         max: 50000,
       },
       max_comment_length: {
         type: "number",
-        label: "Max Comment Length",
+        label: tr("Max Comment Length","Gjatësia maksimale e komentit"),
         min: 10,
         max: 5000,
       },
       max_forum_description_length: {
         type: "number",
-        label: "Max Forum Description Length",
+        label: tr("Max Forum Description Length","Gjatësia maksimale e përshkrimit të forumit"),
         min: 50,
         max: 10000,
       },
       auto_moderate_content: {
         type: "boolean",
-        label: "Auto Moderate Content",
+        label: tr("Auto Moderate Content","Modero automatikisht përmbajtjen"),
       },
       require_approval_for_problems: {
         type: "boolean",
-        label: "Require Approval for Problems",
+        label: tr("Require Approval for Problems","Kërko miratim për problemet"),
       },
     },
     forum: {
       max_members_per_forum: {
         type: "number",
-        label: "Max Members per Forum",
+        label: tr("Max Members per Forum","Numri maksimal i anëtarëve për forum"),
         min: 10,
         max: 1000,
       },
       forum_creation_requires_approval: {
         type: "boolean",
-        label: "Forum Creation Requires Approval",
+        label: tr("Forum Creation Requires Approval","Krijimi i forumit kërkon miratim"),
       },
       default_forum_visibility: {
         type: "select",
-        label: "Default Forum Visibility",
+        label: tr("Default Forum Visibility","Dukshmëria e parazgjedhur e forumit"),
         options: ["public", "private", "invite_only"],
       },
     },
     notification: {
       email_notifications_enabled: {
         type: "boolean",
-        label: "Email Notifications",
+        label: tr("Email Notifications","Njoftimet me email"),
       },
       in_app_notifications_enabled: {
         type: "boolean",
-        label: "In-App Notifications",
+        label: tr("In-App Notifications","Njoftimet në platformë"),
       },
       notification_retention_days: {
         type: "number",
-        label: "Notification Retention (days)",
+        label: tr("Notification Retention (days)","Ruajtja e njoftimeve (ditë)"),
         min: 7,
         max: 365,
       },
     },
     analytics: {
-      analytics_enabled: { type: "boolean", label: "Analytics Enabled" },
-      track_user_activity: { type: "boolean", label: "Track User Activity" },
+      analytics_enabled: { type: "boolean", label: tr("Analytics Enabled","Statistikat aktive") },
+      track_user_activity: { type: "boolean", label: tr("Track User Activity","Regjistro aktivitetin e përdoruesve") },
       data_retention_days: {
         type: "number",
-        label: "Data Retention (days)",
+        label: tr("Data Retention (days)","Ruajtja e të dhënave (ditë)"),
         min: 30,
         max: 1095,
       },
-      export_data_enabled: { type: "boolean", label: "Allow Data Export" },
+      export_data_enabled: { type: "boolean", label: tr("Allow Data Export","Lejo eksportimin e të dhënave") },
     },
     maintenance: {
-      maintenance_mode: { type: "boolean", label: "Maintenance Mode" },
+      maintenance_mode: { type: "boolean", label: tr("Maintenance Mode","Modaliteti i mirëmbajtjes") },
       maintenance_message: {
         type: "textarea",
-        label: "Maintenance Message",
+        label: tr("Maintenance Message","Mesazhi i mirëmbajtjes"),
         rows: 3,
       },
       backup_frequency_hours: {
         type: "number",
-        label: "Backup Frequency (hours)",
+        label: tr("Backup Frequency (hours)","Frekuenca e kopjeve rezervë (orë)"),
         min: 1,
         max: 168,
       },
-      auto_cleanup_enabled: { type: "boolean", label: "Auto Cleanup Enabled" },
+      auto_cleanup_enabled: { type: "boolean", label: tr("Auto Cleanup Enabled","Pastrimi automatik aktiv") },
     },
     feature: {
-      forums_enabled: { type: "boolean", label: "Forums Enabled" },
-      comments_enabled: { type: "boolean", label: "Comments Enabled" },
-      voting_enabled: { type: "boolean", label: "Voting Enabled" },
-      bookmarks_enabled: { type: "boolean", label: "Bookmarks Enabled" },
-      following_enabled: { type: "boolean", label: "Following Enabled" },
+      forums_enabled: { type: "boolean", label: tr("Forums Enabled","Forumet aktive") },
+      comments_enabled: { type: "boolean", label: tr("Comments Enabled","Komentet aktive") },
+      voting_enabled: { type: "boolean", label: tr("Voting Enabled","Votimi aktiv") },
+      bookmarks_enabled: { type: "boolean", label: tr("Bookmarks Enabled","Ruajtja e të preferuarave aktive") },
+      following_enabled: { type: "boolean", label: tr("Following Enabled","Ndjekja aktive") },
       notifications_enabled: {
         type: "boolean",
-        label: "Notifications Enabled",
+        label: tr("Notifications Enabled","Njoftimet aktive"),
       },
-      reports_enabled: { type: "boolean", label: "Reports Enabled" },
+      reports_enabled: { type: "boolean", label: tr("Reports Enabled","Raportimet aktive") },
     },
     privacy: {
       profile_visibility: {
         type: "select",
-        label: "Profile Visibility",
+        label: tr("Profile Visibility","Dukshmëria e profilit"),
         options: ["public", "private", "friends_only"],
       },
       show_online_status: {
         type: "boolean",
-        label: "Show Online Status",
+        label: tr("Show Online Status","Shfaq statusin online"),
         disabled: true,
       },
       allow_data_export: {
         type: "boolean",
-        label: "Allow Data Export",
+        label: tr("Allow Data Export","Lejo eksportimin e të dhënave"),
         disabled: true,
       },
       gdpr_compliance: {
         type: "boolean",
-        label: "GDPR Compliance",
+        label: tr("GDPR Compliance","Pajtueshmëria me GDPR"),
         disabled: true,
       },
     },
     integration: {
-      google_analytics_id: { type: "text", label: "Google Analytics ID" },
-      facebook_app_id: { type: "text", label: "Facebook App ID" },
-      twitter_handle: { type: "text", label: "Twitter Handle" },
-      discord_webhook: { type: "url", label: "Discord Webhook URL" },
+      google_analytics_id: { type: "text", label: tr("Google Analytics ID","ID e Google Analytics") },
+      facebook_app_id: { type: "text", label: tr("Facebook App ID","ID e aplikacionit Facebook") },
+      twitter_handle: { type: "text", label: tr("Twitter Handle","Emri i përdoruesit në Twitter") },
+      discord_webhook: { type: "url", label: tr("Discord Webhook URL","URL-ja e webhook-ut Discord") },
     },
     advanced: {
-      cache_enabled: { type: "boolean", label: "Cache Enabled" },
+      cache_enabled: { type: "boolean", label: tr("Cache Enabled","Memoria e përkohshme aktive") },
       cache_ttl_minutes: {
         type: "number",
-        label: "Cache TTL (minutes)",
+        label: tr("Cache TTL (minutes)","Skadimi i memories së përkohshme (minuta)"),
         min: 1,
         max: 1440,
       },
-      cdn_enabled: { type: "boolean", label: "CDN Enabled" },
-      cdn_url: { type: "url", label: "CDN URL" },
-      ssl_required: { type: "boolean", label: "SSL Required" },
-      cors_origins: { type: "textarea", label: "CORS Origins", rows: 2 },
+      cdn_enabled: { type: "boolean", label: tr("CDN Enabled","CDN aktiv") },
+      cdn_url: { type: "url", label: tr("CDN URL","URL-ja e CDN-së") },
+      ssl_required: { type: "boolean", label: tr("SSL Required","Kërko SSL") },
+      cors_origins: { type: "textarea", label: tr("CORS Origins","Origjinat e lejuara CORS"), rows: 2 },
     },
   };
 
@@ -560,7 +564,7 @@ All settings are working correctly! 🎉
           >
             {config.options.map((option) => (
               <option key={option} value={option}>
-                {option}
+                {({light:tr("Light","E çelët"),dark:tr("Dark","E errët"),auto:tr("Automatic","Automatike"),public:tr("Public","Publike"),private:tr("Private","Private"),invite_only:tr("Invitation only","Vetëm me ftesë"),friends_only:tr("Friends only","Vetëm miqtë"),en:"English",es:"Español",fr:"Français",de:"Deutsch"})[option]||option}
               </option>
             ))}
           </select>
@@ -689,7 +693,7 @@ All settings are working correctly! 🎉
       >
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: "24px", marginBottom: "16px" }}></div>
-          <div>Loading settings...</div>
+          <div>{tr("Loading settings...","Duke ngarkuar cilësimet...")}</div>
         </div>
       </div>
     );
@@ -697,10 +701,10 @@ All settings are working correctly! 🎉
 
   return (
     <div className="publishing-workspace admin-settings-page">
-      <PublishingHeader eyebrow="Website / Configuration" title="System settings" description="Manage platform behavior. Review changes before saving; maintenance actions are separate below." />
-      <div className="publishing-actions settings-primary-actions"><button className="p1-btn" onClick={saveSettings} disabled={saving}>{saving?"Saving…":"Save all changes"}</button><button className="p1-btn alt" onClick={fetchSettings}>Refresh</button><button className="p1-btn alt" onClick={exportSettings}>Export</button></div>
-      <details className="publishing-maintenance"><summary>Maintenance actions</summary><p>These actions affect system configuration. Review the confirmation before proceeding.</p><div className="publishing-actions"><button className="p1-btn alt" onClick={testSettings}>Test settings</button><button className="p1-btn alt" onClick={initializeSettings}>Initialize</button><button className="p1-btn alt" onClick={resetSettings}>Reset</button></div></details>
-      <div className="publishing-settings-columns"><aside className="publishing-section"><label>Search settings<input type="search" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} placeholder="Setting name…"/></label><label className="help-checkbox"><input type="checkbox" checked={showAdvanced} onChange={e=>setShowAdvanced(e.target.checked)}/>Show advanced settings</label><nav className="publishing-queue" aria-label="Settings categories">{filteredCategories.map(category=><button key={category} aria-pressed={activeTab===category} onClick={()=>setActiveTab(category)}>{categories[category].name}<span aria-hidden="true">→</span></button>)}</nav></aside><div>
+      <PublishingHeader eyebrow={tr("Website / Configuration","Faqja / Konfigurimi")} title={tr("System settings","Cilësimet e sistemit")} description={tr("Manage platform behavior. Review changes before saving; maintenance actions are separate below.","Administro funksionimin e platformës. Kontrollo ndryshimet para ruajtjes; veprimet e mirëmbajtjes janë të ndara më poshtë.")} />
+      <div className="publishing-actions settings-primary-actions"><button className="p1-btn" onClick={saveSettings} disabled={saving}>{saving?tr("Saving…","Duke ruajtur…"):tr("Save all changes","Ruaj të gjitha ndryshimet")}</button><button className="p1-btn alt" onClick={fetchSettings}>{tr("Refresh","Rifresko")}</button><button className="p1-btn alt" onClick={exportSettings}>{tr("Export","Eksporto")}</button></div>
+      <details className="publishing-maintenance"><summary>{tr("Maintenance actions","Veprimet e mirëmbajtjes")}</summary><p>{tr("These actions affect system configuration. Review the confirmation before proceeding.","Këto veprime ndikojnë në konfigurimin e sistemit. Kontrollo konfirmimin para se të vazhdosh.")}</p><div className="publishing-actions"><button className="p1-btn alt" onClick={testSettings}>{tr("Test settings","Testo cilësimet")}</button><button className="p1-btn alt" onClick={initializeSettings}>{tr("Initialize","Inicializo")}</button><button className="p1-btn alt" onClick={resetSettings}>{tr("Reset","Rivendos")}</button></div></details>
+      <div className="publishing-settings-columns"><aside className="publishing-section"><label>{tr("Search settings","Kërko cilësimet")}<input type="search" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} placeholder={tr("Setting name…","Emri i cilësimit…")}/></label><label className="help-checkbox"><input type="checkbox" checked={showAdvanced} onChange={e=>setShowAdvanced(e.target.checked)}/>{tr("Show advanced settings","Shfaq cilësimet e avancuara")}</label><nav className="publishing-queue" aria-label={tr("Settings categories","Kategoritë e cilësimeve")}>{filteredCategories.map(category=><button key={category} aria-pressed={activeTab===category} onClick={()=>setActiveTab(category)}>{categories[category].name}<span aria-hidden="true">→</span></button>)}</nav></aside><div>
       {/* Settings Content */}
       <div className="admin-card">
         <h2
@@ -719,7 +723,7 @@ All settings are working correctly! 🎉
         <div className="publishing-settings-fields">
           {settingsConfig[activeTab] && Object.keys(settingsConfig[activeTab]).filter(key=>!searchTerm||settingsConfig[activeTab][key].label.toLowerCase().includes(searchTerm.toLowerCase())||key.toLowerCase().includes(searchTerm.toLowerCase())).map(key=>{
             const config=settingsConfig[activeTab][key],setting=settings[activeTab]?.[key];
-            return <fieldset className="publishing-setting" key={key}><legend>{config.label}{config.required?' *':''}{config.disabled?' (Coming soon)':''}</legend>{renderSettingField(activeTab,key,config)}{setting?.description&&<p>{setting.description}</p>}{setting?.updated_at&&<small>Last updated: {new Date(setting.updated_at).toLocaleString()}{setting.updated_by&&` by ${setting.updated_by}`}</small>}</fieldset>;
+            return <fieldset className="publishing-setting" key={key}><legend>{config.label}{config.required?' *':''}{config.disabled?tr(' (Coming soon)',' (Së shpejti)'):''}</legend>{renderSettingField(activeTab,key,config)}{setting?.description&&<p>{setting.description}</p>}{setting?.updated_at&&<small>{tr("Last updated:","Përditësuar së fundmi:")} {new Date(setting.updated_at).toLocaleString()}{setting.updated_by&&` by ${setting.updated_by}`}</small>}</fieldset>;
           })}
           {/* Show message if no settings for this tab */}
           {(!settingsConfig[activeTab] ||
@@ -742,10 +746,10 @@ All settings are working correctly! 🎉
                   marginBottom: "8px",
                 }}
               >
-                No settings available for this category
+                {tr("No settings available for this category","Nuk ka cilësime për këtë kategori")}
               </div>
               <div style={{ fontSize: "14px" }}>
-                Settings will appear here once they are initialized
+                {tr("Settings will appear here once they are initialized","Cilësimet do të shfaqen pas inicializimit")}
               </div>
             </div>
           )}

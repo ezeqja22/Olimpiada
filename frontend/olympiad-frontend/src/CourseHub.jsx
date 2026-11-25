@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader,PublishingSection} from "./components/PublishingWorkspace";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -231,6 +232,9 @@ export default function CourseHub() {
 }
 
 export function AdminCourses() {
+ const {lang}=useLanguage();
+ const tr=(en,sq)=>lang==='sq'?sq:en;
+
   const [classes, setClasses] = useState([]),
     [published, setPublished] = useState([]),
     [loadError, setLoadError] = useState(false),
@@ -277,23 +281,23 @@ export function AdminCourses() {
       await axios.post(API + "/core/courses/admin/items", payload, {
         headers: hdr(),
       });
-      setNotice("Materiali/detyra/testi u programua me sukses.");
+      setNotice(tr("Material/assignment/test scheduled successfully.","Materiali/detyra/testi u programua me sukses."));
       reload();
     } catch (e) {
-      setNotice(e.response?.data?.detail || "Nuk u ruajt përmbajtja.");
+      setNotice(e.response?.data?.detail || tr("Content could not be saved.","Nuk u ruajt përmbajtja."));
     } finally {
       setBusy(false);
     }
   };
   return (
     <main className="publishing-workspace">
-      <PublishingHeader eyebrow="Learning / Publishing" title="Materiale dhe Teste" description="Përgatit materialin, cakto klasën dhe programo publikimin. Datat shfaqen në orën lokale të pajisjes." to="/courses" linkLabel="Shiko materialet" />
+      <PublishingHeader eyebrow={tr("Learning / Publishing","Mësimi / Publikimi")} title={tr("Materials & tests","Materiale dhe Teste")} description={tr("Prepare material, assign the class and schedule publication. Dates use the device's local time.","Përgatit materialin, cakto klasën dhe programo publikimin. Datat shfaqen në orën lokale të pajisjes.")} to="/courses" linkLabel={tr("View materials","Shiko materialet")} />
       <div className="publishing-columns">
       <form className="publishing-section publishing-form" onSubmit={submit}>
-        <header><h2>Përgatit përmbajtjen</h2><p>Material, detyrë ose test me kohëmatës.</p></header>
+        <header><h2>{tr("Prepare content","Përgatit përmbajtjen")}</h2><p>{tr("Material, assignment or timed test.","Material, detyrë ose test me kohëmatës.")}</p></header>
         {classes.length > 0 && (
           <label>
-            Klasa/forumi (i detyrueshëm për mësuesit)
+            {tr("Class/forum (required for teachers)","Klasa/forumi (i detyrueshëm për mësuesit)")}
             <select
               className="p1-select"
               required
@@ -302,7 +306,7 @@ export function AdminCourses() {
                 setItem({ ...item, forum_id: Number(e.target.value) || null })
               }
             >
-              <option value="">Zgjidh klasën</option>
+              <option value="">{tr("Choose class","Zgjidh klasën")}</option>
               {classes.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.title}
@@ -312,19 +316,19 @@ export function AdminCourses() {
           </label>
         )}
         <label>
-          Format
+          {tr("Format","Formati")}
           <select
             className="p1-select"
             value={item.kind}
             onChange={(e) => setItem({ ...item, kind: e.target.value })}
           >
             <option value="material">Material</option>
-            <option value="homework">Detyrë</option>
-            <option value="test">Test me kohëmatës</option>
+            <option value="homework">{tr("Assignment","Detyrë")}</option>
+            <option value="test">{tr("Timed test","Test me kohëmatës")}</option>
           </select>
         </label>
         <label>
-          Titulli
+          {tr("Title","Titulli")}
           <input
             className="p1-input"
             required
@@ -333,7 +337,7 @@ export function AdminCourses() {
           />
         </label>
         <label>
-          Lënda
+          {tr("Subject","Lënda")}
           <input
             className="p1-input"
             required
@@ -342,7 +346,7 @@ export function AdminCourses() {
           />
         </label>
         <label>
-          Udhëzimet
+          {tr("Instructions","Udhëzimet")}
           <textarea
             className="p1-input"
             value={item.instructions}
@@ -350,16 +354,16 @@ export function AdminCourses() {
           />
         </label>
         <label>
-          Përmbajtja (formulat shtohen vizualisht)
+          {tr("Content (formulas are added visually)","Përmbajtja (formulat shtohen vizualisht)")}
           <VisualMathEditor
             value={item.body}
             onChange={(body) => setItem({ ...item, body })}
             minHeight={200}
           />
         </label>
-        <fieldset className="publishing-details"><legend>Orari dhe afati</legend>
+        <fieldset className="publishing-details"><legend>{tr("Schedule and deadline","Orari dhe afati")}</legend>
         <label>
-          Publikimi
+          {tr("Publication","Publikimi")}
           <input
             type="datetime-local"
             className="p1-input"
@@ -370,7 +374,7 @@ export function AdminCourses() {
         </label>
         {item.kind !== "material" && (
           <label>
-            Afati (opsional)
+            {tr("Deadline (optional)","Afati (opsional)")}
             <input
               type="datetime-local"
               className="p1-input"
@@ -381,7 +385,7 @@ export function AdminCourses() {
         )}
         {item.kind === "test" && (
           <label>
-            Kohëzgjatja (minuta)
+            {tr("Duration (minutes)","Kohëzgjatja (minuta)")}
             <input
               className="p1-input"
               required
@@ -397,23 +401,22 @@ export function AdminCourses() {
         )}
         </fieldset>
         <button type="submit" disabled={busy} className="p1-btn">
-          {busy ? "Saving…" : "Programo publikimin"}
+          {busy ? tr("Saving…","Duke ruajtur…") : tr("Schedule publication","Programo publikimin")}
         </button>
       </form>
       {loadError && (
         <p role="alert">
-          Publishing history or classes could not load.{" "}
-          <button onClick={reload}>Retry</button>
+          {tr("Publishing history or classes could not load.","Historiku i publikimeve ose klasat nuk u ngarkuan.")}{" "}
+          <button onClick={reload}>{tr("Retry","Provo përsëri")}</button>
         </p>
       )}
       <section className="publishing-section publishing-history">
-        <h2>Your publishing history</h2>
+        <h2>{tr("Your publishing history","Historiku i publikimeve")}</h2>
         <p>
-          Scheduled items become visible after publication to learners with
-          access to the selected forum. <Link to="/courses">Open learning</Link>
+          {tr("Scheduled items become visible after publication to learners with access to the selected forum.","Materialet e programuara shfaqen pas publikimit për nxënësit me akses në forumin e zgjedhur.")} <Link to="/courses">{tr("Open learning","Hap materialet")}</Link>
         </p>
         {published.map((i) => (
-          <article key={i.id}><h3>{i.title}</h3><p>{i.kind} · {i.subject}</p><p>{readUTC(i.published_at)}</p><Link to="/courses">Open learning →</Link></article>
+          <article key={i.id}><h3>{i.title}</h3><p>{({material:tr("Material","Material"),homework:tr("Assignment","Detyrë"),test:tr("Timed test","Test me kohëmatës")})[i.kind]||i.kind} · {i.subject}</p><p>{readUTC(i.published_at)}</p><Link to="/courses">{tr("Open learning →","Hap materialet →")}</Link></article>
         ))}
       </section>
       </div>

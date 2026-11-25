@@ -22,3 +22,5 @@ test('cancelled delete and ban operations do not mutate accounts',async()=>{
  fireEvent.click(screen.getByRole('button',{name:'Ban',exact:true}));
  expect(axios.delete).not.toHaveBeenCalled();expect(axios.put).not.toHaveBeenCalled();prompt.mockRestore();
 });
+
+vi.mock('./context/LanguageContext',()=>({useLanguage:()=>({lang:'en'})}));

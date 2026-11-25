@@ -1,3 +1,5 @@
+import {adminStatusLabel} from "./adminNavigation";
+import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -7,6 +9,9 @@ import "./AdminLayout.css";
 import {AdminTemplates} from "./AdminExperience";
 
 const AdminEmail = () => {
+  const {lang}=useLanguage();
+  const tr=(en,sq)=>lang==='sq'?sq:en;
+
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -236,23 +241,23 @@ const AdminEmail = () => {
   if (error) {
     return (
       <div className="admin-card">
-        <h2>Error</h2>
+        <h2>{tr("Error","Gabim")}</h2>
         <p>{error}</p>
         <button className="admin-btn" onClick={fetchCampaigns}>
-          Try Again
+          {tr("Try Again","Provo përsëri")}
         </button>
       </div>
     );
   }
 
   return (
-    <div className="publishing-workspace admin-email-page"><PublishingHeader eyebrow="Website / Communication" title="Email campaigns" description="Prepare campaigns, review recipients and inspect delivery history. Sending an email is a separate action."/><details className="publishing-maintenance"><summary>Notification templates</summary><AdminTemplates/></details>
+    <div className="publishing-workspace admin-email-page"><PublishingHeader eyebrow={tr("Website / Communication","Faqja / Komunikimi")} title={tr("Email campaigns","Fushatat me email")} description={tr("Prepare campaigns, review recipients and inspect delivery history. Sending an email is a separate action.","Përgatit fushatat, kontrollo marrësit dhe historikun e dërgesave. Dërgimi i emailit është një veprim më vete.")}/><details className="publishing-maintenance"><summary>{tr("Notification templates","Modelet e njoftimeve")}</summary><AdminTemplates/></details>
       {/* Header */}
       <div className="admin-card">
         <div className="admin-card-header admin-card-header-wrap">
-          <h2>Campaign history</h2>
+          <h2>{tr("Campaign history","Historiku i fushatave")}</h2>
           <button className="admin-btn" onClick={() => setShowCreateForm(true)}>
-            Create Campaign
+            {tr("Create Campaign","Krijo fushatë")}
           </button>
         </div>
       </div>
@@ -260,10 +265,10 @@ const AdminEmail = () => {
       {/* Create Campaign Form */}
       {showCreateForm && (
         <div className="publishing-section publishing-composer">
-          <header><h3>Create a campaign</h3><p>Compose the message and select its audience. Review the campaign before sending.</p></header>
+          <header><h3>{tr("Create a campaign","Krijo një fushatë")}</h3><p>{tr("Compose the message and select its audience. Review the campaign before sending.","Përgatit mesazhin dhe përzgjidh marrësit. Kontrollo fushatën para dërgimit.")}</p></header>
           <form onSubmit={handleCreateCampaign} className="admin-form">
             <div className="form-group">
-              <label htmlFor="campaign-subject">Subject</label>
+              <label htmlFor="campaign-subject">{tr("Subject","Subjekti")}</label>
               <input
                 id="campaign-subject" type="text"
                 value={newCampaign.subject}
@@ -273,13 +278,13 @@ const AdminEmail = () => {
                     subject: e.target.value,
                   }))
                 }
-                placeholder="Email subject..."
+                placeholder={tr("Email subject...","Subjekti i emailit...")}
                 required
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="campaign-content">Content</label>
+              <label htmlFor="campaign-content">{tr("Content","Përmbajtja")}</label>
               <textarea id="campaign-content"
                 value={newCampaign.content}
                 onChange={(e) =>
@@ -288,14 +293,14 @@ const AdminEmail = () => {
                     content: e.target.value,
                   }))
                 }
-                placeholder="Email content..."
+                placeholder={tr("Email content...","Përmbajtja e emailit...")}
                 rows={8}
                 required
               />
             </div>
 
             <div className="form-group">
-              <label>Target Audience</label>
+              <label>{tr("Target Audience","Grupi i synuar")}</label>
               <select
                 value={newCampaign.target_audience}
                 onChange={(e) =>
@@ -305,12 +310,12 @@ const AdminEmail = () => {
                   }))
                 }
               >
-                <option value="all">All Users</option>
-                <option value="marketing_opt_in">Marketing Opt-in Users</option>
-                <option value="admins">Admins Only</option>
-                <option value="moderators">Moderators Only</option>
-                <option value="users">Regular Users Only</option>
-                <option value="specific">Specific Users</option>
+                <option value="all">{tr("All Users","Të gjithë përdoruesit")}</option>
+                <option value="marketing_opt_in">{tr("Marketing Opt-in Users","Përdoruesit që pranojnë marketingun")}</option>
+                <option value="admins">{tr("Admins Only","Vetëm administratorët")}</option>
+                <option value="moderators">{tr("Moderators Only","Vetëm moderatorët")}</option>
+                <option value="users">{tr("Regular Users Only","Vetëm përdoruesit e zakonshëm")}</option>
+                <option value="specific">{tr("Specific Users","Përdorues të caktuar")}</option>
               </select>
             </div>
 
@@ -336,14 +341,14 @@ const AdminEmail = () => {
 
             <div className="admin-form-actions">
               <button type="submit" className="admin-btn">
-                Create Campaign
+                {tr("Create Campaign","Krijo fushatë")}
               </button>
               <button
                 type="button"
                 className="admin-btn secondary"
                 onClick={() => setShowCreateForm(false)}
               >
-                Cancel
+                {tr("Cancel","Anulo")}
               </button>
             </div>
           </form>
@@ -356,14 +361,14 @@ const AdminEmail = () => {
           <table>
             <thead>
               <tr>
-                <th>Subject</th>
-                <th>Target</th>
-                <th>Status</th>
-                <th>Recipients</th>
-                <th>Created By</th>
-                <th>Created</th>
-                <th>Sent</th>
-                <th>Actions</th>
+                <th>{tr("Subject","Subjekti")}</th>
+                <th>{tr("Target","Marrësit e synuar")}</th>
+                <th>{tr("Status","Statusi")}</th>
+                <th>{tr("Recipients","Marrësit")}</th>
+                <th>{tr("Created By","Krijuar nga")}</th>
+                <th>{tr("Created","Krijuar")}</th>
+                <th>{tr("Sent","Dërguar")}</th>
+                <th>{tr("Actions","Veprimet")}</th>
               </tr>
             </thead>
             <tbody>
@@ -421,7 +426,7 @@ const AdminEmail = () => {
                             fontWeight: "500",
                           }}
                         >
-                          Send
+                          {tr("Send","Dërgo")}
                         </button>
                       )}
                       <button
@@ -432,7 +437,7 @@ const AdminEmail = () => {
                           fontSize: "0.8rem",
                         }}
                       >
-                        View
+                        {tr("View","Shiko")}
                       </button>
                       {campaign.status === "draft" && (
                         <button
@@ -445,7 +450,7 @@ const AdminEmail = () => {
                         >
                           <img
                             src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
-                            alt="Delete"
+                            alt={tr("Delete","Fshi")}
                             style={{
                               width: "14px",
                               height: "14px",
@@ -453,7 +458,7 @@ const AdminEmail = () => {
                               marginRight: "6px",
                             }}
                           />
-                          Delete
+                          {tr("Delete","Fshi")}
                         </button>
                       )}
                     </div>
@@ -467,13 +472,13 @@ const AdminEmail = () => {
         {/* Empty State */}
         {campaigns.length === 0 && (
           <div className="empty-state">
-            <h3>No email campaigns</h3>
-            <p>No email campaigns have been created yet.</p>
+            <h3>{tr("No email campaigns","Nuk ka fushata me email")}</h3>
+            <p>{tr("No email campaigns have been created yet.","Nuk është krijuar ende asnjë fushatë me email.")}</p>
             <button
               className="admin-btn"
               onClick={() => setShowCreateForm(true)}
             >
-              Create Your First Campaign
+              {tr("Create Your First Campaign","Krijo fushatën e parë")}
             </button>
           </div>
         )}
@@ -518,7 +523,7 @@ const AdminEmail = () => {
                   fontWeight: "600",
                 }}
               >
-                Campaign Details
+                {tr("Campaign Details","Detajet e fushatës")}
               </h3>
               <button
                 onClick={() => {
@@ -627,7 +632,7 @@ const AdminEmail = () => {
                   fontWeight: "500",
                 }}
               >
-                {selectedCampaign.status}
+                {adminStatusLabel(selectedCampaign.status,lang)}
               </span>
             </div>
 
@@ -708,7 +713,7 @@ const AdminEmail = () => {
                   (e.target.style.backgroundColor = "#6b7280")
                 }
               >
-                Close
+                {tr("Close","Mbyll")}
               </button>
             </div>
           </div>

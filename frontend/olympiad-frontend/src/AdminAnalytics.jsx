@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
@@ -8,6 +9,9 @@ import { AdminFinance } from "./AdminPhase1";
 import GA4Dashboard from "./GA4Dashboard";
 
 const AdminAnalytics = () => {
+  const {lang}=useLanguage();
+  const tr=(en,sq)=>lang==='sq'?sq:en;
+
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -58,21 +62,21 @@ const AdminAnalytics = () => {
   if (error) {
     return (
       <div className="admin-card">
-        <h2>Error</h2>
+        <h2>{tr("Error","Gabim")}</h2>
         <p>{error}</p>
         <button className="admin-btn" onClick={fetchAnalytics}>
-          Try Again
+          {tr("Try Again","Provo përsëri")}
         </button>
       </div>
     );
   }
 
   return (
-    <div className="publishing-workspace admin-analytics-page"><PublishingHeader eyebrow="Administration / Activity" title="Platform activity" description="Compare community activity over time. These figures describe usage, not service availability."/>
+    <div className="publishing-workspace admin-analytics-page"><PublishingHeader eyebrow={tr("Administration / Activity","Administrimi / Aktiviteti")} title={tr("Platform activity","Aktiviteti i platformës")} description={tr("Compare community activity over time. These figures describe usage, not service availability.","Krahaso aktivitetin e komunitetit me kalimin e kohës. Këto shifra tregojnë përdorimin, jo disponueshmërinë e shërbimit.")}/>
       {/* Time Range Selector */}
       <div className="admin-card">
         <div className="admin-card-header admin-card-header-wrap">
-          <label htmlFor="analytics-period">Reporting period</label>
+          <label htmlFor="analytics-period">{tr("Reporting period","Periudha e raportimit")}</label>
           <select id="analytics-period"
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
@@ -82,11 +86,11 @@ const AdminAnalytics = () => {
               border: "2px solid #e9ecef",
             }}
           >
-            <option value="1d">Last 24 Hours</option>
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="90d">Last 90 Days</option>
-            <option value="1y">Last Year</option>
+            <option value="1d">{tr("Last 24 Hours","24 orët e fundit")}</option>
+            <option value="7d">{tr("Last 7 Days","7 ditët e fundit")}</option>
+            <option value="30d">{tr("Last 30 Days","30 ditët e fundit")}</option>
+            <option value="90d">{tr("Last 90 Days","90 ditët e fundit")}</option>
+            <option value="1y">{tr("Last Year","Viti i fundit")}</option>
           </select>
         </div>
       </div>
@@ -94,13 +98,13 @@ const AdminAnalytics = () => {
       {/* Key Metrics */}
       <div className="publishing-metrics">
         <div className="publishing-metric">
-          <h3>New Users</h3>
+          <h3>{tr("New Users","Përdorues të rinj")}</h3>
           <p className="stat-value">{analytics?.new_users || 0}</p>
           <p className="stat-change">{getTimeRangeLabel(timeRange)}</p>
         </div>
 
         <div className="publishing-metric">
-          <h3>Active Users</h3>
+          <h3>{tr("Active Users","Përdorues aktivë")}</h3>
           <p className="stat-value">{analytics?.active_users || 0}</p>
           <p className="stat-change">
             {analytics?.user_activity_rate || 0}% activity rate
@@ -108,19 +112,19 @@ const AdminAnalytics = () => {
         </div>
 
         <div className="publishing-metric">
-          <h3>New Forums</h3>
+          <h3>{tr("New Forums","Forume të reja")}</h3>
           <p className="stat-value">{analytics?.new_forums || 0}</p>
           <p className="stat-change">{getTimeRangeLabel(timeRange)}</p>
         </div>
 
         <div className="publishing-metric">
-          <h3>New Problems</h3>
+          <h3>{tr("New Problems","Probleme të reja")}</h3>
           <p className="stat-value">{analytics?.new_problems || 0}</p>
           <p className="stat-change">{getTimeRangeLabel(timeRange)}</p>
         </div>
 
         <div className="publishing-metric">
-          <h3>Total Comments</h3>
+          <h3>{tr("Total Comments","Komentet gjithsej")}</h3>
           <p className="stat-value">{analytics?.total_comments || 0}</p>
           <p className="stat-change">
             {analytics?.comments_per_day || 0} per day
@@ -128,7 +132,7 @@ const AdminAnalytics = () => {
         </div>
 
         <div className="publishing-metric">
-          <h3>Reports</h3>
+          <h3>{tr("Reports","Raportimet")}</h3>
           <p className="stat-value">{analytics?.total_reports || 0}</p>
           <p className="stat-change">
             {analytics?.resolved_reports || 0} resolved
@@ -139,7 +143,7 @@ const AdminAnalytics = () => {
       {/* User Growth Chart */}
       <div className="admin-card">
         <div className="admin-card-header analytics-card-header">
-          <h2 style={{ margin: 0 }}>Growth Trends</h2>
+          <h2 style={{ margin: 0 }}>{tr("Growth Trends","Tendencat e rritjes")}</h2>
           <span
             style={{
               background: "#e3f2fd",
@@ -209,25 +213,25 @@ const AdminAnalytics = () => {
 
             {/* X-axis labels */}
             <text x="150" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Mon
+              {tr("Mon","Hën")}
             </text>
             <text x="250" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Tue
+              {tr("Tue","Mar")}
             </text>
             <text x="350" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Wed
+              {tr("Wed","Mër")}
             </text>
             <text x="450" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Thu
+              {tr("Thu","Enj")}
             </text>
             <text x="550" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Fri
+              {tr("Fri","Pre")}
             </text>
             <text x="650" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Sat
+              {tr("Sat","Sht")}
             </text>
             <text x="750" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Sun
+              {tr("Sun","Die")}
             </text>
 
             {/* Generate sample data for the week */}
@@ -407,7 +411,7 @@ const AdminAnalytics = () => {
                   marginRight: "8px",
                 }}
               ></div>
-              <span>New Users</span>
+              <span>{tr("New Users","Përdorues të rinj")}</span>
             </div>
             <div
               style={{
@@ -424,7 +428,7 @@ const AdminAnalytics = () => {
                   marginRight: "8px",
                 }}
               ></div>
-              <span>Active Users</span>
+              <span>{tr("Active Users","Përdorues aktivë")}</span>
             </div>
             <div
               style={{
@@ -441,7 +445,7 @@ const AdminAnalytics = () => {
                   marginRight: "8px",
                 }}
               ></div>
-              <span>New Forums</span>
+              <span>{tr("New Forums","Forume të reja")}</span>
             </div>
             <div style={{ display: "flex", alignItems: "center" }}>
               <div
@@ -452,7 +456,7 @@ const AdminAnalytics = () => {
                   marginRight: "8px",
                 }}
               ></div>
-              <span>New Problems</span>
+              <span>{tr("New Problems","Probleme të reja")}</span>
             </div>
           </div>
         </div>
@@ -462,16 +466,16 @@ const AdminAnalytics = () => {
       <div className="admin-two-column-grid analytics-detail-grid">
         {/* Top Users */}
         <div className="admin-card">
-          <h2>Most Active Users</h2>
+          <h2>{tr("Most Active Users","Përdoruesit më aktivë")}</h2>
           {analytics?.top_users && analytics.top_users.length > 0 ? (
             <div className="admin-table">
               <table>
                 <thead>
                   <tr>
-                    <th>User</th>
-                    <th>Activity</th>
-                    <th>Problems</th>
-                    <th>Comments</th>
+                    <th>{tr("User","Përdoruesi")}</th>
+                    <th>{tr("Activity","Aktiviteti")}</th>
+                    <th>{tr("Problems","Problemet")}</th>
+                    <th>{tr("Comments","Komentet")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -506,24 +510,24 @@ const AdminAnalytics = () => {
             </div>
           ) : (
             <div className="empty-state">
-              <h3>No activity data</h3>
-              <p>No user activity data available for this period.</p>
+              <h3>{tr("No activity data","Nuk ka të dhëna aktiviteti")}</h3>
+              <p>{tr("No user activity data available for this period.","Nuk ka të dhëna për aktivitetin e përdoruesve gjatë kësaj periudhe.")}</p>
             </div>
           )}
         </div>
 
         {/* Popular Forums */}
         <div className="admin-card">
-          <h2>Most Popular Forums</h2>
+          <h2>{tr("Most Popular Forums","Forumet më të frekuentuara")}</h2>
           {analytics?.popular_forums && analytics.popular_forums.length > 0 ? (
             <div className="admin-table">
               <table>
                 <thead>
                   <tr>
-                    <th>Forum</th>
-                    <th>Members</th>
-                    <th>Activity</th>
-                    <th>Created</th>
+                    <th>{tr("Forum","Forumi")}</th>
+                    <th>{tr("Members","Anëtarët")}</th>
+                    <th>{tr("Activity","Aktiviteti")}</th>
+                    <th>{tr("Created","Krijuar")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -605,8 +609,8 @@ const AdminAnalytics = () => {
             </div>
           ) : (
             <div className="empty-state">
-              <h3>No forum data</h3>
-              <p>No forum activity data available for this period.</p>
+              <h3>{tr("No forum data","Nuk ka të dhëna për forumet")}</h3>
+              <p>{tr("No forum activity data available for this period.","Nuk ka të dhëna për aktivitetin e forumeve gjatë kësaj periudhe.")}</p>
             </div>
           )}
         </div>
@@ -614,7 +618,7 @@ const AdminAnalytics = () => {
 
       <GA4Dashboard />
       <AdminFinance />
-      <section className="publishing-section"><h2>Monitoring information</h2><p>This page does not verify service availability or uptime.</p><dl className="publishing-health"><div><dt>Database response time</dt><dd>{analytics?.db_response_time!=null?analytics.db_response_time+" ms":"Not measured"}</dd></div><div><dt>Storage usage</dt><dd>{analytics?.storage_usage||"Not measured"}</dd></div></dl></section>
+      <section className="publishing-section"><h2>{tr("Monitoring information","Informacion monitorimi")}</h2><p>{tr("This page does not verify service availability or uptime.","Kjo faqe nuk verifikon disponueshmërinë ose kohën e funksionimit të shërbimit.")}</p><dl className="publishing-health"><div><dt>{tr("Database response time","Koha e përgjigjes së bazës së të dhënave")}</dt><dd>{analytics?.db_response_time!=null?analytics.db_response_time+" ms":"Not measured"}</dd></div><div><dt>{tr("Storage usage","Përdorimi i hapësirës ruajtëse")}</dt><dd>{analytics?.storage_usage||"Not measured"}</dd></div></dl></section>
     </div>
   );
 };
