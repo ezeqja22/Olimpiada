@@ -51,6 +51,8 @@ export const adminRoleLabel = (role, lang) => ({
  moderator: {en:"Moderator",sq:"Moderator"},
  reviewer: {en:"Reviewer",sq:"Vlerësues"},
  user: {en:"User",sq:"Përdorues"},
+ student: {en:"Student",sq:"Nxënës"},
+ teacher: {en:"Teacher",sq:"Mësues"},
 }[role]?.[lang === "en" ? "en" : "sq"] || String(role || "").replaceAll("_"," "));
 export const adminPathActive = (path, pathname) =>
  path === "/admin" ? pathname.replace(/\/$/, "") === path : pathname === path || pathname.startsWith(path + "/");
