@@ -10,6 +10,8 @@ import {AdminTemplates} from "./AdminExperience";
 const AdminEmail = () => {
   const {lang} = useLanguage();
   const tr = (en,sq) => lang === 'en' ? en : sq;
+  const statusLabel = status => ({draft:tr("Draft","Draft"),sent:tr("Sent","Dërguar"),scheduled:tr("Scheduled","Programuar"),failed:tr("Failed","Dështuar")})[status] || status;
+  const audienceLabel = audience => ({all:tr("All users","Të gjithë përdoruesit"),marketing_opt_in:tr("Marketing opt-in users","Përdoruesit që pranojnë marketingun"),admins:tr("Admins only","Vetëm administratorët"),moderators:tr("Moderators only","Vetëm moderatorët"),users:tr("Regular users only","Vetëm përdoruesit e zakonshëm"),specific:tr("Specific users","Përdorues të caktuar")})[audience] || audience;
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -123,7 +125,7 @@ const AdminEmail = () => {
           ...style,
         }}
       >
-        {status}
+        {statusLabel(status)}
       </span>
     );
   };
@@ -378,7 +380,7 @@ const AdminEmail = () => {
                         fontSize: "0.8rem",
                       }}
                     >
-                      {campaign.target_audience}
+                      {audienceLabel(campaign.target_audience)}
                     </span>
                   </td>
                   <td>{getStatusBadge(campaign.status)}</td>
@@ -569,7 +571,7 @@ const AdminEmail = () => {
                   fontWeight: "500",
                 }}
               >
-                {selectedCampaign.target_audience}
+                {audienceLabel(selectedCampaign.target_audience)}
               </span>
             </div>
 
@@ -606,7 +608,7 @@ const AdminEmail = () => {
                   fontWeight: "500",
                 }}
               >
-                {selectedCampaign.status}
+                {statusLabel(selectedCampaign.status)}
               </span>
             </div>
 
