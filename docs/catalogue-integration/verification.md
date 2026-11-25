@@ -35,3 +35,11 @@ Checkpoint 4119a69 pushed. Vercel confirmed a Preview-only REACT_APP_API_URL ove
 - Blocked: Railway staged exactly two backend-staging changes (integration branch and pinned commit 82399a0). The deployment confirmation was declined. Latest running backend remains 24e85a5. No staging migration executed. End-to-end verification of the remote pair and its CORS policy is pending. Supabase production was untouched.
 - Pending: staff editorial/rights review before publishing seed guides or third-party library imports. Image-only protected reading limits assistive technology, and process-local limits multiply with worker count. Intensive resource benchmarking is deferred.
 - Next step: approve the existing Railway staging-only deployment request, verify pre-deploy migration and service health, then check guest catalogue/weekly and authorized staff workflows from the Vercel preview. Hold merge until those pass.
+
+## Hosted staging release gate — supersedes staging handoff above
+
+Railway staging deployment `79b99e12-352e-4c6d-91e3-98a84a8542e2` succeeded. Its pre-deploy log records the PostgreSQL upgrades 77f26f3 → 88f2701 → 88f2702 → 88f2703 followed by “Existing staging schema upgraded to head” and successful application startup. Revision confirmed from committed migration execution logs; a separate live SELECT result was not captured.
+
+Remote GETs returned 200 for health, both public catalogues (empty lists), and the weekly challenge. Guest requests to the protected page and staff queue returned 401. The verified Vercel preview origin received no Access-Control-Allow-Origin on those responses; its Authorization preflight returned 400 “Disallowed CORS origin”. A browser cannot complete the preview workflow in this configuration.
+
+Hold merge. Append the exact preview origin https://science-pioneers-394kqgx57-enio-zeqjas-projects.vercel.app to staging FRONTEND_ORIGINS, preserve other origins, apply, and recheck. Authenticated PDF reading and staff grading/publication on hosted staging remain pending. This check created zero remote fixtures.
