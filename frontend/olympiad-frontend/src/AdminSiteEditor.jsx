@@ -21,8 +21,8 @@ function errorText(error) {
 }
 
 export default function AdminSiteEditor() {
-  const {lang}=useLanguage();
-  const tr=(en,sq)=>lang==='sq'?sq:en;
+  const {lang:adminLanguage}=useLanguage();
+  const tr=(en,sq)=>adminLanguage==='sq'?sq:en;
 
   const { currentUser, authLoading } = useAuth();
   const canEdit = !!(currentUser?.is_superuser || ["admin","super_admin"].includes(currentUser?.role));
@@ -66,7 +66,7 @@ export default function AdminSiteEditor() {
   const navigateSection = (key) => {
     if (busy) return;
     if (dirty) {
-      if (!window.confirm("Ke ndryshime të paruajtura. Vazhdo pa i ruajtur?")) return;
+      if (!window.confirm(tr("You have unsaved changes. Continue without saving?","Ke ndryshime të paruajtura. Vazhdo pa i ruajtur?"))) return;
       setDrafts(prev=>{const next={...prev};delete next[selected];return next;});
     }
     setSelected(key);
@@ -92,7 +92,7 @@ export default function AdminSiteEditor() {
     }
   };
   const restore = () => {
-    if (!window.confirm("Të rikthehen tekstet dhe imazhi i parazgjedhur për këtë seksion? Ruajtja bëhet vetëm pasi të klikosh Ruaj.")) return;
+    if (!window.confirm(tr("Restore the default text and image for this section? Changes are saved only when you click Save.","Të rikthehen tekstet dhe imazhi i parazgjedhur për këtë seksion? Ruajtja bëhet vetëm pasi të klikosh Ruaj."))) return;
     setDrafts(prev => ({...prev,[selected]:{...EMPTY}}));
     setStatus({text:"U përgatit rikthimi. Kliko Ruaj ndryshimet për ta konfirmuar."});
   };
@@ -137,17 +137,17 @@ export default function AdminSiteEditor() {
           <form onSubmit={e=>{e.preventDefault();save();}}>
             <div className="publishing-cms-columns"><fieldset disabled={busy} className="site-editor__fields publishing-cms-fields">
               <label>
-                Titulli ({lang.toUpperCase()})
+                {tr("Title","Titulli")} ({lang.toUpperCase()})
                 <input maxLength={250} value={current["title_"+lang]}
                   onChange={e=>change("title_"+lang,e.target.value)}
-                  placeholder={defaults["title_"+lang] || "Titulli"} />
+                  placeholder={defaults["title_"+lang] || tr("Title","Titulli")} />
                 <span className="site-editor__hint">{tr("Leave empty to use the default text.","Lëre bosh për tekstin e parazgjedhur.")}</span>
               </label>
               <label>
-                Përshkrimi ({lang.toUpperCase()})
+                {tr("Description","Përshkrimi")} ({lang.toUpperCase()})
                 <textarea rows={4} maxLength={2500} value={current["subtitle_"+lang]}
                   onChange={e=>change("subtitle_"+lang,e.target.value)}
-                  placeholder={defaults["subtitle_"+lang] || "Përshkrimi"} />
+                  placeholder={defaults["subtitle_"+lang] || tr("Description","Përshkrimi")} />
                 <span className="site-editor__hint">{selected.startsWith("home_founder_")
                   ?"Rreshti i parë është biografia; çdo rresht tjetër shfaqet si arritje në listë."
                   :"Mbështeten lidhje si [Lexo më shumë](/explore) dhe **bold**."}</span>
@@ -181,7 +181,7 @@ export default function AdminSiteEditor() {
             </aside></div>
             <div className="site-editor__actions">
               <button className="site-editor__save" type="submit" disabled={busy || !dirty}>
-                {busy?"Duke ruajtur...":tr("Save changes","Ruaj ndryshimet")}
+                {busy?tr("Saving...","Duke ruajtur..."):tr("Save changes","Ruaj ndryshimet")}
               </button>
               <button type="button" className="site-editor__secondary" disabled={busy}
                 onClick={restore}>{tr("Restore defaults","Rikthe parazgjedhjet")}</button>

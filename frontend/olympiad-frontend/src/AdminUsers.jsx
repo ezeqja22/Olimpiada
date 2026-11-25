@@ -1,3 +1,4 @@
+import {adminRoleLabel} from "./adminNavigation";
 import {useLanguage} from "./context/LanguageContext";
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-restricted-globals */
@@ -158,12 +159,12 @@ const AdminUsers = () => {
 
   return (
     <div className="admin-page administration-directory">
-      <header className="administration-heading"><div><p>{tr("Community directory","Regjistri i komunitetit")}</p><h2>{tr("User Management","Administrimi i përdoruesve")}</h2></div><span>{pagination.total ?? users.length} members</span></header>
+      <header className="administration-heading"><div><p>{tr("Community directory","Regjistri i komunitetit")}</p><h2>{tr("User Management","Administrimi i përdoruesve")}</h2></div><span>{pagination.total ?? users.length} {tr('members','anëtarë')}</span></header>
       <div className="administration-directory-columns">
         <aside className="administration-filters" aria-label={tr("User filters","Filtrat e përdoruesve")}>
           <h3>{tr("Find a member","Gjej një anëtar")}</h3>
           <label htmlFor="admin-user-search">{tr("Search all members","Kërko të gjithë anëtarët")}</label><input id="admin-user-search" type="search" placeholder={tr("Username or email","Emri i përdoruesit ose emaili")} value={filters.search} onChange={e=>handleSearchChange(e.target.value)} />
-          <label htmlFor="admin-user-role">{tr("Role","Roli")}</label><select id="admin-user-role" value={filters.role} onChange={e=>handleFilterChange("role",e.target.value)}><option value="">{tr("All roles","Të gjitha rolet")}</option>{["student","teacher","reviewer","admin","super_admin","moderator","user"].map(role=><option key={role} value={role}>{role.replaceAll('_',' ')}</option>)}</select>
+          <label htmlFor="admin-user-role">{tr("Role","Roli")}</label><select id="admin-user-role" value={filters.role} onChange={e=>handleFilterChange("role",e.target.value)}><option value="">{tr("All roles","Të gjitha rolet")}</option>{["student","teacher","reviewer","admin","super_admin","moderator","user"].map(role=><option key={role} value={role}>{adminRoleLabel(role,lang)}</option>)}</select>
           <label htmlFor="admin-user-status">{tr("Status","Statusi")}</label><select id="admin-user-status" value={filters.status} onChange={e=>handleFilterChange("status",e.target.value)}><option value="">{tr("All statuses","Të gjitha statuset")}</option><option value="active">{tr("Active","Aktiv")}</option><option value="banned">{tr("Banned","I bllokuar")}</option><option value="inactive">{tr("Inactive","Joaktiv")}</option></select>
           <button onClick={()=>setFilters({search:"",role:"",status:"",page:1})}>{tr("Clear filters","Pastro filtrat")}</button>
           <p>{tr("Role changes remain limited to super administrators. Moderation actions are recorded in the existing history.","Ndryshimi i roleve mbetet i kufizuar te superadministratorët. Veprimet e moderimit regjistrohen në historikun ekzistues.")}</p>
@@ -197,11 +198,11 @@ const AdminUsers = () => {
                   </td>
                   <td>{getRoleBadge(user.role)}</td>
                   <td>{getStatusBadge(user)}</td>
-                  <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                  <td>{new Date(user.created_at).toLocaleDateString(lang==='sq'?'sq-AL':'en-GB')}</td>
                   <td>
                     <div className="admin-table-actions">
                       <select
-                        aria-label={`Role for ${user.username}`}
+                        aria-label={tr('Role for','Roli për')+' '+user.username}
                         value={user.role}
                         onChange={(e) => {
                           if (e.target.value !== user.role) {
@@ -332,7 +333,7 @@ const AdminUsers = () => {
                 color: "#495057",
               }}
             >
-              Page {filters.page} of {pagination.pages}
+              {tr('Page','Faqja')} {filters.page} {tr('of','nga')} {pagination.pages}
             </span>
 
             <button

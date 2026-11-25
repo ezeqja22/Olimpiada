@@ -162,7 +162,7 @@ const AdminReports = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString(lang==="sq"?"sq-AL":"en-GB", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -357,7 +357,7 @@ const AdminReports = () => {
                 color: "#495057",
               }}
             >
-              Page {filters.page} of {pagination.pages}
+              {tr('Page','Faqja')} {filters.page} {tr('of','nga')} {pagination.pages}
             </span>
 
             <button

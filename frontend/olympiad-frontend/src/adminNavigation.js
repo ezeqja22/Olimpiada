@@ -48,7 +48,7 @@ export const adminGroups = [
 ];
 export function adminIcon(key){ return icons[key]; }
 export function adminRoleLabel(role,lang){
- const labels={admin:['Administrator','Administrator'],super_admin:['Super administrator','Superadministrator'],moderator:['Moderator','Moderator'],reviewer:['Reviewer','Shqyrtues'],user:['User','Përdorues'],teacher:['Teacher','Mësues']};
+ const labels={admin:['Administrator','Administrator'],super_admin:['Super administrator','Superadministrator'],moderator:['Moderator','Moderator'],reviewer:['Reviewer','Shqyrtues'],user:['User','Përdorues'],teacher:['Teacher','Mësues'],student:['Student','Nxënës']};
  return labels[role]?.[lang==='sq'?1:0] || role?.replaceAll('_',' ') || '';
 }
 const normalize = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
@@ -62,4 +62,9 @@ export function getAdminGroups(role, query=''){
 }
 export function isAdminRouteActive(current,path){
  return path==='/admin'?current===path:current===path||current.startsWith(path+'/');
+}
+
+export function adminStatusLabel(status,lang){
+ const labels={pending:['Pending','Në pritje'],approved:['Approved','Miratuar'],rejected:['Rejected','Refuzuar'],open:['Open','E hapur'],in_progress:['In progress','Në proces'],under_review:['Under review','Në shqyrtim'],resolved:['Resolved','Zgjidhur'],dismissed:['Dismissed','Hedhur poshtë'],active:['Active','Aktiv'],inactive:['Inactive','Joaktiv'],banned:['Banned','I bllokuar'],scheduled:['Scheduled','Programuar'],published:['Published','Publikuar'],closed:['Closed','Mbyllur'],draft:['Draft','Draft'],sent:['Sent','Dërguar'],failed:['Failed','Dështuar']};
+ return labels[status]?.[lang==='sq'?1:0] || String(status||'').replaceAll('_',' ');
 }

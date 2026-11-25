@@ -32,7 +32,7 @@ export default function AdminContent(){
   <section className="publishing-section"><h2>{tr("Teacher subjects","Lëndët e profesorëve")}</h2>
    <p className="p1-muted">{tr("Choose the teacher and the subject they teach.","Zgjidh profesorin dhe lëndën që zhvillon.")}</p>
    <form className="p1-form" onSubmit={e=>{e.preventDefault();call("/access/admin/teacher-subjects",{teacher_id:Number(teacher.teacher_id),subject:teacher.subject});}}>
-    <AdminUserSelect label={tr("Teacher","Mësuesi")} role="teacher" value={teacher.teacher_id} onChange={teacher_id=>setTeacher({...teacher,teacher_id})}/>
+    <AdminUserSelect lang={lang} label={tr("Teacher","Mësuesi")} role="teacher" value={teacher.teacher_id} onChange={teacher_id=>setTeacher({...teacher,teacher_id})}/>
     <label>{tr("Subject","Lënda")}<input className="p1-input" required value={teacher.subject} onChange={e=>setTeacher({...teacher,subject:e.target.value})}/></label>
     <button className="p1-btn" type="submit" disabled={busy}>{tr("Assign subject","Cakto lëndën")}</button>
    </form>

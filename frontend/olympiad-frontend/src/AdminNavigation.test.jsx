@@ -1,7 +1,9 @@
 import React from 'react';
 import {describe,expect,test,vi} from 'vitest';
-import {render,screen,fireEvent} from '@testing-library/react';
-import {MemoryRouter} from 'react-router-dom';
+import {render,screen,fireEvent,within} from '@testing-library/react';
+import {MemoryRouter,Routes,Route} from 'react-router-dom';
+import axios from 'axios';
+import AdminLayout from './AdminLayout';
 import {adminGroups,getAdminGroups,isAdminRouteActive} from './adminNavigation';
 import AdminDirectory from './components/AdminDirectory';
 
@@ -54,4 +56,23 @@ describe('Admin navigation',()=>{
   expect(screen.getByRole('link',{name:/^Biblioteka online/})).toBeInTheDocument();
   expect(screen.queryByRole('link',{name:/^Cilësimet e sistemit/})).not.toBeInTheDocument();
  });
+});
+
+vi.mock('axios',()=>({default:{get:vi.fn()}}));
+test('the actual admin sidebar renders the new catalogue routes',async()=>{
+ language.lang='en';
+ axios.get.mockResolvedValue({data:{role:'admin',username:'Test staff'}});
+ const originalMatchMedia=window.matchMedia;
+ Object.defineProperty(window,'matchMedia',{configurable:true,writable:true,value:vi.fn(()=>({matches:false,addEventListener:vi.fn(),removeEventListener:vi.fn()}))});
+ localStorage.setItem('token','synthetic');
+ try{
+  render(<MemoryRouter initialEntries={['/admin']}><Routes><Route path='/admin' element={<AdminLayout/>}><Route index element={<div>Admin home</div>}/></Route></Routes></MemoryRouter>);
+  const navigation=await screen.findByRole('navigation',{name:'Admin navigation'});
+  expect(within(navigation).getByRole('link',{name:'Olympiads'})).toHaveAttribute('href','/admin/olympiads');
+  expect(within(navigation).getByRole('link',{name:'Online library'})).toHaveAttribute('href','/admin/library');
+  expect(within(navigation).getAllByRole('link')).toHaveLength(19);
+  fireEvent.change(screen.getByRole('searchbox',{name:'Find a tool'}),{target:{value:'biblioteka'}});
+  expect(within(navigation).getByRole('link',{name:'Online library'})).toBeInTheDocument();
+  expect(within(navigation).queryByRole('link',{name:'Olympiads'})).not.toBeInTheDocument();
+ }finally{Object.defineProperty(window,'matchMedia',{configurable:true,writable:true,value:originalMatchMedia});localStorage.removeItem('token');}
 });

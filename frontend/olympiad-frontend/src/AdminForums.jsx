@@ -114,7 +114,7 @@ const AdminForums = () => {
   const formatDate = (dateString) => {
     if (!dateString) return "—";
 
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString(lang==="sq"?"sq-AL":"en-GB", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -208,7 +208,7 @@ const AdminForums = () => {
         {pagination.pages > 1 && (
           <div className="admin-pagination">
             <span className="admin-pagination-text">
-              Page {filters.page} of {pagination.pages}
+              {tr('Page','Faqja')} {filters.page} {tr('of','nga')} {pagination.pages}
             </span>
 
             <div className="admin-pagination-actions">
