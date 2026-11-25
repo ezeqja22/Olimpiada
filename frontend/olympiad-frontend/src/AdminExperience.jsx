@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 import React,{useEffect,useState} from "react";
 import axios from "axios";
@@ -9,22 +10,24 @@ const headers=()=>({Authorization:"Bearer "+localStorage.getItem("token")});
 const api=(path)=>API+"/experience"+path;
 const blank={title_sq:"",title_en:"",subtitle_sq:"",subtitle_en:"",image_url:"",button_url:""};
 export function AdminTeachers(){
+ const {lang}=useLanguage();
+ const tr=(sq,en)=>lang==="en"?en:sq;
  const [loading,setLoading]=useState(true),[loadError,setLoadError]=useState(false);
  const [rows,setRows]=useState([]),[forms,setForms]=useState({}),[forums,setForums]=useState([]),[notice,setNotice]=useState("");
- const load=()=>{setLoading(true);setLoadError(false);return axios.get(api("/admin/teachers"),{headers:headers()}).then(r=>setRows(r.data)).catch(()=>{setLoadError(true);setNotice("Nuk u lexuan aplikimet.");}).finally(()=>setLoading(false));};
- useEffect(()=>{load();axios.get(API+"/core/forums/catalog",{headers:headers()}).then(r=>setForums(r.data)).catch(()=>setNotice("Klasat nuk u ngarkuan. Ringarko faqen për të caktuar një klasë."));},[]);
- const review=async(id,approve)=>{try{await axios.post(api("/admin/teachers/"+id+"/review"),{approve,note:""},{headers:headers()});load();}catch(e){setNotice(e.response?.data?.detail||"Nuk u ruajt vendimi.");}};
- const assign=async(e,id)=>{e.preventDefault();try{await axios.post(api("/admin/teacher-assignments"),{teacher_id:Number(forms[id]?.teacher_id||id),forum_id:Number(forms[id]?.forum_id)},{headers:headers()});setNotice("Mësuesi u caktua në forum.");}catch(e){setNotice(e.response?.data?.detail||"Caktimi dështoi.");}};
- return <main className="publishing-workspace"><PublishingHeader eyebrow="Learning / Teachers" title="Mësuesit & Verifikimi" description="Shqyrto përvojën dhe lëndën e çdo aplikanti. Mësuesit e miratuar mund të caktohen në një klasë." to="/teacher/apply" linkLabel="Shiko aplikimin"/>
- <div className="publishing-history">{rows.map(r=><section className="publishing-ticket" key={r.id}><div><div className="p1-row"><div><h2>{r.first_name} {r.last_name}</h2><p>{r.subject} · {r.status} · Data e lindjes: {r.birth_date}</p></div></div>
+ const load=()=>{setLoading(true);setLoadError(false);return axios.get(api("/admin/teachers"),{headers:headers()}).then(r=>setRows(r.data)).catch(()=>{setLoadError(true);setNotice(tr("Nuk u lexuan aplikimet.","Applications could not load."));}).finally(()=>setLoading(false));};
+ useEffect(()=>{load();axios.get(API+"/core/forums/catalog",{headers:headers()}).then(r=>setForums(r.data)).catch(()=>setNotice(tr("Klasat nuk u ngarkuan. Ringarko faqen për të caktuar një klasë.","Classes could not load. Reload the page before assigning a class.")));},[]);
+ const review=async(id,approve)=>{try{await axios.post(api("/admin/teachers/"+id+"/review"),{approve,note:""},{headers:headers()});load();}catch(e){setNotice(e.response?.data?.detail||tr("Nuk u ruajt vendimi.","Could not save the decision."));}};
+ const assign=async(e,id)=>{e.preventDefault();try{await axios.post(api("/admin/teacher-assignments"),{teacher_id:Number(forms[id]?.teacher_id||id),forum_id:Number(forms[id]?.forum_id)},{headers:headers()});setNotice(tr("Mësuesi u caktua në forum.","Teacher assigned to forum."));}catch(e){setNotice(e.response?.data?.detail||tr("Caktimi dështoi.","Assignment failed."));}};
+ return <main className="publishing-workspace"><PublishingHeader eyebrow={tr("Të nxënit / Mësuesit","Learning / Teachers")} title={tr("Mësuesit & Verifikimi","Teachers & verification")} description={tr("Shqyrto përvojën dhe lëndën e çdo aplikanti. Mësuesit e miratuar mund të caktohen në një klasë.","Review each applicant's experience and subject. Approved teachers may be assigned to a class.")} to="/teacher/apply" linkLabel={tr("Shiko aplikimin","View application")}/>
+ <div className="publishing-history">{rows.map(r=><section className="publishing-ticket" key={r.id}><div><div className="p1-row"><div><h2>{r.first_name} {r.last_name}</h2><p>{r.subject} · {({pending:tr("Në pritje","Pending"),approved:tr("Miratuar","Approved"),rejected:tr("Refuzuar","Rejected")})[r.status]||r.status} · {tr("Data e lindjes:","Date of birth:")} {r.birth_date}</p></div></div>
  <p className="publishing-submission">{r.bio}</p></div><div className="publishing-review">
- {r.status==="pending"&&<div className="p1-row"><button className="p1-btn" onClick={()=>review(r.id,true)}>Aprovo</button><button className="p1-btn alt" onClick={()=>review(r.id,false)}>Refuzo</button></div>}
+ {r.status==="pending"&&<div className="p1-row"><button className="p1-btn" onClick={()=>review(r.id,true)}>{tr("Aprovo","Approve")}</button><button className="p1-btn alt" onClick={()=>review(r.id,false)}>{tr("Refuzo","Reject")}</button></div>}
  {r.status==="approved"&&<form className="p1-row p3-assignment" onSubmit={e=>assign(e,r.user_id)}>
- <label>Klasa / Forumi<select required className="p1-select" value={forms[r.user_id]?.forum_id||""} onChange={e=>setForms({...forms,[r.user_id]:{forum_id:e.target.value}})}>
- <option value="">Zgjidh forumin</option>{forums.map(f=><option key={f.id} value={f.id}>{f.title} · {f.subject||"General"}</option>)}
+ <label>{tr("Klasa / Forumi","Class / forum")}<select required className="p1-select" value={forms[r.user_id]?.forum_id||""} onChange={e=>setForms({...forms,[r.user_id]:{forum_id:e.target.value}})}>
+ <option value="">{tr("Zgjidh forumin","Choose forum")}</option>{forums.map(f=><option key={f.id} value={f.id}>{f.title} · {f.subject||"General"}</option>)}
  </select></label>
- <button className="p1-btn">Cakto në klasë</button></form>}</div></section>)}</div>
- {loading&&<p role="status">Duke ngarkuar…</p>}{loadError&&<button className="p1-btn alt" onClick={load}>Provo përsëri</button>}{!loading&&!loadError&&rows.length===0&&<p className="p1-note">Nuk ka ende aplikime.</p>}{notice&&<p className="p1-note" role="status">{notice}</p>}</main>;
+ <button className="p1-btn">{tr("Cakto në klasë","Assign to class")}</button></form>}</div></section>)}</div>
+ {loading&&<p role="status">{tr("Duke ngarkuar…","Loading…")}</p>}{loadError&&<button className="p1-btn alt" onClick={load}>{tr("Provo përsëri","Retry")}</button>}{!loading&&!loadError&&rows.length===0&&<p className="p1-note">{tr("Nuk ka ende aplikime.","No applications yet.")}</p>}{notice&&<p className="p1-note" role="status">{notice}</p>}</main>;
 }
 const KEYS=[["hero","Hero"],["competition","Gara / Olimpiadat"],["community","Komuniteti"],["partner","Spark Partner"],["cta","Thirrja për regjistrim"]];
 export function AdminBranding(){
@@ -73,38 +76,42 @@ export function AdminSupport(){
  {notice&&<p className="p1-note">{notice}</p>}</main>;
 }
 export function AdminTemplates(){
+ const {lang}=useLanguage();
+ const tr=(sq,en)=>lang==="en"?en:sq;
  const [rows,setRows]=useState([]),[editing,setEditing]=useState(null),[form,setForm]=useState({}),[notice,setNotice]=useState("");
  const [recipients,setRecipients]=useState(""),[dispatchFields,setDispatchFields]=useState("{}");
  const load=()=>axios.get(api("/admin/templates"),{headers:headers()}).then(r=>setRows(r.data)).catch(()=>{});
  useEffect(()=>{load();},[]);
- const save=async e=>{e.preventDefault();try{await axios.put(api("/admin/templates/"+form.key),form,{headers:headers()});setNotice("Template u ruajt.");setEditing(null);load();}catch(e){setNotice(e.response?.data?.detail||"Ruajtja dështoi.");}};
- return <section className="publishing-section"><h2>Notification templates</h2>
- <p className="p1-muted">Template të personalizueshme sipas llojit të njoftimit. Placeholders: {"{{name}}, {{title}}, {{child_name}}, {{forum_name}}, {{result}}, {{link}}"}.</p>
- <div className="publishing-settings-columns"><nav className="publishing-queue" aria-label="Notification templates">{rows.map(row=><button aria-pressed={editing===row.key} className="p3-template-row" key={row.key} onClick={()=>{setForm(row);setEditing(row.key);}}>{row.key} <span>✎</span></button>)}
- <button className="p1-btn alt" onClick={()=>{setForm({key:"new_template",subject_sq:"",subject_en:"",body_sq:"",body_en:"",active:true});setEditing("new");}}>+ Template i ri</button></nav>
+ const save=async e=>{e.preventDefault();try{await axios.put(api("/admin/templates/"+form.key),form,{headers:headers()});setNotice(tr("Template u ruajt.","Template saved."));setEditing(null);load();}catch(e){setNotice(e.response?.data?.detail||tr("Ruajtja dështoi.","Could not save."));}};
+ return <section className="publishing-section"><h2>{tr("Modelet e njoftimeve","Notification templates")}</h2>
+ <p className="p1-muted">{tr("Modele të personalizueshme sipas llojit të njoftimit. Fushat dinamike:","Customizable templates by notification type. Placeholders:")} {"{{name}}, {{title}}, {{child_name}}, {{forum_name}}, {{result}}, {{link}}"}.</p>
+ <div className="publishing-settings-columns"><nav className="publishing-queue" aria-label={tr("Modelet e njoftimeve","Notification templates")}>{rows.map(row=><button aria-pressed={editing===row.key} className="p3-template-row" key={row.key} onClick={()=>{setForm(row);setEditing(row.key);}}>{row.key} <span>✎</span></button>)}
+ <button className="p1-btn alt" onClick={()=>{setForm({key:"new_template",subject_sq:"",subject_en:"",body_sq:"",body_en:"",active:true});setEditing("new");}}>{tr("+ Template i ri","+ New template")}</button></nav>
  {editing&&<form className="publishing-form" onSubmit={save}>
- <label>Template key<input required className="p1-input" value={form.key} disabled={editing!=="new"} onChange={e=>setForm({...form,key:e.target.value})}/></label>
- {["subject_sq","body_sq","subject_en","body_en"].map(k=><label key={k}>{k}<textarea className="p1-input" required rows={k.startsWith("body")?5:2} value={form[k]||""} onChange={e=>setForm({...form,[k]:e.target.value})}/></label>)}
- <label><input type="checkbox" checked={!!form.active} onChange={e=>setForm({...form,active:e.target.checked})}/> Active</label>
- <button className="p1-btn">Ruaj template</button></form>}</div>
- {editing&&<div className="p3-form" style={{marginTop:18}}><h3>Dërgo te përdorues specifikë (maksimumi 25)</h3>
- <label>User ID, të ndara me presje<input className="p1-input" value={recipients} onChange={e=>setRecipients(e.target.value)} placeholder="12, 35, 90"/></label>
+ <label>{tr("Identifikuesi i modelit","Template key")}<input required className="p1-input" value={form.key} disabled={editing!=="new"} onChange={e=>setForm({...form,key:e.target.value})}/></label>
+ {["subject_sq","body_sq","subject_en","body_en"].map(k=><label key={k}>{({subject_sq:tr("Subjekti (shqip)","Subject (Albanian)"),body_sq:tr("Përmbajtja (shqip)","Body (Albanian)"),subject_en:tr("Subjekti (anglisht)","Subject (English)"),body_en:tr("Përmbajtja (anglisht)","Body (English)")})[k]||k}<textarea className="p1-input" required rows={k.startsWith("body")?5:2} value={form[k]||""} onChange={e=>setForm({...form,[k]:e.target.value})}/></label>)}
+ <label><input type="checkbox" checked={!!form.active} onChange={e=>setForm({...form,active:e.target.checked})}/> {tr("Aktiv","Active")}</label>
+ <button className="p1-btn">{tr("Ruaj template","Save template")}</button></form>}</div>
+ {editing&&<div className="p3-form" style={{marginTop:18}}><h3>{tr("Dërgo te përdorues specifikë (maksimumi 25)","Send to specific users (maximum 25)")}</h3>
+ <label>{tr("User ID, të ndara me presje","User IDs, comma-separated")}<input className="p1-input" value={recipients} onChange={e=>setRecipients(e.target.value)} placeholder="12, 35, 90"/></label>
  <label>Placeholder JSON<input className="p1-input" value={dispatchFields} onChange={e=>setDispatchFields(e.target.value)} placeholder='{"title":"Detyrë e re","link":"/courses"}'/></label>
  <button className="p1-btn alt" type="button" onClick={async()=>{try{const ids=recipients.split(",").map(n=>Number(n.trim())).filter(n=>Number.isInteger(n)&&n>0);if(!ids.length)throw new Error("Choose at least one recipient");const fields=JSON.parse(dispatchFields);
- const r=await axios.post(api("/admin/templates/"+form.key+"/send"),{recipient_user_ids:ids,fields},{headers:headers()});setNotice("U dërguan "+r.data.recipients+" njoftime.");}
- catch(e){setNotice(e.response?.data?.detail||"Dërgimi dështoi.");}}}>Dërgo template</button></div>}
+ const r=await axios.post(api("/admin/templates/"+form.key+"/send"),{recipient_user_ids:ids,fields},{headers:headers()});setNotice(tr(`U dërguan ${r.data.recipients} njoftime.`, `${r.data.recipients} notifications sent.`));}
+ catch(e){setNotice(e.response?.data?.detail||tr("Dërgimi dështoi.","Sending failed."));}}}>{tr("Dërgo template","Send template")}</button></div>}
  {notice&&<p role="status" className="p1-note">{notice}</p>}</section>;
 }
 export function AdminParents(){
+ const {lang}=useLanguage();
+ const tr=(sq,en)=>lang==="en"?en:sq;
  const [parent,setParent]=useState(""),[student,setStudent]=useState(""),[link,setLink]=useState(""),[report,setReport]=useState(""),[notice,setNotice]=useState("");
  const [links,setLinks]=useState([]),[loadError,setLoadError]=useState(false),[loading,setLoading]=useState(true);
  const load=()=>{setLoading(true);setLoadError(false);return axios.get(api("/admin/parent-links"),{headers:headers()}).then(r=>setLinks(r.data)).catch(()=>setLoadError(true)).finally(()=>setLoading(false));};
  useEffect(()=>{load();},[]);
- const connect=async e=>{e.preventDefault();try{await axios.post(api("/admin/parent-links"),{parent_id:Number(parent),student_id:Number(student)},{headers:headers()});setNotice("Ftesa u krijua. Kërkon miratimin e prindit dhe nxënësit.");load();}catch(e){setNotice(e.response?.data?.detail||"Krijimi dështoi.");}};
- const send=async e=>{e.preventDefault();const f=new FormData();f.append("report",report);try{const r=await axios.post(api("/admin/parent-reports/"+link),f,{headers:headers()});setNotice(r.data.delivered?"Raporti u dërgua.":"Raporti u ruajt në njoftimet e prindit; email-i nuk u dorëzua.");}catch(e){setNotice(e.response?.data?.detail||"Lidhja duhet konfirmuar.");}};
- return <main className="publishing-workspace"><PublishingHeader eyebrow="Community / Family" title="Raportet për Prindërit" description="Krijo një ftesë për lidhjen familjare. Raportet private kërkojnë miratimin e prindit dhe të nxënësit." to="/family" linkLabel="Shiko hapësirën familjare"/>
- <div className="publishing-columns"><form className="publishing-section publishing-form" onSubmit={connect}><h2>Lidh prindin dhe nxënësin</h2><AdminUserSelect label="Parent" value={parent} onChange={setParent}/><AdminUserSelect label="Student" value={student} onChange={setStudent}/><button className="p1-btn">Krijo lidhjen</button></form>
- <form className="publishing-section publishing-form" onSubmit={send}><h2>Dërgo raport progresi</h2><label>Approved family link<select required className="p1-select" value={link} onChange={e=>setLink(e.target.value)}><option value="">Choose an approved link</option>{links.filter(l=>l.status==="approved").map(l=><option key={l.id} value={l.id}>Parent #{l.parent_id} · Student #{l.student_id}</option>)}</select></label><label>Raporti<textarea className="p1-input" minLength={10} required rows={6} value={report} onChange={e=>setReport(e.target.value)}/></label><button className="p1-btn">Dërgo raportin</button></form></div>
- <section className="publishing-section publishing-history"><h2>Lidhjet & Miratimi</h2>{loading&&<p role="status">Duke ngarkuar…</p>}{loadError&&<p role="alert">Lidhjet nuk u ngarkuan. <button className="p1-btn alt" onClick={load}>Provo përsëri</button></p>}{!loading&&!loadError&&!links.length&&<p>Nuk ka lidhje familjare.</p>}{links.map(l=><div className="p3-assignment-row" key={l.id}><span>#{l.id}: Parent {l.parent_id} · Student {l.student_id} — {l.status}</span>{l.status==="approved"&&<button className="p1-btn alt" onClick={()=>setLink(String(l.id))}>Përdor për raport</button>}</div>)}</section>
+ const connect=async e=>{e.preventDefault();try{await axios.post(api("/admin/parent-links"),{parent_id:Number(parent),student_id:Number(student)},{headers:headers()});setNotice(tr("Ftesa u krijua. Kërkon miratimin e prindit dhe nxënësit.","Invitation created. Parent and student approval is required."));load();}catch(e){setNotice(e.response?.data?.detail||tr("Krijimi dështoi.","Could not create the link."));}};
+ const send=async e=>{e.preventDefault();const f=new FormData();f.append("report",report);try{const r=await axios.post(api("/admin/parent-reports/"+link),f,{headers:headers()});setNotice(r.data.delivered?tr("Raporti u dërgua.","Report sent."):tr("Raporti u ruajt në njoftimet e prindit; email-i nuk u dorëzua.","Report saved in the parent's notifications; email was not delivered."));}catch(e){setNotice(e.response?.data?.detail||tr("Lidhja duhet konfirmuar.","The link must be confirmed."));}};
+ return <main className="publishing-workspace"><PublishingHeader eyebrow={tr("Komuniteti / Familja","Community / Family")} title={tr("Raportet për Prindërit","Parent reports")} description={tr("Krijo një ftesë për lidhjen familjare. Raportet private kërkojnë miratimin e prindit dhe të nxënësit.","Create a family-link invitation. Private reports require approval from the parent and student.")} to="/family" linkLabel={tr("Shiko hapësirën familjare","View family workspace")}/>
+ <div className="publishing-columns"><form className="publishing-section publishing-form" onSubmit={connect}><h2>{tr("Lidh prindin dhe nxënësin","Link parent and student")}</h2><AdminUserSelect label={tr("Prindi","Parent")} value={parent} onChange={setParent}/><AdminUserSelect label={tr("Nxënësi","Student")} value={student} onChange={setStudent}/><button className="p1-btn">{tr("Krijo lidhjen","Create link")}</button></form>
+ <form className="publishing-section publishing-form" onSubmit={send}><h2>{tr("Dërgo raport progresi","Send progress report")}</h2><label>{tr("Lidhja familjare e miratuar","Approved family link")}<select required className="p1-select" value={link} onChange={e=>setLink(e.target.value)}><option value="">{tr("Zgjidh një lidhje të miratuar","Choose an approved link")}</option>{links.filter(l=>l.status==="approved").map(l=><option key={l.id} value={l.id}>{tr("Prindi","Parent")} #{l.parent_id} · {tr("Nxënësi","Student")} #{l.student_id}</option>)}</select></label><label>{tr("Raporti","Report")}<textarea className="p1-input" minLength={10} required rows={6} value={report} onChange={e=>setReport(e.target.value)}/></label><button className="p1-btn">{tr("Dërgo raportin","Send report")}</button></form></div>
+ <section className="publishing-section publishing-history"><h2>{tr("Lidhjet & Miratimi","Links & approval")}</h2>{loading&&<p role="status">{tr("Duke ngarkuar…","Loading…")}</p>}{loadError&&<p role="alert">{tr("Lidhjet nuk u ngarkuan.","Links could not load.")}<button className="p1-btn alt" onClick={load}>{tr("Provo përsëri","Retry")}</button></p>}{!loading&&!loadError&&!links.length&&<p>{tr("Nuk ka lidhje familjare.","No family links.")}</p>}{links.map(l=><div className="p3-assignment-row" key={l.id}><span>#{l.id}: {tr("Prindi","Parent")} {l.parent_id} · {tr("Nxënësi","Student")} {l.student_id} — {({pending:tr("Në pritje","Pending"),approved:tr("Miratuar","Approved"),rejected:tr("Refuzuar","Rejected")})[l.status]||l.status}</span>{l.status==="approved"&&<button className="p1-btn alt" onClick={()=>setLink(String(l.id))}>{tr("Përdor për raport","Use for report")}</button>}</div>)}</section>
  {notice&&<p className="p1-note">{notice}</p>}</main>;
 }
