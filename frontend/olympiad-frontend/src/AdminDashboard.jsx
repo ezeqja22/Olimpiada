@@ -13,7 +13,7 @@ export function AdminDirectory({role}) {
   const t = (sq, en) => lang === "en" ? en : sq;
   const [query, setQuery] = useState("");
   const groups = visibleAdminGroups(role, query);
-  return <section className="administration-directory" aria-labelledby="admin-directory-title">
+  return <section className="administration-tools-directory" aria-labelledby="admin-directory-title">
     <header>
       <div><h3 id="admin-directory-title">{t("Mjetet e administrimit", "Administration tools")}</h3>
         <p>{t("Zgjidh një seksion ose kërko sipas emrit.", "Choose a section or search by name.")}</p></div>
