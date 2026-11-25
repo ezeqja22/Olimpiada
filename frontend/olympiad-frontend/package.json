@@ -22,7 +22,7 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
-    "build": "vite build",
+    "build": "REACT_APP_API_URL=http://127.0.0.1:1 npm run test -- AdminNavigation.test.jsx AdminUsers.test.jsx AdminForums.test.jsx AdminHelp.test.jsx AdminSiteEditor.test.jsx CatalogueWorkflow.test.jsx WeeklyWorkflow.test.jsx CourseHub.test.jsx && vite build",
     "test": "vitest run"
   },
   "devDependencies": {
