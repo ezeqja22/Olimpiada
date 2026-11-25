@@ -1312,7 +1312,7 @@ ${currentUser?.username || "Admin"}`;
             </div>
 
             <div style={{ marginBottom: spacing.md }}>
-              <strong>Current Status:</strong>
+              <strong>{tr("Current Status:","Statusi aktual:")}</strong>
               <div style={{ marginTop: spacing.xs }}>
                 <span
                   style={{
@@ -1347,7 +1347,7 @@ ${currentUser?.username || "Admin"}`;
             <div>
               <h4>{tr("Moderation History:","Historiku i moderimit:")}</h4>
               {userHistory.history.length === 0 ? (
-                <p>No moderation history found.</p>
+                <p>{tr("No moderation history found.","Nuk ka historik moderimi.")}</p>
               ) : (
                 <div style={{ maxHeight: "400px", overflow: "auto" }}>
                   {userHistory.history.map((entry, index) => (
