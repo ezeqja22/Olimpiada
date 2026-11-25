@@ -6,10 +6,14 @@ import {loginIntent} from "./navigation";
 import "./AdminLayout.css";
 import "./AdministrationWorkspace.css";
 import {useDialogFocus} from "./hooks/useDialogFocus";
+import {useLanguage} from "./context/LanguageContext";
+import {visibleAdminGroups, adminLabel, adminPathActive, adminRoleLabel} from "./adminNavigation";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 const AdminLayout = () => {
+  const {lang, setLang} = useLanguage();
+  const t = (sq, en) => lang === "en" ? en : sq;
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -70,105 +74,15 @@ const AdminLayout = () => {
     }
   };
 
-  const menuItems = [
-    {
-      path: "/admin",
-      label: "Dashboard",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811298/Dashboard_admin_panel_omb7cw.svg",
-      adminOnly: false,
-    },
-    {
-      path: "/admin/users",
-      label: "Users",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg",
-      adminOnly: false,
-    },
-    {
-      path: "/admin/forums",
-      label: "Forums",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",
-      adminOnly: false,
-    },
-    {
-      path: "/admin/reports",
-      label: "Reports",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811440/Reports_admin_panel_mun0ix.svg",
-      adminOnly: false,
-    },
-    {
-      path: "/admin/user-history",
-      label: "User History",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811353/Users_Hirstory_admin_panel_eqvfdf.svg",
-      adminOnly: false,
-    },
-    {
-      path: "/admin/settings",
-      label: "Settings",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811439/Settings_admin_panel_cpayja.svg",
-      adminOnly: true,
-    },
-    {
-      path: "/admin/email",
-      label: "Email",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811297/Email_admin_panel_zjmkz7.svg",
-      adminOnly: true,
-    },
-    {path:"/admin/teachers",label:"Aplikimet e Mësuesve",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811353/Users_Hirstory_admin_panel_eqvfdf.svg",adminOnly:false},
-    {path:"/admin/site-content",label:"Përmbajtja e Website-it",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811439/Settings_admin_panel_cpayja.svg",adminOnly:true},
-    {path:"/admin/parents",label:"Raporte Prindërish",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg",adminOnly:false},
-    {path: "/admin/olympiads",label: "Olimpiadat", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
-    {path: "/admin/library",label: "Biblioteka online", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
-    {path: "/admin/weekly",label: "Problema e Javës", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
-    {path: "/admin/courses",label: "Materiale & Teste", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
-    {
-      path: "/admin/content",
-      label: "Përmbajtja & Profesorët",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",
-      adminOnly: false,
-    },
-    {
-      path: "/admin/tutoring",
-      label: "Kërkesat 1-to-1",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/Analytics_admin_panel_en0409.svg",
-      adminOnly: false,
-    },
-    {
-      path: "/admin/faq",
-      label: "FAQ",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811439/Settings_admin_panel_cpayja.svg",
-      adminOnly: false,
-    },
-    {
-      path: "/admin/support",
-      label: "Support",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811297/Email_admin_panel_zjmkz7.svg",
-      adminOnly: false,
-    },
-    {
-      path: "/admin/analytics",
-      label: "Analytics",
-      icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811310/Analytics_admin_panel_en0409.svg",
-      adminOnly: false,
-    },
-  ];
-
-  const filteredMenuItems = menuItems.filter(
-    (item) => !item.adminOnly || ["admin", "super_admin"].includes(currentUser?.role),
-  );
-
-  const isActiveRoute = (path) => {
-    if (path === "/admin") {
-      return location.pathname === "/admin";
-    }
-
-    return location.pathname.startsWith(path);
-  };
+  const groups = visibleAdminGroups(currentUser?.role);
+  const activeItem = groups.flatMap(group => group.items).find(item => adminPathActive(item.path, location.pathname));
+  const isActiveRoute = path => adminPathActive(path, location.pathname);
 
   if (loading) {
     return (
       <div className="admin-auth-loading">
         <div className="loading-spinner" />
-        <span>Loading admin panel...</span>
+        <span>{t("Duke ngarkuar panelin…", "Loading admin panel…")}</span>
       </div>
     );
   }
@@ -185,32 +99,41 @@ const AdminLayout = () => {
         <button
           type="button"
           className="mobile-overlay show"
-          aria-label="Close admin navigation"
+          aria-label={t("Mbyll menunë e administrimit", "Close admin navigation")}
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      <aside ref={sidebarRef} id="admin-navigation" role={isMobile && sidebarOpen ? "dialog" : undefined} aria-modal={isMobile && sidebarOpen ? true : undefined} aria-label="Admin navigation" inert={isMobile && !sidebarOpen ? true : undefined} className={`admin-sidebar ${sidebarOpen ? "open" : "closed"}`}>
+      <aside ref={sidebarRef} id="admin-navigation" role={isMobile && sidebarOpen ? "dialog" : undefined} aria-modal={isMobile && sidebarOpen ? true : undefined} aria-label={t("Menuja e administrimit", "Admin navigation")} inert={isMobile && !sidebarOpen ? true : undefined} className={`admin-sidebar ${sidebarOpen ? "open" : "closed"}`}>
         <div className="admin-sidebar-header">
-          {sidebarOpen && <h2>Admin Panel</h2>}
+          {sidebarOpen && <h2>{t("Paneli i administrimit", "Admin Panel")}</h2>}
 
           <button
             type="button"
             className="sidebar-toggle"
             onClick={() => setSidebarOpen((open) => !open)}
-            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            aria-label={sidebarOpen ? t("Mbyll menunë", "Collapse sidebar") : t("Hap menunë", "Expand sidebar")}
           >
             {isMobile ? "×" : sidebarOpen ? "◀" : "▶"}
           </button>
         </div>
 
-        <nav className="admin-nav administration-navigation" aria-label="Admin navigation">
-          {[
-            ["Overview",["/admin","/admin/analytics"]],
-            ["Community",["/admin/users","/admin/forums","/admin/reports","/admin/user-history"]],
-            ["Learning",["/admin/weekly","/admin/courses","/admin/content","/admin/teachers","/admin/tutoring","/admin/parents"]],
-            ["Website & communication",["/admin/site-content","/admin/faq","/admin/support","/admin/email","/admin/settings"]]
-          ].map(([group,paths])=><div className="administration-nav-group" key={group}>{sidebarOpen && <h3>{group}</h3>}{filteredMenuItems.filter(item=>paths.includes(item.path)).map(item=><Link key={item.path} to={item.path} className={`admin-nav-item ${isActiveRoute(item.path)?"active":""}`} aria-current={isActiveRoute(item.path)?"page":undefined} title={!sidebarOpen?item.label:undefined} aria-label={!sidebarOpen?item.label:undefined}><span className="nav-icon"><img src={item.icon} alt=""/></span>{sidebarOpen && <span className="nav-label">{item.label}</span>}</Link>)}</div>)}
+        <nav className="admin-nav administration-navigation" aria-label={t("Menuja e administrimit", "Admin navigation")}>
+          {groups.map(group => (
+            <div className="administration-nav-group" key={group.id}>
+              {sidebarOpen && <h3>{adminLabel(group, lang)}</h3>}
+              {group.items.map(item => (
+                <Link key={item.path} to={item.path}
+                  className={`admin-nav-item ${isActiveRoute(item.path) ? "active" : ""}`}
+                  aria-current={isActiveRoute(item.path) ? "page" : undefined}
+                  title={!sidebarOpen ? adminLabel(item, lang) : undefined}
+                  aria-label={!sidebarOpen ? adminLabel(item, lang) : undefined}>
+                  <span className="nav-icon"><img src={item.icon} alt="" /></span>
+                  {sidebarOpen && <span className="nav-label">{adminLabel(item, lang)}</span>}
+                </Link>
+              ))}
+            </div>
+          ))}
         </nav>
 
         <div className="admin-sidebar-footer">
@@ -218,7 +141,8 @@ const AdminLayout = () => {
             type="button"
             className="back-to-site"
             onClick={() => navigate("/")}
-            title={!sidebarOpen ? "Back to Site" : undefined}
+            aria-label={t("Kthehu në faqe", "Back to Site")}
+            title={!sidebarOpen ? t("Kthehu në faqe", "Back to Site") : undefined}
           >
             <span className="nav-icon">
               <img
@@ -226,7 +150,7 @@ const AdminLayout = () => {
                 alt=""
               />
             </span>
-            {sidebarOpen && <span className="nav-label">Back to Site</span>}
+            {sidebarOpen && <span className="nav-label">{t("Kthehu në faqe", "Back to Site")}</span>}
           </button>
         </div>
       </aside>
@@ -239,7 +163,7 @@ const AdminLayout = () => {
                 type="button"
                 className="mobile-menu-toggle"
                 onClick={() => setSidebarOpen(true)}
-                aria-label="Open admin navigation"
+                aria-label={t("Hap menunë e administrimit", "Open admin navigation")}
                 aria-expanded={sidebarOpen}
                 aria-controls="admin-navigation"
               >
@@ -248,22 +172,24 @@ const AdminLayout = () => {
             )}
 
             <div className="admin-header-copy">
-              <div className="administration-breadcrumb"><Link to="/homepage">Olimpiada</Link><span>/ Administration</span><h1>{filteredMenuItems.find(item=>item.path===location.pathname)?.label || "Administration"}</h1></div>
+              <div className="administration-breadcrumb"><Link to="/homepage">Olimpiada</Link><Link to="/admin">/ {t("Administrimi", "Administration")}</Link><h1>{activeItem ? adminLabel(activeItem, lang) : t("Administrimi", "Administration")}</h1></div>
               <span className="user-role">
-                {currentUser.role.replaceAll("_", " ")}
+                {adminRoleLabel(currentUser.role, lang)}
               </span>
             </div>
           </div>
 
           <div className="admin-header-right">
-            <span className="welcome-text">
-              Welcome, {currentUser.username}
-            </span>
+            <span className="welcome-text">{t("Mirë se erdhe", "Welcome")}, {currentUser.username}</span>
+            <select className="administration-language" aria-label={t("Gjuha", "Language")} value={lang} onChange={event => setLang(event.target.value)}>
+              <option value="sq">Shqip</option>
+              <option value="en">English</option>
+            </select>
           </div>
         </header>
 
         <main className="admin-main">
-          <Outlet />
+          <Outlet context={{role: currentUser.role}} />
         </main>
       </div>
     </div>

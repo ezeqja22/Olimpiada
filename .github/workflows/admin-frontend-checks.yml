@@ -1,0 +1,46 @@
+name: Admin browser checks
+on:
+  pull_request:
+    paths:
+      - 'frontend/olympiad-frontend/**'
+      - 'staging/admin-navigation-browser.cjs'
+      - '.github/workflows/admin-frontend-checks.yml'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/olympiad-frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend/olympiad-frontend
+      - run: npm run build
+        working-directory: frontend/olympiad-frontend
+        env:
+          REACT_APP_API_URL: http://127.0.0.1:8000
+      - name: Install isolated browser test dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/admin-browser" --no-save playwright@1.56.1
+          "$RUNNER_TEMP/admin-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Run browser checks
+        run: |
+          (cd frontend/olympiad-frontend && npm exec -- vite preview --host 127.0.0.1 --port 4173 --strictPort) > /tmp/admin-preview.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/admin >/dev/null; then break; fi
+            sleep 1
+          done
+          NODE_PATH="$RUNNER_TEMP/admin-browser/node_modules" node staging/admin-navigation-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: admin-navigation-screenshots
+          path: staging/.local-state/admin-navigation/*.png
+          if-no-files-found: ignore
+          include-hidden-files: true

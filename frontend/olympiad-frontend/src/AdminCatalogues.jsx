@@ -29,6 +29,8 @@ function CatalogueEditor({guides}) {
   const fields = Object.fromEntries(Object.entries(guides ? guideFields : documentFields).map(([key,label]) => [key,sq?label:enFields[key]]));
   const route = guides ? "/core/olympiads/admin" : "/core/library/admin";
   const [rows, setRows] = useState([]);
+  const [query, setQuery] = useState("");
+  const [publication, setPublication] = useState("all");
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState(blank);
   const [file, setFile] = useState(null);
@@ -99,8 +101,13 @@ function CatalogueEditor({guides}) {
   }
 
   const visibleField = guides ? "published" : "visible";
+  const normalize = value => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  const matchingRows = rows.filter(row => {
+    const searchable = [row.name, row.title, row.acronym, row.subject, row.author, row.discipline, row.slug].map(normalize).join(" ");
+    return searchable.includes(normalize(query)) && (publication === "all" || Boolean(row[visibleField]) === (publication === "public"));
+  });
   return <main className="publishing-workspace">
-    <PublishingHeader title={guides ? t("Olimpiadat", "Olympiads") : t("Biblioteka online", "Online library")} to={guides ? "/olympiads" : "/library"} linkLabel={t("Shiko faqen publike", "View public page")}/>
+    <PublishingHeader eyebrow={t("Administrimi / Garat dhe materialet", "Administration / Competitions & resources")} title={guides ? t("Olimpiadat", "Olympiads") : t("Biblioteka online", "Online library")} to={guides ? "/olympiads" : "/library"} linkLabel={t("Shiko faqen publike", "View public page")}/>
     <div className="publishing-columns">
       <section className="publishing-section">
         <h2>{selected ? t("Përditëso", "Edit") : guides ? t("Shto olimpiadë", "Add olympiad") : t("Shto dokument", "Add document")}</h2>
@@ -131,9 +138,18 @@ function CatalogueEditor({guides}) {
       </section>
       <section className="publishing-section">
         <h2>{guides ? t("Olimpiadat në katalog", "Olympiads in catalogue") : t("Dokumentet në katalog", "Documents in catalogue")}</h2>
-        <button type="button" className="p1-btn alt" disabled={loading} onClick={() => setReload(n => n + 1)}>{t("Ringarko listën", "Reload list")}</button>
+        <div className="p1-form">
+          <label>{t("Kërko në katalog", "Search catalogue")}<input type="search" className="p1-input" value={query} onChange={event => setQuery(event.target.value)}/></label>
+          <label>{t("Statusi i publikimit", "Publication status")}<select className="p1-select" value={publication} onChange={event => setPublication(event.target.value)}>
+            <option value="all">{t("Të gjitha", "All")}</option><option value="public">{t("Publike", "Public")}</option><option value="hidden">{t("Të fshehura", "Hidden")}</option>
+          </select></label>
+          <div className="p1-row"><button type="button" className="p1-btn alt" disabled={loading} onClick={() => setReload(n => n + 1)}>{t("Ringarko listën", "Reload list")}</button>
+            <button type="button" className="p1-btn alt" disabled={saving} onClick={() => {edit(null);setQuery("");setPublication("all");}}>{guides?t("Shto olimpiadë", "Add olympiad"):t("Shto dokument", "Add document")}</button></div>
+        </div>
         {loading ? <p role="status">{t("Duke ngarkuar…", "Loading…")}</p> : !rows.length && <p>{t("Katalogu është bosh.", "The catalogue is empty.")}</p>}
-        <div className="publishing-queue">{rows.map(row => <button type="button" key={row.id} disabled={saving}
+        {!loading && rows.length > 0 && <p className="p1-muted" role="status">{t(`${matchingRows.length} nga ${rows.length} rezultate`, `${matchingRows.length} of ${rows.length} results`)}</p>}
+        {!loading && rows.length > 0 && !matchingRows.length && <p>{t("Nuk u gjet asnjë rezultat.", "No matching results.")}</p>}
+        <div className="publishing-queue">{matchingRows.map(row => <button type="button" key={row.id} disabled={saving}
           aria-pressed={row.id === selected} onClick={() => edit(row)}>
           <span><strong>{guides ? row.name : row.title}</strong><small>{row.subject} · {row[visibleField] ? t("Publik", "Public") : t("I fshehur", "Hidden")}{!guides && !row.available ? t(" · Pa PDF", " · No PDF") : ""}</small></span>
           <span>{t("Përditëso →", "Edit →")}</span>

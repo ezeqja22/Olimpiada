@@ -45,3 +45,16 @@ test('reader zoom is local, retries failed pages and revokes private image URLs'
  expect(img).toHaveStyle({width:'300%'});expect(axios.get).toHaveBeenCalledTimes(before);
  view.unmount();expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:synthetic');
 });
+
+test('catalogue search and publication filters keep hidden records easy to find',async()=>{
+ axios.get.mockResolvedValue({data:[{id:1,title:'Matematikë',subject:'Math',visible:true,available:true},{id:2,title:'Physics draft',subject:'Physics',visible:false,available:true}]});
+ render(<MemoryRouter><AdminLibrary/></MemoryRouter>);
+ await screen.findByRole('button',{name:/Matematikë/});
+ fireEvent.change(screen.getByRole('searchbox',{name:'Search catalogue'}),{target:{value:'matematike'}});
+ expect(screen.getByRole('button',{name:/Matematikë/})).toBeInTheDocument();
+ expect(screen.queryByRole('button',{name:/Physics draft/})).not.toBeInTheDocument();
+ fireEvent.change(screen.getByRole('searchbox',{name:'Search catalogue'}),{target:{value:''}});
+ fireEvent.change(screen.getByLabelText('Publication status'),{target:{value:'hidden'}});
+ expect(screen.getByRole('button',{name:/Physics draft/})).toBeInTheDocument();
+ expect(screen.queryByRole('button',{name:/Matematikë/})).not.toBeInTheDocument();
+});

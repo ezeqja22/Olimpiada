@@ -1,3 +1,5 @@
+import {adminRoleLabel} from "./adminNavigation";
+import {useLanguage} from "./context/LanguageContext";
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-restricted-globals */
 /* eslint-disable react-hooks/exhaustive-deps */
@@ -10,6 +12,8 @@ import "./AdministrationWorkspace.css";
 import {useConfirm} from "./components/ConfirmProvider";
 
 const AdminUsers = () => {
+  const {lang} = useLanguage();
+  const tr = (en,sq) => lang === "en" ? en : sq;
   const {confirm}=useConfirm();
   const requestVersion=useRef(0);
   const [allUsers, setAllUsers] = useState([]); // Store all users for filtering
@@ -58,7 +62,7 @@ const AdminUsers = () => {
       setUsers(response.data.users);
       setPagination(response.data.pagination);
     } catch (err) {
-      if(version===requestVersion.current)setError("Failed to load users");
+      if(version===requestVersion.current)setError(tr("Failed to load users","Përdoruesit nuk u ngarkuan"));
       console.error("Users error:", err);
     } finally {
       if(version===requestVersion.current)setLoading(false);
@@ -124,17 +128,17 @@ const AdminUsers = () => {
       fetchUsers();
     } catch (err) {
       console.error("User action error:", err);
-      showToast("Failed to perform action", "error");
+      showToast(tr("Failed to perform action","Veprimi dështoi"), "error");
     }
   };
 
   const getStatusBadge = (user) => {
     if (user.is_banned) {
-      return <span className="status-badge banned">Banned</span>;
+      return <span className="status-badge banned">{tr("Banned","Bllokuar")}</span>;
     } else if (user.is_active) {
-      return <span className="status-badge active">Active</span>;
+      return <span className="status-badge active">{tr("Active","Aktiv")}</span>;
     } else {
-      return <span className="status-badge inactive">Inactive</span>;
+      return <span className="status-badge inactive">{tr("Inactive","Joaktiv")}</span>;
     }
   };
 
@@ -147,38 +151,38 @@ const AdminUsers = () => {
 
     return (
       <span className={`status-badge ${roleColors[role] || "inactive"}`}>
-        {role}
+        {adminRoleLabel(role,lang)}
       </span>
     );
   };
 
   return (
     <div className="admin-page administration-directory">
-      <header className="administration-heading"><div><p>Community directory</p><h2>User Management</h2></div><span>{pagination.total ?? users.length} members</span></header>
+      <header className="administration-heading"><div><p>{tr("Community directory","Lista e komunitetit")}</p><h2>{tr("User Management","Menaxhimi i përdoruesve")}</h2></div><span>{pagination.total ?? users.length} {tr("members","anëtarë")}</span></header>
       <div className="administration-directory-columns">
-        <aside className="administration-filters" aria-label="User filters">
-          <h3>Find a member</h3>
-          <label htmlFor="admin-user-search">Search all members</label><input id="admin-user-search" type="search" placeholder="Username or email" value={filters.search} onChange={e=>handleSearchChange(e.target.value)} />
-          <label htmlFor="admin-user-role">Role</label><select id="admin-user-role" value={filters.role} onChange={e=>handleFilterChange("role",e.target.value)}><option value="">All roles</option>{["student","teacher","reviewer","admin","super_admin","moderator","user"].map(role=><option key={role} value={role}>{role.replaceAll('_',' ')}</option>)}</select>
-          <label htmlFor="admin-user-status">Status</label><select id="admin-user-status" value={filters.status} onChange={e=>handleFilterChange("status",e.target.value)}><option value="">All statuses</option><option value="active">Active</option><option value="banned">Banned</option><option value="inactive">Inactive</option></select>
-          <button onClick={()=>setFilters({search:"",role:"",status:"",page:1})}>Clear filters</button>
-          <p>Role changes remain limited to super administrators. Moderation actions are recorded in the existing history.</p>
+        <aside className="administration-filters" aria-label={tr("User filters","Filtrat e përdoruesve")}>
+          <h3>{tr("Find a member","Gjej një anëtar")}</h3>
+          <label htmlFor="admin-user-search">{tr("Search all members","Kërko të gjithë anëtarët")}</label><input id="admin-user-search" type="search" placeholder={tr("Username or email","Emri i përdoruesit ose email-i")} value={filters.search} onChange={e=>handleSearchChange(e.target.value)} />
+          <label htmlFor="admin-user-role">{tr("Role","Roli")}</label><select id="admin-user-role" value={filters.role} onChange={e=>handleFilterChange("role",e.target.value)}><option value="">{tr("All roles","Të gjitha rolet")}</option>{["student","teacher","reviewer","admin","super_admin","moderator","user"].map(role=><option key={role} value={role}>{adminRoleLabel(role,lang)}</option>)}</select>
+          <label htmlFor="admin-user-status">{tr("Status","Statusi")}</label><select id="admin-user-status" value={filters.status} onChange={e=>handleFilterChange("status",e.target.value)}><option value="">{tr("All statuses","Të gjitha statuset")}</option><option value="active">{tr("Active","Aktiv")}</option><option value="banned">{tr("Banned","Bllokuar")}</option><option value="inactive">{tr("Inactive","Joaktiv")}</option></select>
+          <button onClick={()=>setFilters({search:"",role:"",status:"",page:1})}>{tr("Clear filters","Pastro filtrat")}</button>
+          <p>{tr("Role changes remain limited to super administrators. Moderation actions are recorded in the existing history.","Ndryshimet e roleve lejohen vetëm për superadministratorët. Veprimet e moderimit regjistrohen në historikun ekzistues.")}</p>
         </aside>
-        <section className="administration-directory-results" aria-label="Members">
-          {error && <p role="alert">{error} <button onClick={fetchUsers}>Retry</button></p>}
-          {loading && <p role="status">Loading members…</p>}
-          {!loading && !error && !users.length && <p className="administration-empty">No members match these filters.</p>}
+        <section className="administration-directory-results" aria-label={tr("Members","Anëtarët")}>
+          {error && <p role="alert">{error} <button onClick={fetchUsers}>{tr("Retry","Provo përsëri")}</button></p>}
+          {loading && <p role="status">{tr("Loading members…","Duke ngarkuar anëtarët…")}</p>}
+          {!loading && !error && !users.length && <p className="administration-empty">{tr("No members match these filters.","Asnjë anëtar nuk përputhet me filtrat.")}</p>}
       {/* Users Table */}
       <div>
-        <div className="administration-table" tabIndex={0} role="region" aria-label="Member management table" aria-busy={loading}>
+        <div className="administration-table" tabIndex={0} role="region" aria-label={tr("Member management table","Tabela e menaxhimit të anëtarëve")} aria-busy={loading}>
           <table>
             <thead>
               <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Joined</th>
-                <th>Actions</th>
+                <th>{tr("User","Përdoruesi")}</th>
+                <th>{tr("Role","Roli")}</th>
+                <th>{tr("Status","Statusi")}</th>
+                <th>{tr("Joined","Regjistruar më")}</th>
+                <th>{tr("Actions","Veprimet")}</th>
               </tr>
             </thead>
             <tbody>
@@ -193,11 +197,11 @@ const AdminUsers = () => {
                   </td>
                   <td>{getRoleBadge(user.role)}</td>
                   <td>{getStatusBadge(user)}</td>
-                  <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                  <td>{new Date(user.created_at).toLocaleDateString(lang === "en" ? "en-GB" : "sq-AL")}</td>
                   <td>
                     <div className="admin-table-actions">
                       <select
-                        aria-label={`Role for ${user.username}`}
+                        aria-label={tr(`Role for ${user.username}`, `Roli i ${user.username}`)}
                         value={user.role}
                         onChange={(e) => {
                           if (e.target.value !== user.role) {
@@ -219,13 +223,13 @@ const AdminUsers = () => {
                             !canAssignRoles ? "not-allowed" : "pointer",
                         }}
                       >
-                        <option value="student">Student</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="reviewer">Reviewer</option>
-                        <option value="admin">Admin</option>
-                        <option value="super_admin">Super Admin</option>
-                        <option value="moderator">Moderator (legacy)</option>
-                        <option value="user">User (legacy)</option>
+                        <option value="student">{tr("Student","Nxënës")}</option>
+                        <option value="teacher">{tr("Teacher","Mësues")}</option>
+                        <option value="reviewer">{tr("Reviewer","Vlerësues")}</option>
+                        <option value="admin">{tr("Admin","Administrator")}</option>
+                        <option value="super_admin">{tr("Super Admin","Superadministrator")}</option>
+                        <option value="moderator">{tr("Moderator (legacy)","Moderator (rol i mëparshëm)")}</option>
+                        <option value="user">{tr("User (legacy)","Përdorues (rol i mëparshëm)")}</option>
                       </select>
 
                       <button
@@ -237,7 +241,7 @@ const AdminUsers = () => {
                           } else {
                             // Ban user - ask for reason
                             const reason = prompt(
-                              "Enter ban reason (optional):",
+                              tr("Enter ban reason (optional):","Shkruaj arsyen e bllokimit (opsionale):"),
                             );
                             if(reason===null)return;
                             handleUserAction(user.id, "update", {
@@ -247,7 +251,7 @@ const AdminUsers = () => {
                           }
                         }}
                       >
-                        {user.is_banned ? "Unban" : "Ban"}
+                        {user.is_banned ? tr("Unban","Zhblloko") : tr("Ban","Blloko")}
                       </button>
 
                       <button
@@ -262,17 +266,17 @@ const AdminUsers = () => {
                           }
                         }}
                       >
-                        {user.is_active ? "Deactivate" : "Activate"}
+                        {user.is_active ? tr("Deactivate","Çaktivizo") : tr("Activate","Aktivizo")}
                       </button>
 
                       <button
                         className="admin-btn danger"
                         onClick={async () => {
                           const confirmed = await confirm({
-                            title: "Delete user?",
-                            message: `Are you sure you want to delete ${user.username}?`,
-                            confirmText: "Delete",
-                            cancelText: "Cancel",
+                            title: tr("Delete user?","Fshi përdoruesin?"),
+                            message: tr(`Are you sure you want to delete ${user.username}?`, `Je i sigurt që dëshiron të fshish ${user.username}?`),
+                            confirmText: tr("Delete","Fshi"),
+                            cancelText: tr("Cancel","Anulo"),
                             variant: "danger",
                           });
                           if (confirmed) {
@@ -283,16 +287,14 @@ const AdminUsers = () => {
                       >
                         <img
                           src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
-                          alt="Delete"
+                          alt={tr("Delete","Fshi")}
                           style={{
                             width: "16px",
                             height: "16px",
                             objectFit: "contain",
                             marginRight: "8px",
                           }}
-                        />
-                        Delete
-                      </button>
+                        />{tr("Delete","Fshi")}</button>
                     </div>
                   </td>
                 </tr>
@@ -316,9 +318,7 @@ const AdminUsers = () => {
               className="admin-btn secondary"
               onClick={() => handlePageChange(filters.page - 1)}
               disabled={filters.page <= 1}
-            >
-              Previous
-            </button>
+            >{tr("Previous","Para")}</button>
 
             <span
               style={{
@@ -328,16 +328,14 @@ const AdminUsers = () => {
                 color: "#495057",
               }}
             >
-              Page {filters.page} of {pagination.pages}
+              {tr(`Page ${filters.page} of ${pagination.pages}`, `Faqja ${filters.page} nga ${pagination.pages}`)}
             </span>
 
             <button
               className="admin-btn secondary"
               onClick={() => handlePageChange(filters.page + 1)}
               disabled={filters.page >= pagination.pages}
-            >
-              Next
-            </button>
+            >{tr("Next","Tjetër")}</button>
           </div>
         )}
       </div>

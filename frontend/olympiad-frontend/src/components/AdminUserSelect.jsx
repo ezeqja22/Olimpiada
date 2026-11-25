@@ -1,7 +1,10 @@
+import {useLanguage} from "../context/LanguageContext";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function AdminUserSelect({ label, role, value, onChange }) {
+  const {lang}=useLanguage();
+  const tr=(en,sq)=>lang==="en"?en:sq;
   const [search, setSearch] = useState(""),
     [users, setUsers] = useState([]),
     [error, setError] = useState(false),
@@ -38,7 +41,7 @@ export default function AdminUserSelect({ label, role, value, onChange }) {
   return (
     <div>
       <label>
-        Search {label.toLowerCase()}
+        {tr("Search","Kërko")} {label.toLowerCase()}
         <input
           className="p1-input"
           type="search"
@@ -51,9 +54,9 @@ export default function AdminUserSelect({ label, role, value, onChange }) {
       </label>
       {error && (
         <p role="alert">
-          Could not load accounts.{" "}
+          {tr("Could not load accounts.","Llogaritë nuk u ngarkuan.")}{" "}
           <button type="button" onClick={() => setRetry((x) => x + 1)}>
-            Retry
+            {tr("Retry","Provo përsëri")}
           </button>
         </p>
       )}
@@ -65,7 +68,7 @@ export default function AdminUserSelect({ label, role, value, onChange }) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
         >
-          <option value="">Choose an account</option>
+          <option value="">{tr("Choose an account","Zgjidh një llogari")}</option>
           {users.map((user) => (
             <option key={user.id} value={user.id}>
               {user.username} · {user.email} (#{user.id})
