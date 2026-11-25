@@ -15,7 +15,7 @@
     ],
     "source_url": "https://www.ama.org.al/olympiads/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "imo",
@@ -33,7 +33,7 @@
     ],
     "source_url": "https://www.imo-official.org/countries/ALB/",
     "local_url": "https://www.ama.org.al/olympiads/",
-    "published": true
+    "published": false
   },
   {
     "slug": "bmo",
@@ -50,7 +50,7 @@
     ],
     "source_url": "https://www.ama.org.al/olympiads/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "jbmo",
@@ -67,7 +67,7 @@
     ],
     "source_url": "https://www.ama.org.al/olympiads/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "egmo",
@@ -84,7 +84,7 @@
     ],
     "source_url": "https://www.egmo.org/countries/",
     "local_url": "https://www.ama.org.al/olympiads/",
-    "published": true
+    "published": false
   },
   {
     "slug": "emo",
@@ -101,7 +101,7 @@
     ],
     "source_url": "https://www.ama.org.al/olympiads/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "kamo",
@@ -118,7 +118,7 @@
     ],
     "source_url": "https://www.ama.org.al/olympiads/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "igo",
@@ -135,7 +135,7 @@
     ],
     "source_url": "https://www.ama.org.al/olympiads/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "ipho",
@@ -153,7 +153,7 @@
     ],
     "source_url": "https://ipho-unofficial.org/countries/ALB/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "ioi",
@@ -171,7 +171,7 @@
     ],
     "source_url": "https://stats.ioinformatics.org/members/ALB/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "ioai",
@@ -188,7 +188,7 @@
     ],
     "source_url": "https://ioai-official.org/about/countries-and-territories/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "ok-fizike",
@@ -206,7 +206,7 @@
     ],
     "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "ok-informatike",
@@ -224,7 +224,7 @@
     ],
     "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "ok-kimi",
@@ -242,7 +242,7 @@
     ],
     "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "ok-biologji",
@@ -260,7 +260,7 @@
     ],
     "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "ok-histori",
@@ -278,7 +278,7 @@
     ],
     "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "ok-gjeografi",
@@ -296,7 +296,7 @@
     ],
     "source_url": "https://qsha.gov.al/olimpiada-2025-2026/",
     "local_url": null,
-    "published": true
+    "published": false
   },
   {
     "slug": "boi",
@@ -314,6 +314,6 @@
     ],
     "source_url": "https://boi2026.al/",
     "local_url": "https://qsha.gov.al/olimpiada-2025-2026/",
-    "published": true
+    "published": false
   }
 ]
