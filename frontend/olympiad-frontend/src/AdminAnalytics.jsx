@@ -65,7 +65,7 @@ const AdminAnalytics = () => {
         <h2>{tr("Error","Gabim")}</h2>
         <p>{error}</p>
         <button className="admin-btn" onClick={fetchAnalytics}>
-          Try Again
+          {tr("Try Again","Provo përsëri")}
         </button>
       </div>
     );
@@ -213,25 +213,25 @@ const AdminAnalytics = () => {
 
             {/* X-axis labels */}
             <text x="150" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Mon
+              {tr("Mon","Hën")}
             </text>
             <text x="250" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Tue
+              {tr("Tue","Mar")}
             </text>
             <text x="350" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Wed
+              {tr("Wed","Mër")}
             </text>
             <text x="450" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Thu
+              {tr("Thu","Enj")}
             </text>
             <text x="550" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Fri
+              {tr("Fri","Pre")}
             </text>
             <text x="650" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Sat
+              {tr("Sat","Sht")}
             </text>
             <text x="750" y="290" fontSize="12" fill="#666" textAnchor="middle">
-              Sun
+              {tr("Sun","Die")}
             </text>
 
             {/* Generate sample data for the week */}

@@ -41,7 +41,7 @@ export default function AdminSiteEditor() {
   const dirty = JSON.stringify(normalized(stored[selected])) !== JSON.stringify(current);
   const hasContent = Object.values(normalized(stored[selected])).some(v => typeof v === "string" && v.trim());
   const sections = useMemo(() => SITE_SECTIONS.filter(item =>
-    (item.label + " " + item.key + " " + item.group).toLowerCase().includes(filter.toLowerCase().trim())
+    (item.label + " " + item.labelEn + " " + item.key + " " + item.group + " " + item.groupEn).toLowerCase().includes(filter.toLowerCase().trim())
   ), [filter]);
 
   useEffect(() => {
@@ -96,7 +96,7 @@ export default function AdminSiteEditor() {
     setDrafts(prev => ({...prev,[selected]:{...EMPTY}}));
     setStatus({text:"U përgatit rikthimi. Kliko Ruaj ndryshimet për ta konfirmuar."});
   };
-  const title = current["title_" + lang] || defaults["title_" + lang] || section.label;
+  const title = current["title_" + lang] || defaults["title_" + lang] || (lang==="en"?section.labelEn:section.label);
   const subtitle = current["subtitle_" + lang] || defaults["subtitle_" + lang] || "";
 
   if (authLoading) return <main className="site-editor"><p className="site-editor__status">{tr("Verifying access...","Duke verifikuar aksesin...")}</p></main>;
@@ -112,11 +112,11 @@ export default function AdminSiteEditor() {
           const items = sections.filter(item=>item.group===group);
           if (!items.length) return null;
           return <div key={group}>
-            <div className="site-editor__nav-section">{group==="Kreu"?"Faqja kryesore":"Faqet e platformës"}</div>
+            <div className="site-editor__nav-section">{group==="Kreu"?tr("Homepage","Faqja kryesore"):tr("Platform pages","Faqet e platformës")}</div>
             {items.map(item => <button key={item.key} type="button"
               className="site-editor__item" aria-current={selected===item.key?"true":undefined}
               onClick={()=>navigateSection(item.key)}>
-              <span>{item.label}</span>
+              <span>{adminLanguage==="en"?item.labelEn:item.label}</span>
               {stored[item.key] && <span className="site-editor__modified-dot" aria-label={tr("Customized","I personalizuar")} title={tr("Customized","I personalizuar")} />}
             </button>)}
           </div>;
@@ -127,7 +127,7 @@ export default function AdminSiteEditor() {
       <div className="site-editor__workspace">
         <section className="site-editor__panel" aria-label={tr("Edit section","Redaktimi i seksionit")}>
           <div className="site-editor__top">
-            <div><h2>{section.label}</h2><div className="site-editor__meta">{tr("Section:","Seksioni:")} {section.key} · <Link to={section.url} target="_blank" rel="noopener noreferrer">{tr("View page","Shiko faqen")}</Link></div></div>
+            <div><h2>{adminLanguage==="en"?section.labelEn:section.label}</h2><div className="site-editor__meta">{tr("Section:","Seksioni:")} {section.key} · <Link to={section.url} target="_blank" rel="noopener noreferrer">{tr("View page","Shiko faqen")}</Link></div></div>
             <div className="site-editor__language" aria-label={tr("Editing language","Gjuha e redaktimit")}>
               <button type="button" aria-pressed={lang==="sq"} onClick={()=>setLang("sq")}>SQ</button>
               <button type="button" aria-pressed={lang==="en"} onClick={()=>setLang("en")}>EN</button>
@@ -155,7 +155,7 @@ export default function AdminSiteEditor() {
               {section.image && <>
                 <div className="site-editor__media">
                   <label>
-                    Lidhja e fotografisë (HTTPS)
+                    {tr("Image URL (HTTPS)","Lidhja e fotografisë (HTTPS)")}
                     <input type="url" placeholder="https://..." value={current.image_url}
                       onChange={e=>change("image_url",e.target.value)}/>
                   </label>
@@ -168,7 +168,7 @@ export default function AdminSiteEditor() {
                   onClick={()=>change("image_url","")}>{tr("Remove image","Hiq fotografinë")}</button>}
               </>}
               {section.link && <label>
-                Lidhja e butonit
+                {tr("Button link","Lidhja e butonit")}
                 <input value={current.button_url} placeholder="/explore" maxLength={500}
                   onChange={e=>change("button_url",e.target.value)} />
                 <span className="site-editor__hint">{tr("Only internal links starting with /.","Vetëm lidhje të brendshme që fillojnë me /.")}</span>

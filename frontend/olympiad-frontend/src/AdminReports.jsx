@@ -1,3 +1,4 @@
+import {adminStatusLabel} from "./adminNavigation";
 import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 /* eslint-disable no-unused-vars */
@@ -145,7 +146,7 @@ const AdminReports = () => {
 
     return (
       <span className={`status-badge ${statusColors[status] || "inactive"}`}>
-        {status}
+        {adminStatusLabel(status,lang)}
       </span>
     );
   };

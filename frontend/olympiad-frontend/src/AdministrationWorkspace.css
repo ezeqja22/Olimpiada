@@ -44,3 +44,5 @@
 @media(max-width:768px){.admin-header .admin-header-tools{display:flex}.admin-header{gap:8px}.admin-header-left{gap:8px}.admin-header-copy{gap:4px}.administration-breadcrumb{min-width:0}.administration-breadcrumb>span{overflow-wrap:anywhere}.admin-nav-search{padding-top:8px}}
 
 @media(min-width:1440px){.administration-directory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+@media(max-width:768px){.admin-nav-search input{font-size:16px}}

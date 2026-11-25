@@ -1,3 +1,4 @@
+import {adminStatusLabel} from "./adminNavigation";
 import {useLanguage} from "./context/LanguageContext";
 import {PublishingHeader} from "./components/PublishingWorkspace";
 import React, { useState, useEffect } from "react";
@@ -243,7 +244,7 @@ const AdminEmail = () => {
         <h2>{tr("Error","Gabim")}</h2>
         <p>{error}</p>
         <button className="admin-btn" onClick={fetchCampaigns}>
-          Try Again
+          {tr("Try Again","Provo përsëri")}
         </button>
       </div>
     );
@@ -256,7 +257,7 @@ const AdminEmail = () => {
         <div className="admin-card-header admin-card-header-wrap">
           <h2>{tr("Campaign history","Historiku i fushatave")}</h2>
           <button className="admin-btn" onClick={() => setShowCreateForm(true)}>
-            Create Campaign
+            {tr("Create Campaign","Krijo fushatë")}
           </button>
         </div>
       </div>
@@ -340,14 +341,14 @@ const AdminEmail = () => {
 
             <div className="admin-form-actions">
               <button type="submit" className="admin-btn">
-                Create Campaign
+                {tr("Create Campaign","Krijo fushatë")}
               </button>
               <button
                 type="button"
                 className="admin-btn secondary"
                 onClick={() => setShowCreateForm(false)}
               >
-                Cancel
+                {tr("Cancel","Anulo")}
               </button>
             </div>
           </form>
@@ -425,7 +426,7 @@ const AdminEmail = () => {
                             fontWeight: "500",
                           }}
                         >
-                          Send
+                          {tr("Send","Dërgo")}
                         </button>
                       )}
                       <button
@@ -436,7 +437,7 @@ const AdminEmail = () => {
                           fontSize: "0.8rem",
                         }}
                       >
-                        View
+                        {tr("View","Shiko")}
                       </button>
                       {campaign.status === "draft" && (
                         <button
@@ -449,7 +450,7 @@ const AdminEmail = () => {
                         >
                           <img
                             src="https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811026/Delete_Icon_White_pjg21g.svg"
-                            alt="Delete"
+                            alt={tr("Delete","Fshi")}
                             style={{
                               width: "14px",
                               height: "14px",
@@ -457,7 +458,7 @@ const AdminEmail = () => {
                               marginRight: "6px",
                             }}
                           />
-                          Delete
+                          {tr("Delete","Fshi")}
                         </button>
                       )}
                     </div>
@@ -477,7 +478,7 @@ const AdminEmail = () => {
               className="admin-btn"
               onClick={() => setShowCreateForm(true)}
             >
-              Create Your First Campaign
+              {tr("Create Your First Campaign","Krijo fushatën e parë")}
             </button>
           </div>
         )}
@@ -522,7 +523,7 @@ const AdminEmail = () => {
                   fontWeight: "600",
                 }}
               >
-                Campaign Details
+                {tr("Campaign Details","Detajet e fushatës")}
               </h3>
               <button
                 onClick={() => {
@@ -631,7 +632,7 @@ const AdminEmail = () => {
                   fontWeight: "500",
                 }}
               >
-                {selectedCampaign.status}
+                {adminStatusLabel(selectedCampaign.status,lang)}
               </span>
             </div>
 
@@ -712,7 +713,7 @@ const AdminEmail = () => {
                   (e.target.style.backgroundColor = "#6b7280")
                 }
               >
-                Close
+                {tr("Close","Mbyll")}
               </button>
             </div>
           </div>

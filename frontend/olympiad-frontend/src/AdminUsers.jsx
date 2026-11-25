@@ -152,7 +152,7 @@ const AdminUsers = () => {
 
     return (
       <span className={`status-badge ${roleColors[role] || "inactive"}`}>
-        {role}
+        {adminRoleLabel(role,lang)}
       </span>
     );
   };

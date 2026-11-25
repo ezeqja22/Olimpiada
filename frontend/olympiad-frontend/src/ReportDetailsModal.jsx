@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -65,6 +66,9 @@ const ReportDetailsModal = ({
   currentUser,
   onReportUpdate,
 }) => {
+ const {lang}=useLanguage();
+ const tr=(en,sq)=>lang==='sq'?sq:en;
+
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -367,7 +371,7 @@ ${currentUser?.username || "Admin"}`;
             textAlign: "center",
           }}
         >
-          <div>Loading report details...</div>
+          <div>{tr("Loading report details...","Duke ngarkuar detajet e raportimit...")}</div>
         </div>
       </div>
     );
@@ -401,7 +405,7 @@ ${currentUser?.username || "Admin"}`;
             {error}
           </div>
           <button onClick={onClose} className="admin-btn">
-            Close
+            {tr("Close","Mbyll")}
           </button>
         </div>
       </div>
@@ -450,7 +454,7 @@ ${currentUser?.username || "Admin"}`;
             textAlign: "center",
           }}
         >
-          Loading report details...
+          {tr("Loading report details...","Duke ngarkuar detajet e raportimit...")}
         </div>
       </div>
     );
@@ -484,7 +488,7 @@ ${currentUser?.username || "Admin"}`;
             {error || "Report not found"}
           </p>
           <button onClick={onClose} className="admin-btn">
-            Close
+            {tr("Close","Mbyll")}
           </button>
         </div>
       </div>
@@ -611,7 +615,7 @@ ${currentUser?.username || "Admin"}`;
                 fontWeight: typography.weight.semibold,
               }}
             >
-              Report Information
+              {tr("Report Information","Informacioni i raportimit")}
             </h3>
             <div
               style={{
@@ -634,7 +638,7 @@ ${currentUser?.username || "Admin"}`;
                     fontWeight: typography.weight.medium,
                   }}
                 >
-                  Type
+                  {tr("Type","Lloji")}
                 </span>
                 <span
                   style={{
@@ -659,7 +663,7 @@ ${currentUser?.username || "Admin"}`;
                     fontWeight: typography.weight.medium,
                   }}
                 >
-                  Reason
+                  {tr("Reason","Arsyeja")}
                 </span>
                 <span
                   style={{
@@ -684,7 +688,7 @@ ${currentUser?.username || "Admin"}`;
                     fontWeight: typography.weight.medium,
                   }}
                 >
-                  Status
+                  {tr("Status","Statusi")}
                 </span>
                 <span
                   style={{
@@ -722,7 +726,7 @@ ${currentUser?.username || "Admin"}`;
                     fontWeight: typography.weight.medium,
                   }}
                 >
-                  Assigned to
+                  {tr("Assigned to","Caktuar te")}
                 </span>
                 <span
                   style={{
@@ -747,7 +751,7 @@ ${currentUser?.username || "Admin"}`;
                     fontWeight: typography.weight.medium,
                   }}
                 >
-                  Reporter
+                  {tr("Reporter","Raportuesi")}
                 </span>
                 <span
                   style={{
@@ -772,7 +776,7 @@ ${currentUser?.username || "Admin"}`;
                     fontWeight: typography.weight.medium,
                   }}
                 >
-                  Reported User
+                  {tr("Reported User","Përdoruesi i raportuar")}
                 </span>
                 <span
                   style={{
@@ -801,7 +805,7 @@ ${currentUser?.username || "Admin"}`;
                     fontWeight: typography.weight.medium,
                   }}
                 >
-                  Created
+                  {tr("Created","Krijuar")}
                 </span>
                 <span
                   style={{
@@ -821,7 +825,7 @@ ${currentUser?.username || "Admin"}`;
                   fontWeight: typography.weight.medium,
                 }}
               >
-                Description
+                {tr("Description","Përshkrimi")}
               </span>
               <div
                 style={{
@@ -860,7 +864,7 @@ ${currentUser?.username || "Admin"}`;
                 fontWeight: typography.weight.semibold,
               }}
             >
-              Moderation Actions
+              {tr("Moderation Actions","Veprimet e moderimit")}
             </h3>
 
             {canTakeReport && (
@@ -1014,7 +1018,7 @@ ${currentUser?.username || "Admin"}`;
                     }
                   }}
                 >
-                  Deactivate Account
+                  {tr("Deactivate Account","Çaktivizo llogarinë")}
                 </button>
                 {targetUser && targetUser.is_banned && (
                   <button
@@ -1067,7 +1071,7 @@ ${currentUser?.username || "Admin"}`;
                   marginBottom: spacing.sm,
                 }}
               >
-                Send Email
+                {tr("Send Email","Dërgo email")}
               </button>
             )}
 
@@ -1105,7 +1109,7 @@ ${currentUser?.username || "Admin"}`;
                     }
                   }}
                 >
-                  Dismiss Report
+                  {tr("Dismiss Report","Hidh poshtë raportimin")}
                 </button>
                 <button
                   onClick={handleResolveReport}
@@ -1140,7 +1144,7 @@ ${currentUser?.username || "Admin"}`;
                     }
                   }}
                 >
-                  Resolve Report
+                  {tr("Resolve Report","Zgjidh raportimin")}
                 </button>
               </>
             )}
@@ -1150,12 +1154,12 @@ ${currentUser?.username || "Admin"}`;
           {isAssignedToMe && (
             <div style={{ marginBottom: spacing.lg }}>
               <h3 style={{ marginBottom: spacing.md, color: colors.gray[800] }}>
-                Investigation Notes
+                {tr("Investigation Notes","Shënimet e shqyrtimit")}
               </h3>
               <textarea
                 value={investigationNotes}
                 onChange={(e) => setInvestigationNotes(e.target.value)}
-                placeholder="Add investigation notes..."
+                placeholder={tr("Add investigation notes...","Shto shënimet e shqyrtimit...")}
                 rows="4"
                 style={{
                   width: "100%",
@@ -1173,7 +1177,7 @@ ${currentUser?.username || "Admin"}`;
                   marginTop: spacing.sm,
                 }}
               >
-                Update Notes
+                {tr("Update Notes","Përditëso shënimet")}
               </button>
             </div>
           )}
@@ -1182,12 +1186,12 @@ ${currentUser?.username || "Admin"}`;
           {canResolve && (
             <div style={{ marginBottom: spacing.lg }}>
               <h3 style={{ marginBottom: spacing.md, color: colors.gray[800] }}>
-                Resolution
+                {tr("Resolution","Zgjidhja")}
               </h3>
               <textarea
                 value={resolution}
                 onChange={(e) => setResolution(e.target.value)}
-                placeholder="Enter resolution details..."
+                placeholder={tr("Enter resolution details...","Shkruaj detajet e zgjidhjes...")}
                 rows="3"
                 style={{
                   width: "100%",
@@ -1205,7 +1209,7 @@ ${currentUser?.username || "Admin"}`;
           {report?.email_sent && (
             <div style={{ marginBottom: spacing.lg }}>
               <h3 style={{ marginBottom: spacing.md, color: colors.gray[800] }}>
-                Email Sent
+                {tr("Email Sent","Emaili i dërguar")}
               </h3>
               <div
                 style={{
@@ -1216,11 +1220,11 @@ ${currentUser?.username || "Admin"}`;
                 }}
               >
                 <div style={{ marginBottom: spacing.xs }}>
-                  <strong>Sent:</strong>{" "}
+                  <strong>{tr("Sent:","Dërguar:")}</strong>{" "}
                   {new Date(report?.email_sent_at).toLocaleString()}
                 </div>
                 <div>
-                  <strong>Content:</strong>
+                  <strong>{tr("Content:","Përmbajtja:")}</strong>
                   <pre
                     style={{
                       marginTop: spacing.xs,
@@ -1266,7 +1270,7 @@ ${currentUser?.username || "Admin"}`;
               overflow: "auto",
             }}
           >
-            <h3 style={{ marginBottom: spacing.md }}>Send Email to Reporter</h3>
+            <h3 style={{ marginBottom: spacing.md }}>{tr("Send Email to Reporter","Dërgo email te raportuesi")}</h3>
             <textarea
               value={emailContent}
               onChange={(e) => setEmailContent(e.target.value)}
@@ -1292,14 +1296,14 @@ ${currentUser?.username || "Admin"}`;
                 onClick={() => setShowEmailModal(false)}
                 className="admin-btn secondary"
               >
-                Cancel
+                {tr("Cancel","Anulo")}
               </button>
               <button
                 onClick={handleSendEmail}
                 disabled={actionLoading}
                 className="admin-btn"
               >
-                Send Email
+                {tr("Send Email","Dërgo email")}
               </button>
             </div>
           </div>
@@ -1342,7 +1346,7 @@ ${currentUser?.username || "Admin"}`;
                 marginBottom: spacing.md,
               }}
             >
-              <h3>User History: {userHistory.user.username}</h3>
+              <h3>{tr("User History:","Historiku i përdoruesit:")} {userHistory.user.username}</h3>
               <button
                 onClick={() => setShowUserHistory(false)}
                 style={{
@@ -1357,7 +1361,7 @@ ${currentUser?.username || "Admin"}`;
             </div>
 
             <div style={{ marginBottom: spacing.md }}>
-              <strong>Current Status:</strong>
+              <strong>{tr("Current Status:","Statusi aktual:")}</strong>
               <div style={{ marginTop: spacing.xs }}>
                 <span
                   style={{
@@ -1390,9 +1394,9 @@ ${currentUser?.username || "Admin"}`;
             </div>
 
             <div>
-              <h4>Moderation History:</h4>
+              <h4>{tr("Moderation History:","Historiku i moderimit:")}</h4>
               {userHistory.history.length === 0 ? (
-                <p>No moderation history found.</p>
+                <p>{tr("No moderation history found.","Nuk u gjet historik moderimi.")}</p>
               ) : (
                 <div style={{ maxHeight: "400px", overflow: "auto" }}>
                   {userHistory.history.map((entry, index) => (
@@ -1430,11 +1434,11 @@ ${currentUser?.username || "Admin"}`;
                         </span>
                       </div>
                       <div style={{ marginTop: spacing.xs }}>
-                        <strong>Reason:</strong> {entry.reason}
+                        <strong>{tr("Reason:","Arsyeja:")}</strong> {entry.reason}
                       </div>
                       {entry.duration && (
                         <div style={{ marginTop: spacing.xs }}>
-                          <strong>Duration:</strong> {entry.duration} days
+                          <strong>{tr("Duration:","Kohëzgjatja:")}</strong> {entry.duration} days
                         </div>
                       )}
                       <div
@@ -1501,7 +1505,7 @@ ${currentUser?.username || "Admin"}`;
                   color: colors.gray[700],
                 }}
               >
-                Ban Duration:
+                {tr("Ban Duration:","Kohëzgjatja e bllokimit:")}
               </label>
               <select
                 value={banDuration}
@@ -1515,12 +1519,12 @@ ${currentUser?.username || "Admin"}`;
                   backgroundColor: colors.white,
                 }}
               >
-                <option value="1">1 Day</option>
-                <option value="2">2 Days</option>
-                <option value="7">1 Week</option>
-                <option value="30">1 Month</option>
-                <option value="365">1 Year</option>
-                <option value="permanent">Permanent</option>
+                <option value="1">{tr("1 Day","1 ditë")}</option>
+                <option value="2">{tr("2 Days","2 ditë")}</option>
+                <option value="7">{tr("1 Week","1 javë")}</option>
+                <option value="30">{tr("1 Month","1 muaj")}</option>
+                <option value="365">{tr("1 Year","1 vit")}</option>
+                <option value="permanent">{tr("Permanent","I përhershëm")}</option>
               </select>
             </div>
 
@@ -1535,7 +1539,7 @@ ${currentUser?.username || "Admin"}`;
                 onClick={() => setShowBanModal(false)}
                 className="admin-btn secondary"
               >
-                Cancel
+                {tr("Cancel","Anulo")}
               </button>
               <button
                 onClick={() => {

@@ -126,7 +126,7 @@ const AdminUserHistory = () => {
               opacity: loading ? 0.6 : 1,
             }}
           >
-            {loading ? "Searching..." : "Search"}
+            {loading ? tr("Searching...","Duke kërkuar...") : tr("Search","Kërko")}
           </button>
         </form>
       </aside><section className="publishing-section">
@@ -190,7 +190,7 @@ const AdminUserHistory = () => {
                   color: "white",
                 }}
               >
-                {userHistory.user.is_banned ? "BANNED" : "ACTIVE"}
+                {userHistory.user.is_banned ? tr("BANNED","I BLLOKUAR") : tr("ACTIVE","AKTIV")}
               </span>
               <span
                 style={{
@@ -204,7 +204,7 @@ const AdminUserHistory = () => {
                   color: "white",
                 }}
               >
-                {userHistory.user.is_active ? "ACTIVE" : "DEACTIVATED"}
+                {userHistory.user.is_active ? tr("ACTIVE","AKTIV") : tr("DEACTIVATED","ÇAKTIVIZUAR")}
               </span>
             </div>
           </div>
@@ -212,7 +212,7 @@ const AdminUserHistory = () => {
           {/* Moderation History */}
           <div>
             <h3 style={{ marginBottom: "15px", color: "#333" }}>
-              Moderation History
+              {tr("Moderation History","Historiku i moderimit")}
             </h3>
 
             {userHistory.history.length === 0 ? (
@@ -348,7 +348,7 @@ const AdminUserHistory = () => {
           }}
         >
           <h3 style={{ color: "#666", marginBottom: "10px" }}>
-            Search for a User
+            {tr("Search for a User","Kërko një përdorues")}
           </h3>
           <p style={{ color: "#999", margin: 0 }}>
             Enter a username above to view their complete moderation history,
