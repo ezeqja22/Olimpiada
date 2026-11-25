@@ -508,7 +508,7 @@ const AdminAnalytics = () => {
           ) : (
             <div className="empty-state">
               <h3>{tr("No activity data","Nuk ka të dhëna aktiviteti")}</h3>
-              <p>No user activity data available for this period.</p>
+              <p>{tr("No user activity data available for this period.","Nuk ka të dhëna për aktivitetin e përdoruesve në këtë periudhë.")}</p>
             </div>
           )}
         </div>
@@ -607,7 +607,7 @@ const AdminAnalytics = () => {
           ) : (
             <div className="empty-state">
               <h3>{tr("No forum data","Nuk ka të dhëna forumesh")}</h3>
-              <p>No forum activity data available for this period.</p>
+              <p>{tr("No forum activity data available for this period.","Nuk ka të dhëna për aktivitetin e forumeve në këtë periudhë.")}</p>
             </div>
           )}
         </div>
