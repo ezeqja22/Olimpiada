@@ -43,3 +43,13 @@ Railway staging deployment `79b99e12-352e-4c6d-91e3-98a84a8542e2` succeeded. Its
 Remote GETs returned 200 for health, both public catalogues (empty lists), and the weekly challenge. Guest requests to the protected page and staff queue returned 401. The verified Vercel preview origin received no Access-Control-Allow-Origin on those responses; its Authorization preflight returned 400 “Disallowed CORS origin”. A browser cannot complete the preview workflow in this configuration.
 
 Hold merge. Append the exact preview origin https://science-pioneers-394kqgx57-enio-zeqjas-projects.vercel.app to staging FRONTEND_ORIGINS, preserve other origins, apply, and recheck. Authenticated PDF reading and staff grading/publication on hosted staging remain pending. This check created zero remote fixtures.
+
+## Hosted release gate closed — supersedes the previous CORS blocker
+
+**Hosted release gate passed. Ready to merge.** On Railway staging deployment `abbe551e-08e8-44ce-932c-dcf805cfcd46`, the running service connected to staging PostgreSQL and read `88f2703` from `public.alembic_version`.
+
+- Both preflights returned 200 for the exact [Vercel review preview](https://science-pioneers-394kqgx57-enio-zeqjas-projects.vercel.app). The origin, methods and Authorization/Content-Type were allowed. Authenticated staging responses also returned the matching allow-origin header.
+- Two temporary users logged in through the deployed HTTPS API. Staff uploaded a synthetic PDF (201). The verified student retrieved its protected JPEG page (200, private no-store caching policy).
+- For a closed synthetic challenge, premature publication returned 409. Staff approved the submission with 8 points. The unpublished ranking returned 404. Explicit publication succeeded, then the public ranking showed the synthetic student at rank 1 with 8 points.
+- Cleanup committed and a separate database session verified zero remaining matching users, sessions, problem, challenge, submission, library metadata or file. Fixture IDs: users 7 and 8, problem 2, challenge 2, submission 1, document 2.
+- These were remote API and CORS checks. Browser UI coverage is recorded separately in the earlier local Playwright results. No production action was taken.
