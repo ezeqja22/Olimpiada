@@ -1,0 +1,24 @@
+name: Admin frontend checks
+on:
+  pull_request:
+    paths:
+      - 'frontend/olympiad-frontend/**'
+      - '.github/workflows/admin-frontend-checks.yml'
+permissions:
+  contents: read
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/olympiad-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/olympiad-frontend/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
