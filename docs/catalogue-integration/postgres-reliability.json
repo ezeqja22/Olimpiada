@@ -1,0 +1,448 @@
+{
+  "passed": true,
+  "waves": [
+    {
+      "concurrency": 20,
+      "requests": 201,
+      "duration_seconds": 3.346,
+      "p95_seconds": 0.2468,
+      "max_seconds": 0.3734,
+      "status_counts": {
+        "/auth/login 200": 20,
+        "/auth/problems/ 200": 20,
+        "/auth/forums 200": 20,
+        "/site-info 200": 20,
+        "/core/courses/items 200": 20,
+        "/get-settings 200": 20,
+        "/core/courses/items 401": 20,
+        "/auth/login 401": 20,
+        "/does-not-exist 404": 20,
+        "/forums/__ux_failure/{id} 409": 20,
+        "/forums/__ux_failure/{id} 500": 1
+      },
+      "mismatches": [],
+      "pool_checked_out_after": 0
+    },
+    {
+      "concurrency": 35,
+      "requests": 351,
+      "duration_seconds": 4.266,
+      "p95_seconds": 0.3212,
+      "max_seconds": 0.478,
+      "status_counts": {
+        "/auth/login 200": 35,
+        "/auth/problems/ 200": 35,
+        "/auth/forums 200": 35,
+        "/site-info 200": 35,
+        "/core/courses/items 200": 35,
+        "/get-settings 200": 35,
+        "/core/courses/items 401": 35,
+        "/auth/login 401": 35,
+        "/does-not-exist 404": 35,
+        "/forums/__ux_failure/{id} 409": 35,
+        "/forums/__ux_failure/{id} 500": 1
+      },
+      "mismatches": [],
+      "pool_checked_out_after": 0
+    },
+    {
+      "concurrency": 50,
+      "requests": 501,
+      "duration_seconds": 5.133,
+      "p95_seconds": 0.4392,
+      "max_seconds": 0.5704,
+      "status_counts": {
+        "/auth/login 200": 50,
+        "/auth/problems/ 200": 50,
+        "/auth/forums 200": 50,
+        "/site-info 200": 50,
+        "/core/courses/items 200": 50,
+        "/get-settings 200": 50,
+        "/core/courses/items 401": 50,
+        "/auth/login 401": 50,
+        "/does-not-exist 404": 50,
+        "/forums/__ux_failure/{id} 409": 50,
+        "/forums/__ux_failure/{id} 500": 1
+      },
+      "mismatches": [],
+      "pool_checked_out_after": 0
+    }
+  ],
+  "cleanup": {
+    "pool_checked_out": 0,
+    "removed_record_counts": {
+      "learning_resources": 0,
+      "annual_report_deliveries": 0,
+      "olympiad_guides": 0,
+      "faq_entries": 0,
+      "site_content_blocks": 0,
+      "users": 2,
+      "follows": 0,
+      "notification_preferences": 0,
+      "notifications": 0,
+      "forums": 1,
+      "drafts": 0,
+      "admin_actions": 0,
+      "email_campaigns": 0,
+      "site_reports": 0,
+      "system_settings": 0,
+      "password_reset_tokens": 0,
+      "user_sessions": 107,
+      "payment_submissions": 0,
+      "teacher_subjects": 0,
+      "tutoring_requests": 0,
+      "monthly_expenses": 0,
+      "library_documents": 1,
+      "teacher_applications": 0,
+      "email_templates": 0,
+      "email_delivery_logs": 0,
+      "parent_student_links": 0,
+      "support_tickets": 0,
+      "content_event_deliveries": 0,
+      "problems": 1,
+      "forum_memberships": 0,
+      "forum_invitations": 0,
+      "forum_join_requests": 0,
+      "user_online_status": 0,
+      "user_moderation_history": 0,
+      "course_items": 1,
+      "library_files": 1,
+      "teacher_forum_assignments": 0,
+      "comments": 0,
+      "votes": 0,
+      "bookmarks": 0,
+      "problem_images": 0,
+      "forum_messages": 0,
+      "weekly_challenges": 3,
+      "course_attempts": 0,
+      "forum_replies": 0,
+      "weekly_submissions": 1,
+      "ux_rollback_probe": 0
+    },
+    "connections_before_drop": 0,
+    "database_absent": true,
+    "cluster_stopped": true,
+    "port_closed": true,
+    "cluster_files_removed": true
+  },
+  "limitations": [
+    "Local single-process PostgreSQL and Uvicorn; not a Railway/Supavisor latency or multi-replica benchmark.",
+    "Schema created from SQLAlchemy metadata, not a production migration rehearsal.",
+    "Email adapters disabled; external delivery and destructive account jobs are not exercised."
+  ],
+  "postgres_version": "postgres (PostgreSQL) 17.11",
+  "pool_configuration": {
+    "size": 5,
+    "max_overflow": 10,
+    "timeout_seconds": 30.0
+  },
+  "scheduler_cycles": [
+    {
+      "weekly": {
+        "opened": 1,
+        "closed": 1,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    },
+    {
+      "weekly": {
+        "opened": 0,
+        "closed": 0,
+        "published": 0
+      },
+      "learning_notices": 0
+    }
+  ],
+  "pool_pressure": {
+    "concurrency": 50,
+    "requests": 50,
+    "connection_hold_seconds": 0.1,
+    "duration_seconds": 0.847,
+    "all_200": true
+  },
+  "pdf_pressure": {
+    "concurrency": 50,
+    "status_counts": {
+      "200": 13,
+      "503": 37
+    },
+    "duration_seconds": 1.311,
+    "pool_checked_out_after": 0
+  },
+  "pdf_warm_cache": {
+    "concurrency": 50,
+    "all_200": true,
+    "duration_seconds": 0.614
+  },
+  "ordinary_requests_during_pdf_burst": {
+    "requests": 50,
+    "all_200": true
+  },
+  "training_download_passed": true,
+  "weekly_races": {
+    "submit_concurrency": 50,
+    "submit_status_counts": {
+      "200": 1,
+      "409": 49
+    },
+    "grading_publication_concurrency": 40,
+    "decision_status_counts": {
+      "409": 20,
+      "200": 20
+    },
+    "pending_publication_blocked": true,
+    "final_score": 8,
+    "pool_checked_out_after": 0,
+    "requests": 92
+  },
+  "scheduler_exception_rolled_back_and_recovered": true,
+  "periodic_cleanup_entry_point_passed": true,
+  "deadlocks": 0,
+  "database_connection_states_after": {
+    "idle": 5
+  },
+  "total_http_requests": 1348,
+  "successful_scheduler_cycles": 31,
+  "pool_counters": {
+    "checkouts": 1477,
+    "checkins": 1477,
+    "active": 0,
+    "peak": 15
+  },
+  "failed_endpoint_executions": 108,
+  "middleware_replays": 0,
+  "rollback_probe_rows": 0,
+  "email_calls": 0,
+  "postgres_log_errors": [
+    "2026-11-25 16:06:56.738 CET [3876] ERROR:  division by zero",
+    "2026-11-25 16:07:01.004 CET [37584] ERROR:  division by zero",
+    "2026-11-25 16:07:06.137 CET [35472] ERROR:  division by zero",
+    "2026-11-25 16:07:06.872 CET [35472] ERROR:  division by zero"
+  ],
+  "duration_seconds": 31.584
+}

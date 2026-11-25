@@ -92,6 +92,9 @@ async def settings_middleware(request: Request, call_next):
         return JSONResponse(status_code=404, content={"message": f"{disabled.title()} are currently disabled"})
     return await call_next(request)
 
+from library_limits import LibraryUploadLimit
+app.add_middleware(LibraryUploadLimit)
+
 # Register CORS after application middleware so even rejected requests
 # receive the appropriate CORS headers for allowed frontend origins.
 app.add_middleware(
@@ -113,6 +116,8 @@ from phase2_routes import router as phase2_router
 app.include_router(phase2_router)
 from phase3_routes import router as phase3_router
 app.include_router(phase3_router)
+from catalog_routes import router as catalog_router
+app.include_router(catalog_router)
 # Removed notification admin router
 
 # Stage 2 help routes map existing migrated tables and never create/alter them.

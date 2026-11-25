@@ -116,6 +116,8 @@ const AdminLayout = () => {
     {path:"/admin/teachers",label:"Aplikimet e Mësuesve",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811353/Users_Hirstory_admin_panel_eqvfdf.svg",adminOnly:false},
     {path:"/admin/site-content",label:"Përmbajtja e Website-it",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811439/Settings_admin_panel_cpayja.svg",adminOnly:true},
     {path:"/admin/parents",label:"Raporte Prindërish",icon:"https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811397/Users_admin_panel_lzwnqx.svg",adminOnly:false},
+    {path: "/admin/olympiads",label: "Olimpiadat", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
+    {path: "/admin/library",label: "Biblioteka online", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
     {path: "/admin/weekly",label: "Problema e Javës", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
     {path: "/admin/courses",label: "Materiale & Teste", icon: "https://res.cloudinary.com/dqmmgk88b/image/upload/v1760811442/Forums_admin_panel_bmseel.svg",adminOnly:false},
     {

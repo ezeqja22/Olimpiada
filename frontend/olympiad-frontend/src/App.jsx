@@ -31,6 +31,10 @@ const Explore = lazy(() => import("./AccessPages").then(m => ({default:m.Explore
 const Learning = lazy(() => import("./AccessPages").then(m => ({default:m.Learning})));
 const Tutoring = lazy(() => import("./AccessPages").then(m => ({default:m.Tutoring})));
 const AdminTutoring = lazy(() => import("./AdminPhase1").then(m => ({default:m.AdminTutoring})));
+const Olympiads = lazy(() => import("./CompetitionLibrary").then(m => ({default:m.Olympiads})));
+const Library = lazy(() => import("./CompetitionLibrary").then(m => ({default:m.Library})));
+const AdminOlympiads = lazy(() => import("./AdminCatalogues").then(m => ({default:m.AdminOlympiads})));
+const AdminLibrary = lazy(() => import("./AdminCatalogues").then(m => ({default:m.AdminLibrary})));
 const AdminContent = lazy(() => import("./AdminContent"));
 const WeeklyPage = lazy(() => import("./WeeklyPage"));
 const AdminWeekly = lazy(() => import("./WeeklyPage").then(m => ({default:m.AdminWeekly})));
@@ -106,8 +110,8 @@ function App() {
               <Route path="/homepage" element={<Homepage />} />
               <Route path="/pricing" element={<Navigate to="/explore" replace />} />
               <Route path="/explore" element={<ConnectedPage><Explore /></ConnectedPage>} />
-              <Route path="/library" element={<Navigate to="/explore" replace />} />
-              <Route path="/library/:id" element={<Navigate to="/explore" replace />} />
+              <Route path="/library/:id?" element={<ConnectedPage><Library /></ConnectedPage>} />
+              <Route path="/olympiads/:slug?" element={<ConnectedPage><Olympiads /></ConnectedPage>} />
               <Route path="/courses" element={<ProtectedRoute><ConnectedPage><CourseHub /></ConnectedPage></ProtectedRoute>} />
               <Route path="/weekly" element={<ConnectedPage><WeeklyPage /></ConnectedPage>} />
               <Route path="/forum-catalog" element={<Navigate to="/forums" replace />} />
@@ -252,7 +256,8 @@ function App() {
                 <Route path="content" element={<AdminContent />} />
                 <Route path="weekly" element={<AdminWeekly />} />
                 <Route path="courses" element={<AdminCourses />} />
-                <Route path="library" element={<Navigate to="/admin/content" replace />} />
+                <Route path="library" element={<AdminLibrary />} />
+                <Route path="olympiads" element={<AdminOlympiads />} />
                 <Route path="teachers" element={<AdminTeachers />} />
                 <Route path="site-content" element={<AdminSiteEditor />} />
                 <Route path="branding" element={<Navigate to="/admin/site-content" replace />} />

@@ -127,6 +127,53 @@ class CoreTests(unittest.TestCase):
                               json={"answers":"42"},headers=self.headers(self.student_token))
         self.assertEqual(late.status_code,409,late.text)
 
+    def test_catalogue_roles_and_hidden_guides(self):
+        form = dict(slug="test-guide", name="Synthetic guide", acronym="TEST", subject="Math",
+                    scope="national", audience="Synthetic users", importance="Synthetic purpose only",
+                    history="Synthetic history only", steps=["Ask your school"], source_url="https://example.org", published=False)
+        url = "/core/olympiads/admin"
+        self.assertIn(self.client.get(url).status_code, (401,403))
+        self.assertEqual(self.client.post(url, json=form, headers=self.headers(self.student_token)).status_code,403)
+        for role in ("student", "teacher", "moderator", "reviewer", "admin", "super_admin"):
+            self.student.role = role; self.db.commit()
+            expected = 403 if role in ("student", "teacher") else 200
+            for route in (url, "/core/library/admin"):
+                self.assertEqual(self.client.get(route,headers=self.headers(self.student_token)).status_code,expected)
+        result=self.client.post(url,json=form,headers=self.headers(self.admin_token))
+        self.assertEqual(result.status_code,201,result.text)
+        self.assertNotIn(result.json()["id"], [row["id"] for row in self.client.get("/public/olympiads").json()])
+        form["published"]=True
+        self.assertEqual(self.client.put(f"{url}/{result.json()['id']}",json=form,headers=self.headers(self.admin_token)).status_code,200)
+        self.assertIn(result.json()["id"], [row["id"] for row in self.client.get("/public/olympiads").json()])
+
+    def test_tied_and_cumulative_rankings_preserve_unscored_history(self):
+        now=datetime.utcnow()
+        problem=models.Problem(title="Synthetic rankings",description="Question",subject="Math",level="School",author_id=self.admin.id)
+        self.db.add(problem);self.db.flush()
+        weeks=[]
+        for index in range(2):
+            week=models.WeeklyChallenge(week_date=f"2020-01-{6+index*7:02}",problem_id=problem.id,
+                starts_at=now-timedelta(days=14-index*7),closes_at=now-timedelta(days=8-index*7),
+                status="published",official_solution="Answer",created_by=self.admin.id)
+            self.db.add(week);self.db.flush();weeks.append(week)
+        for week,user,score in ((weeks[0],self.student,8),(weeks[0],self.admin,8),(weeks[1],self.student,None),(weeks[1],self.admin,5)):
+            self.db.add(models.WeeklySubmission(challenge_id=week.id,student_id=user.id,answer_text="Synthetic answer",status="approved",score=score))
+        self.db.commit()
+        week=self.client.get('/core/weekly/rankings?week=2020-01-06').json()
+        self.assertEqual([row['rank'] for row in week['rankings']], [1,1])
+        total=self.client.get('/core/weekly/rankings').json()['rankings']
+        self.assertEqual([(row['rank'],row['points']) for row in total],[(1,13),(2,8)])
+        self.assertEqual(self.db.query(models.WeeklySubmission).filter(models.WeeklySubmission.score.is_(None)).count(),1)
+
+    def test_starter_seed_is_hidden_idempotent_and_does_not_fetch_external_files(self):
+        from unittest.mock import patch
+        from seed_library import seed_library
+        with patch('seed_library.fetch_pdf',side_effect=AssertionError('External fetch without rights review')):
+            self.assertEqual(seed_library(self.admin.id),3)
+            self.assertEqual(seed_library(self.admin.id),0)
+        self.assertEqual(self.db.query(models.LibraryDocument).filter_by(visible=True).count(),0)
+        self.assertEqual(self.db.query(models.LibraryFile).count(),3)
+
     def test_weekly_solution_private_until_publish(self):
         now=datetime.utcnow()
         p=models.Problem(title="Weekly test",description="Solve x + 1 = 2",
@@ -144,28 +191,127 @@ class CoreTests(unittest.TestCase):
                              headers=self.headers(self.student_token))
         self.assertEqual(sub.status_code,200,sub.text)
         review=self.client.post("/core/weekly/admin/submissions/"+str(sub.json()["id"])+"/review",
-                                json={"approve":True},headers=self.headers(self.admin_token))
+                                json={"approve":True,"score":8},headers=self.headers(self.admin_token))
         self.assertEqual(review.status_code,200,review.text)
+        self.assertEqual(self.client.get("/core/weekly/rankings").json()["rankings"], [])
+        self.assertEqual(self.client.post(
+            f"/core/weekly/admin/submissions/{sub.json()['id']}/review",
+            json={"approve":True,"score":11}, headers=self.headers(self.admin_token)).status_code,422)
         w.closes_at=now-timedelta(seconds=1)
         self.db.commit()
+        self.assertIsNone(self.client.get("/core/weekly").json()["challenge"]["official_solution"])
+        self.assertEqual(self.client.get("/core/weekly/rankings").json()["rankings"], [])
+        self.assertEqual(self.client.post(f"/core/weekly/admin/{w.id}/publish", headers=self.headers(self.student_token)).status_code, 403)
         result=run_weekly_transitions(self.db)
-        self.assertGreaterEqual(result["published"],1)
+        self.assertGreaterEqual(result["closed"], 1)
+        self.assertEqual(result["published"], 0)
+        self.assertEqual(self.client.post(f"/core/weekly/admin/{w.id}/publish", headers=self.headers(self.admin_token)).status_code, 200)
+        weekly=self.client.get(f"/core/weekly/rankings?week={w.week_date}").json()
+        self.assertTrue(all("user_id" not in row for row in weekly["rankings"]))
+        self.assertEqual([(x["rank"],x["points"]) for x in weekly["rankings"]],[(1,8)])
+        self.assertEqual(self.client.get("/core/weekly/rankings").json()["rankings"],weekly["rankings"])
+        result=run_weekly_transitions(self.db)
+        self.assertEqual(result["published"],0)
         r=self.client.get("/core/weekly")
         self.assertEqual(r.json()["challenge"]["official_solution"],"CONFIDENTIAL_ANSWER_1")
-        self.assertTrue(any(u["user_id"]==self.student.id for u in r.json()["challenge"]["winners"]))
+        self.assertTrue(any(u["username"]==self.student.username for u in r.json()["challenge"]["winners"]))
 
-    def test_library_endpoints_are_retired_for_guests_students_and_admins(self):
-        doc=models.LibraryDocument(title="Retained",category="book",subject="Math",
-            level="school",storage_key="library/retained.pdf",page_count=1,uploaded_by=self.admin.id)
-        self.db.add(doc);self.db.commit()
-        for headers in ({},self.headers(self.student_token),self.headers(self.admin_token)):
-            for path in ("/public/library","/core/library/catalog",f"/core/library/{doc.id}",f"/core/library/{doc.id}/pages/1"):
-                response=self.client.get(path,headers=headers)
-                self.assertEqual(response.status_code,404,(path,response.text))
-            response=self.client.post("/core/library/admin/upload",headers=headers,
-                files={"file":("book.pdf",b"%PDF-1.4","application/pdf")})
-            self.assertEqual(response.status_code,404,response.text)
-        self.assertIsNotNone(self.db.get(models.LibraryDocument,doc.id))
+    def test_publication_requires_complete_grading_after_close(self):
+        now=datetime.utcnow()
+        problem=models.Problem(title="[UX-TEST] grading",description="Solve",author_id=self.admin.id,subject="Math")
+        self.db.add(problem);self.db.flush()
+        week=models.WeeklyChallenge(week_date="2031-01-06",problem_id=problem.id,starts_at=now-timedelta(days=7),closes_at=now-timedelta(seconds=1),official_solution="PRIVATE",status="open",created_by=self.admin.id)
+        self.db.add(week);self.db.flush()
+        answer=models.WeeklySubmission(challenge_id=week.id,student_id=self.student.id,answer_text="Answer",status="pending")
+        self.db.add(answer);self.db.commit()
+        url=f"/core/weekly/admin/{week.id}/publish"
+        admin=self.headers(self.admin_token)
+        self.assertEqual(self.client.post(url,headers=admin).status_code,409)
+        self.assertEqual(self.client.post(f"/core/weekly/{week.id}/submit",json={"answer":"late"},headers=self.headers(self.student_token)).status_code,409)
+        answer.status="approved";self.db.commit()
+        self.assertEqual(self.client.post(url,headers=admin).status_code,409)
+        review=f"/core/weekly/admin/submissions/{answer.id}/review"
+        self.assertEqual(self.client.post(review,json={"approve":True,"score":7},headers=admin).status_code,200)
+        self.assertEqual(self.client.post(url,headers=admin).status_code,200)
+        self.assertEqual(self.client.post(url,headers=admin).status_code,200)
+        self.assertEqual(self.client.post(review,json={"approve":True,"score":9},headers=admin).status_code,409)
+
+    def test_library_only_delivers_images_and_watermarked_training_pdfs(self):
+        from io import BytesIO
+        import json
+        from pypdf import PdfReader
+        from reportlab.pdfgen.canvas import Canvas
+
+        pdf = BytesIO()
+        canvas = Canvas(pdf)
+        for number in range(2):
+            canvas.drawString(50, 500, f"Training page {number}")
+            canvas.showPage()
+        canvas.save()
+        data = {"title":"Training notes","subject":"Math","level":"Intermediate",
+                "kind":"book","discipline":"Combinatorics"}
+        file = {"file":("book.pdf",pdf.getvalue(),"application/pdf")}
+        student = self.headers(self.student_token)
+        admin = self.headers(self.admin_token)
+        url = "/core/library/admin/upload"
+        self.assertEqual(self.client.post(url,headers=student,data={"metadata":json.dumps(data)},files=file).status_code,403)
+        result = self.client.post(url,headers=admin,data={"metadata":json.dumps(data)},files=file)
+        self.assertEqual(result.status_code,201,result.text)
+        doc_id = result.json()["id"]
+        catalog = self.client.get("/public/library").json()
+        doc = next(row for row in catalog if row["id"] == doc_id)
+        self.assertEqual(doc["page_count"],2)
+        self.assertNotIn("storage_key",doc)
+        self.assertNotIn("content",doc)
+        url = f"/core/library/{doc_id}"
+        self.assertIn(self.client.get(url+"/pages/1").status_code,(401,403))
+        page = self.client.get(url+"/pages/1",headers=student)
+        self.assertEqual(page.status_code,200,page.text if page.status_code != 200 else "")
+        self.assertEqual(page.headers["Content-Type"],"image/jpeg")
+        self.assertEqual(page.headers["Cache-Control"],"private, no-store")
+        from unittest.mock import patch
+        with patch('catalog_routes.render_page', side_effect=AssertionError('Unexpected rerender')):
+            self.assertEqual(self.client.get(url+"/pages/1",headers=student).content,page.content)
+        for field in ('is_verified','is_active','is_banned'):
+            original=getattr(self.student,field)
+            setattr(self.student,field,field=='is_banned');self.db.commit()
+            self.assertEqual(self.client.get(url+"/pages/1",headers=student).status_code,403)
+            setattr(self.student,field,original);self.db.commit()
+        replacement = BytesIO()
+        canvas = Canvas(replacement);canvas.drawString(50,500,'Replacement page');canvas.showPage();canvas.save()
+        updated=self.client.put(f"/core/library/admin/{doc_id}",headers=admin,data={"metadata":json.dumps(data)},files={"file":('replace.pdf',replacement.getvalue(),'application/pdf')})
+        self.assertEqual(updated.status_code,200)
+        self.assertNotEqual(self.client.get(url+"/pages/1",headers=student).content,page.content)
+        self.client.put(f"/core/library/admin/{doc_id}",headers=admin,data={"metadata":json.dumps(data)},files=file)
+
+        self.assertEqual(self.client.get(url+"/download",headers=student).status_code,403)
+        data["kind"] = "training"
+        edited = self.client.put(f"/core/library/admin/{doc_id}",headers=admin,data={"metadata":json.dumps(data)})
+        self.assertEqual(edited.status_code,200,edited.text)
+        download = self.client.get(url+"/download",headers=student)
+        self.assertEqual(download.status_code,200)
+        pages = PdfReader(BytesIO(download.content)).pages
+        self.assertEqual(len(pages),2)
+        self.assertTrue(all(f"Olimpiada.al  |  ID {self.student.id}" in p.extract_text() for p in pages))
+        data["visible"] = False
+        self.client.put(f"/core/library/admin/{doc_id}",headers=admin,data={"metadata":json.dumps(data)})
+        self.assertEqual(self.client.get(url+"/pages/1",headers=student).status_code,404)
+
+    def test_olympiad_drafts_are_admin_only(self):
+        data = dict(slug="test-olympiad",name="Test Olympiad",acronym="TO",subject="Physics",
+                    scope="international",audience="Pupils",importance="The most interesting test",
+                    history="This is a test history",steps=["Apply through school"],
+                    source_url="https://example.org",published=False)
+        url = "/core/olympiads/admin"
+        self.assertEqual(self.client.post(url,headers=self.headers(self.student_token),json=data).status_code,403)
+        admin = self.headers(self.admin_token)
+        result = self.client.post(url,headers=admin,json=data)
+        self.assertEqual(result.status_code,201,result.text)
+        self.assertEqual(self.client.get("/public/olympiads").json(),[])
+        data["published"] = True
+        result = self.client.put(f"{url}/{result.json()['id']}",headers=admin,json=data)
+        self.assertEqual(result.status_code,200,result.text)
+        self.assertEqual(self.client.get("/public/olympiads").json()[0]["slug"],data["slug"])
 
     def test_timezone_dst(self):
         start,close=weekly_bounds(datetime(2026,3,23).date())

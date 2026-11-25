@@ -3,9 +3,11 @@ export const primaryNavigation = [
   { to: "/feed", en: "Problems", sq: "Probleme" },
   { to: "/forums", en: "Forums", sq: "Forumet" },
   { to: "/weekly", en: "Weekly", sq: "Sfida e javës" },
+  { to: "/olympiads", en: "Olympiads", sq: "Olimpiadat" },
   { to: "/courses", en: "Learning", sq: "Mësimi" },
 ];
 export const moreNavigation = [
+  { to: "/library", en: "Library", sq: "Biblioteka" },
   { to: "/tutoring", en: "Tutoring", sq: "Mentorim" },
   { to: "/faq", en: "FAQ", sq: "Pyetje të shpeshta" },
   { to: "/support", en: "Support", sq: "Suport" },
