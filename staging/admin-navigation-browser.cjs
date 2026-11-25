@@ -30,7 +30,7 @@ const stats={users:{total:3,active:3,banned:0,new_today:0},problems:{total:4,new
    await route.fulfill({status:200,json:data,headers:{"access-control-allow-origin":"*","access-control-allow-headers":"*","access-control-allow-methods":"GET, PUT, POST, OPTIONS"}});
   });
   // Block unexpected remote requests to avoid third-party calls.
-  await page.route("https://**",route=>route.abort());
+  await page.route("https://**",route=>{const url=new URL(route.request().url());return url.hostname==="res.cloudinary.com" && route.request().resourceType()==="image" ? route.continue() : route.abort();});
   const nav=page.locator(".administration-navigation");
   const directory=page.locator(".administration-tools-directory");
   const overflow=async(label)=>{
@@ -67,6 +67,7 @@ const stats={users:{total:3,active:3,banned:0,new_today:0},problems:{total:4,new
    await page.setViewportSize({width,height:950});
    const toggle=page.getByRole("button",{name:"Hap menunë e administrimit",exact:true});
    await toggle.waitFor();
+   await page.getByRole("combobox",{name:"Gjuha",exact:true}).waitFor({state:"visible"});
    await overflow("Dashboard "+width);
    await page.screenshot({path:output+"/dashboard-sq-"+width+".png",animations:"disabled"});
    await toggle.click();
