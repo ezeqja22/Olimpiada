@@ -1,3 +1,4 @@
+import {useLanguage} from "./context/LanguageContext";
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -65,6 +66,8 @@ const ReportDetailsModal = ({
   currentUser,
   onReportUpdate,
 }) => {
+  const {lang}=useLanguage();
+  const tr=(en,sq)=>lang==="en"?en:sq;
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -105,7 +108,7 @@ const ReportDetailsModal = ({
         setTargetUser(response.data.target_user);
       }
     } catch (err) {
-      setError("Failed to load report details");
+      setError(tr("Failed to load report details","Detajet e raportimit nuk u ngarkuan"));
       console.error("Report details error:", err);
     } finally {
       setLoading(false);
@@ -125,7 +128,7 @@ const ReportDetailsModal = ({
       setShowUserHistory(true);
     } catch (err) {
       console.error("User history error:", err);
-      showToast("Failed to load user history", "error");
+      showToast(tr("Failed to load user history","Historiku i përdoruesit nuk u ngarkua"), "error");
     }
   };
 
@@ -140,7 +143,7 @@ const ReportDetailsModal = ({
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-      showToast("Report assigned successfully", "success");
+      showToast(tr("Report assigned successfully","Raportimi u caktua me sukses"), "success");
       fetchReportDetails();
       if (onReportUpdate) onReportUpdate();
     } catch (err) {
@@ -165,7 +168,7 @@ const ReportDetailsModal = ({
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-      showToast("Investigation notes updated", "success");
+      showToast(tr("Investigation notes updated","Shënimet e shqyrtimit u përditësuan"), "success");
     } catch (err) {
       showToast(
         `Failed to update notes: ${err.response?.data?.detail || err.message}`,
@@ -176,7 +179,7 @@ const ReportDetailsModal = ({
 
   const handleResolveReport = async () => {
     if (!resolution.trim()) {
-      showToast("Please enter a resolution", "error");
+      showToast(tr("Please enter a resolution","Shkruaj zgjidhjen"), "error");
       return;
     }
 
@@ -192,7 +195,7 @@ const ReportDetailsModal = ({
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-      showToast("Report resolved successfully", "success");
+      showToast(tr("Report resolved successfully","Raportimi u zgjidh me sukses"), "success");
       fetchReportDetails();
       if (onReportUpdate) onReportUpdate();
     } catch (err) {
@@ -207,7 +210,7 @@ const ReportDetailsModal = ({
 
   const handleDismissReport = async () => {
     if (!resolution.trim()) {
-      showToast("Please enter a dismissal reason", "error");
+      showToast(tr("Please enter a dismissal reason","Shkruaj arsyen e hedhjes poshtë"), "error");
       return;
     }
 
@@ -223,7 +226,7 @@ const ReportDetailsModal = ({
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-      showToast("Report dismissed successfully", "success");
+      showToast(tr("Report dismissed successfully","Raportimi u hodh poshtë"), "success");
       fetchReportDetails();
       if (onReportUpdate) onReportUpdate();
     } catch (err) {
@@ -238,7 +241,7 @@ const ReportDetailsModal = ({
 
   const handleModerationAction = async (action, additionalData = {}) => {
     if (!report?.target_id) {
-      showToast("No target user found for this report", "error");
+      showToast(tr("No target user found for this report","Nuk u gjet përdoruesi i raportuar"), "error");
       return;
     }
 
@@ -295,7 +298,7 @@ const ReportDetailsModal = ({
 
   const handleSendEmail = async () => {
     if (!emailContent.trim()) {
-      showToast("Please enter email content", "error");
+      showToast(tr("Please enter email content","Shkruaj përmbajtjen e email-it"), "error");
       return;
     }
 
@@ -311,7 +314,7 @@ const ReportDetailsModal = ({
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-      showToast("Email sent successfully", "success");
+      showToast(tr("Email sent successfully","Email-i u dërgua me sukses"), "success");
       setShowEmailModal(false);
       fetchReportDetails();
     } catch (err) {
@@ -367,7 +370,7 @@ ${currentUser?.username || "Admin"}`;
             textAlign: "center",
           }}
         >
-          <div>Loading report details...</div>
+          <div>{tr("Loading report details...","Duke ngarkuar detajet e raportimit...")}</div>
         </div>
       </div>
     );
@@ -400,9 +403,7 @@ ${currentUser?.username || "Admin"}`;
           <div style={{ color: colors.error, marginBottom: spacing.md }}>
             {error}
           </div>
-          <button onClick={onClose} className="admin-btn">
-            Close
-          </button>
+          <button onClick={onClose} className="admin-btn">{tr("Close","Mbyll")}</button>
         </div>
       </div>
     );
@@ -449,9 +450,7 @@ ${currentUser?.username || "Admin"}`;
             borderRadius: borderRadius.lg,
             textAlign: "center",
           }}
-        >
-          Loading report details...
-        </div>
+        >{tr("Loading report details...","Duke ngarkuar detajet e raportimit...")}</div>
       </div>
     );
   }
@@ -481,11 +480,9 @@ ${currentUser?.username || "Admin"}`;
           }}
         >
           <p style={{ color: colors.error, marginBottom: spacing.md }}>
-            {error || "Report not found"}
+            {error || tr("Report not found","Raportimi nuk u gjet")}
           </p>
-          <button onClick={onClose} className="admin-btn">
-            Close
-          </button>
+          <button onClick={onClose} className="admin-btn">{tr("Close","Mbyll")}</button>
         </div>
       </div>
     );
@@ -542,7 +539,7 @@ ${currentUser?.username || "Admin"}`;
                 color: colors.white,
               }}
             >
-              Report Details #{report?.id}
+              {tr("Report Details","Detajet e raportimit")} #{report?.id}
             </h2>
             <p
               style={{
@@ -550,9 +547,7 @@ ${currentUser?.username || "Admin"}`;
                 fontSize: typography.size.sm,
                 opacity: 0.9,
               }}
-            >
-              Investigation & Moderation Tools
-            </p>
+            >{tr("Investigation & Moderation Tools","Mjetet e shqyrtimit dhe moderimit")}</p>
           </div>
           <button
             onClick={onClose}
@@ -610,9 +605,7 @@ ${currentUser?.username || "Admin"}`;
                 fontSize: typography.size.base,
                 fontWeight: typography.weight.semibold,
               }}
-            >
-              Report Information
-            </h3>
+            >{tr("Report Information","Informacioni i raportimit")}</h3>
             <div
               style={{
                 display: "grid",
@@ -633,9 +626,7 @@ ${currentUser?.username || "Admin"}`;
                     color: colors.gray[700],
                     fontWeight: typography.weight.medium,
                   }}
-                >
-                  Type
-                </span>
+                >{tr("Type","Lloji")}</span>
                 <span
                   style={{
                     fontSize: typography.size.base,
@@ -658,9 +649,7 @@ ${currentUser?.username || "Admin"}`;
                     color: colors.gray[700],
                     fontWeight: typography.weight.medium,
                   }}
-                >
-                  Reason
-                </span>
+                >{tr("Reason","Arsyeja")}</span>
                 <span
                   style={{
                     fontSize: typography.size.base,
@@ -683,9 +672,7 @@ ${currentUser?.username || "Admin"}`;
                     color: colors.gray[700],
                     fontWeight: typography.weight.medium,
                   }}
-                >
-                  Status
-                </span>
+                >{tr("Status","Statusi")}</span>
                 <span
                   style={{
                     display: "inline-block",
@@ -721,16 +708,14 @@ ${currentUser?.username || "Admin"}`;
                     color: colors.gray[700],
                     fontWeight: typography.weight.medium,
                   }}
-                >
-                  Assigned to
-                </span>
+                >{tr("Assigned to","Caktuar te")}</span>
                 <span
                   style={{
                     fontSize: typography.size.base,
                     color: colors.gray[800],
                   }}
                 >
-                  {report?.assigned_to || "Unassigned"}
+                  {report?.assigned_to || tr("Unassigned","Pa caktuar")}
                 </span>
               </div>
               <div
@@ -746,9 +731,7 @@ ${currentUser?.username || "Admin"}`;
                     color: colors.gray[700],
                     fontWeight: typography.weight.medium,
                   }}
-                >
-                  Reporter
-                </span>
+                >{tr("Reporter","Raportuesi")}</span>
                 <span
                   style={{
                     fontSize: typography.size.base,
@@ -771,9 +754,7 @@ ${currentUser?.username || "Admin"}`;
                     color: colors.gray[700],
                     fontWeight: typography.weight.medium,
                   }}
-                >
-                  Reported User
-                </span>
+                >{tr("Reported User","Përdoruesi i raportuar")}</span>
                 <span
                   style={{
                     fontSize: typography.size.base,
@@ -800,16 +781,14 @@ ${currentUser?.username || "Admin"}`;
                     color: colors.gray[700],
                     fontWeight: typography.weight.medium,
                   }}
-                >
-                  Created
-                </span>
+                >{tr("Created","Krijuar më")}</span>
                 <span
                   style={{
                     fontSize: typography.size.base,
                     color: colors.gray[800],
                   }}
                 >
-                  {new Date(report?.created_at).toLocaleString()}
+                  {new Date(report?.created_at).toLocaleString(lang==="en"?"en-GB":"sq-AL")}
                 </span>
               </div>
             </div>
@@ -820,9 +799,7 @@ ${currentUser?.username || "Admin"}`;
                   color: colors.gray[700],
                   fontWeight: typography.weight.medium,
                 }}
-              >
-                Description
-              </span>
+              >{tr("Description","Përshkrimi")}</span>
               <div
                 style={{
                   marginTop: spacing.xs,
@@ -836,7 +813,7 @@ ${currentUser?.username || "Admin"}`;
                   lineHeight: "1.5",
                 }}
               >
-                {report?.description || "No description provided"}
+                {report?.description || tr("No description provided","Nuk është dhënë përshkrim")}
               </div>
             </div>
           </div>
@@ -859,9 +836,7 @@ ${currentUser?.username || "Admin"}`;
                 fontSize: typography.size.lg,
                 fontWeight: typography.weight.semibold,
               }}
-            >
-              Moderation Actions
-            </h3>
+            >{tr("Moderation Actions","Veprimet e moderimit")}</h3>
 
             {canTakeReport && (
               <button
@@ -1013,9 +988,7 @@ ${currentUser?.username || "Admin"}`;
                       e.target.style.boxShadow = "none";
                     }
                   }}
-                >
-                  Deactivate Account
-                </button>
+                >{tr("Deactivate Account","Çaktivizo llogarinë")}</button>
                 {targetUser && targetUser.is_banned && (
                   <button
                     onClick={() => handleModerationAction("unban")}
@@ -1066,9 +1039,7 @@ ${currentUser?.username || "Admin"}`;
                   marginRight: spacing.sm,
                   marginBottom: spacing.sm,
                 }}
-              >
-                Send Email
-              </button>
+              >{tr("Send Email","Dërgo email")}</button>
             )}
 
             {canResolve && (
@@ -1104,9 +1075,7 @@ ${currentUser?.username || "Admin"}`;
                       e.target.style.boxShadow = "none";
                     }
                   }}
-                >
-                  Dismiss Report
-                </button>
+                >{tr("Dismiss Report","Hidh poshtë raportimin")}</button>
                 <button
                   onClick={handleResolveReport}
                   disabled={actionLoading}
@@ -1139,9 +1108,7 @@ ${currentUser?.username || "Admin"}`;
                       e.target.style.boxShadow = "none";
                     }
                   }}
-                >
-                  Resolve Report
-                </button>
+                >{tr("Resolve Report","Zgjidh raportimin")}</button>
               </>
             )}
           </div>
@@ -1149,13 +1116,11 @@ ${currentUser?.username || "Admin"}`;
           {/* Investigation Notes */}
           {isAssignedToMe && (
             <div style={{ marginBottom: spacing.lg }}>
-              <h3 style={{ marginBottom: spacing.md, color: colors.gray[800] }}>
-                Investigation Notes
-              </h3>
+              <h3 style={{ marginBottom: spacing.md, color: colors.gray[800] }}>{tr("Investigation Notes","Shënimet e shqyrtimit")}</h3>
               <textarea
                 value={investigationNotes}
                 onChange={(e) => setInvestigationNotes(e.target.value)}
-                placeholder="Add investigation notes..."
+                placeholder={tr("Add investigation notes...","Shto shënime shqyrtimi...")}
                 rows="4"
                 style={{
                   width: "100%",
@@ -1172,22 +1137,18 @@ ${currentUser?.username || "Admin"}`;
                 style={{
                   marginTop: spacing.sm,
                 }}
-              >
-                Update Notes
-              </button>
+              >{tr("Update Notes","Përditëso shënimet")}</button>
             </div>
           )}
 
           {/* Resolution */}
           {canResolve && (
             <div style={{ marginBottom: spacing.lg }}>
-              <h3 style={{ marginBottom: spacing.md, color: colors.gray[800] }}>
-                Resolution
-              </h3>
+              <h3 style={{ marginBottom: spacing.md, color: colors.gray[800] }}>{tr("Resolution","Zgjidhja")}</h3>
               <textarea
                 value={resolution}
                 onChange={(e) => setResolution(e.target.value)}
-                placeholder="Enter resolution details..."
+                placeholder={tr("Enter resolution details...","Shkruaj detajet e zgjidhjes...")}
                 rows="3"
                 style={{
                   width: "100%",
@@ -1204,9 +1165,7 @@ ${currentUser?.username || "Admin"}`;
           {/* Email History */}
           {report?.email_sent && (
             <div style={{ marginBottom: spacing.lg }}>
-              <h3 style={{ marginBottom: spacing.md, color: colors.gray[800] }}>
-                Email Sent
-              </h3>
+              <h3 style={{ marginBottom: spacing.md, color: colors.gray[800] }}>{tr("Email Sent","Email-i u dërgua")}</h3>
               <div
                 style={{
                   padding: spacing.sm,
@@ -1217,7 +1176,7 @@ ${currentUser?.username || "Admin"}`;
               >
                 <div style={{ marginBottom: spacing.xs }}>
                   <strong>Sent:</strong>{" "}
-                  {new Date(report?.email_sent_at).toLocaleString()}
+                  {new Date(report?.email_sent_at).toLocaleString(lang==="en"?"en-GB":"sq-AL")}
                 </div>
                 <div>
                   <strong>Content:</strong>
@@ -1266,7 +1225,7 @@ ${currentUser?.username || "Admin"}`;
               overflow: "auto",
             }}
           >
-            <h3 style={{ marginBottom: spacing.md }}>Send Email to Reporter</h3>
+            <h3 style={{ marginBottom: spacing.md }}>{tr("Send Email to Reporter","Dërgo email te raportuesi")}</h3>
             <textarea
               value={emailContent}
               onChange={(e) => setEmailContent(e.target.value)}
@@ -1291,16 +1250,12 @@ ${currentUser?.username || "Admin"}`;
               <button
                 onClick={() => setShowEmailModal(false)}
                 className="admin-btn secondary"
-              >
-                Cancel
-              </button>
+              >{tr("Cancel","Anulo")}</button>
               <button
                 onClick={handleSendEmail}
                 disabled={actionLoading}
                 className="admin-btn"
-              >
-                Send Email
-              </button>
+              >{tr("Send Email","Dërgo email")}</button>
             </div>
           </div>
         </div>
@@ -1342,7 +1297,7 @@ ${currentUser?.username || "Admin"}`;
                 marginBottom: spacing.md,
               }}
             >
-              <h3>User History: {userHistory.user.username}</h3>
+              <h3>{tr("User History:","Historiku i përdoruesit:")} {userHistory.user.username}</h3>
               <button
                 onClick={() => setShowUserHistory(false)}
                 style={{
@@ -1371,7 +1326,7 @@ ${currentUser?.username || "Admin"}`;
                     marginRight: spacing.sm,
                   }}
                 >
-                  {userHistory.user.is_banned ? "BANNED" : "ACTIVE"}
+                  {userHistory.user.is_banned ? tr("BANNED","BLLOKUAR") : tr("ACTIVE","AKTIV")}
                 </span>
                 <span
                   style={{
@@ -1384,13 +1339,13 @@ ${currentUser?.username || "Admin"}`;
                     fontSize: "12px",
                   }}
                 >
-                  {userHistory.user.is_active ? "ACTIVE" : "DEACTIVATED"}
+                  {userHistory.user.is_active ? tr("ACTIVE","AKTIV") : tr("DEACTIVATED","ÇAKTIVIZUAR")}
                 </span>
               </div>
             </div>
 
             <div>
-              <h4>Moderation History:</h4>
+              <h4>{tr("Moderation History:","Historiku i moderimit:")}</h4>
               {userHistory.history.length === 0 ? (
                 <p>No moderation history found.</p>
               ) : (
@@ -1426,7 +1381,7 @@ ${currentUser?.username || "Admin"}`;
                         <span
                           style={{ fontSize: "12px", color: colors.gray[600] }}
                         >
-                          {new Date(entry.created_at).toLocaleString()}
+                          {new Date(entry.created_at).toLocaleString(lang==="en"?"en-GB":"sq-AL")}
                         </span>
                       </div>
                       <div style={{ marginTop: spacing.xs }}>
@@ -1500,9 +1455,7 @@ ${currentUser?.username || "Admin"}`;
                   fontWeight: typography.weight.medium,
                   color: colors.gray[700],
                 }}
-              >
-                Ban Duration:
-              </label>
+              >{tr("Ban Duration:","Kohëzgjatja e bllokimit:")}</label>
               <select
                 value={banDuration}
                 onChange={(e) => setBanDuration(e.target.value)}
@@ -1515,12 +1468,12 @@ ${currentUser?.username || "Admin"}`;
                   backgroundColor: colors.white,
                 }}
               >
-                <option value="1">1 Day</option>
-                <option value="2">2 Days</option>
-                <option value="7">1 Week</option>
-                <option value="30">1 Month</option>
-                <option value="365">1 Year</option>
-                <option value="permanent">Permanent</option>
+                <option value="1">{tr("1 Day","1 ditë")}</option>
+                <option value="2">{tr("2 Days","2 ditë")}</option>
+                <option value="7">{tr("1 Week","1 javë")}</option>
+                <option value="30">{tr("1 Month","1 muaj")}</option>
+                <option value="365">{tr("1 Year","1 vit")}</option>
+                <option value="permanent">{tr("Permanent","Përgjithmonë")}</option>
               </select>
             </div>
 
@@ -1534,9 +1487,7 @@ ${currentUser?.username || "Admin"}`;
               <button
                 onClick={() => setShowBanModal(false)}
                 className="admin-btn secondary"
-              >
-                Cancel
-              </button>
+              >{tr("Cancel","Anulo")}</button>
               <button
                 onClick={() => {
                   handleModerationAction("ban", {
