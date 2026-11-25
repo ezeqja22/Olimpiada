@@ -40,3 +40,5 @@
 @media(max-width:768px){.administration-directory-header{align-items:stretch;flex-direction:column;gap:12px}.administration-directory-search{width:100%}.admin-header-tools .welcome-text{display:none}.admin-header-tools{gap:6px}.admin-header-copy{min-width:0}.administration-breadcrumb h1{overflow-wrap:anywhere}.administration-actions{grid-template-columns:1fr}}
 @media(max-width:620px){.administration-directory-grid{grid-template-columns:1fr}.administration-tool-link{padding:12px}.admin-language-switch button{padding-inline:6px}}
 @media(prefers-reduced-motion:reduce){.administration-tool-link{transition:none}}
+
+@media(max-width:768px){.admin-header .admin-header-tools{display:flex}.admin-header{gap:8px}.admin-header-left{gap:8px}.admin-header-copy{gap:4px}.administration-breadcrumb{min-width:0}.administration-breadcrumb>span{overflow-wrap:anywhere}.admin-nav-search{padding-top:8px}}
